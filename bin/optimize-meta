@@ -1,0 +1,55 @@
+#!/usr/bin/env node
+
+/**
+ * 🛠️  Scentral Architect: Self-Healing Metadata Utility
+ * Automates the refactoring of legacy viewport metadata to Next.js 14+ standards.
+ */
+
+const fs = require('fs');
+const path = require('path');
+
+const APP_DIR = path.join(process.cwd(), 'app');
+
+function walk(dir) {
+  let results = [];
+  const list = fs.readdirSync(dir);
+  list.forEach(file => {
+    file = path.join(dir, file);
+    const stat = fs.statSync(file);
+    if (stat && stat.isDirectory()) {
+      results = results.concat(walk(file));
+    } else if (file.endsWith('.tsx') || file.endsWith('.ts')) {
+      results.push(file);
+    }
+  });
+  return results;
+}
+
+console.log('🔍  Scanning for legacy metadata patterns...');
+
+const files = walk(APP_DIR);
+let fixedCount = 0;
+
+files.forEach(file => {
+  let content = fs.readFileSync(file, 'utf8');
+  
+  // Pattern: viewport: '...' inside metadata object
+  const legacyViewportPattern = /viewport:\s*['"]([^'"]+)['"],?/g;
+  
+  if (legacyViewportPattern.test(content)) {
+    console.log(`🩹  Fixing metadata in: ${path.relative(process.cwd(), file)}`);
+    
+    // 1. Remove from metadata object
+    content = content.replace(legacyViewportPattern, '');
+    
+    // 2. Add separate viewport export if not present
+    if (!content.includes('export const viewport')) {
+      content += `\n\nexport const viewport = {\n  width: 'device-width',\n  initialScale: 1,\n};\n`;
+    }
+    
+    fs.writeFileSync(file, content);
+    fixedCount++;
+  }
+});
+
+console.log(`✅  Self-healing complete. ${fixedCount} files optimized.`);

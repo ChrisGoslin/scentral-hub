@@ -6,22 +6,34 @@ echo "------------------------------------------------"
 echo "🚀  INITIATING HIGH-VELOCITY DEPLOYMENT SEQUENCE"
 echo "------------------------------------------------"
 
-# 1. Integrity Check: Build Validation
-echo "🔍  Phase 1: Validating Build Integrity..."
+# 1. Integrity Check: ESLint Configuration & Linting
+echo "🔍  Phase 1: Validating Code Standards..."
+
+# Check for ESLint configuration
+if [ ! -f .eslintrc.json ] && [ ! -f .eslintrc.js ] && [ ! -f eslint.config.js ]; then
+  echo "❌  ESLint configuration missing. Enterprise standards require strict linting."
+  exit 1
+fi
+
+# Run Linting
+npm run lint || { echo "❌  Linting failed. Deployment aborted to maintain code quality."; exit 1; }
+
+# 2. Integrity Check: Build Validation
+echo "🏗️  Phase 2: Validating Build Integrity..."
 npm run build || { echo "❌  Build failed. Deployment aborted to prevent production outage."; exit 1; }
 
-# 2. Performance Audit: Asset Optimization
-echo "📊  Phase 2: Auditing Resource Efficiency..."
+# 3. Performance Audit: Asset Optimization
+echo "📊  Phase 3: Auditing Resource Efficiency..."
 # Check for common bloat: oversized node_modules
 MODULE_SIZE=$(du -sh node_modules | cut -f1)
 echo "📦  Current Dependency Footprint: $MODULE_SIZE"
 
-# 3. Environment Synchronization
-echo "🌐  Phase 3: Verifying Environment Parity..."
+# 4. Environment Synchronization
+echo "🌐  Phase 4: Verifying Environment Parity..."
 # (Placeholder for future Supabase/API drift detection)
 
-# 4. Production Push
-echo "🚀  Phase 4: Finalizing Production Deployment..."
+# 5. Production Push
+echo "🚀  Phase 5: Finalizing Production Deployment..."
 vercel --prod --yes --no-wait
 
 echo "------------------------------------------------"

@@ -4,7 +4,7 @@ import './globals.css';
 export const metadata: Metadata = {
   title: 'Scentral - Build Fragrance Layering Combos',
   description: 'Create fragrance layering combos, discover harmony scores, and share your Accords. Free, no account needed.',
-  viewport: 'width=device-width, initial-scale=1',
+  
 };
 
 export default function RootLayout({
@@ -22,3 +22,9 @@ export default function RootLayout({
     </html>
   );
 }
+
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+};

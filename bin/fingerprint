@@ -1,0 +1,44 @@
+#!/bin/bash
+set -e
+
+# 📊  Scentral Architect: Build Fingerprinting Engine
+echo "------------------------------------------------"
+echo "🔍  GENERATING BUILD FINGERPRINT"
+echo "------------------------------------------------"
+
+PROJECT_ROOT=$(pwd)
+OUTPUT_FILE="$HOME/.gemini/scentral-hub-baseline.json"
+
+# Ensure build exists
+if [ ! -d ".next" ]; then
+  echo "🏗️  No build detected. Initiating fresh build..."
+  npm run build
+fi
+
+echo "📉  Calculating bundle sizes..."
+
+# Get sizes in bytes
+STATIC_SIZE=$(du -sb .next/static | cut -f1 || du -sk .next/static | cut -f1)
+SERVER_SIZE=$(du -sb .next/server | cut -f1 || du -sk .next/server | cut -f1)
+TOTAL_SIZE=$(du -sb .next | cut -f1 || du -sk .next | cut -f1)
+
+# Get timestamp
+TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+# Generate JSON
+cat <<EOF > "$OUTPUT_FILE"
+{
+  "project": "scentral-hub",
+  "timestamp": "$TIMESTAMP",
+  "fingerprint": {
+    "static_bundle_size": $STATIC_SIZE,
+    "server_bundle_size": $SERVER_SIZE,
+    "total_build_size": $TOTAL_SIZE
+  },
+  "unit": "bytes"
+}
+EOF
+
+echo "✅  Fingerprint generated at $OUTPUT_FILE"
+echo "📊  Total Build Size: $TOTAL_SIZE bytes"
+echo "------------------------------------------------"
