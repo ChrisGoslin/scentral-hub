@@ -1,0 +1,41 @@
+=====================================
+SCENTRAL DEPLOYMENT TO VERCEL
+=====================================
+
+Prerequisites:
+- Vercel CLI installed: npm i -g vercel
+- Connected to your Vercel account: vercel login
+
+Steps:
+1. Navigate to project root:
+   cd ~/Documents/Claude/Projects/Scentral\ Hub
+
+2. Deploy to Vercel:
+   vercel --prod
+
+3. Vercel will prompt for:
+   - Project name (use: scentral)
+   - Framework (select: Next.js)
+   - Root directory (press Enter to use default)
+   - Build command (press Enter to use default)
+   - Output directory (press Enter to use default)
+
+4. Wait for deployment to complete (2-5 min)
+
+5. Get live URL from Vercel dashboard or terminal output
+   → https://scentral.vercel.app (or custom domain)
+
+6. Share URL with early users
+
+=====================================
+What's Being Deployed:
+- Landing page with email signup
+- Accord Creator (fragrance layering tool)
+- 3 preset fragrances for demo
+- localStorage persistence
+- Dark mode with amber accents
+- Mobile-responsive design
+
+No hardcoding. Email signup captures to localStorage only (Phase 2: Supabase).
+
+=====================================
