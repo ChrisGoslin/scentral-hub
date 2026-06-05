@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { Search, X, Check, ArrowLeft } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Chip from '@/components/ui/Chip'
@@ -178,6 +178,28 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
   const [results, setResults] = useState<AuraResultItem[] | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [usedLayers, setUsedLayers] = useState<Set<string>>(new Set())
+  const [auraEnvironment, setAuraEnvironment] = useState<string | null>(null)
+
+  useEffect(() => {
+    try {
+      const env = localStorage.getItem('scentral-environment')
+      if (env) setAuraEnvironment(env)
+
+      const raw = localStorage.getItem('scentral-use-cases')
+      if (raw) {
+        const stored: string[] = JSON.parse(raw)
+        if (stored.length === 1) {
+          const matched = USE_CASES.find(uc => uc.toLowerCase() === stored[0].toLowerCase())
+          if (matched) {
+            setUseCase(matched)
+            setStep(2)
+          }
+        }
+      }
+    } catch {
+      // localStorage unavailable or malformed JSON — silently ignore
+    }
+  }, [])
 
   const filteredFragrances = useMemo(() => {
     const q = pickerQuery.trim().toLowerCase()
@@ -202,6 +224,7 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
         body: JSON.stringify({
           use_case: useCase,
           base_fragrance_id: base?.id ?? null,
+          ...(auraEnvironment ? { environment: auraEnvironment } : {}),
         }),
       })
       const data = await res.json()
@@ -288,6 +311,22 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
                 AURA will build a layering stack tailored to the context.
               </p>
             </div>
+            {auraEnvironment && (
+              <p
+                style={{
+                  fontSize: 12,
+                  color: 'var(--text-muted)',
+                  padding: '5px 10px',
+                  borderRadius: 'var(--r-btn)',
+                  background: 'var(--surface-2)',
+                  border: '1px solid var(--line)',
+                  display: 'inline-block',
+                  alignSelf: 'flex-start',
+                }}
+              >
+                Your environment: {auraEnvironment}
+              </p>
+            )}
             <div className="flex flex-wrap gap-2">
               {USE_CASES.map(uc => (
                 <Chip key={uc} onClick={() => handleUseCaseSelect(uc)}>

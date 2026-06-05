@@ -130,11 +130,13 @@ export async function POST(req: Request) {
       use_case = 'casual',
       time_of_day = 'evening',
       weather,
+      environment,
     }: {
       base_fragrance_id?: string
       use_case?: string
       time_of_day?: string
       weather?: { temp_c: number; humidity: number }
+      environment?: string
     } = body
 
     const profile = USE_CASE_PROFILE[use_case] ?? USE_CASE_PROFILE.casual
@@ -213,10 +215,12 @@ export async function POST(req: Request) {
       .slice(0, 6)
 
     // Build AURA's reasoning summary
+    const environmentNote = environment ? ` Tuned for ${environment} environment.` : ''
     const aura_context = {
       use_case,
       time_of_day,
-      profile_description: profile.description,
+      environment: environment ?? null,
+      profile_description: profile.description + environmentNote,
       weather_condition: weather
         ? weather.temp_c >= 25 ? 'Hot — lighter layers recommended'
           : weather.temp_c <= 10 ? 'Cold — warm anchors preferred'
