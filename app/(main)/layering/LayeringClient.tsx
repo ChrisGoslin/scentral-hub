@@ -207,7 +207,6 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
       // localStorage unavailable or malformed JSON — silently ignore
     }
   }, [])
-
   useEffect(() => {
     const anchorId = searchParams.get('anchor')
     const topId = searchParams.get('top')
