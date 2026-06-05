@@ -12,16 +12,27 @@ const PHASE_LABEL: Record<number, string> = {
   3: 'Top',
 }
 
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+}
+
 export default async function FragranceDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const cookieStore = await cookies()
   const supabase = await createClient(cookieStore)
 
-  const { data, error } = await supabase
-    .from('fragrances')
-    .select('id, brand, name, phase, phase_label, family, projection, anosmia_risk, lean, rating, image_url, use_case, spritz_count, application_zone')
-    .eq('id', id)
-    .single()
+  const [{ data, error }, { data: collectionRow }] = await Promise.all([
+    supabase
+      .from('fragrances')
+      .select('id, brand, name, phase, phase_label, family, projection, anosmia_risk, lean, rating, image_url, use_case, spritz_count, application_zone, maturation')
+      .eq('id', id)
+      .single(),
+    supabase
+      .from('collections')
+      .select('maceration_started_at, maceration_ready_at')
+      .eq('fragrance_id', id)
+      .maybeSingle(),
+  ])
 
   if (error || !data) {
     notFound()
@@ -29,6 +40,21 @@ export default async function FragranceDetailPage({ params }: { params: Promise<
 
   const f = data
   const phaseLabel = PHASE_LABEL[f.phase] ?? f.phase_label
+
+  const now = new Date()
+  const readyAt = collectionRow?.maceration_ready_at ? new Date(collectionRow.maceration_ready_at) : null
+  const startedAt = collectionRow?.maceration_started_at ? new Date(collectionRow.maceration_started_at) : null
+
+  let maturationChip: 'maturing' | 'macerated' | 'recommended' | null = null
+  if (readyAt && readyAt > now) {
+    maturationChip = 'maturing'
+  } else if (readyAt && readyAt <= now) {
+    maturationChip = 'macerated'
+  } else if (startedAt) {
+    maturationChip = 'macerated'
+  } else if (f.maturation) {
+    maturationChip = 'recommended'
+  }
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--text)' }}>
@@ -91,6 +117,33 @@ export default async function FragranceDetailPage({ params }: { params: Promise<
         {f.rating !== null && (
           <p style={{ fontSize: 14, color: 'var(--accent)', fontVariantNumeric: 'tabular-nums' }}>
             {f.rating}/10
+          </p>
+        )}
+
+        {/* Maturation status */}
+        {maturationChip === 'maturing' && readyAt && (
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: 4,
+            fontSize: 12, fontWeight: 500, color: 'var(--accent)',
+            background: 'color-mix(in srgb, var(--accent) 12%, transparent)',
+            borderRadius: 999, padding: '4px 10px', alignSelf: 'flex-start',
+          }}>
+            ⏳ Maturing · Ready {formatDate(collectionRow!.maceration_ready_at!)}
+          </span>
+        )}
+        {maturationChip === 'macerated' && (
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: 4,
+            fontSize: 12, fontWeight: 500, color: 'var(--positive)',
+            background: 'color-mix(in srgb, var(--positive) 12%, transparent)',
+            borderRadius: 999, padding: '4px 10px', alignSelf: 'flex-start',
+          }}>
+            Macerated ✓
+          </span>
+        )}
+        {maturationChip === 'recommended' && (
+          <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+            Maceration: {f.maturation} recommended
           </p>
         )}
 

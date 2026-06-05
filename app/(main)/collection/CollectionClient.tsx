@@ -19,6 +19,9 @@ export type CollectionFragrance = {
   rating: number | null
   image_url: string | null
   optimal_season: string | null
+  maturation?: string | null
+  maceration_started_at?: string | null
+  maceration_ready_at?: string | null
 }
 
 type PhaseFilter = 'All' | 'Anchor' | 'Modulator' | 'Top'
@@ -75,10 +78,22 @@ function FragranceImage({ imageUrl, brand, name }: { imageUrl: string | null; br
   )
 }
 
+function maturationStatus(f: CollectionFragrance): 'maturing' | 'macerated' | 'recommended' | null {
+  const now = new Date()
+  const readyAt = f.maceration_ready_at ? new Date(f.maceration_ready_at) : null
+  const startedAt = f.maceration_started_at ? new Date(f.maceration_started_at) : null
+  if (readyAt && readyAt > now) return 'maturing'
+  if (readyAt && readyAt <= now) return 'macerated'
+  if (startedAt) return 'macerated'
+  if (f.maturation) return 'recommended'
+  return null
+}
+
 function FragranceCard({ f }: { f: CollectionFragrance }) {
   const phaseLabel = PHASE_MAP[f.phase] ?? f.phase_label
   const dot = PHASE_DOT[phaseLabel]
   const shortName = f.name.length > 24 ? f.name.slice(0, 22) + '…' : f.name
+  const mStatus = maturationStatus(f)
 
   return (
     <Card className="flex flex-col gap-2 transition-colors h-full group">
@@ -95,6 +110,12 @@ function FragranceCard({ f }: { f: CollectionFragrance }) {
             {dot && <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: dot }} />}
             <p style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: '14px' }}>{phaseLabel}</p>
           </div>
+          {mStatus === 'maturing' && (
+            <p style={{ fontSize: 10, color: 'var(--accent)', marginTop: 3, lineHeight: '13px' }}>⏳ Maturing</p>
+          )}
+          {mStatus === 'macerated' && (
+            <p style={{ fontSize: 10, color: 'var(--positive)', marginTop: 3, lineHeight: '13px' }}>Macerated ✓</p>
+          )}
         </div>
       </Link>
       
