@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useMemo, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Search, X, Check, ArrowLeft } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Chip from '@/components/ui/Chip'
@@ -169,6 +170,12 @@ function AuraResultCard({
 }
 
 export default function LayeringClient({ fragrances }: { fragrances: LayeringFragrance[] }) {
+  const searchParams = useSearchParams()
+  const [mode, setMode] = useState<'aura' | 'manual'>('aura')
+  const [slot1, setSlot1] = useState<LayeringFragrance | null>(null)
+  const [slot2, setSlot2] = useState<LayeringFragrance | null>(null)
+  const [manualSynthesized, setManualSynthesized] = useState(false)
+
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [useCase, setUseCase] = useState<UseCase | null>(null)
   const [baseFragrance, setBaseFragrance] = useState<LayeringFragrance | null>(null)
@@ -200,6 +207,19 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
       // localStorage unavailable or malformed JSON — silently ignore
     }
   }, [])
+
+  useEffect(() => {
+    const anchorId = searchParams.get('anchor')
+    const topId = searchParams.get('top')
+    if (!anchorId || !topId) return
+    const anchor = fragrances.find(f => f.id === anchorId) ?? null
+    const top = fragrances.find(f => f.id === topId) ?? null
+    if (anchor && top) {
+      setSlot1(anchor)
+      setSlot2(top)
+      setMode('manual')
+    }
+  }, [searchParams, fragrances])
 
   const filteredFragrances = useMemo(() => {
     const q = pickerQuery.trim().toLowerCase()
@@ -290,8 +310,120 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
       </div>
 
       <div className="px-4 py-6">
+        {/* ── Manual mode (pre-filled from DNA Match) ── */}
+        {mode === 'manual' && (
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-2">
+              <h2
+                style={{
+                  fontFamily: 'var(--font-display)',
+                  fontSize: 22,
+                  fontStyle: 'italic',
+                  color: 'var(--text)',
+                  lineHeight: '28px',
+                }}
+              >
+                Your Layering Formula
+              </h2>
+              <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+                Anchor and top note loaded from Olfactory Resonance.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              {([
+                { label: 'Anchor', frag: slot1 },
+                { label: 'Top Note', frag: slot2 },
+              ] as const).map(({ label, frag }) => (
+                <div
+                  key={label}
+                  className="flex items-center gap-4 p-4 rounded-[var(--r-card)]"
+                  style={{ background: 'var(--surface)', border: '1px solid var(--accent)' }}
+                >
+                  <div className="flex-1 min-w-0">
+                    <p
+                      style={{
+                        fontSize: 10,
+                        color: 'var(--accent)',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.08em',
+                      }}
+                    >
+                      {label}
+                    </p>
+                    <p
+                      style={{
+                        fontSize: 11,
+                        color: 'var(--text-muted)',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.06em',
+                        marginTop: 2,
+                      }}
+                    >
+                      {frag?.brand}
+                    </p>
+                    <p
+                      style={{
+                        fontSize: 17,
+                        color: 'var(--text)',
+                        fontFamily: 'var(--font-display)',
+                        fontStyle: 'italic',
+                        lineHeight: '22px',
+                        marginTop: 1,
+                      }}
+                    >
+                      {frag?.name}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {!manualSynthesized ? (
+              <Button fullWidth onClick={() => setManualSynthesized(true)}>
+                Synthesize
+              </Button>
+            ) : (
+              <div
+                className="flex flex-col gap-3 p-5 rounded-[var(--r-card)]"
+                style={{ background: 'var(--surface)', border: '1px solid var(--accent)' }}
+              >
+                <p
+                  style={{
+                    fontSize: 11,
+                    color: 'var(--accent)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.08em',
+                  }}
+                >
+                  Stack ready
+                </p>
+                <p style={{ fontSize: 14, color: 'var(--text)', lineHeight: '20px' }}>
+                  Apply <strong>{slot1?.name}</strong> as your anchor layer, then layer{' '}
+                  <strong>{slot2?.name}</strong> on top. Allow 60–90 seconds between applications.
+                </p>
+                <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                  {slot1?.application_zone && `Anchor: ${slot1.application_zone}`}
+                  {slot1?.application_zone && slot2?.application_zone && ' · '}
+                  {slot2?.application_zone && `Top: ${slot2.application_zone}`}
+                </p>
+              </div>
+            )}
+
+            <button
+              onClick={() => {
+                setMode('aura')
+                setManualSynthesized(false)
+              }}
+              style={{ fontSize: 13, color: 'var(--text-muted)', textAlign: 'center' }}
+            >
+              Switch to AURA mode →
+            </button>
+          </div>
+        )}
+
         {/* ── Step 1 — Use Case ── */}
-        {step === 1 && (
+        {mode === 'aura' && step === 1 && (
           <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-3">
               <StepDots current={1} />
@@ -338,7 +470,7 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
         )}
 
         {/* ── Step 2 — Base Fragrance ── */}
-        {step === 2 && useCase && (
+        {mode === 'aura' && step === 2 && useCase && (
           <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
@@ -416,7 +548,7 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
         )}
 
         {/* ── Step 3 — Results ── */}
-        {step === 3 && (
+        {mode === 'aura' && step === 3 && (
           <div className="flex flex-col gap-5">
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">

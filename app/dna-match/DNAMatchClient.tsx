@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import AudioChord from '../components/AudioChord';
 
 interface Fragrance {
@@ -20,6 +21,7 @@ interface DNAMatchResult {
 }
 
 export default function ResonanceClient({ fragrances }: { fragrances: Fragrance[] }) {
+  const router = useRouter();
   const [fragA, setFragA] = useState<Fragrance | null>(null);
   const [fragB, setFragB] = useState<Fragrance | null>(null);
   const [result, setResult] = useState<DNAMatchResult | null>(null);
@@ -137,6 +139,14 @@ export default function ResonanceClient({ fragrances }: { fragrances: Fragrance[
       {result && !loading && (
         <div className="fade-up border rounded-3xl p-10 shadow-sm text-center space-y-8" style={{ background: 'var(--surface)', borderColor: 'var(--line)' }}>
           <ScoreRing score={result.score} />
+
+          <button
+            onClick={() => router.push(`/layering?anchor=${fragA!.id}&top=${fragB!.id}`)}
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full font-semibold text-sm transition-all hover:opacity-80 active:scale-95"
+            style={{ background: 'var(--accent)', color: 'var(--bg)' }}
+          >
+            Send to Atelier →
+          </button>
 
           <div className="space-y-4">
             <div
