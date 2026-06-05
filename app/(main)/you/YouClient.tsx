@@ -1,10 +1,11 @@
 'use client'
 
-import React, { useState, useTransition } from 'react'
+import React, { useState, useTransition, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
+import Chip from '@/components/ui/Chip'
 import EmptyState from '@/components/ui/EmptyState'
 import ErrorInline from '@/components/ui/ErrorInline'
 import LoadingShimmer from '@/components/ui/LoadingShimmer'
@@ -60,6 +61,127 @@ function SavedItem({ combo }: { combo: SavedCombination }) {
         <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>{meta}</p>
       )}
     </Card>
+  )
+}
+
+const ENVIRONMENTS = ['Office', 'WFH', 'Outdoor', 'Creative', 'Client-facing'] as const
+const USE_CASES = ['Daily wear', 'Date night', 'Work', 'Sport', 'Evening out', 'Travel', 'Formal', 'Casual'] as const
+
+type WeatherData = { city: string; temp: number; humidity: number }
+
+function ScentProfile() {
+  const [geoStatus, setGeoStatus] = useState<'idle' | 'loading' | 'ok' | 'error'>('loading')
+  const [weather, setWeather] = useState<WeatherData | null>(null)
+  const [geoError, setGeoError] = useState<string | null>(null)
+  const [environment, setEnvironment] = useState<string>('')
+  const [useCases, setUseCases] = useState<string[]>([])
+
+  // Hydrate localStorage on mount (avoids SSR mismatch)
+  useEffect(() => {
+    setEnvironment(localStorage.getItem('scentral-environment') ?? '')
+    try {
+      const stored = localStorage.getItem('scentral-use-cases')
+      if (stored) setUseCases(JSON.parse(stored))
+    } catch { /* ignore */ }
+  }, [])
+
+  // Request geolocation + fetch weather on mount
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setGeoStatus('error')
+      setGeoError('Geolocation not supported')
+      return
+    }
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude: lat, longitude: lon } = pos.coords
+        try {
+          const [weatherRes, geoRes] = await Promise.all([
+            fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m&timezone=auto`),
+            fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`),
+          ])
+          const [weatherJson, geoJson] = await Promise.all([weatherRes.json(), geoRes.json()])
+          const city =
+            geoJson.address?.city ??
+            geoJson.address?.town ??
+            geoJson.address?.village ??
+            geoJson.address?.county ??
+            'Unknown'
+          setWeather({ city, temp: weatherJson.current.temperature_2m, humidity: weatherJson.current.relative_humidity_2m })
+          setGeoStatus('ok')
+        } catch {
+          setGeoStatus('error')
+          setGeoError('Unable to fetch weather')
+        }
+      },
+      () => {
+        setGeoStatus('error')
+        setGeoError('Location access denied')
+      },
+      { timeout: 10000 }
+    )
+  }, [])
+
+  function selectEnvironment(env: string) {
+    setEnvironment(env)
+    localStorage.setItem('scentral-environment', env)
+  }
+
+  function toggleUseCase(uc: string) {
+    setUseCases(prev => {
+      const next = prev.includes(uc) ? prev.filter(x => x !== uc) : [...prev, uc]
+      localStorage.setItem('scentral-use-cases', JSON.stringify(next))
+      return next
+    })
+  }
+
+  return (
+    <div style={{ borderTop: '1px solid var(--line)', paddingTop: 20 }}>
+      <p style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 16 }}>
+        Scent Profile
+      </p>
+
+      {/* Current conditions */}
+      <div style={{ marginBottom: 20 }}>
+        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>Current conditions</p>
+        {geoStatus === 'loading' && (
+          <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>Detecting location…</p>
+        )}
+        {geoStatus === 'ok' && weather && (
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 14, color: 'var(--text)', fontFamily: 'var(--font-display)' }}>{weather.city}</span>
+            <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{weather.temp}°C · {weather.humidity}% humidity</span>
+          </div>
+        )}
+        {geoStatus === 'error' && (
+          <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{geoError}</p>
+        )}
+      </div>
+
+      {/* Work environment — single-select */}
+      <div style={{ marginBottom: 20 }}>
+        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>Work environment</p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          {ENVIRONMENTS.map(env => (
+            <Chip key={env} selected={environment === env} onClick={() => selectEnvironment(env)}>
+              {env}
+            </Chip>
+          ))}
+        </div>
+      </div>
+
+      {/* Use cases — multi-select */}
+      <div>
+        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>Preferred use cases</p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          {USE_CASES.map(uc => (
+            <Chip key={uc} selected={useCases.includes(uc)} onClick={() => toggleUseCase(uc)}>
+              {uc}
+            </Chip>
+          ))}
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -176,6 +298,9 @@ export default function YouClient(props: YouClientProps) {
             </div>
           )}
         </div>
+
+        {/* Scent Profile */}
+        <ScentProfile />
 
         {/* Settings */}
         <SettingsSection
