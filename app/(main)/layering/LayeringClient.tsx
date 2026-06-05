@@ -220,6 +220,19 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
     }
   }, [searchParams, fragrances])
 
+  useEffect(() => {
+    const anchorId = searchParams.get('anchor')
+    const topId = searchParams.get('top')
+    if (!anchorId || !topId) return
+    const anchor = fragrances.find(f => f.id === anchorId) ?? null
+    const top = fragrances.find(f => f.id === topId) ?? null
+    if (anchor && top) {
+      setSlot1(anchor)
+      setSlot2(top)
+      setMode('manual')
+    }
+  }, [searchParams, fragrances])
+
   const filteredFragrances = useMemo(() => {
     const q = pickerQuery.trim().toLowerCase()
     if (!q) return fragrances
