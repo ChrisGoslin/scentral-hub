@@ -201,15 +201,15 @@ export async function POST(req: Request) {
 
       return {
         ...frag,
-        harmony_pct: harmonyPct,
+        similarity_score: harmonyPct,
         layering_role: frag.phase === 1 ? 'Anchor' : frag.phase === 2 ? 'Modulator' : 'Top Layer',
         resonance_similarity: similarity ?? null,
       }
     })
 
     // Sort by score descending, take top 6
-    const recommendations = scored
-      .sort((a, b) => b.harmony_pct - a.harmony_pct)
+    const results = scored
+      .sort((a, b) => b.similarity_score - a.similarity_score)
       .slice(0, 6)
 
     // Build AURA's reasoning summary
@@ -229,7 +229,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: true,
-      recommendations,
+      results,
       aura_context,
       total_candidates: candidates.length,
     })
