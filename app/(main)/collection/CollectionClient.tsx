@@ -18,9 +18,19 @@ export type CollectionFragrance = {
   lean: string
   rating: number | null
   image_url: string | null
+  optimal_season: string | null
 }
 
 type PhaseFilter = 'All' | 'Anchor' | 'Modulator' | 'Top'
+type SeasonFilter = 'All' | 'Summer' | 'All-Year' | 'Winter' | 'Spring'
+
+const SEASON_DB_MAP: Record<SeasonFilter, string | null> = {
+  All: null,
+  Summer: 'High Heat',
+  'All-Year': 'All-Year',
+  Winter: 'Winter/Fall',
+  Spring: 'Spring/Summer',
+}
 
 const PHASE_MAP: Record<number, string> = {
   1: 'Anchor',
@@ -107,14 +117,23 @@ function FragranceCard({ f }: { f: CollectionFragrance }) {
 }
 
 export default function CollectionClient({ fragrances }: { fragrances: CollectionFragrance[] }) {
-  const [filter, setFilter] = useState<PhaseFilter>('All')
+  const [phaseFilter, setPhaseFilter] = useState<PhaseFilter>('All')
+  const [seasonFilter, setSeasonFilter] = useState<SeasonFilter>('All')
+  const [search, setSearch] = useState('')
 
-  const filtered = filter === 'All'
-    ? fragrances
-    : fragrances.filter(f => PHASE_MAP[f.phase] === filter)
-
-  const filters: PhaseFilter[] = ['All', 'Anchor', 'Modulator', 'Top']
+  const phaseFilters: PhaseFilter[] = ['All', 'Anchor', 'Modulator', 'Top']
+  const seasonFilters: SeasonFilter[] = ['All', 'Summer', 'All-Year', 'Winter', 'Spring']
   const total = fragrances.length
+
+  const filtered = fragrances.filter(f => {
+    if (phaseFilter !== 'All' && PHASE_MAP[f.phase] !== phaseFilter) return false
+    if (seasonFilter !== 'All' && f.optimal_season !== SEASON_DB_MAP[seasonFilter]) return false
+    if (search.trim()) {
+      const q = search.trim().toLowerCase()
+      if (!f.brand.toLowerCase().includes(q) && !f.name.toLowerCase().includes(q)) return false
+    }
+    return true
+  })
 
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh' }}>
@@ -128,13 +147,35 @@ export default function CollectionClient({ fragrances }: { fragrances: Collectio
         </p>
       </div>
 
+      {/* Search input */}
+      <div className="px-4 pt-3 pb-2">
+        <input
+          type="search"
+          placeholder="Search brand or name…"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          style={{
+            width: '100%',
+            background: 'var(--surface)',
+            border: '1px solid var(--line)',
+            borderRadius: 'var(--r-chip)',
+            color: 'var(--text)',
+            fontSize: 13,
+            padding: '8px 12px',
+            outline: 'none',
+          }}
+          onFocus={e => { e.currentTarget.style.borderColor = 'var(--accent)' }}
+          onBlur={e => { e.currentTarget.style.borderColor = 'var(--line)' }}
+        />
+      </div>
+
       {/* Phase filter chips */}
-      <div className="flex gap-2 px-4 py-3 overflow-x-auto" style={{ borderBottom: '1px solid var(--line)' }}>
-        {filters.map(f => (
+      <div className="flex gap-2 px-4 py-2 overflow-x-auto">
+        {phaseFilters.map(f => (
           <Chip
             key={f}
-            selected={filter === f}
-            onClick={() => setFilter(f)}
+            selected={phaseFilter === f}
+            onClick={() => setPhaseFilter(f)}
             dot={f !== 'All' ? PHASE_DOT[f] : undefined}
             style={{ flexShrink: 0 }}
           >
@@ -143,12 +184,33 @@ export default function CollectionClient({ fragrances }: { fragrances: Collectio
         ))}
       </div>
 
+      {/* Season filter chips */}
+      <div className="flex gap-2 px-4 py-2 overflow-x-auto" style={{ borderBottom: '1px solid var(--line)' }}>
+        {seasonFilters.map(s => (
+          <Chip
+            key={s}
+            selected={seasonFilter === s}
+            onClick={() => setSeasonFilter(s)}
+            style={{ flexShrink: 0 }}
+          >
+            {s}
+          </Chip>
+        ))}
+      </div>
+
+      {/* Result count */}
+      <div className="px-4 pt-3">
+        <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+          {filtered.length} result{filtered.length !== 1 ? 's' : ''}
+        </p>
+      </div>
+
       {/* Grid */}
-      <div className="px-4 py-5">
+      <div className="px-4 py-3">
         {filtered.length === 0 ? (
           <EmptyState
-            headline="Your wardrobe is empty"
-            caption="The sanctuary is awaiting its first essence. Begin your collection to explore olfactory resonance."
+            headline="No matches"
+            caption="Try adjusting your filters or search term."
           />
         ) : (
           <div className="grid grid-cols-2 gap-3">

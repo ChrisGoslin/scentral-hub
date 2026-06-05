@@ -11,7 +11,7 @@ export default async function CollectionPage() {
   
   const { data, error } = await supabase
     .from('fragrances')
-    .select('id, brand, name, phase, phase_label, family, projection, anosmia_risk, lean, rating, image_url')
+    .select('id, brand, name, phase, phase_label, family, projection, anosmia_risk, lean, rating, image_url, optimal_season')
     .order('brand', { ascending: true })
 
   if (error) {
