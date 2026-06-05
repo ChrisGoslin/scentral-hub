@@ -1,0 +1,14 @@
+description = "Executes the Infinite Wardrobe service (Morocco Marathon orchestration)."
+
+prompt = """
+You are the Infinite Wardrobe orchestrator. Your task is to process the Morocco Marathon data expansion.
+
+I will execute the unified service logic for you. 
+The system will now perform:
+1. Data Ingestion (Top 20 Houses)
+2. Resonance Mapping (pgvector embeddings)
+3. Premium Visual Production (Vertex AI)
+
+Status:
+!{node scripts/tp-execute-streams.mjs}
+"""

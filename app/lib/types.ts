@@ -9,6 +9,11 @@ export interface Fragrance {
   name: string;
   brand: string;
   notes: FragranceNotes;
+  image_url?: string | null;
+  family?: string;
+  accords?: string[];
+  clone_target?: string;
+  versatility_score?: number;
 }
 
 export interface CombinerState {

@@ -1,5 +1,12 @@
 import { Fragrance, ProfileBreakdown } from './types';
 
+export interface ScentDebtRecommendation {
+  base_layer_id: string;
+  top_layer_id: string;
+  synergy_justification: string;
+  expected_harmony: number;
+}
+
 // Calculate note intersection and similarity
 function calculateNoteMatch(notesA: string[], notesB: string[]): number {
   if (notesA.length === 0 || notesB.length === 0) return 0;
@@ -74,4 +81,57 @@ export function calculateHarmonyScore(fragrances: (Fragrance | null)[]): {
       dominantProfile
     }
   };
+}
+
+/**
+ * 🧪 Scent Debt Optimization Protocol
+ * Pairs the lower 20% (Debt) with the upper 80% (Staples)
+ */
+export function optimizeScentDebt(
+  debtFragrances: Fragrance[],
+  stapleFragrances: Fragrance[]
+): ScentDebtRecommendation[] {
+  const recommendations: ScentDebtRecommendation[] = [];
+
+  for (const debt of debtFragrances) {
+    let bestMatch: Fragrance | null = null;
+    let highestHarmony = 0;
+    let justification = "";
+
+    for (const staple of stapleFragrances) {
+      const harmony = calculateHarmonyScore([debt, staple]);
+      
+      // Look for contrasting but complementary profiles
+      // e.g., A heavy Amber (Debt) base with a Fresh Citrus (Staple) top
+      const isContrasting = 
+        (debt.family === 'Oriental' && staple.family === 'Fresh') ||
+        (debt.family === 'Woody' && staple.family === 'Floral') ||
+        (debt.family === 'Gourmand' && staple.family === 'Spicy');
+
+      // Bonus score for contrast in optimization mode
+      const adjustedScore = harmony.score + (isContrasting ? 20 : 0);
+
+      if (adjustedScore > highestHarmony) {
+        highestHarmony = adjustedScore;
+        bestMatch = staple;
+        
+        if (isContrasting) {
+          justification = `Synthesizing ${debt.name}'s dense ${debt.family} architecture with ${staple.name}'s high-velocity ${staple.family} profile for a transformational refactor.`;
+        } else {
+          justification = `Reinforcing ${debt.name}'s core accords with the established ${staple.name} protocol to reduce olfactory entropy.`;
+        }
+      }
+    }
+
+    if (bestMatch) {
+      recommendations.push({
+        base_layer_id: debt.id,
+        top_layer_id: bestMatch.id,
+        synergy_justification: justification,
+        expected_harmony: Math.min(100, highestHarmony)
+      });
+    }
+  }
+
+  return recommendations.sort((a, b) => b.expected_harmony - a.expected_harmony);
 }

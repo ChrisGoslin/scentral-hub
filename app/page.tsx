@@ -1,102 +1,110 @@
-'use client';
+'use client'
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import AccordCreator from '@/app/components/AccordCreator';
+import Link from 'next/link'
+import AudioChord from './components/AudioChord'
+
+const STATS = [
+  { value: '76', label: 'Fragrances' },
+  { value: '3072', label: 'Resonance dims' },
+  { value: '4', label: 'Layering protocols' },
+]
+
+const QUICK_LINKS = [
+  { label: 'The Wardrobe', sub: 'Browse & explore your collection', href: '/collection' },
+  { label: 'The Atelier', sub: 'Formulate layering combinations', href: '/layering' },
+  { label: 'The Ritual', sub: 'Plan your daily scent sequence', href: '/schedule' },
+  { label: 'Resonance Engine', sub: 'Match olfactory DNA between fragrances', href: '/dna-match' },
+]
 
 export default function Home() {
-  const [showAccordCreator, setShowAccordCreator] = useState(false);
-  const [email, setEmail] = useState('');
-  const [submitted, setSubmitted] = useState(false);
-
-  useEffect(() => {
-    setShowAccordCreator(true);
-  }, []);
-
-  const handleEmailSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) return;
-    
-    localStorage.setItem('scentral_email_signup', email);
-    setSubmitted(true);
-    setTimeout(() => {
-      setShowAccordCreator(true);
-    }, 1500);
-  };
-
-  if (submitted || showAccordCreator) {
-    return <AccordCreator />;
-  }
-
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col justify-center items-center p-6">
-      <div className="max-w-2xl w-full">
-        {/* Logo / Branding */}
-        <div className="text-center mb-16">
-          <h1 className="text-5xl md:text-6xl font-bold mb-4">Scentral</h1>
-          <p className="text-xl text-gray-400">Create fragrance layering combos in seconds</p>
-        </div>
+    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] flex items-center justify-center transition-colors duration-700">
+      <main className="max-w-6xl w-full px-6 py-20 grid grid-cols-1 md:grid-cols-2 gap-20 items-center fade-up">
 
-        {/* Hero Section */}
-        <div className="bg-gray-800 rounded-xl p-8 md:p-12 border border-gray-700">
-          <h2 className="text-3xl font-bold mb-4">Build Your Signature Accords</h2>
-          <p className="text-gray-400 mb-8 leading-relaxed">
-            Layer 2–3 fragrances from your collection. Get instant harmony scores. Discover combinations you never thought of. Share your Accords with friends.
-          </p>
+        {/* Left — hero copy */}
+        <section className="space-y-10">
+          <div>
+            <div className="w-12 h-0.5 bg-[var(--accent)] mb-6" />
+            <p className="text-[10px] uppercase tracking-[0.4em] text-[var(--text-muted)] font-bold">Scentral</p>
+          </div>
 
-          {/* Email Form */}
-          <form onSubmit={handleEmailSubmit} className="space-y-4">
-            <div className="flex flex-col md:flex-row gap-3">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="your@email.com"
-                required
-                className="flex-1 px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-amber-600"
-              />
-              <button
-                type="submit"
-                className="px-6 py-3 bg-amber-600 hover:bg-amber-700 rounded-lg font-semibold transition whitespace-nowrap"
+          <div className="space-y-6">
+            <h1 className="text-5xl md:text-7xl font-serif italic leading-tight tracking-tight">
+              Where notes<br />
+              <span className="text-[var(--text-muted)]">compose memory</span>
+            </h1>
+            <p className="text-[var(--text-muted)] max-w-xl text-lg font-light leading-relaxed">
+              A sensory-first tool for discovering fragrance pairings, building daily rituals, and understanding your collection.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-6 items-center">
+            <Link
+              href="/collection"
+              className="bg-[var(--accent)] text-white px-10 py-4 rounded-[var(--r-btn)] shadow-sm transition-all hover:bg-[var(--accent-press)] active:scale-95 font-bold uppercase tracking-widest text-[10px]"
+            >
+              Enter The Wardrobe
+            </Link>
+            <Link
+              href="/layering"
+              className="text-[var(--text)] border-b border-[var(--text)] pb-1 hover:text-[var(--accent)] hover:border-[var(--accent)] transition-all uppercase tracking-[0.2em] text-[10px] font-bold"
+            >
+              Open The Atelier
+            </Link>
+          </div>
+
+          {/* Quick nav grid */}
+          <div className="grid grid-cols-2 gap-3">
+            {QUICK_LINKS.map(({ label, sub, href }) => (
+              <Link
+                key={href}
+                href={href}
+                className="group bg-[var(--surface)] border border-[var(--line)] px-5 py-4 transition-all hover:border-[var(--accent)] shadow-sm"
               >
-                Get Started
-              </button>
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)] group-hover:text-[var(--accent)] transition-colors">{label}</p>
+                <p className="text-[11px] text-[var(--text-muted)] mt-1 font-light leading-snug">{sub}</p>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        {/* Right — collection stat card */}
+        <aside className="flex flex-col gap-6">
+          <div className="bg-[var(--surface)] border border-[var(--line)] p-8 space-y-8">
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--text-muted)] font-bold mb-1">The Collection</p>
+              <p className="text-[13px] text-[var(--text-muted)] font-light">Live data. Personal intelligence.</p>
             </div>
-            <p className="text-xs text-gray-500">Free. No account needed.</p>
-          </form>
-        </div>
 
-        {/* Features */}
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
-            <div className="text-amber-400 text-2xl font-bold mb-2">⚗️</div>
-            <h3 className="font-semibold mb-2">Layer Fragrances</h3>
-            <p className="text-sm text-gray-400">Combine 2–3 bottles to create new scent experiences</p>
+            <div className="grid grid-cols-3 gap-4">
+              {STATS.map(({ value, label }) => (
+                <div key={label} className="text-center">
+                  <p className="text-3xl font-bold text-[var(--accent)] font-serif">{value}</p>
+                  <p className="text-[9px] uppercase tracking-widest text-[var(--text-muted)] mt-1 font-bold">{label}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="pt-4 border-t border-[var(--line)] space-y-3">
+              {[
+                { label: 'Phase 1 — Anchor', hint: 'Oud · Amber · Musk · Leather' },
+                { label: 'Phase 2 — Modulator', hint: 'Florals · Spice · Resin' },
+                { label: 'Phase 3 — Top', hint: 'Citrus · Aquatic · Fruit' },
+              ].map(({ label, hint }) => (
+                <div key={label} className="flex justify-between items-center">
+                  <span className="text-[11px] font-bold text-[var(--text)]">{label}</span>
+                  <span className="text-[10px] text-[var(--text-muted)]">{hint}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
-            <div className="text-amber-400 text-2xl font-bold mb-2">📊</div>
-            <h3 className="font-semibold mb-2">Get Harmony Scores</h3>
-            <p className="text-sm text-gray-400">See how well fragrances work together (0–100%)</p>
+          <div className="flex justify-end">
+            <AudioChord />
           </div>
+        </aside>
 
-          <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
-            <div className="text-amber-400 text-2xl font-bold mb-2">📤</div>
-            <h3 className="font-semibold mb-2">Share Your Accords</h3>
-            <p className="text-sm text-gray-400">Export cards and share combos with friends</p>
-          </div>
-        </div>
-
-        {/* Skip Button */}
-        <div className="text-center mt-12">
-          <button
-            onClick={() => setShowAccordCreator(true)}
-            className="text-gray-500 hover:text-gray-300 text-sm transition"
-          >
-            Skip and explore →
-          </button>
-        </div>
-      </div>
+      </main>
     </div>
-  );
+  )
 }
