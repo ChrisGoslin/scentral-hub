@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useMemo } from 'react'
-import { Search, Check, Sparkles } from 'lucide-react'
+import { Search, Check, Sparkles, Share2 } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
 import { SLOTS, type SlotKey, type SlotConfig, type ScheduleFragrance, type SavedSchedule } from './types'
 import SlotCard, { PhaseChip } from './SlotCard'
@@ -289,28 +289,59 @@ export default function ScheduleClient({ fragrances, savedSchedules: initialSave
 }
 
 function SavedScheduleRow({ schedule, onLoad }: { schedule: SavedSchedule; onLoad: (s: SavedSchedule) => void }) {
+  const [copied, setCopied] = useState(false)
   const count = [schedule.morning_frag, schedule.midday_frag, schedule.evening_frag].filter(Boolean).length
   const date = schedule.created_at ? new Date(schedule.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''
 
+  const handleShare = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    const url = `${window.location.origin}/ritual/${schedule.id}`
+    await navigator.clipboard.writeText(url)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
   return (
-    <button
+    <div
+      role="button"
+      tabIndex={0}
       onClick={() => onLoad(schedule)}
-      className="w-full text-left bg-white border border-[var(--line)] p-5 shadow-sm hover:shadow-md transition-all flex flex-col gap-3 group"
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onLoad(schedule) }}
+      className="w-full text-left bg-white border border-[var(--line)] p-5 shadow-sm hover:shadow-md transition-all flex flex-col gap-3 group cursor-pointer"
     >
       <div className="flex justify-between items-start">
         <h4 className="text-[17px] font-serif italic text-[var(--text)] group-hover:text-[var(--accent)] transition-colors">{schedule.name}</h4>
         <span className="text-[10px] text-[var(--text-muted)] font-mono">{date}</span>
       </div>
-      <div className="flex items-center gap-2">
-        {schedule.occasion && (
-          <span className="text-[9px] px-2 py-0.5 bg-[var(--surface)] text-[var(--text-muted)] font-bold uppercase tracking-widest">
-            {schedule.occasion}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          {schedule.occasion && (
+            <span className="text-[9px] px-2 py-0.5 bg-[var(--surface)] text-[var(--text-muted)] font-bold uppercase tracking-widest">
+              {schedule.occasion}
+            </span>
+          )}
+          <span className="text-[9px] text-[var(--text-muted)] font-bold uppercase tracking-widest">
+            {count} essence{count !== 1 ? 's' : ''}
           </span>
-        )}
-        <span className="text-[9px] text-[var(--text-muted)] font-bold uppercase tracking-widest">
-          {count} essence{count !== 1 ? 's' : ''}
-        </span>
+        </div>
+        <button
+          onClick={handleShare}
+          title="Copy share link"
+          className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest px-2.5 py-1 border border-[var(--line)] text-[var(--text-muted)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors shrink-0"
+        >
+          {copied ? (
+            <>
+              <Check size={10} />
+              Copied!
+            </>
+          ) : (
+            <>
+              <Share2 size={10} />
+              Share
+            </>
+          )}
+        </button>
       </div>
-    </button>
+    </div>
   )
 }
