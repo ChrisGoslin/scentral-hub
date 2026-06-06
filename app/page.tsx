@@ -7,7 +7,7 @@ const QUICK_LINKS = [
   { label: 'The Wardrobe', sub: 'Browse & explore your collection', href: '/collection' },
   { label: 'The Atelier', sub: 'Formulate layering combinations', href: '/layering' },
   { label: 'The Ritual', sub: 'Plan your daily scent sequence', href: '/schedule' },
-  { label: 'Resonance Engine', sub: 'Match olfactory DNA between fragrances', href: '/dna-match' },
+  { label: 'Intelligence', sub: 'AURA insights across your collection', href: '/intelligence' },
 ]
 
 export const dynamic = 'force-dynamic'
