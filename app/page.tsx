@@ -1,13 +1,7 @@
-'use client'
-
 import Link from 'next/link'
+import { createClient } from '@/utils/supabase/server'
+import { cookies } from 'next/headers'
 import AudioChord from './components/AudioChord'
-
-const STATS = [
-  { value: '76', label: 'Fragrances' },
-  { value: '3072', label: 'Resonance dims' },
-  { value: '4', label: 'Layering protocols' },
-]
 
 const QUICK_LINKS = [
   { label: 'The Wardrobe', sub: 'Browse & explore your collection', href: '/collection' },
@@ -16,7 +10,23 @@ const QUICK_LINKS = [
   { label: 'Resonance Engine', sub: 'Match olfactory DNA between fragrances', href: '/dna-match' },
 ]
 
-export default function Home() {
+export const dynamic = 'force-dynamic'
+
+export default async function Home() {
+  const cookieStore = await cookies()
+  const supabase = await createClient(cookieStore)
+
+  const [{ count: totalCount }, { count: ownedCount }] = await Promise.all([
+    supabase.from('fragrances').select('*', { count: 'exact', head: true }),
+    supabase.from('fragrances').select('*', { count: 'exact', head: true }).eq('is_user_created', false).not('rating', 'is', null),
+  ])
+
+  const STATS = [
+    { value: String(ownedCount ?? 106), label: 'In your wardrobe' },
+    { value: String(totalCount ?? 282), label: 'Total catalogue' },
+    { value: '3072', label: 'Resonance dims' },
+  ]
+
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] flex items-center justify-center transition-colors duration-700">
       <main className="max-w-6xl w-full px-6 py-20 grid grid-cols-1 md:grid-cols-2 gap-20 items-center fade-up">
@@ -68,7 +78,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Right — collection stat card */}
+        {/* Right — live collection stat card */}
         <aside className="flex flex-col gap-6">
           <div className="bg-[var(--surface)] border border-[var(--line)] p-8 space-y-8">
             <div>

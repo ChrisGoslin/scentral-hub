@@ -22,6 +22,7 @@ export type CollectionFragrance = {
   maturation?: string | null
   maceration_started_at?: string | null
   maceration_ready_at?: string | null
+  is_user_created?: boolean | null
 }
 
 type PhaseFilter = 'All' | 'Anchor' | 'Modulator' | 'Top'
@@ -141,12 +142,16 @@ export default function CollectionClient({ fragrances }: { fragrances: Collectio
   const [phaseFilter, setPhaseFilter] = useState<PhaseFilter>('All')
   const [seasonFilter, setSeasonFilter] = useState<SeasonFilter>('All')
   const [search, setSearch] = useState('')
+  const [ownedOnly, setOwnedOnly] = useState(false)
 
   const phaseFilters: PhaseFilter[] = ['All', 'Anchor', 'Modulator', 'Top']
   const seasonFilters: SeasonFilter[] = ['All', 'Summer', 'All-Year', 'Winter', 'Spring']
-  const total = fragrances.length
 
-  const filtered = fragrances.filter(f => {
+  // Owned = has a rating (proxy until proper ownership flag is robust)
+  const ownedFragrances = fragrances.filter(f => f.rating !== null)
+  const displayFragrances = ownedOnly ? ownedFragrances : fragrances
+
+  const filtered = displayFragrances.filter(f => {
     if (phaseFilter !== 'All' && PHASE_MAP[f.phase] !== phaseFilter) return false
     if (seasonFilter !== 'All' && f.optimal_season !== SEASON_DB_MAP[seasonFilter]) return false
     if (search.trim()) {
@@ -160,12 +165,29 @@ export default function CollectionClient({ fragrances }: { fragrances: Collectio
     <div style={{ background: 'var(--bg)', minHeight: '100vh' }}>
       {/* Header */}
       <div className="px-4 pt-8 pb-4" style={{ borderBottom: '1px solid var(--line)' }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--text)', lineHeight: '34px' }}>
-          The Wardrobe
-        </h1>
-        <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
-          {total} essences discovered
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--text)', lineHeight: '34px' }}>
+              The Wardrobe
+            </h1>
+            <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
+              {filtered.length} of {fragrances.length} essences
+            </p>
+          </div>
+          {/* Owned toggle */}
+          <button
+            onClick={() => setOwnedOnly(o => !o)}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-full transition-all"
+            style={{
+              background: ownedOnly ? 'var(--accent)' : 'var(--surface)',
+              border: '1px solid var(--line)',
+              color: ownedOnly ? 'white' : 'var(--text-muted)',
+              fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em',
+            }}
+          >
+            {ownedOnly ? '★ My Bottles' : '☆ All'}
+          </button>
+        </div>
       </div>
 
       {/* Search input */}

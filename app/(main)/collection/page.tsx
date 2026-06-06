@@ -12,7 +12,7 @@ export default async function CollectionPage() {
   const [{ data, error }, { data: collectionRows }] = await Promise.all([
     supabase
       .from('fragrances')
-      .select('id, brand, name, phase, phase_label, family, projection, anosmia_risk, lean, rating, image_url, optimal_season, maturation')
+      .select('id, brand, name, phase, phase_label, family, projection, anosmia_risk, lean, rating, image_url, optimal_season, maturation, is_user_created')
       .order('brand', { ascending: true }),
     supabase
       .from('collections')
