@@ -8,6 +8,7 @@ import Chip from '@/components/ui/Chip'
 import Sheet from '@/components/ui/Sheet'
 import LoadingShimmer from '@/components/ui/LoadingShimmer'
 import ErrorInline from '@/components/ui/ErrorInline'
+import AuraShareCard, { type AuraShareData } from '@/app/components/AuraShareCard'
 
 export type LayeringFragrance = {
   id: string
@@ -31,6 +32,10 @@ type AuraResultItem = {
   name: string
   layering_role: string
   similarity_score: number
+  phase?: 1 | 2 | 3
+  harmony_pct?: number
+  family?: string
+  projection?: string
 }
 
 const USE_CASES = ['Work', 'Date', 'Casual', 'Interview', 'Home', 'Gym', 'Evening'] as const
@@ -635,6 +640,19 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
                     onUse={() => setUsedLayers(prev => new Set([...prev, item.id]))}
                   />
                 ))}
+
+                {/* Share card — uses top result */}
+                {results[0] && baseFragrance && (
+                  <AuraShareCard
+                    data={{
+                      anchor: { brand: baseFragrance.brand, name: baseFragrance.name, phase: baseFragrance.phase },
+                      top: { brand: results[0].brand, name: results[0].name, phase: results[0].phase ?? 2 },
+                      harmony_pct: results[0].harmony_pct ?? Math.round((results[0].similarity_score ?? 0.7) * 100),
+                      use_case: useCase ?? 'casual',
+                      aura_description: `${results[0].family ?? ''} · ${results[0].layering_role} · ${results[0].projection ?? ''} projection`.replace('·  ·', '·'),
+                    }}
+                  />
+                )}
               </div>
             )}
 
