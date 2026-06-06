@@ -22,9 +22,16 @@ export type SavedCombination = {
   top_frag: { brand: string; name: string } | null
 }
 
+export type WeekWearEntry = {
+  fragrance_id: string
+  brand: string
+  name: string
+  count: number
+}
+
 export type YouClientProps =
   | { state: 'signed-out' }
-  | { state: 'signed-in'; email: string; saves: SavedCombination[]; fetchError: string | null }
+  | { state: 'signed-in'; email: string; saves: SavedCombination[]; fetchError: string | null; weekWear: WeekWearEntry[]; ownedCount: number }
 
 function formatDate(iso: string | null): string {
   if (!iso) return ''
@@ -185,6 +192,61 @@ function ScentProfile() {
   )
 }
 
+function RotationIntelligence({ weekWear, ownedCount }: { weekWear: WeekWearEntry[]; ownedCount: number }) {
+  if (weekWear.length === 0) return null
+
+  const top = weekWear[0]
+  const anosmiaCandidates = weekWear.filter(w => w.count >= 3)
+  const neverWornCount = Math.max(0, ownedCount - weekWear.length)
+
+  return (
+    <div style={{ borderTop: '1px solid var(--line)', paddingTop: 20 }}>
+      <p style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>
+        Rotation Intelligence
+      </p>
+
+      <div className="flex items-center justify-between" style={{ padding: '10px 0', borderBottom: '1px solid var(--line)' }}>
+        <div>
+          <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>Most worn this week</p>
+          <p style={{ fontSize: 14, color: 'var(--text)', fontFamily: 'var(--font-display)', marginTop: 2 }}>
+            {top.brand} {top.name}
+          </p>
+        </div>
+        <span style={{
+          fontSize: 11, fontWeight: 600, color: 'var(--accent)',
+          background: 'var(--surface-2)', border: '1px solid var(--line)',
+          borderRadius: 999, padding: '3px 10px', flexShrink: 0,
+        }}>
+          {top.count}&times;
+        </span>
+      </div>
+
+      {anosmiaCandidates.length > 0 && (
+        <div style={{ padding: '10px 0', borderBottom: '1px solid var(--line)' }}>
+          <div className="flex items-start gap-2">
+            <span style={{ fontSize: 14, lineHeight: '20px', color: '#d97706', flexShrink: 0 }}>⚠</span>
+            <div>
+              <p style={{ fontSize: 13, color: 'var(--text)' }}>Anosmia risk</p>
+              <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
+                {anosmiaCandidates.map(w => `${w.name} (${w.count}×)`).join(', ')} — worn too frequently this week
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {neverWornCount > 0 && (
+        <div className="flex items-center justify-between" style={{ padding: '10px 0' }}>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>Never worn</p>
+          <span style={{ fontSize: 13, color: 'var(--text)' }}>
+            {neverWornCount} {neverWornCount === 1 ? 'fragrance' : 'fragrances'}
+          </span>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function SettingsSection({ email, onSignOut, signingOut }: { email: string; onSignOut: () => void; signingOut: boolean }) {
   return (
     <div className="flex flex-col gap-1" style={{ borderTop: '1px solid var(--line)', paddingTop: 20 }}>
@@ -267,7 +329,7 @@ export default function YouClient(props: YouClientProps) {
     )
   }
 
-  const { email, saves, fetchError } = props
+  const { email, saves, fetchError, weekWear, ownedCount } = props
 
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh', color: 'var(--text)' }}>
@@ -298,6 +360,9 @@ export default function YouClient(props: YouClientProps) {
             </div>
           )}
         </div>
+
+        {/* Rotation Intelligence */}
+        <RotationIntelligence weekWear={weekWear} ownedCount={ownedCount} />
 
         {/* Scent Profile */}
         <ScentProfile />
