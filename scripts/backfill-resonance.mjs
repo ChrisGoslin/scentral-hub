@@ -20,11 +20,11 @@ const model = genAI.getGenerativeModel({ model: 'gemini-embedding-001' });
 async function backfill() {
   console.log('🚀 Starting Resonance Backfill...');
 
-  // 1. Fetch fragrances missing primary_vector
+  // 1. Fetch fragrances missing embedding
   const { data: fragrances, error: fetchError } = await supabase
     .from('fragrances')
-    .select('id, brand, name, notes')
-    .is('primary_vector', null);
+    .select('id, brand, name, family, top_notes, heart_notes, base_notes')
+    .is('embedding', null);
 
   if (fetchError) {
     console.error('❌ Failed to fetch fragrances:', fetchError.message);
@@ -38,7 +38,14 @@ async function backfill() {
 
   for (const f of fragrances) {
     try {
-      const text = `${f.brand} ${f.name}. Notes: ${f.notes || 'N/A'}`;
+      // Build text from note arrays
+      const notesText = [
+        f.top_notes?.join(', '),
+        f.heart_notes?.join(', '),
+        f.base_notes?.join(', ')
+      ].filter(Boolean).join('; ');
+      
+      const text = `${f.brand} ${f.name}. Family: ${f.family || 'Unknown'}. Notes: ${notesText || 'N/A'}`;
       console.log(`✨ Embedding [${f.brand}] ${f.name}...`);
 
       const result = await model.embedContent(text);
@@ -48,8 +55,9 @@ async function backfill() {
         throw new Error(`Unexpected embedding length: ${embedding.length}`);
       }
 
-      // Update BOTH primary_vector (text legacy) and embedding (vector type if it exists)
+      // Update BOTH embedding (vector type literal) and primary_vector (JSON string for legacy)
       const updateData = {
+        embedding: `[${embedding.join(',')}]`,
         primary_vector: JSON.stringify(embedding)
       };
 
