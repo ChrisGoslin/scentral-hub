@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import Button from '@/components/ui/Button'
 import SensoryAnatomy from '@/components/ui/SensoryAnatomy'
 import SimilarFragrances from './SimilarFragrances'
+import InspiredByClones from './InspiredByClones'
 import { cookies } from 'next/headers'
 
 const PHASE_LABEL: Record<number, string> = {
@@ -24,7 +25,7 @@ export default async function FragranceDetailPage({ params }: { params: Promise<
   const [{ data, error }, { data: collectionRow }] = await Promise.all([
     supabase
       .from('fragrances')
-      .select('id, brand, name, phase, phase_label, family, projection, anosmia_risk, lean, rating, image_url, use_case, spritz_count, application_zone, maturation')
+      .select('id, brand, name, phase, phase_label, family, projection, anosmia_risk, lean, rating, image_url, use_case, spritz_count, application_zone, maturation, inspired_by, is_user_created')
       .eq('id', id)
       .single(),
     supabase
@@ -39,6 +40,17 @@ export default async function FragranceDetailPage({ params }: { params: Promise<
   }
 
   const f = data
+
+  // Look up the reference fragrance this clone is inspired by (server-side, single extra query)
+  let inspiredByRef: { id: string; brand: string; name: string } | null = null
+  if (f.inspired_by) {
+    const { data: refRow } = await supabase
+      .from('fragrances')
+      .select('id, brand, name')
+      .ilike('full_name', f.inspired_by)
+      .maybeSingle()
+    inspiredByRef = refRow ?? null
+  }
   const phaseLabel = PHASE_LABEL[f.phase] ?? f.phase_label
 
   const now = new Date()
@@ -176,6 +188,29 @@ export default async function FragranceDetailPage({ params }: { params: Promise<
 
         {/* Resonance — Find Similar */}
         <SimilarFragrances fragranceId={f.id} />
+
+        {/* Inspired By — reverse lookup to reference fragrance */}
+        {f.inspired_by && (
+          <div>
+            {inspiredByRef ? (
+              <Link
+                href={`/collection/${inspiredByRef.id}`}
+                style={{ fontSize: 13, color: 'var(--accent)', textDecoration: 'underline' }}
+              >
+                Inspired by {f.inspired_by} →
+              </Link>
+            ) : (
+              <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+                Inspired by {f.inspired_by}
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Clones — shown on reference fragrances (no rating, catalogue entry) */}
+        {f.rating === null && f.is_user_created === false && (
+          <InspiredByClones fragranceName={f.name} fragranceBrand={f.brand} />
+        )}
 
         {/* Anosmia — inline pill only */}
         {f.anosmia_risk === 'High' && (
