@@ -1,97 +1,183 @@
-import { NextResponse } from 'next/server';
-import { GoogleGenAI, Type } from '@google/genai';
+import { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
+import { createClient } from '@/utils/supabase/server'
+import { GoogleGenerativeAI } from '@google/generative-ai'
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
-const SYSTEM_INSTRUCTION = `
-You are the Alchemist, the highly sophisticated AI Sommelier of the Scentral Hub.
-Your job is to construct a "Spritz Schedule" (a daily layering protocol) for the user based on their intent, weather, and available wardrobe.
-
-You MUST follow these physical chemistry rules for olfactory mechanics:
-1. Phase 1 (Endothermic Anchors): Heavy bases (Oud, Vanilla, Woods). High viscosity, slow evaporation. Apply FIRST. Best in cold weather. Kinetic application: "Lipid Primer Superimposition" or "Decentralized Zone Mapping".
-2. Phase 2 (Textural Modulators): Mids (Iris, Musk, Spices). Act as bridges. Kinetic application: "Direct Dermal Fusion".
-3. Phase 3 (Exothermic Tops): Low molecular weight (Citrus, Ambroxan, Aquatic). Rapid evaporation. Apply LAST. Thrives in heat. Kinetic application: "Spatial Cloud Dispersion" or "Textile Fixation".
-
-If it is Humid/Hot: Suppress dense ouds/resins. Over-index on sharp citrus to pierce moisture.
-If it is Cold/Dry: Trap volatile tops with lipids, rely heavily on deep amber/woody anchors.
-
-Given the user's intent and weather, select 2 to 3 fragrances from their wardrobe to construct a layered protocol. Give the protocol a creative, highly stylized "Niche" name. 
-Write a short, sophisticated editorial narrative explaining the chemistry behind the choice.
-`;
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
 
 export async function POST(req: Request) {
   try {
-    if (!process.env.GEMINI_API_KEY) {
-      return NextResponse.json({ error: 'GEMINI_API_KEY not configured.' }, { status: 500 });
-    }
+    const { mode, lat, lon, time_of_day = 'evening', occasion } = await req.json()
+    
+    const cookieStore = await cookies()
+    const supabase = await createClient(cookieStore)
 
-    const body = await req.json();
-    const { intent, weather, wardrobe } = body;
+    // Check cache for gap_analysis
+    if (mode === 'gap_analysis') {
+      const { data: cached } = await supabase
+        .from('sommelier_cache')
+        .select('result, created_at')
+        .eq('mode', 'gap_analysis')
+        .single()
 
-    // Reinforcement Learning: Fetch historical high-resonance logs
-    const { createClient } = await import('@/utils/supabase/server');
-    const supabase = await createClient();
-    const { data: pastSuccesses } = await supabase
-      .from('wear_logs')
-      .select('notes, rating, created_at')
-      .eq('rating', 5)
-      .limit(3);
-
-    const memoryBlock = pastSuccesses?.length 
-      ? `\nHistorical Memory (High Resonance): ${pastSuccesses.map(log => `[${log.created_at}] "${log.notes}"`).join(' | ')}`
-      : "";
-
-    const userPrompt = `
-      User Intent/Vibe: "${intent}"
-      Local Weather: ${weather.temp}°C, ${weather.humidity}% Humidity, Condition: ${weather.condition}
-      ${memoryBlock}
-      
-      Available Wardrobe:
-      ${wardrobe.map((f: any) => `- ${f.brand} ${f.name} (Family: ${f.family ?? f.primary_vector}) [Notes: ${f.notes}]`).join('\n')}
-      
-      Construct the protocol.
-    `;
-
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: userPrompt,
-      config: {
-        systemInstruction: SYSTEM_INSTRUCTION,
-        responseMimeType: 'application/json',
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            title: { type: Type.STRING, description: 'A highly creative, prestigious name for this specific layering protocol (e.g., "The Humid Edge", "Midnight Sovereign").' },
-            narrative: { type: Type.STRING, description: 'A 2-3 sentence sophisticated explanation of the olfactory chemistry and why it fits the weather/intent.' },
-            schedule: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  phase: { type: Type.STRING, description: 'e.g., Anchor (Base), Modulator (Heart), Exothermic (Top)' },
-                  time: { type: Type.STRING, description: 'Recommended application time, e.g., 08:00 AM' },
-                  color: { type: Type.STRING, description: 'Tailwind color for the node based on phase (bg-amber-500 for Base, bg-violet-500 for Mid, bg-sky-400 for Top)' },
-                  title: { type: Type.STRING, description: 'The Kinetic Application technique (e.g., "Lipid Primer / Inner Wrists")' },
-                  desc: { type: Type.STRING, description: 'Why and how to apply this specific layer.' },
-                  bottle: { type: Type.STRING, description: 'Fragrance Name' },
-                  brand: { type: Type.STRING, description: 'Brand Name' }
-                },
-                required: ['phase', 'time', 'color', 'title', 'desc', 'bottle', 'brand']
-              }
-            }
-          },
-          required: ['title', 'narrative', 'schedule']
+      if (cached) {
+        const createdAt = new Date(cached.created_at)
+        const now = new Date()
+        const diffHours = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60)
+        if (diffHours < 24) {
+          return NextResponse.json({ success: true, ...cached.result, cached: true })
         }
       }
-    });
+    }
 
-    const resultText = response.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!resultText) throw new Error("No response from AI");
+    if (mode === 'gap_analysis') {
+      const { data: frags } = await supabase
+        .from('fragrances')
+        .select('family, phase, optimal_season, projection, lean, rating')
+        .not('rating', 'is', null)
 
-    const json = JSON.parse(resultText);
-    return NextResponse.json(json);
+      if (!frags || frags.length === 0) {
+        return NextResponse.json({ error: 'No rated fragrances found' }, { status: 404 })
+      }
+
+      const total = frags.length
+      const highRated = frags.filter(f => (f.rating || 0) >= 8)
+
+      // 1. Missing families
+      const targetFamilies = ['Fresh Aquatic', 'Leather Oriental', 'Woody Vetiver', 'Oud Rose', 'Green Floral']
+      const missingFamilies = targetFamilies.filter(tf => frags.filter(f => f.family.includes(tf)).length < 2)
+
+      // 2. Phase imbalance
+      const p1Count = frags.filter(f => f.phase === 1).length
+      const p3Count = frags.filter(f => f.phase === 3).length
+      const p1Pct = p1Count / total
+      const p3Pct = p3Count / total
+      
+      const imbalances = []
+      if (p1Pct > 0.6) imbalances.push('anchor-heavy')
+      if (p3Pct < 0.15) imbalances.push('top-note deficient')
+
+      // 3. Season gap
+      const seasons = ['High Heat', 'Winter/Fall', 'Spring/Summer', 'All-Year']
+      const seasonGaps = seasons.filter(s => highRated.filter(f => f.optimal_season === s).length < 3)
+
+      // 4. Projection gap
+      const hasMedium = frags.some(f => f.projection === 'Medium')
+      const projGaps = !hasMedium ? ['office-hostile'] : []
+
+      const gapContext = {
+        total_fragrances: total,
+        missing_families: missingFamilies,
+        imbalances,
+        season_gaps: seasonGaps,
+        projection_gaps: projGaps
+      }
+
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
+      const prompt = `You are the Scentral Collection Sommelier. Analyze this fragrance wardrobe's data and provide strategic intelligence.
+      
+      COLLECTION DATA:
+      ${JSON.stringify(gapContext, null, 2)}
+
+      Return a JSON response only:
+      {
+        "headline": "Your wardrobe in one sentence",
+        "strengths": ["strength 1", "strength 2", "strength 3"],
+        "gaps": [{ "gap": "description", "severity": "critical|moderate|minor", "recommendation": "specific fragrance suggestion" }],
+        "personality_archetype": "The Architect | The Hedonist | The Minimalist | The Collector | The Experimenter",
+        "archetype_description": "2 sentences"
+      }`
+
+      const result = await model.generateContent(prompt)
+      const text = result.response.text()
+      const jsonStr = text.replace(/```json/g, '').replace(/```/g, '').trim()
+      const geminiResult = JSON.parse(jsonStr)
+
+      // Cache the result
+      await supabase.from('sommelier_cache').upsert({
+        mode: 'gap_analysis',
+        result: geminiResult,
+        created_at: new Date().toISOString()
+      }, { onConflict: 'mode' })
+
+      return NextResponse.json({ success: true, ...geminiResult })
+    }
+
+    if (mode === 'daily_pick') {
+      if (!lat || !lon) return NextResponse.json({ error: 'Location required' }, { status: 400 })
+
+      // Fetch weather
+      const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m&timezone=auto`)
+      const weather = await weatherRes.json()
+
+      const { data: frags } = await supabase
+        .from('fragrances')
+        .select('id, brand, name, family, phase, optimal_season, projection, rating')
+        .not('rating', 'is', null)
+        .order('rating', { ascending: false })
+        .limit(20)
+
+      if (!frags) return NextResponse.json({ error: 'Fragrances not found' }, { status: 404 })
+
+      // Simple scoring for daily pick
+      const temp = weather.current.temperature_2m
+      const humidity = weather.current.relative_humidity_2m
+      
+      const scored = frags.map(f => {
+        let score = (f.rating || 5) * 5
+        
+        // Weather fit
+        if (temp > 25 && f.optimal_season === 'High Heat') score += 20
+        if (temp < 10 && f.optimal_season === 'Winter/Fall') score += 20
+        if (f.optimal_season === 'All-Year') score += 10
+        
+        // Time of day fit
+        if (time_of_day === 'evening' && f.phase === 1) score += 15
+        if (time_of_day === 'morning' && f.phase === 3) score += 15
+
+        return { ...f, daily_score: score }
+      })
+
+      const top3 = scored.sort((a, b) => b.daily_score - a.daily_score).slice(0, 3)
+
+      return NextResponse.json({ 
+        success: true, 
+        weather: { temp, humidity },
+        recommendations: top3.map(r => ({
+          ...r,
+          reasoning: `Matches ${temp}°C conditions and your ${time_of_day} preference.`
+        }))
+      })
+    }
+
+    if (mode === 'occasion_audit') {
+      const { data: frags } = await supabase
+        .from('fragrances')
+        .select('id, brand, name, use_case, rating')
+        .not('rating', 'is', null)
+
+      const occasions = ['Work', 'Date', 'Gym', 'Formal', 'Casual', 'Evening']
+      const coverage: any = {}
+
+      occasions.forEach(occ => {
+        const matches = (frags || [])
+          .filter(f => f.use_case?.toLowerCase().includes(occ.toLowerCase()))
+          .sort((a, b) => (b.rating || 0) - (a.rating || 0))
+        
+        coverage[occ] = {
+          count: matches.length,
+          top: matches.slice(0, 2),
+          gap: matches.length < 2
+        }
+      })
+
+      return NextResponse.json({ success: true, coverage })
+    }
+
+    return NextResponse.json({ error: 'Invalid mode' }, { status: 400 })
+
   } catch (error: any) {
-    console.error('Sommelier API Error:', error);
-    return NextResponse.json({ error: error.message || 'Failed to synthesize protocol' }, { status: 500 });
+    console.error('Sommelier API Error:', error)
+    return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 })
   }
 }

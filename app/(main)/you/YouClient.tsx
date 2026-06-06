@@ -10,6 +10,7 @@ import EmptyState from '@/components/ui/EmptyState'
 import ErrorInline from '@/components/ui/ErrorInline'
 import LoadingShimmer from '@/components/ui/LoadingShimmer'
 import AuthSheet from '@/components/auth/AuthSheet'
+import WardrobeIntelligence from './WardrobeIntelligence'
 
 export type SavedCombination = {
   id: string
@@ -363,6 +364,9 @@ export default function YouClient(props: YouClientProps) {
 
         {/* Rotation Intelligence */}
         <RotationIntelligence weekWear={weekWear} ownedCount={ownedCount} />
+
+        {/* Wardrobe Intelligence */}
+        <WardrobeIntelligence />
 
         {/* Scent Profile */}
         <ScentProfile />

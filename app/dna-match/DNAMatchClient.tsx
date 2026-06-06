@@ -3,6 +3,9 @@
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import AudioChord from '../components/AudioChord';
+import dynamic from 'next/dynamic';
+
+const ChemistPanel = dynamic(() => import('@/components/ChemistPanel'), { ssr: false });
 
 interface Fragrance {
   id: string;
@@ -174,6 +177,15 @@ export default function ResonanceClient({ fragrances }: { fragrances: Fragrance[
           </div>
 
           {result.cached && <div className="text-[10px] font-mono tracking-widest uppercase" style={{ color: 'var(--text-muted)' }}>🔄 Retrieved from Archives</div>}
+
+          {fragA && fragB && (
+            <ChemistPanel 
+              fragranceAId={fragA.id} 
+              fragranceBId={fragB.id} 
+              fragranceAName={fragA.name} 
+              fragranceBName={fragB.name} 
+            />
+          )}
         </div>
       )}
 

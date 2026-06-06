@@ -9,6 +9,9 @@ import Sheet from '@/components/ui/Sheet'
 import LoadingShimmer from '@/components/ui/LoadingShimmer'
 import ErrorInline from '@/components/ui/ErrorInline'
 import AuraShareCard, { type AuraShareData } from '@/app/components/AuraShareCard'
+import dynamic from 'next/dynamic'
+
+const ChemistPanel = dynamic(() => import('@/components/ChemistPanel'), { ssr: false })
 
 export type LayeringFragrance = {
   id: string
@@ -425,6 +428,16 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
                   {slot2?.application_zone && `Top: ${slot2.application_zone}`}
                 </p>
               </div>
+            )}
+
+            {manualSynthesized && slot1 && slot2 && (
+              <ChemistPanel 
+                fragranceAId={slot1.id} 
+                fragranceBId={slot2.id} 
+                fragranceAName={slot1.name} 
+                fragranceBName={slot2.name} 
+                useCase={useCase || undefined}
+              />
             )}
 
             <button
