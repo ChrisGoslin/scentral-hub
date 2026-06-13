@@ -8,12 +8,20 @@
   --text: #1c1917; /* Stone-900 */
   --text-muted: #78716c; /* Stone-500 */
 
-  /* Accent */
+  /* Accent — champagne gold */
   --accent: #c49a3c; /* Fragrance Gold */
   --accent-press: #a07d30;
 
+  /* Secondary accent — deep burgundy (editorial depth) */
+  --burgundy: #6e1f2e;
+  --burgundy-press: #561622;
+
+  /* Deep editorial surface (for rich, dark-on-light moments) */
+  --surface-deep: #2a1418;
+
   /* Semantic */
   --line: #e7e5e4; /* Stone-200 */
+  --line-light: #f0eeec; /* Stone-200 @ ~40% — hairline dividers */
   --positive: #15803d;
   --warning: #d97706;
   --danger: #b91c1c;

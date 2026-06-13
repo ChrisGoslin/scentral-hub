@@ -90,11 +90,11 @@ export default function ResonanceClient({ fragrances }: { fragrances: Fragrance[
 
   const categoryColor = result
     ? result.category.includes('Twin')
-      ? '#16a34a'
+      ? 'var(--positive)'
       : result.category.includes('Strategic')
         ? 'var(--accent)'
         : result.category.includes('Homage')
-          ? '#2563eb'
+          ? 'var(--burgundy)'
           : 'var(--text-muted)'
     : 'var(--accent)';
 
@@ -135,13 +135,14 @@ export default function ResonanceClient({ fragrances }: { fragrances: Fragrance[
           <button
             onClick={handleFindMatch}
             disabled={!fragA || !fragB || loading}
-            className={`w-full max-w-sm py-4 rounded-full font-bold text-lg transition-all shadow-md ${
+            className="w-full max-w-sm py-4 rounded-full font-bold text-lg transition-all shadow-md active:scale-95 disabled:cursor-not-allowed disabled:active:scale-100"
+            style={
               !fragA || !fragB || loading
-                ? 'bg-stone-100 text-stone-400 cursor-not-allowed'
-                : 'bg-[#c49a3c] text-white hover:bg-[#a07d30] active:scale-95'
-            }`}
+                ? { background: 'var(--surface-2)', color: 'var(--text-muted)' }
+                : { background: 'var(--accent)', color: 'var(--bg)' }
+            }
           >
-            {loading ? 'Synthesizing Resonance...' : 'Find Resonance'}
+            {loading ? 'Synthesizing Resonance…' : 'Find Resonance'}
           </button>
         </div>
 
@@ -241,7 +242,7 @@ function FragrancePicker({
 
   return (
     <div ref={ref} className="relative space-y-3">
-      <label className="block text-xs font-bold uppercase tracking-widest text-stone-400">{label}</label>
+      <label className="block text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>{label}</label>
 
       {!selected ? (
         <input
@@ -295,7 +296,7 @@ function ScoreRing({ score }: { score: number }) {
   return (
     <div className="relative w-40 h-40 mx-auto flex items-center justify-center">
       <svg width="160" height="160" viewBox="0 0 120 120" className="transform -rotate-90">
-        <circle cx="60" cy="60" r="45" fill="none" stroke="#e7e5e4" strokeWidth="2" />
+        <circle cx="60" cy="60" r="45" fill="none" stroke="var(--surface-2)" strokeWidth="2" />
         <circle
           cx="60"
           cy="60"
@@ -310,8 +311,8 @@ function ScoreRing({ score }: { score: number }) {
         />
         <defs>
           <linearGradient id="resonance-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#c49a3c" />
-            <stop offset="100%" stopColor="#a07d30" />
+            <stop offset="0%" stopColor="var(--accent)" />
+            <stop offset="100%" stopColor="var(--burgundy)" />
           </linearGradient>
         </defs>
       </svg>

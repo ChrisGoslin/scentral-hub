@@ -118,22 +118,24 @@ function FragranceCard({ f }: { f: CollectionFragrance }) {
             <p style={{ fontSize: 10, color: 'var(--positive)', marginTop: 3, lineHeight: '13px' }}>Macerated ✓</p>
           )}
         </div>
+        {f.anosmia_risk === 'High' && (
+          <div className="flex items-center gap-1 mt-1.5">
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--warning)' }} />
+            <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Sensory Caution</p>
+          </div>
+        )}
       </Link>
-      
-      <div className="mt-1 pt-2" style={{ borderTop: '1px solid var(--line-light)' }}>
-        <Link href={`/dna-match?a=${f.id}`} className="inline-block">
-          <p style={{ fontSize: 10, color: 'var(--accent)', textDecoration: 'underline' }}>
-            See similar profiles
-          </p>
-        </Link>
-      </div>
 
-      {f.anosmia_risk === 'High' && (
-        <div className="flex items-center gap-1 mt-1">
-          <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--warning)' }} />
-          <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Sensory Caution</p>
-        </div>
-      )}
+      {/* Secondary action — seeds the DNA Match flow with this essence preselected */}
+      <Link
+        href={`/dna-match?a=${f.id}`}
+        className="flex items-center justify-center mt-1 min-h-[36px] rounded-full transition-all hover:opacity-80 active:scale-95"
+        style={{ border: '1px solid var(--line)', background: 'var(--surface-2)' }}
+      >
+        <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--burgundy)' }}>
+          Match this →
+        </span>
+      </Link>
     </Card>
   )
 }
@@ -256,7 +258,7 @@ export default function CollectionClient({ fragrances }: { fragrances: Collectio
             caption="Try adjusting your filters or search term."
           />
         ) : (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
             {filtered.map(f => (
               <FragranceCard key={f.id} f={f} />
             ))}
