@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
 import DNAMatchClient from './DNAMatchClient';
@@ -23,9 +24,10 @@ async function loadFragrances() {
 export default async function ResonancePage() {
   const fragrances = await loadFragrances();
 
+  // Suspense boundary required: DNAMatchClient reads useSearchParams (?a=<id>)
   return (
-    <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
+    <Suspense fallback={<div style={{ minHeight: '100vh', background: 'var(--bg)' }} />}>
       <DNAMatchClient fragrances={fragrances} />
-    </div>
+    </Suspense>
   );
 }

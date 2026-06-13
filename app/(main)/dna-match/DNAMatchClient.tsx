@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
-import AudioChord from '../components/AudioChord';
+import { useState, useMemo, useRef, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import AudioChord from '@/app/components/AudioChord';
 import dynamic from 'next/dynamic';
 
 const ChemistPanel = dynamic(() => import('@/components/ChemistPanel'), { ssr: false });
@@ -25,13 +25,21 @@ interface DNAMatchResult {
 
 export default function ResonanceClient({ fragrances }: { fragrances: Fragrance[] }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [fragA, setFragA] = useState<Fragrance | null>(null);
   const [fragB, setFragB] = useState<Fragrance | null>(null);
   const [result, setResult] = useState<DNAMatchResult | null>(null);
   const [loading, setLoading] = useState(false);
-  const [expanded, setExpanded] = useState(false);
   const [searchA, setSearchA] = useState('');
   const [searchB, setSearchB] = useState('');
+
+  // Deep-link: pre-seed Essence Alpha from ?a=<id> (Collection "See similar" handoff)
+  useEffect(() => {
+    const aId = searchParams.get('a');
+    if (!aId) return;
+    const match = fragrances.find((f) => f.id === aId);
+    if (match) setFragA(match);
+  }, [searchParams, fragrances]);
 
   const filteredA = useMemo(
     () =>
@@ -70,7 +78,6 @@ export default function ResonanceClient({ fragrances }: { fragrances: Fragrance[
       const data = await res.json();
       if (data.success) {
         setResult(data);
-        setExpanded(false);
       } else {
         console.error('Resonance synthesis failed:', data.error);
       }
@@ -92,104 +99,112 @@ export default function ResonanceClient({ fragrances }: { fragrances: Fragrance[
     : 'var(--accent)';
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-16 space-y-12">
-      <header className="space-y-2">
-        <h1 className="text-5xl font-serif italic tracking-tight" style={{ color: 'var(--text)' }}>Olfactory Resonance</h1>
-        <p className="text-lg" style={{ color: 'var(--text-muted)' }}>Synthesize the chemical harmony between two essences.</p>
+    <div style={{ background: 'var(--bg)', minHeight: '100vh' }}>
+      {/* Flush header — matches Wardrobe / You */}
+      <header className="px-4 pt-8 pb-4 md:px-6" style={{ borderBottom: '1px solid var(--line)' }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--text)', lineHeight: '34px' }}>
+          Olfactory Resonance
+        </h1>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
+          Synthesize the chemical harmony between two essences.
+        </p>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-        <FragrancePicker
-          label="Essence Alpha"
-          selected={fragA}
-          search={searchA}
-          onSearchChange={setSearchA}
-          filtered={filteredA}
-          onSelect={setFragA}
-        />
+      <div className="px-4 py-5 space-y-8 md:max-w-4xl md:mx-auto md:px-6 md:py-10 md:space-y-12">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-12 md:items-center">
+          <FragrancePicker
+            label="Essence Alpha"
+            selected={fragA}
+            search={searchA}
+            onSearchChange={setSearchA}
+            filtered={filteredA}
+            onSelect={setFragA}
+          />
 
-        <FragrancePicker
-          label="Essence Beta"
-          selected={fragB}
-          search={searchB}
-          onSearchChange={setSearchB}
-          filtered={filteredB}
-          onSelect={setFragB}
-        />
-      </div>
-
-      <div className="flex justify-center">
-        <button
-          onClick={handleFindMatch}
-          disabled={!fragA || !fragB || loading}
-          className={`w-full max-w-sm py-4 rounded-full font-bold text-lg transition-all shadow-md ${
-            !fragA || !fragB || loading
-              ? 'bg-stone-100 text-stone-400 cursor-not-allowed'
-              : 'bg-[#c49a3c] text-white hover:bg-[#a07d30] active:scale-95'
-          }`}
-        >
-          {loading ? 'Synthesizing Resonance...' : 'Find Resonance'}
-        </button>
-      </div>
-
-      {loading && (
-        <div className="space-y-4 animate-pulse">
-          <div className="h-40 rounded-3xl" style={{ background: 'var(--surface)' }} />
-          <div className="h-6 w-1/3 mx-auto rounded" style={{ background: 'var(--surface)' }} />
+          <FragrancePicker
+            label="Essence Beta"
+            selected={fragB}
+            search={searchB}
+            onSearchChange={setSearchB}
+            filtered={filteredB}
+            onSelect={setFragB}
+          />
         </div>
-      )}
 
-      {result && !loading && (
-        <div className="fade-up border rounded-3xl p-10 shadow-sm text-center space-y-8" style={{ background: 'var(--surface)', borderColor: 'var(--line)' }}>
-          <ScoreRing score={result.score} />
-
+        <div className="flex justify-center">
           <button
-            onClick={() => router.push(`/layering?anchor=${fragA!.id}&top=${fragB!.id}`)}
-            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full font-semibold text-sm transition-all hover:opacity-80 active:scale-95"
-            style={{ background: 'var(--accent)', color: 'var(--bg)' }}
+            onClick={handleFindMatch}
+            disabled={!fragA || !fragB || loading}
+            className={`w-full max-w-sm py-4 rounded-full font-bold text-lg transition-all shadow-md ${
+              !fragA || !fragB || loading
+                ? 'bg-stone-100 text-stone-400 cursor-not-allowed'
+                : 'bg-[#c49a3c] text-white hover:bg-[#a07d30] active:scale-95'
+            }`}
           >
-            Send to Atelier →
+            {loading ? 'Synthesizing Resonance...' : 'Find Resonance'}
           </button>
-
-          <div className="space-y-4">
-            <div
-              className="inline-block px-6 py-2 rounded-full border-2 font-bold text-sm uppercase tracking-widest"
-              style={{ borderColor: categoryColor, color: categoryColor }}
-            >
-              {result.category}
-            </div>
-
-            <div className="max-w-xl mx-auto">
-              <button
-                onClick={() => setExpanded(!expanded)}
-                className="transition text-sm font-medium"
-                style={{ color: 'var(--accent)' }}
-              >
-                {expanded ? 'Hide Editorial Note ▲' : 'Read Editorial Note ▼'}
-              </button>
-
-              {expanded && (
-                <div className="mt-6 p-6 rounded-2xl italic leading-relaxed border" style={{ background: 'var(--bg)', color: 'var(--text-muted)', borderColor: 'var(--line)' }}>
-                  {result.narrative}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {result.cached && <div className="text-[10px] font-mono tracking-widest uppercase" style={{ color: 'var(--text-muted)' }}>🔄 Retrieved from Archives</div>}
-
-          {fragA && fragB && (
-            <ChemistPanel 
-              fragranceAId={fragA.id} 
-              fragranceBId={fragB.id} 
-              fragranceAName={fragA.name} 
-              fragranceBName={fragB.name} 
-            />
-          )}
         </div>
-      )}
 
-      <aside className="fixed bottom-8 right-8 z-50">
+        {loading && (
+          <div className="space-y-4 animate-pulse">
+            <div className="h-40 rounded-3xl" style={{ background: 'var(--surface)' }} />
+            <div className="h-6 w-1/3 mx-auto rounded" style={{ background: 'var(--surface)' }} />
+          </div>
+        )}
+
+        {result && !loading && fragA && fragB && (
+          <div className="fade-up border rounded-3xl p-8 md:p-10 shadow-sm text-center space-y-8" style={{ background: 'var(--surface)', borderColor: 'var(--line)' }}>
+            {/* Two-fragrance context header — never lose what was compared */}
+            <div className="flex items-center justify-center gap-4">
+              <div className="text-right min-w-0">
+                <p className="text-[10px] uppercase font-bold tracking-widest truncate" style={{ color: 'var(--text-muted)' }}>{fragA.brand}</p>
+                <p className="text-sm font-semibold truncate" style={{ color: 'var(--text)' }}>{fragA.name}</p>
+              </div>
+              <span className="text-lg flex-shrink-0" style={{ color: 'var(--accent)' }}>×</span>
+              <div className="text-left min-w-0">
+                <p className="text-[10px] uppercase font-bold tracking-widest truncate" style={{ color: 'var(--text-muted)' }}>{fragB.brand}</p>
+                <p className="text-sm font-semibold truncate" style={{ color: 'var(--text)' }}>{fragB.name}</p>
+              </div>
+            </div>
+
+            <ScoreRing score={result.score} />
+
+            <button
+              onClick={() => router.push(`/layering?anchor=${fragA.id}&top=${fragB.id}`)}
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full font-semibold text-sm transition-all hover:opacity-80 active:scale-95"
+              style={{ background: 'var(--accent)', color: 'var(--bg)' }}
+            >
+              Send to Atelier →
+            </button>
+
+            <div className="space-y-4">
+              <div
+                className="inline-block px-6 py-2 rounded-full border-2 font-bold text-sm uppercase tracking-widest"
+                style={{ borderColor: categoryColor, color: categoryColor }}
+              >
+                {result.category}
+              </div>
+
+              {/* Editorial note — shown by default, no toggle */}
+              <div className="max-w-xl mx-auto mt-2 p-6 rounded-2xl italic leading-relaxed border text-left" style={{ background: 'var(--bg)', color: 'var(--text-muted)', borderColor: 'var(--line)' }}>
+                {result.narrative}
+              </div>
+            </div>
+
+            {result.cached && <div className="text-[10px] font-mono tracking-widest uppercase" style={{ color: 'var(--text-muted)' }}>🔄 Retrieved from Archives</div>}
+
+            <ChemistPanel
+              fragranceAId={fragA.id}
+              fragranceBId={fragB.id}
+              fragranceAName={fragA.name}
+              fragranceBName={fragB.name}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Float above the bottom nav (≈56px) + safe-area inset */}
+      <aside className="fixed right-4 z-50" style={{ bottom: 'calc(56px + env(safe-area-inset-bottom, 0px) + 16px)' }}>
         <AudioChord />
       </aside>
     </div>
@@ -212,11 +227,22 @@ function FragrancePicker({
   onSelect: (f: Fragrance | null) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside tap
+  useEffect(() => {
+    if (!open) return;
+    function handle(e: PointerEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener('pointerdown', handle);
+    return () => document.removeEventListener('pointerdown', handle);
+  }, [open]);
 
   return (
-    <div className="relative space-y-3">
+    <div ref={ref} className="relative space-y-3">
       <label className="block text-xs font-bold uppercase tracking-widest text-stone-400">{label}</label>
-      
+
       {!selected ? (
         <input
           type="text"

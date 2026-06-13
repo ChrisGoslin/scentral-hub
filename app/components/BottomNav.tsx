@@ -2,13 +2,14 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Archive, FlaskConical, Calendar, User } from 'lucide-react'
+import { Archive, FlaskConical, Dna, Calendar, User } from 'lucide-react'
 
 const NAV_ITEMS = [
-  { label: 'The Wardrobe', href: '/collection', Icon: Archive },
-  { label: 'The Atelier', href: '/layering',   Icon: FlaskConical },
-  { label: 'The Ritual',   href: '/schedule',   Icon: Calendar },
-  { label: 'The You',      href: '/you',        Icon: User },
+  { label: 'Wardrobe',  href: '/collection', Icon: Archive },
+  { label: 'Lab',       href: '/layering',   Icon: FlaskConical },
+  { label: 'Resonance', href: '/dna-match',  Icon: Dna },
+  { label: 'Ritual',    href: '/schedule',   Icon: Calendar },
+  { label: 'You',       href: '/you',        Icon: User },
 ]
 
 export default function BottomNav() {
@@ -25,7 +26,7 @@ export default function BottomNav() {
     >
       <div
         className="mx-auto grid h-14 max-w-md items-center"
-        style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}
+        style={{ gridTemplateColumns: 'repeat(5, 1fr)' }}
       >
         {NAV_ITEMS.map(({ label, href, Icon }) => {
           const isActive = pathname === href || pathname.startsWith(`${href}/`)
@@ -41,11 +42,14 @@ export default function BottomNav() {
                 strokeWidth={1.75}
                 fill={isActive ? 'var(--accent)' : 'none'}
                 color={isActive ? 'var(--accent)' : 'var(--text-muted)'}
-                style={{ transition: `color var(--motion-fast), fill var(--motion-fast)` }}
+                style={{
+                  transform: isActive ? 'scale(1.12)' : 'scale(1)',
+                  transition: `color var(--motion-fast), fill var(--motion-fast), transform var(--motion-fast)`,
+                }}
               />
               <span
                 style={{
-                  fontSize: 8,
+                  fontSize: 10,
                   textTransform: 'uppercase',
                   letterSpacing: '0.08em',
                   fontWeight: 700,

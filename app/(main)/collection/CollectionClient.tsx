@@ -121,7 +121,7 @@ function FragranceCard({ f }: { f: CollectionFragrance }) {
       </Link>
       
       <div className="mt-1 pt-2" style={{ borderTop: '1px solid var(--line-light)' }}>
-        <Link href={`/dna-match?search=${encodeURIComponent(f.family)}`} className="inline-block">
+        <Link href={`/dna-match?a=${f.id}`} className="inline-block">
           <p style={{ fontSize: 10, color: 'var(--accent)', textDecoration: 'underline' }}>
             See similar profiles
           </p>
