@@ -322,10 +322,10 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
             lineHeight: '34px',
           }}
         >
-          AURA Layering Lab
+          Layer Builder
         </h1>
         <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
-          AI-guided fragrance layering
+          Find two scents that work together
         </p>
       </div>
 
@@ -343,7 +343,7 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
                   lineHeight: '28px',
                 }}
               >
-                Your Layering Formula
+                Your Combination
               </h2>
               <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
                 Anchor and top note loaded from Olfactory Resonance.

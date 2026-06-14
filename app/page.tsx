@@ -1,13 +1,12 @@
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
-import AudioChord from './components/AudioChord'
 
 const QUICK_LINKS = [
-  { label: 'The Wardrobe', sub: 'Browse & explore your collection', href: '/collection' },
-  { label: 'The Atelier', sub: 'Formulate layering combinations', href: '/layering' },
-  { label: 'The Ritual', sub: 'Plan your daily scent sequence', href: '/schedule' },
-  { label: 'Intelligence', sub: 'AURA insights across your collection', href: '/intelligence' },
+  { label: 'My Bottles', sub: 'Browse and track your collection', href: '/collection' },
+  { label: 'Layer Builder', sub: 'Combine two scents that work together', href: '/layering' },
+  { label: 'Find a Scent', sub: 'Explore 280+ fragrances by feel', href: '/collection?browse=true' },
+  { label: 'Compare Scents', sub: 'See how similar two fragrances really are', href: '/dna-match' },
 ]
 
 export const dynamic = 'force-dynamic'
@@ -22,9 +21,9 @@ export default async function Home() {
   ])
 
   const STATS = [
-    { value: String(ownedCount ?? 106), label: 'In your wardrobe' },
-    { value: String(totalCount ?? 282), label: 'Total catalogue' },
-    { value: '3072', label: 'Resonance dims' },
+    { value: String(ownedCount ?? 106), label: 'In your collection' },
+    { value: String(totalCount ?? 282), label: 'Scents to explore' },
+    { value: '18+', label: 'Fragrance houses' },
   ]
 
   return (
@@ -40,11 +39,11 @@ export default async function Home() {
 
           <div className="space-y-6">
             <h1 className="text-5xl md:text-7xl font-serif italic leading-tight tracking-tight">
-              Where notes<br />
-              <span className="text-[var(--text-muted)]">compose memory</span>
+              You already<br />
+              <span className="text-[var(--text-muted)]">know what you like.</span>
             </h1>
             <p className="text-[var(--text-muted)] max-w-xl text-lg font-light leading-relaxed">
-              A sensory-first tool for discovering fragrance pairings, building daily rituals, and understanding your collection.
+              Scentral helps you find more of it — discover inspired-by alternatives, build combinations that last all day, and track the bottles you love.
             </p>
           </div>
 
@@ -53,13 +52,13 @@ export default async function Home() {
               href="/collection"
               className="bg-[var(--accent)] text-white px-10 py-4 rounded-[var(--r-btn)] shadow-sm transition-all hover:bg-[var(--accent-press)] active:scale-95 font-bold uppercase tracking-widest text-[10px]"
             >
-              Enter The Wardrobe
+              My Bottles
             </Link>
             <Link
               href="/layering"
               className="text-[var(--text)] border-b border-[var(--text)] pb-1 hover:text-[var(--accent)] hover:border-[var(--accent)] transition-all uppercase tracking-[0.2em] text-[10px] font-bold"
             >
-              Open The Atelier
+              Try Layering
             </Link>
           </div>
 
@@ -78,12 +77,12 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* Right — live collection stat card */}
+        {/* Right — catalogue card */}
         <aside className="flex flex-col gap-6">
           <div className="bg-[var(--surface)] border border-[var(--line)] p-8 space-y-8">
             <div>
-              <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--text-muted)] font-bold mb-1">The Collection</p>
-              <p className="text-[13px] text-[var(--text-muted)] font-light">Live data. Personal intelligence.</p>
+              <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--text-muted)] font-bold mb-1">What's inside</p>
+              <p className="text-[13px] text-[var(--text-muted)] font-light">Fragrances you know. Alternatives you don't — yet.</p>
             </div>
 
             <div className="grid grid-cols-3 gap-4">
@@ -97,9 +96,9 @@ export default async function Home() {
 
             <div className="pt-4 border-t border-[var(--line)] space-y-3">
               {[
-                { label: 'Phase 1 — Anchor', hint: 'Oud · Amber · Musk · Leather' },
-                { label: 'Phase 2 — Modulator', hint: 'Florals · Spice · Resin' },
-                { label: 'Phase 3 — Top', hint: 'Citrus · Aquatic · Fruit' },
+                { label: 'Warm & rich', hint: 'Oud · Amber · Musk · Leather' },
+                { label: 'Fresh & elegant', hint: 'Florals · Spice · Citrus' },
+                { label: 'Bold & lasting', hint: 'Resin · Wood · Aquatic' },
               ].map(({ label, hint }) => (
                 <div key={label} className="flex justify-between items-center">
                   <span className="text-[11px] font-bold text-[var(--text)]">{label}</span>
@@ -109,8 +108,12 @@ export default async function Home() {
             </div>
           </div>
 
-          <div className="flex justify-end">
-            <AudioChord />
+          {/* Gavan hook — the Christopher moment */}
+          <div className="bg-[var(--surface)] border border-[var(--accent)] px-6 py-5 space-y-2">
+            <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--accent)] font-bold">Ever smelled something and needed it?</p>
+            <p className="text-[13px] text-[var(--text-muted)] font-light leading-relaxed">
+              Middle Eastern houses like Lattafa and Afnan make scents that smell identical to luxury designers — at a fraction of the price. Scentral helps you find them.
+            </p>
           </div>
         </aside>
 

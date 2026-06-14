@@ -2,14 +2,14 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Archive, FlaskConical, Dna, Calendar, User } from 'lucide-react'
+import { Archive, FlaskConical, Compass, User } from 'lucide-react'
 
+// Free tier — always visible in the main nav
 const NAV_ITEMS = [
-  { label: 'Wardrobe',  href: '/collection', Icon: Archive },
-  { label: 'Lab',       href: '/layering',   Icon: FlaskConical },
-  { label: 'Resonance', href: '/dna-match',  Icon: Dna },
-  { label: 'Ritual',    href: '/schedule',   Icon: Calendar },
-  { label: 'You',       href: '/you',        Icon: User },
+  { label: 'Discover',  href: '/collection', Icon: Compass },
+  { label: 'My Bottles', href: '/collection', Icon: Archive },
+  { label: 'Layering',  href: '/layering',   Icon: FlaskConical },
+  { label: 'You',       href: '/you',         Icon: User },
 ]
 
 export default function BottomNav() {
@@ -26,13 +26,13 @@ export default function BottomNav() {
     >
       <div
         className="mx-auto grid h-14 max-w-md items-center"
-        style={{ gridTemplateColumns: 'repeat(5, 1fr)' }}
+        style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}
       >
         {NAV_ITEMS.map(({ label, href, Icon }) => {
           const isActive = pathname === href || pathname.startsWith(`${href}/`)
           return (
             <Link
-              key={href}
+              key={label}
               href={href}
               className="flex flex-col items-center justify-center gap-0.5 py-1 min-h-[44px]"
               aria-current={isActive ? 'page' : undefined}

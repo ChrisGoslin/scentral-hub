@@ -170,10 +170,10 @@ export default function CollectionClient({ fragrances }: { fragrances: Collectio
         <div className="flex items-center justify-between">
           <div>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--text)', lineHeight: '34px' }}>
-              The Wardrobe
+              My Bottles
             </h1>
             <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
-              {filtered.length} of {fragrances.length} essences
+              {filtered.length} of {fragrances.length} scents
             </p>
           </div>
           {/* Owned toggle */}

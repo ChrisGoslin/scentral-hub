@@ -1,3 +1,8 @@
+---
+name: repo-tidy
+description: "7-phase repo cleanup runbook: branch audit, secrets scan, dead code scrub, regression check, out-of-scope purge, git log sanity, Vercel pre-deploy checklist. Run after a multi-session CLI sprint or before any merge to main."
+---
+
 # Skill: repo-tidy
 
 ## Purpose
