@@ -10,13 +10,21 @@ export type DiscoverFragrance = {
   id: string
   brand: string
   name: string
+  full_name: string
   family: string
   projection: string
   optimal_season: string | null
   plain_description: string | null
   inspired_by: string | null
   image_url: string | null
+  rating: number | null
+  created_at: string
 }
+
+// ── Sort types ───────────────────────────────────────────────────────────────
+
+type SortOption = 'A–Z' | 'Top Rated' | 'Newest' | 'Most Popular'
+const SORT_OPTIONS: SortOption[] = ['A–Z', 'Top Rated', 'Newest', 'Most Popular']
 
 // ── Filter maps ──────────────────────────────────────────────────────────────
 
@@ -91,6 +99,7 @@ export default function DiscoverClient({ fragrances, error }: Props) {
   const [feel, setFeel]           = useState<string | null>(null)
   const [longevity, setLongevity] = useState<string | null>(null)
   const [brand, setBrand]         = useState<string | null>(null)
+  const [sort, setSort]           = useState<SortOption>('A–Z')
   const [vibeActive, setVibeActive] = useState(false)
 
   const [searchTerm, setSearchTerm]       = useState('')
@@ -98,14 +107,24 @@ export default function DiscoverClient({ fragrances, error }: Props) {
   const [searchFocused, setSearchFocused] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // On mount: read scentral_vibe from localStorage and pre-select feel
+  // On mount: read scentral_vibe and sort from localStorage
   useEffect(() => {
     const vibe = localStorage.getItem('scentral_vibe')
     if (vibe && VIBE_TO_FEEL[vibe]) {
       setFeel(VIBE_TO_FEEL[vibe])
       setVibeActive(true)
     }
+
+    const savedSort = localStorage.getItem('scentral_discover_sort') as SortOption
+    if (savedSort && SORT_OPTIONS.includes(savedSort)) {
+      setSort(savedSort)
+    }
   }, [])
+
+  // Persist sort selection
+  useEffect(() => {
+    localStorage.setItem('scentral_discover_sort', sort)
+  }, [sort])
 
   // Debounce search input 200ms
   useEffect(() => {
@@ -114,8 +133,19 @@ export default function DiscoverClient({ fragrances, error }: Props) {
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
   }, [searchTerm])
 
+  const popularityMap = useMemo(() => {
+    const map: Record<string, number> = {}
+    fragrances.forEach(f => {
+      if (f.inspired_by) {
+        const key = f.inspired_by.toLowerCase()
+        map[key] = (map[key] || 0) + 1
+      }
+    })
+    return map
+  }, [fragrances])
+
   const filtered = useMemo(() => {
-    return fragrances.filter(f => {
+    const result = fragrances.filter(f => {
       // Feel filter
       if (feel) {
         const families  = FEEL_FAMILIES[feel] ?? []
@@ -154,7 +184,30 @@ export default function DiscoverClient({ fragrances, error }: Props) {
 
       return true
     })
-  }, [fragrances, feel, longevity, brand, debouncedSearch])
+
+    // Sorting
+    return result.sort((a, b) => {
+      if (sort === 'A–Z') {
+        return a.brand.localeCompare(b.brand) || a.name.localeCompare(b.name)
+      }
+      if (sort === 'Top Rated') {
+        if (a.rating === b.rating) return a.brand.localeCompare(b.brand)
+        if (a.rating === null) return 1
+        if (b.rating === null) return -1
+        return b.rating - a.rating
+      }
+      if (sort === 'Newest') {
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      }
+      if (sort === 'Most Popular') {
+        const popA = popularityMap[a.full_name.toLowerCase()] || 0
+        const popB = popularityMap[b.full_name.toLowerCase()] || 0
+        if (popA === popB) return a.brand.localeCompare(b.brand)
+        return popB - popA
+      }
+      return 0
+    })
+  }, [fragrances, feel, longevity, brand, debouncedSearch, sort, popularityMap])
 
   function toggleFeel(v: string) {
     setVibeActive(false)
@@ -317,6 +370,20 @@ export default function DiscoverClient({ fragrances, error }: Props) {
           <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingLeft: 16, paddingRight: 16, scrollbarWidth: 'none' }}>
             {[...KNOWN_BRANDS, 'Other'].map(v => (
               <Chip key={v} selected={brand === v} onClick={() => toggleBrand(v)} style={{ flexShrink: 0 }}>
+                {v}
+              </Chip>
+            ))}
+          </div>
+        </div>
+
+        {/* Sort */}
+        <div>
+          <p style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.12em', paddingLeft: 16, marginBottom: 6 }}>
+            Sort
+          </p>
+          <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingLeft: 16, paddingRight: 16, scrollbarWidth: 'none' }}>
+            {SORT_OPTIONS.map(v => (
+              <Chip key={v} selected={sort === v} onClick={() => setSort(v)} style={{ flexShrink: 0 }}>
                 {v}
               </Chip>
             ))}
