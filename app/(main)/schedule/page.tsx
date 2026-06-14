@@ -1,16 +1,10 @@
 import { cookies } from 'next/headers'
 import { createClient } from '@/utils/supabase/server'
-import { createClient as createPublicClient } from '@supabase/supabase-js'
 import ScheduleClient from './ScheduleClient'
 import ProGate from '@/components/ui/ProGate'
 import type { ScheduleFragrance, SavedSchedule } from './types'
 
 export const dynamic = 'force-dynamic'
-
-const publicSupabase = createPublicClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
-)
 
 export default async function SchedulePage() {
   // Pro gate — remove this block when billing is ready
@@ -33,6 +27,8 @@ export default async function SchedulePage() {
 
   /* ── Unreachable until ProGate isPro = true ─────────────────────────────
   // Load fragrances (public)
+  const { createClient: createPublicClient } = await import('@supabase/supabase-js')
+  const publicSupabase = createPublicClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!)
   const { data: fragrances } = await publicSupabase
     .from('fragrances')
     .select('id, brand, name, phase, phase_label, family, projection, anosmia_risk, spritz_count, application_zone, lean')
