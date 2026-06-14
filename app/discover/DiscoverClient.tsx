@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Chip from '@/components/ui/Chip'
 import EmptyState from '@/components/ui/EmptyState'
@@ -39,6 +39,13 @@ const LONGEVITY_PROJECTIONS: Record<string, string[]> = {
 }
 
 const KNOWN_BRANDS = ['Lattafa', 'Afnan', 'Rasasi', 'Armaf', 'Swiss Arabian']
+
+const VIBE_TO_FEEL: Record<string, string> = {
+  warm:  'Warm & Rich',
+  fresh: 'Fresh & Clean',
+  bold:  'Bold & Lasting',
+  soft:  'Light & Subtle',
+}
 
 // ── Card image ───────────────────────────────────────────────────────────────
 
@@ -81,6 +88,28 @@ export default function DiscoverClient({ fragrances, error }: Props) {
   const [feel, setFeel]           = useState<string | null>(null)
   const [longevity, setLongevity] = useState<string | null>(null)
   const [brand, setBrand]         = useState<string | null>(null)
+  const [vibeActive, setVibeActive] = useState(false)
+
+  const [searchTerm, setSearchTerm]       = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [searchFocused, setSearchFocused] = useState(false)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // On mount: read scentral_vibe from localStorage and pre-select feel
+  useEffect(() => {
+    const vibe = localStorage.getItem('scentral_vibe')
+    if (vibe && VIBE_TO_FEEL[vibe]) {
+      setFeel(VIBE_TO_FEEL[vibe])
+      setVibeActive(true)
+    }
+  }, [])
+
+  // Debounce search input 200ms
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => setDebouncedSearch(searchTerm), 200)
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
+  }, [searchTerm])
 
   const filtered = useMemo(() => {
     return fragrances.filter(f => {
@@ -108,13 +137,44 @@ export default function DiscoverClient({ fragrances, error }: Props) {
         }
       }
 
+      // Search filter — AND with chips
+      if (debouncedSearch) {
+        const q = debouncedSearch.toLowerCase()
+        const match = (
+          f.brand.toLowerCase().includes(q) ||
+          f.name.toLowerCase().includes(q) ||
+          (f.inspired_by?.toLowerCase().includes(q) ?? false) ||
+          (f.plain_description?.toLowerCase().includes(q) ?? false)
+        )
+        if (!match) return false
+      }
+
       return true
     })
-  }, [fragrances, feel, longevity, brand])
+  }, [fragrances, feel, longevity, brand, debouncedSearch])
 
-  function toggleFeel(v: string)      { setFeel(f => f === v ? null : v) }
+  function toggleFeel(v: string) {
+    setVibeActive(false)
+    setFeel(f => f === v ? null : v)
+  }
   function toggleLongevity(v: string) { setLongevity(l => l === v ? null : v) }
   function toggleBrand(v: string)     { setBrand(b => b === v ? null : v) }
+
+  function clearVibe() {
+    localStorage.removeItem('scentral_vibe')
+    setFeel(null)
+    setVibeActive(false)
+  }
+
+  const anyFilter = feel !== null || longevity !== null || brand !== null
+  const anySearch = debouncedSearch.length > 0
+
+  const countLabel = (() => {
+    if (!anyFilter && !anySearch) return `${fragrances.length} fragrances`
+    if (anySearch && anyFilter)   return `${filtered.length} results`
+    if (anySearch)                return `${filtered.length} results for "${debouncedSearch}"`
+    return `${filtered.length} of ${fragrances.length}`
+  })()
 
   if (error) {
     return (
@@ -127,6 +187,11 @@ export default function DiscoverClient({ fragrances, error }: Props) {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--text)', paddingBottom: 96 }}>
 
+      {/* placeholder colour — can't be set via inline styles */}
+      <style>{`
+        .discover-search::placeholder { color: var(--text-muted); }
+      `}</style>
+
       {/* Header */}
       <div style={{ padding: '28px 16px 0' }}>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--text)', lineHeight: '34px' }}>
@@ -137,8 +202,81 @@ export default function DiscoverClient({ fragrances, error }: Props) {
         </p>
       </div>
 
+      {/* Search bar */}
+      <div style={{ padding: '16px 16px 0', position: 'relative' }}>
+        <input
+          type="text"
+          className="discover-search"
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+          onFocus={() => setSearchFocused(true)}
+          onBlur={() => setSearchFocused(false)}
+          placeholder="Search by name or designer..."
+          style={{
+            width: '100%',
+            minHeight: 44,
+            background: 'var(--surface)',
+            border: `1px solid ${searchFocused ? 'var(--accent)' : 'var(--line)'}`,
+            borderRadius: 'var(--r-btn)',
+            padding: '0 40px 0 14px',
+            fontSize: 14,
+            color: 'var(--text)',
+            outline: 'none',
+            boxShadow: searchFocused ? '0 0 0 2px color-mix(in srgb, var(--accent) 20%, transparent)' : 'none',
+            boxSizing: 'border-box',
+            transition: 'border-color 0.15s, box-shadow 0.15s',
+          }}
+        />
+        {searchTerm && (
+          <button
+            onClick={() => { setSearchTerm(''); setDebouncedSearch('') }}
+            aria-label="Clear search"
+            style={{
+              position: 'absolute',
+              right: 28,
+              top: '50%',
+              transform: 'translateY(-50%)',
+              fontSize: 16,
+              color: 'var(--text-muted)',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '4px 0',
+              lineHeight: 1,
+            }}
+          >
+            ✕
+          </button>
+        )}
+      </div>
+
       {/* Filters */}
       <div style={{ padding: '16px 0 0', display: 'flex', flexDirection: 'column', gap: 10 }}>
+
+        {/* Vibe dismissal pill */}
+        {vibeActive && (
+          <div style={{ paddingLeft: 16 }}>
+            <span style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              fontSize: 12, color: 'var(--text-muted)',
+              background: 'var(--surface)',
+              border: '1px solid var(--line)',
+              borderRadius: 999,
+              padding: '4px 12px',
+            }}>
+              Showing results for your vibe
+              <span
+                role="button"
+                tabIndex={0}
+                onClick={clearVibe}
+                onKeyDown={e => e.key === 'Enter' && clearVibe()}
+                style={{ color: 'var(--accent)', cursor: 'pointer' }}
+              >
+                · Clear
+              </span>
+            </span>
+          </div>
+        )}
 
         {/* Feel */}
         <div>
@@ -186,9 +324,7 @@ export default function DiscoverClient({ fragrances, error }: Props) {
       {/* Result count */}
       <div style={{ padding: '16px 16px 8px' }}>
         <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-          {filtered.length === fragrances.length
-            ? `${fragrances.length} fragrances`
-            : `${filtered.length} of ${fragrances.length}`}
+          {countLabel}
         </p>
       </div>
 
