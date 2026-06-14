@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
+import WaitlistForm from '@/app/components/WaitlistForm'
 
 const QUICK_LINKS = [
   { label: 'My Bottles', sub: 'Browse and track your collection', href: '/collection' },
@@ -62,6 +63,8 @@ export default async function Home() {
               My Bottles
             </Link>
           </div>
+
+          <WaitlistForm />
         </section>
 
         {/* Right — catalogue card */}
