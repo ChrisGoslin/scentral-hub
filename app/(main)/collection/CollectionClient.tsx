@@ -29,10 +29,10 @@ export type CollectionFragrance = {
   maturation?: string | null
   maceration_started_at?: string | null
   maceration_ready_at?: string | null
+  collection_added_at?: string | null
   is_user_created?: boolean | null
 }
 
-type PhaseFilter = 'All' | 'Anchor' | 'Modulator' | 'Top'
 type SeasonFilter = 'All' | 'Summer' | 'All-Year' | 'Winter' | 'Spring'
 
 const SEASON_DB_MAP: Record<SeasonFilter, string | null> = {
@@ -148,10 +148,9 @@ function FragranceCard({ f }: { f: CollectionFragrance }) {
   )
 }
 
-export default function CollectionClient({ fragrances }: { fragrances: CollectionFragrance[] }) {
+export default function CollectionClient({ fragrances, totalCount }: { fragrances: CollectionFragrance[]; totalCount?: number }) {
   const router = useRouter()
   const supabase = createClient()
-  const [phaseFilter, setPhaseFilter] = useState<PhaseFilter>('All')
   const [seasonFilter, setSeasonFilter] = useState<SeasonFilter>('All')
   const [search, setSearch] = useState('')
   const [ownedOnly, setOwnedOnly] = useState(false)
@@ -229,7 +228,6 @@ export default function CollectionClient({ fragrances }: { fragrances: Collectio
     }
   }
 
-  const phaseFilters: PhaseFilter[] = ['All', 'Anchor', 'Modulator', 'Top']
   const seasonFilters: SeasonFilter[] = ['All', 'Summer', 'All-Year', 'Winter', 'Spring']
 
   // Owned = has a rating (proxy until proper ownership flag is robust)
@@ -237,7 +235,6 @@ export default function CollectionClient({ fragrances }: { fragrances: Collectio
   const displayFragrances = ownedOnly ? ownedFragrances : fragrances
 
   const filtered = displayFragrances.filter(f => {
-    if (phaseFilter !== 'All' && PHASE_MAP[f.phase] !== phaseFilter) return false
     if (seasonFilter !== 'All' && f.optimal_season !== SEASON_DB_MAP[seasonFilter]) return false
     if (search.trim()) {
       const q = search.trim().toLowerCase()
@@ -256,7 +253,7 @@ export default function CollectionClient({ fragrances }: { fragrances: Collectio
               My Bottles
             </h1>
             <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
-              {filtered.length} of {fragrances.length} scents
+              {filtered.length} of {totalCount ?? fragrances.length} scents
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -310,21 +307,6 @@ export default function CollectionClient({ fragrances }: { fragrances: Collectio
           onFocus={e => { e.currentTarget.style.borderColor = 'var(--accent)' }}
           onBlur={e => { e.currentTarget.style.borderColor = 'var(--line)' }}
         />
-      </div>
-
-      {/* Phase filter chips */}
-      <div className="flex gap-2 px-4 py-2 overflow-x-auto">
-        {phaseFilters.map(f => (
-          <Chip
-            key={f}
-            selected={phaseFilter === f}
-            onClick={() => setPhaseFilter(f)}
-            dot={f !== 'All' ? PHASE_DOT[f] : undefined}
-            style={{ flexShrink: 0 }}
-          >
-            {f}
-          </Chip>
-        ))}
       </div>
 
       {/* Season filter chips */}

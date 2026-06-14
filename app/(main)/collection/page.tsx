@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
-import CollectionClient, { type CollectionFragrance } from './CollectionClient'
+import CollectionFilters from './CollectionFilters'
+import { type CollectionFragrance } from './CollectionClient'
 import EmptyState from '@/components/ui/EmptyState'
 import { cookies } from 'next/headers'
 
@@ -16,7 +17,7 @@ export default async function CollectionPage() {
       .order('brand', { ascending: true }),
     supabase
       .from('collections')
-      .select('fragrance_id, maceration_started_at, maceration_ready_at'),
+      .select('fragrance_id, maceration_started_at, maceration_ready_at, created_at'),
   ])
 
   if (error) {
@@ -39,7 +40,8 @@ export default async function CollectionPage() {
     maturation: f.maturation ?? null,
     maceration_started_at: collectionMap.get(f.id)?.maceration_started_at ?? null,
     maceration_ready_at: collectionMap.get(f.id)?.maceration_ready_at ?? null,
+    collection_added_at: collectionMap.get(f.id)?.created_at ?? null,
   }))
 
-  return <CollectionClient fragrances={fragrances} />
+  return <CollectionFilters fragrances={fragrances} />
 }
