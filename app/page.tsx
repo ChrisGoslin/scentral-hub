@@ -50,16 +50,16 @@ export default async function Home() {
 
           <div className="flex flex-wrap gap-6 items-center">
             <Link
-              href="/collection"
+              href="/onboarding"
               className="bg-[var(--accent)] text-white px-10 py-4 rounded-[var(--r-btn)] shadow-sm transition-all hover:bg-[var(--accent-press)] active:scale-95 font-bold uppercase tracking-widest text-[10px]"
             >
-              My Bottles
+              Start Here
             </Link>
             <Link
-              href="/layering"
+              href="/collection"
               className="text-[var(--text)] border-b border-[var(--text)] pb-1 hover:text-[var(--accent)] hover:border-[var(--accent)] transition-all uppercase tracking-[0.2em] text-[10px] font-bold"
             >
-              Try Layering
+              My Bottles
             </Link>
           </div>
         </section>
