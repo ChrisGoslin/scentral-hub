@@ -5,6 +5,7 @@ import Button from '@/components/ui/Button'
 import SensoryAnatomy from '@/components/ui/SensoryAnatomy'
 import SimilarFragrances from './SimilarFragrances'
 import InspiredByClones from './InspiredByClones'
+import LogWearButton from './LogWearButton'
 import { cookies } from 'next/headers'
 
 const PHASE_LABEL: Record<number, string> = {
@@ -47,7 +48,7 @@ export default async function FragranceDetailPage({ params }: { params: Promise<
       .single(),
     supabase
       .from('collections')
-      .select('maceration_started_at, maceration_ready_at')
+      .select('id, maceration_started_at, maceration_ready_at')
       .eq('fragrance_id', id)
       .maybeSingle(),
   ])
@@ -282,6 +283,9 @@ export default async function FragranceDetailPage({ params }: { params: Promise<
         <Link href="/layering">
           <Button fullWidth>Try layering this →</Button>
         </Link>
+        {collectionRow?.id && (
+          <LogWearButton collectionId={collectionRow.id} />
+        )}
         <Link
           href="/discover"
           style={{ fontSize: 13, color: 'var(--text-muted)', textAlign: 'center', display: 'block', padding: 8 }}
