@@ -316,6 +316,11 @@ export default function YouClient(props: YouClientProps) {
 
   const [wishlistItems, setWishlistItems] = useState<WishlistFragrance[]>([])
   const [loadingWishlist, setLoadingWishlist] = useState(false)
+  const [vibe, setVibe] = useState<string | null>(null)
+
+  useEffect(() => {
+    setVibe(localStorage.getItem('scentral_vibe'))
+  }, [])
 
   useEffect(() => {
     if (props.state !== 'signed-in') return
@@ -443,6 +448,38 @@ export default function YouClient(props: YouClientProps) {
       </div>
 
       <div className="px-4 py-6 flex flex-col gap-6">
+        {/* My Vibe */}
+        <section>
+          <p style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 12 }}>
+            MY VIBE
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { key: 'warm', label: 'Warm & Rich' },
+              { key: 'fresh', label: 'Fresh & Clean' },
+              { key: 'bold', label: 'Bold & Lasting' },
+              { key: 'soft', label: 'Light & Subtle' },
+            ].map((opt) => (
+              <Chip
+                key={opt.key}
+                selected={vibe === opt.key}
+                onClick={() => {
+                  localStorage.setItem('scentral_vibe', opt.key)
+                  setVibe(opt.key)
+                }}
+              >
+                {opt.label}
+              </Chip>
+            ))}
+          </div>
+          <button
+            onClick={handleReset}
+            style={{ fontSize: 12, color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer', marginTop: 8, padding: 0 }}
+          >
+            Reset onboarding
+          </button>
+        </section>
+
         {/* Weekly Stats & Owned Count */}
         <section>
           <div className="mb-6">
