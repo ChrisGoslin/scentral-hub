@@ -6,10 +6,10 @@ import { Archive, FlaskConical, Compass, User } from 'lucide-react'
 
 // Free tier — always visible in the main nav
 const NAV_ITEMS = [
-  { label: 'Discover',  href: '/collection', Icon: Compass },
+  { label: 'Discover',   href: '/discover',   Icon: Compass },
   { label: 'My Bottles', href: '/collection', Icon: Archive },
-  { label: 'Layering',  href: '/layering',   Icon: FlaskConical },
-  { label: 'You',       href: '/you',         Icon: User },
+  { label: 'Layering',   href: '/layering',   Icon: FlaskConical },
+  { label: 'You',        href: '/you',         Icon: User },
 ]
 
 export default function BottomNav() {
