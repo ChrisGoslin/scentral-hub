@@ -189,21 +189,31 @@ export default async function FragranceDetailPage({ params }: { params: Promise<
         {/* Resonance — Find Similar */}
         <SimilarFragrances fragranceId={f.id} />
 
-        {/* Inspired By — reverse lookup to reference fragrance */}
+        {/* Inspired By — "Smells like" card */}
         {f.inspired_by && (
-          <div>
+          <div style={{
+            padding: '16px',
+            background: 'var(--surface)',
+            border: '1px solid color-mix(in srgb, var(--accent) 40%, transparent)',
+            borderRadius: 'var(--r-card)',
+          }}>
+            <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--accent)' }}>
+              Smells like
+            </p>
             {inspiredByRef ? (
-              <Link
-                href={`/collection/${inspiredByRef.id}`}
-                style={{ fontSize: 13, color: 'var(--accent)', textDecoration: 'underline' }}
-              >
-                Inspired by {f.inspired_by} →
+              <Link href={`/collection/${inspiredByRef.id}`} style={{ textDecoration: 'none' }}>
+                <p style={{ fontSize: 20, fontFamily: 'var(--font-display)', color: 'var(--text)', marginTop: 6, lineHeight: '24px' }}>
+                  {f.inspired_by} →
+                </p>
               </Link>
             ) : (
-              <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-                Inspired by {f.inspired_by}
+              <p style={{ fontSize: 20, fontFamily: 'var(--font-display)', color: 'var(--text)', marginTop: 6, lineHeight: '24px' }}>
+                {f.inspired_by}
               </p>
             )}
+            <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6 }}>
+              A fraction of the price — same DNA.
+            </p>
           </div>
         )}
 
