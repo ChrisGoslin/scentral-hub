@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Chip from '@/components/ui/Chip'
 import EmptyState from '@/components/ui/EmptyState'
+import { getBrandEmoji } from '@/lib/brandEmoji'
 
 export type DiscoverFragrance = {
   id: string
@@ -48,10 +49,7 @@ const VIBE_TO_FEEL: Record<string, string> = {
 }
 
 // ── Card image ───────────────────────────────────────────────────────────────
-import { getBrandEmoji } from '@/lib/brandEmoji'
 
-export type DiscoverFragrance = {
-...
 function FragranceImage({ imageUrl, brand, name }: { imageUrl: string | null; brand: string; name: string }) {
   if (!imageUrl) {
     return (
@@ -60,7 +58,7 @@ function FragranceImage({ imageUrl, brand, name }: { imageUrl: string | null; br
           width: '100%', aspectRatio: '1 / 1',
           display: 'flex', flexDirection: 'column',
           alignItems: 'center', justifyContent: 'center',
-          background: 'linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%)', 
+          background: 'linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%)',
           borderRadius: 10,
           padding: 8, gap: 4,
         }}
@@ -75,7 +73,7 @@ function FragranceImage({ imageUrl, brand, name }: { imageUrl: string | null; br
       </div>
     )
   }
-
+  return (
     <div style={{ width: '100%', aspectRatio: '1 / 1', borderRadius: 10, overflow: 'hidden', background: 'var(--surface-2)' }}>
       <img src={imageUrl} alt={`${brand} ${name}`} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
     </div>
