@@ -48,7 +48,10 @@ const VIBE_TO_FEEL: Record<string, string> = {
 }
 
 // ── Card image ───────────────────────────────────────────────────────────────
+import { getBrandEmoji } from '@/lib/brandEmoji'
 
+export type DiscoverFragrance = {
+...
 function FragranceImage({ imageUrl, brand, name }: { imageUrl: string | null; brand: string; name: string }) {
   if (!imageUrl) {
     return (
@@ -57,20 +60,22 @@ function FragranceImage({ imageUrl, brand, name }: { imageUrl: string | null; br
           width: '100%', aspectRatio: '1 / 1',
           display: 'flex', flexDirection: 'column',
           alignItems: 'center', justifyContent: 'center',
-          background: 'var(--surface-2)', borderRadius: 10,
+          background: 'linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%)', 
+          borderRadius: 10,
           padding: 8, gap: 4,
         }}
       >
-        <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', textAlign: 'center' }}>
+        <span style={{ fontSize: 32 }}>{getBrandEmoji(brand)}</span>
+        <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', textAlign: 'center', marginTop: 4 }}>
           {brand}
         </p>
-        <p style={{ fontSize: 11, color: 'var(--text)', fontFamily: 'var(--font-display)', textAlign: 'center', lineHeight: '14px' }}>
-          {name.length > 18 ? name.slice(0, 16) + '…' : name}
+        <p style={{ fontSize: 11, color: 'var(--text)', fontFamily: 'var(--font-display)', textAlign: 'center', lineHeight: '14px', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          {name.length > 24 ? name.slice(0, 22) + '…' : name}
         </p>
       </div>
     )
   }
-  return (
+
     <div style={{ width: '100%', aspectRatio: '1 / 1', borderRadius: 10, overflow: 'hidden', background: 'var(--surface-2)' }}>
       <img src={imageUrl} alt={`${brand} ${name}`} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
     </div>

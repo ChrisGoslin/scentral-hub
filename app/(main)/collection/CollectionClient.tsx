@@ -51,26 +51,30 @@ const PHASE_MAP: Record<number, string> = {
 const PHASE_DOT: Record<string, string> = {
   Anchor: 'var(--accent)',
   Modulator: 'var(--positive)',
-  Top: 'var(--text-muted)',
-}
+  import { getBrandEmoji } from '@/lib/brandEmoji'
 
-function FragranceImage({ imageUrl, brand, name }: { imageUrl: string | null; brand: string; name: string }) {
-  const [failed, setFailed] = useState(false)
+  export type CollectionFragrance = {
+  ...
+  function FragranceImage({ imageUrl, brand, name }: { imageUrl: string | null; brand: string; name: string }) {
+    const [failed, setFailed] = useState(false)
 
-  if (!imageUrl || failed) {
-    return (
-      <div
-        className="w-full aspect-square flex flex-col items-center justify-center rounded-[10px] p-2"
-        style={{ background: 'var(--surface-2)' }}
-      >
-        <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', textAlign: 'center', lineHeight: '12px' }}>
-          {brand}
-        </p>
-        <p style={{ fontSize: 11, color: 'var(--text)', fontFamily: 'var(--font-display)', textAlign: 'center', lineHeight: '14px', marginTop: 2 }}>
-          {name.length > 20 ? name.slice(0, 18) + '…' : name}
-        </p>
-      </div>
-    )
+    if (!imageUrl || failed) {
+      return (
+        <div
+          className="w-full aspect-square flex flex-col items-center justify-center rounded-[10px] p-2"
+          style={{ background: 'linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%)' }}
+        >
+          <span style={{ fontSize: 32 }}>{getBrandEmoji(brand)}</span>
+          <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', textAlign: 'center', lineHeight: '12px', marginTop: 4 }}>
+            {brand}
+          </p>
+          <p style={{ fontSize: 11, color: 'var(--text)', fontFamily: 'var(--font-display)', textAlign: 'center', lineHeight: '14px', marginTop: 2, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {name.length > 24 ? name.slice(0, 22) + '…' : name}
+          </p>
+        </div>
+      )
+    }
+
   }
 
   return (

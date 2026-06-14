@@ -381,6 +381,58 @@ export default function YouClient(props: YouClientProps) {
       </div>
 
       <div className="px-4 py-6 flex flex-col gap-6">
+        {/* Weekly Stats & Owned Count */}
+        <section>
+          {weekWear.length > 0 && (
+            <div className="mb-6">
+              <p style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 12 }}>
+                THIS WEEK
+              </p>
+              <div 
+                style={{ 
+                  display: 'flex', 
+                  gap: 10, 
+                  overflowX: 'auto', 
+                  paddingBottom: 4, 
+                  scrollbarWidth: 'none',
+                  msOverflowStyle: 'none'
+                }}
+              >
+                {weekWear.slice(0, 3).map((item, idx) => (
+                  <div 
+                    key={item.fragrance_id}
+                    style={{ 
+                      minWidth: 140, 
+                      flexShrink: 0,
+                      background: 'var(--surface)', 
+                      border: '1px solid var(--line)', 
+                      borderRadius: 'var(--r-card)', 
+                      padding: 12 
+                    }}
+                  >
+                    <p style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 700 }}>
+                      0{idx + 1}
+                    </p>
+                    <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 8 }}>
+                      {item.brand}
+                    </p>
+                    <p style={{ fontFamily: 'var(--font-display)', fontSize: 14, color: 'var(--text)', lineHeight: '18px', marginTop: 2, height: 36, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                      {item.name}
+                    </p>
+                    <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>
+                      {item.count} {item.count === 1 ? 'wear' : 'wears'}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 16 }}>
+            {ownedCount} bottle{ownedCount === 1 ? '' : 's'} in your collection
+          </p>
+        </section>
+
         {/* Saved list */}
         <div className="flex flex-col gap-3">
           <p style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>

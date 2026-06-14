@@ -32,6 +32,8 @@ function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
+import { getBrandEmoji } from '@/lib/brandEmoji'
+
 export default async function FragranceDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const cookieStore = await cookies()
@@ -117,17 +119,15 @@ export default async function FragranceDetailPage({ params }: { params: Promise<
             style={{
               width: 200, height: 200,
               borderRadius: 'var(--r-card)',
-              background: 'var(--surface-2)',
+              background: 'linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%)',
               display: 'flex', flexDirection: 'column',
               alignItems: 'center', justifyContent: 'center',
-              gap: 6, padding: 16, textAlign: 'center',
+              gap: 8, padding: 16, textAlign: 'center',
             }}
           >
-            <p style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+            <span style={{ fontSize: 48 }}>{getBrandEmoji(f.brand)}</span>
+            <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 4 }}>
               {f.brand}
-            </p>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--text)', lineHeight: '20px' }}>
-              {f.name}
             </p>
           </div>
         )}
