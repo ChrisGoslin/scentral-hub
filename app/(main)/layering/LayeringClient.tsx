@@ -8,6 +8,7 @@ import Chip from '@/components/ui/Chip'
 import Sheet from '@/components/ui/Sheet'
 import LoadingShimmer from '@/components/ui/LoadingShimmer'
 import ErrorInline from '@/components/ui/ErrorInline'
+import EmptyState from '@/components/ui/EmptyState'
 import AuraShareCard, { type AuraShareData } from '@/app/components/AuraShareCard'
 import dynamic from 'next/dynamic'
 
@@ -670,16 +671,10 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
             )}
 
             {results && results.length === 0 && (
-              <p
-                style={{
-                  fontSize: 14,
-                  color: 'var(--text-muted)',
-                  textAlign: 'center',
-                  padding: '24px 0',
-                }}
-              >
-                No suggestions found. Try a different use case or anchor.
-              </p>
+              <EmptyState
+                headline="No suggestions found"
+                caption="Try a different use case or anchor."
+              />
             )}
 
             {(results !== null || error) && (
@@ -745,9 +740,10 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
 
           <div className="flex flex-col" style={{ marginLeft: -16, marginRight: -16 }}>
             {filteredFragrances.length === 0 ? (
-              <p className="px-4 py-4" style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-                No fragrances match &quot;{pickerQuery}&quot;.
-              </p>
+              <EmptyState
+                headline="No matches"
+                caption={`No fragrances match "${pickerQuery}".`}
+              />
             ) : (
               filteredFragrances.map(f => (
                 <button

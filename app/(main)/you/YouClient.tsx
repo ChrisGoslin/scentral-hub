@@ -398,31 +398,31 @@ export default function YouClient(props: YouClientProps) {
       <div className="px-4 py-6 flex flex-col gap-6">
         {/* Weekly Stats & Owned Count */}
         <section>
-          {weekWear.length > 0 && (
+          <p style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 12 }}>
+            THIS WEEK
+          </p>
+          {weekWear.length > 0 ? (
             <div className="mb-6">
-              <p style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 12 }}>
-                THIS WEEK
-              </p>
-              <div 
-                style={{ 
-                  display: 'flex', 
-                  gap: 10, 
-                  overflowX: 'auto', 
-                  paddingBottom: 4, 
+              <div
+                style={{
+                  display: 'flex',
+                  gap: 10,
+                  overflowX: 'auto',
+                  paddingBottom: 4,
                   scrollbarWidth: 'none',
                   msOverflowStyle: 'none'
                 }}
               >
                 {weekWear.slice(0, 3).map((item, idx) => (
-                  <div 
+                  <div
                     key={item.fragrance_id}
-                    style={{ 
-                      minWidth: 140, 
+                    style={{
+                      minWidth: 140,
                       flexShrink: 0,
-                      background: 'var(--surface)', 
-                      border: '1px solid var(--line)', 
-                      borderRadius: 'var(--r-card)', 
-                      padding: 12 
+                      background: 'var(--surface)',
+                      border: '1px solid var(--line)',
+                      borderRadius: 'var(--r-card)',
+                      padding: 12
                     }}
                   >
                     <p style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 700 }}>
@@ -441,8 +441,13 @@ export default function YouClient(props: YouClientProps) {
                 ))}
               </div>
             </div>
+          ) : (
+            <EmptyState
+              headline="No wears logged this week"
+              caption="Log a wear from My Bottles to start tracking your rotation."
+            />
           )}
-          
+
           <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 16 }}>
             {ownedCount} bottle{ownedCount === 1 ? '' : 's'} in your collection
           </p>
