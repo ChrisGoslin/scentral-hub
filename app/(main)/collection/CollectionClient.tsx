@@ -12,6 +12,7 @@ import Sheet from '@/components/ui/Sheet'
 import ErrorInline from '@/components/ui/ErrorInline'
 import LoadingShimmer from '@/components/ui/LoadingShimmer'
 import { getBrandEmoji } from '@/lib/brandEmoji'
+import { useFragranceSearch } from '@/app/hooks/useFragranceSearch'
 
 export type CollectionFragrance = {
   id: string
@@ -158,48 +159,23 @@ export default function CollectionClient({ fragrances, totalCount }: { fragrance
   // Add bottle sheet state
   const [isAddSheetOpen, setIsAddSheetOpen] = useState(false)
   const [pickerSearch, setPickerSearch] = useState('')
-  const [allFragrances, setAllFragrances] = useState<any[]>([])
-  const [isLoadingPicker, setIsLoadingPicker] = useState(false)
-  const [pickerError, setPickerError] = useState<string | null>(null)
+  const { results: searchResults, loading: isLoadingPicker, error: pickerErrorHook } = useFragranceSearch(pickerSearch)
+  
   const [selectedToConfirm, setSelectedToConfirm] = useState<any | null>(null)
   const [isAdding, setIsAdding] = useState(false)
   const [addSuccess, setAddSuccess] = useState(false)
+  const [localPickerError, setLocalPickerError] = useState<string | null>(null)
 
-  // Fetch all fragrances for picker once
-  useEffect(() => {
-    if (isAddSheetOpen && allFragrances.length === 0) {
-      const fetchAll = async () => {
-        setIsLoadingPicker(true)
-        setPickerError(null)
-        const { data, error } = await supabase
-          .from('fragrances')
-          .select('id, brand, name')
-          .order('brand', { ascending: true })
-        
-        if (error) setPickerError(error.message)
-        else setAllFragrances(data ?? [])
-        setIsLoadingPicker(false)
-      }
-      fetchAll()
-    }
-  }, [isAddSheetOpen, allFragrances.length, supabase])
-
-  const pickerFiltered = useMemo(() => {
-    if (!pickerSearch.trim()) return allFragrances.slice(0, 50) // Show first 50 when idle
-    const q = pickerSearch.toLowerCase()
-    return allFragrances.filter(f => 
-      f.brand.toLowerCase().includes(q) || f.name.toLowerCase().includes(q)
-    ).slice(0, 100)
-  }, [allFragrances, pickerSearch])
+  const pickerError = pickerErrorHook || localPickerError
 
   async function handleAddBottle() {
     if (!selectedToConfirm) return
     setIsAdding(true)
-    setPickerError(null)
+    setLocalPickerError(null)
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
-      setPickerError('You must be signed in to add bottles.')
+      setLocalPickerError('You must be signed in to add bottles.')
       setIsAdding(false)
       return
     }
@@ -213,7 +189,7 @@ export default function CollectionClient({ fragrances, totalCount }: { fragrance
       })
 
     if (error) {
-      setPickerError(error.message)
+      setLocalPickerError(error.message)
       setIsAdding(false)
     } else {
       setAddSuccess(true)
@@ -417,10 +393,12 @@ export default function CollectionClient({ fragrances, totalCount }: { fragrance
                 >
                   {isLoadingPicker ? (
                     <div className="p-8"><LoadingShimmer variant="line" /></div>
-                  ) : pickerFiltered.length === 0 ? (
+                  ) : pickerSearch.length < 2 ? (
+                    <p className="p-8 text-center text-sm text-[var(--text-muted)]">Type at least 2 characters to search</p>
+                  ) : searchResults.length === 0 ? (
                     <p className="p-8 text-center text-sm text-[var(--text-muted)]">No fragrances found</p>
                   ) : (
-                    pickerFiltered.map(f => (
+                    searchResults.map(f => (
                       <button
                         key={f.id}
                         onClick={() => setSelectedToConfirm(f)}
