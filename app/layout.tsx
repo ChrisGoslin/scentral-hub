@@ -19,17 +19,17 @@ const fraunces = Fraunces({
 
 export const metadata: Metadata = {
   title: "Scentral",
-  description: "Your digital fragrance wardrobe.",
-  manifest: "/manifest.webmanifest",
+  description: "Discover and track your fragrance collection",
+  manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "default",
+    statusBarStyle: "black-translucent",
     title: "Scentral",
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#fafaf9",
+  themeColor: "#0a0a0a",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
