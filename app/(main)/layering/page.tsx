@@ -25,5 +25,16 @@ export default async function LayeringPage() {
     )
   }
 
+  if ((data ?? []).length === 0) {
+    return (
+      <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <EmptyState
+          headline="Build your first combination"
+          caption="Pick an anchor scent to start"
+        />
+      </div>
+    )
+  }
+
   return <LayeringClient fragrances={(data ?? []) as LayeringFragrance[]} />
 }

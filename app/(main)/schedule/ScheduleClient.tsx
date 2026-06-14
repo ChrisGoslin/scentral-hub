@@ -204,7 +204,10 @@ export default function ScheduleClient({ fragrances, savedSchedules: initialSave
           <div className="mt-8 pt-8 border-t border-[var(--line)]">
             <p className="text-[10px] uppercase font-bold tracking-[0.2em] text-[var(--text-muted)] mb-6">Preserved rituals</p>
             {savedSchedules.length === 0 ? (
-              <EmptyState headline="No preserved rituals yet." />
+              <EmptyState
+                headline="No schedules saved yet"
+                caption="Build a layering combination and save it as a schedule"
+              />
             ) : (
               <div className="flex flex-col gap-4">
                 {savedSchedules.map(s => (

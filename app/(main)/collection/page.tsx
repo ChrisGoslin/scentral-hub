@@ -2,6 +2,8 @@ import { createClient } from '@/utils/supabase/server'
 import CollectionFilters from './CollectionFilters'
 import { type CollectionFragrance } from './CollectionClient'
 import EmptyState from '@/components/ui/EmptyState'
+import Button from '@/components/ui/Button'
+import Link from 'next/link'
 import { cookies } from 'next/headers'
 
 export const dynamic = 'force-dynamic'
@@ -26,6 +28,18 @@ export default async function CollectionPage() {
         <EmptyState
           headline="Couldn't load collection"
           caption={error.message}
+        />
+      </div>
+    )
+  }
+
+  if ((collectionRows ?? []).length === 0) {
+    return (
+      <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <EmptyState
+          headline="Your collection is empty"
+          caption="Find your first bottle on Discover"
+          action={<Link href="/discover"><Button>Browse fragrances →</Button></Link>}
         />
       </div>
     )
