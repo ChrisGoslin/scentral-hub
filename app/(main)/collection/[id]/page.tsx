@@ -35,8 +35,15 @@ function formatDate(iso: string): string {
 
 import { getBrandEmoji } from '@/lib/brandEmoji'
 
-export default async function FragranceDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function FragranceDetailPage({ 
+  params, 
+  searchParams 
+}: { 
+  params: Promise<{ id: string }>
+  searchParams: Promise<{ from?: string }>
+}) {
   const { id } = await params
+  const { from } = await searchParams
   const cookieStore = await cookies()
   const supabase = await createClient(cookieStore)
 
@@ -98,10 +105,10 @@ export default async function FragranceDetailPage({ params }: { params: Promise<
       {/* Back nav */}
       <div className="px-4 pt-6 pb-2">
         <Link
-          href="/collection"
+          href={from === 'discover' ? "/discover" : "/collection"}
           style={{ fontSize: 14, color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: 4 }}
         >
-          ‹ Collection
+          ‹ {from === 'discover' ? 'Discover' : 'My Bottles'}
         </Link>
       </div>
 
@@ -266,7 +273,7 @@ export default async function FragranceDetailPage({ params }: { params: Promise<
 
         {/* Clones — shown on reference fragrances (no rating, catalogue entry) */}
         {f.rating === null && f.is_user_created === false && (
-          <InspiredByClones fragranceName={f.name} fragranceBrand={f.brand} />
+          <InspiredByClones fragranceName={f.name} fragranceBrand={f.brand} from={from} />
         )}
 
         {/* Anosmia — inline pill only */}

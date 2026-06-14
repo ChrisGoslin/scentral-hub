@@ -14,9 +14,10 @@ type CloneRow = {
 type Props = {
   fragranceName: string
   fragranceBrand: string
+  from?: string
 }
 
-export default function InspiredByClones({ fragranceName, fragranceBrand }: Props) {
+export default function InspiredByClones({ fragranceName, fragranceBrand, from }: Props) {
   const [clones, setClones] = useState<CloneRow[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -42,7 +43,7 @@ export default function InspiredByClones({ fragranceName, fragranceBrand }: Prop
       {clones.map(c => (
         <Link
           key={c.id}
-          href={`/collection/${c.id}`}
+          href={`/collection/${c.id}${from ? `?from=${from}` : ''}`}
           className="flex items-center justify-between px-3 py-2 rounded-[var(--r-card)] transition-colors hover:border-[var(--accent)]"
           style={{ background: 'var(--surface)', border: '1px solid var(--line)' }}
         >

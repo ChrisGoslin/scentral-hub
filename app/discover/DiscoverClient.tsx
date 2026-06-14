@@ -485,7 +485,7 @@ export default function DiscoverClient({ fragrances, error, hasMore, totalCount 
           {filtered.map(f => (
             <Link
               key={f.id}
-              href={`/collection/${f.id}`}
+              href={`/collection/${f.id}?from=discover`}
               style={{ textDecoration: 'none', display: 'block' }}
             >
               <div
