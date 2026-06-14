@@ -7,10 +7,12 @@ import type { ScheduleFragrance, SavedSchedule } from './types'
 
 export const dynamic = 'force-dynamic'
 
-const publicSupabase = createPublicClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
-)
+function getPublicSupabase() {
+  return createPublicClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
+  )
+}
 
 export default async function SchedulePage() {
   // Pro gate — remove this block when billing is ready
@@ -33,7 +35,7 @@ export default async function SchedulePage() {
 
   /* ── Unreachable until ProGate isPro = true ─────────────────────────────
   // Load fragrances (public)
-  const { data: fragrances } = await publicSupabase
+  const { data: fragrances } = await getPublicSupabase()
     .from('fragrances')
     .select('id, brand, name, phase, phase_label, family, projection, anosmia_risk, spritz_count, application_zone, lean')
     .order('brand', { ascending: true })
