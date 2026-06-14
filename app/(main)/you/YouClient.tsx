@@ -311,14 +311,39 @@ export default function YouClient(props: YouClientProps) {
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--text)', lineHeight: '34px' }}>You</h1>
         </div>
 
-        <div className="flex flex-col items-center justify-center px-6 py-20 gap-6">
-          <EmptyState
-            headline="Sign in to save your formulations."
-            caption="Your saved pairings will appear here once you're signed in."
-            action={
-              <Button onClick={() => setAuthSheetOpen(true)}>Sign in</Button>
-            }
-          />
+        <div className="px-4 py-6 flex flex-col gap-6">
+          <p style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+            Teaser
+          </p>
+
+          {/* Teaser cards */}
+          <div className="flex flex-col gap-3">
+            <Card className="opacity-50 pointer-events-none">
+              <div className="space-y-2">
+                <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>Your 7-day wear streak</p>
+                <p style={{ fontSize: 20, color: 'var(--text)', fontFamily: 'var(--font-display)', fontWeight: 'bold', lineHeight: '26px' }}>12 days</p>
+              </div>
+            </Card>
+
+            <Card className="opacity-50 pointer-events-none">
+              <div className="space-y-2">
+                <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>Most-reached-for this week</p>
+                <p style={{ fontSize: 15, color: 'var(--text)', fontFamily: 'var(--font-display)', lineHeight: '20px' }}>Creed Aventus</p>
+                <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>Worn 8 times</p>
+              </div>
+            </Card>
+
+            <Card className="opacity-50 pointer-events-none">
+              <div className="space-y-2">
+                <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>Saved combinations</p>
+                <p style={{ fontSize: 20, color: 'var(--text)', fontFamily: 'var(--font-display)', fontWeight: 'bold', lineHeight: '26px' }}>3</p>
+              </div>
+            </Card>
+          </div>
+
+          <div className="flex flex-col items-center justify-center gap-4 py-8">
+            <Button onClick={() => setAuthSheetOpen(true)}>Sign in to see yours</Button>
+          </div>
         </div>
 
         <AuthSheet

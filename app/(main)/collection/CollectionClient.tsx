@@ -250,7 +250,47 @@ export default function CollectionClient({ fragrances }: { fragrances: Collectio
 
       {/* Grid */}
       <div className="px-4 py-3">
-        {filtered.length === 0 ? (
+        {filtered.length === 0 && fragrances.length === 0 ? (
+          <div className="flex flex-col gap-4 py-16">
+            <EmptyState
+              headline="Your collection starts here."
+              caption="Add your first bottle and Scentral will help you get more out of it — layering combos, inspired-by alternatives, and what to reach for next."
+            />
+            <div className="flex flex-col gap-2 items-center">
+              <Link href="/library">
+                <button
+                  style={{
+                    background: 'var(--accent)',
+                    color: 'white',
+                    padding: '12px 24px',
+                    borderRadius: 'var(--r-btn)',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    border: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Explore 280+ Scents
+                </button>
+              </Link>
+              <Link href="/layering">
+                <button
+                  style={{
+                    background: 'transparent',
+                    color: 'var(--text)',
+                    padding: '12px 24px',
+                    fontSize: 13,
+                    border: 'none',
+                    cursor: 'pointer',
+                    textDecoration: 'underline',
+                  }}
+                >
+                  Add a bottle manually
+                </button>
+              </Link>
+            </div>
+          </div>
+        ) : filtered.length === 0 ? (
           <EmptyState
             headline="No matches"
             caption="Try adjusting your filters or search term."
