@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Chip from '@/components/ui/Chip'
 import EmptyState from '@/components/ui/EmptyState'
 import { getBrandEmoji } from '@/lib/brandEmoji'
+import { createClient } from '@/utils/supabase/client'
 
 export type DiscoverFragrance = {
   id: string
@@ -93,9 +94,15 @@ function FragranceImage({ imageUrl, brand, name }: { imageUrl: string | null; br
 type Props = {
   fragrances: DiscoverFragrance[]
   error: string | null
+  hasMore: boolean
+  totalCount: number
 }
 
-export default function DiscoverClient({ fragrances, error }: Props) {
+export default function DiscoverClient({ fragrances, error, hasMore, totalCount }: Props) {
+  const [localFragrances, setLocalFragrances] = useState<DiscoverFragrance[]>(fragrances)
+  const [hasMoreLocal, setHasMoreLocal]       = useState(hasMore)
+  const [loadingMore, setLoadingMore]         = useState(false)
+
   const [feel, setFeel]           = useState<string | null>(null)
   const [longevity, setLongevity] = useState<string | null>(null)
   const [brand, setBrand]         = useState<string | null>(null)
@@ -135,17 +142,17 @@ export default function DiscoverClient({ fragrances, error }: Props) {
 
   const popularityMap = useMemo(() => {
     const map: Record<string, number> = {}
-    fragrances.forEach(f => {
+    localFragrances.forEach(f => {
       if (f.inspired_by) {
         const key = f.inspired_by.toLowerCase()
         map[key] = (map[key] || 0) + 1
       }
     })
     return map
-  }, [fragrances])
+  }, [localFragrances])
 
   const filtered = useMemo(() => {
-    const result = fragrances.filter(f => {
+    const result = localFragrances.filter(f => {
       // Feel filter
       if (feel) {
         const families  = FEEL_FAMILIES[feel] ?? []
@@ -207,7 +214,7 @@ export default function DiscoverClient({ fragrances, error }: Props) {
       }
       return 0
     })
-  }, [fragrances, feel, longevity, brand, debouncedSearch, sort, popularityMap])
+  }, [localFragrances, feel, longevity, brand, debouncedSearch, sort, popularityMap])
 
   function toggleFeel(v: string) {
     setVibeActive(false)
@@ -222,14 +229,49 @@ export default function DiscoverClient({ fragrances, error }: Props) {
     setVibeActive(false)
   }
 
+  async function loadMore() {
+    setLoadingMore(true)
+    const supabase = createClient()
+    const offset = localFragrances.length
+    const { data } = await supabase
+      .from('fragrances')
+      .select('id, brand, name, full_name, family, projection, optimal_season, plain_description, inspired_by, image_url, rating, created_at')
+      .order('brand', { ascending: true })
+      .range(offset, offset + 39)
+    if (data && data.length > 0) {
+      const batch: DiscoverFragrance[] = data.map(f => ({
+        id: f.id,
+        brand: f.brand,
+        name: f.name,
+        full_name: f.full_name ?? `${f.brand} ${f.name}`,
+        family: f.family ?? '',
+        projection: f.projection ?? '',
+        optimal_season: f.optimal_season ?? null,
+        plain_description: f.plain_description ?? null,
+        inspired_by: f.inspired_by ?? null,
+        image_url: f.image_url ?? null,
+        rating: f.rating ? Number(f.rating) : null,
+        created_at: f.created_at,
+      }))
+      setLocalFragrances(prev => [...prev, ...batch])
+      setHasMoreLocal(offset + data.length < totalCount)
+    } else {
+      setHasMoreLocal(false)
+    }
+    setLoadingMore(false)
+  }
+
   const anyFilter = feel !== null || longevity !== null || brand !== null
   const anySearch = debouncedSearch.length > 0
 
   const countLabel = (() => {
-    if (!anyFilter && !anySearch) return `${fragrances.length} fragrances`
+    if (!anyFilter && !anySearch) {
+      if (localFragrances.length < totalCount) return `Showing ${localFragrances.length} of ${totalCount}`
+      return `${totalCount} fragrances`
+    }
     if (anySearch && anyFilter)   return `${filtered.length} results`
     if (anySearch)                return `${filtered.length} results for "${debouncedSearch}"`
-    return `${filtered.length} of ${fragrances.length}`
+    return `${filtered.length} of ${localFragrances.length}`
   })()
 
   if (error) {
@@ -472,6 +514,28 @@ export default function DiscoverClient({ fragrances, error }: Props) {
               </div>
             </Link>
           ))}
+        </div>
+      )}
+
+      {/* Load more */}
+      {hasMoreLocal && !anyFilter && !anySearch && (
+        <div style={{ padding: '24px 16px', textAlign: 'center' }}>
+          <button
+            onClick={loadMore}
+            disabled={loadingMore}
+            style={{
+              background: 'var(--surface)',
+              border: '1px solid var(--line)',
+              borderRadius: 'var(--r-btn)',
+              padding: '10px 32px',
+              fontSize: 13,
+              color: loadingMore ? 'var(--text-muted)' : 'var(--text)',
+              cursor: loadingMore ? 'not-allowed' : 'pointer',
+              transition: 'border-color var(--motion-fast)',
+            }}
+          >
+            {loadingMore ? 'Loading…' : 'Load more'}
+          </button>
         </div>
       )}
     </div>

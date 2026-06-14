@@ -6,10 +6,16 @@ export const dynamic = 'force-dynamic'
 export default async function DiscoverPage() {
   const supabase = await createClient()
 
-  const { data, error } = await supabase
-    .from('fragrances')
-    .select('id, brand, name, full_name, family, projection, optimal_season, plain_description, inspired_by, image_url, rating, created_at')
-    .order('brand', { ascending: true })
+  const [{ data, error }, { count: totalCount }] = await Promise.all([
+    supabase
+      .from('fragrances')
+      .select('id, brand, name, full_name, family, projection, optimal_season, plain_description, inspired_by, image_url, rating, created_at')
+      .order('brand', { ascending: true })
+      .range(0, 39),
+    supabase
+      .from('fragrances')
+      .select('*', { count: 'exact', head: true }),
+  ])
 
   const fragrances: DiscoverFragrance[] = (data ?? []).map(f => ({
     id: f.id,
@@ -26,5 +32,14 @@ export default async function DiscoverPage() {
     created_at: f.created_at,
   }))
 
-  return <DiscoverClient fragrances={fragrances} error={error?.message ?? null} />
+  const hasMore = (data?.length ?? 0) < (totalCount ?? 0)
+
+  return (
+    <DiscoverClient
+      fragrances={fragrances}
+      error={error?.message ?? null}
+      hasMore={hasMore}
+      totalCount={totalCount ?? 0}
+    />
+  )
 }
