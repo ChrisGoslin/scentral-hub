@@ -21,15 +21,13 @@ fictional features, lore like "Agent Luna / Hegemony / Shadow Branching", and ha
 ## 1. Ground truth (the ONLY accepted facts unless re-verified)
 - **Repo:** `ChrisGoslin/scentral` (local folder may be named `scentral-hub` — same repo)
 - **Supabase:** project `scentral-mvp` (`lrkdwobnemczvhpixpky`)
-- **Data:** 76 fragrances, 4 layering protocols (Alpha–Delta)
+- **Data:** 282 fragrances. Columns include: plain_description, inspired_by, family, projection, optimal_season, use_case, lean.
 - **Stack:** Next.js App Router, Supabase, Vercel, Tailwind. (Verify the exact Next.js version from
   package.json / node_modules — do NOT assert a version from memory.)
-- **Architecture:** "Scentral Hub" = customer landing page + orchestrator; Collection, Lab, Scheduler are
-  features WITHIN it. Scentral and Scentral Hub are ONE product, single-user MVP.
-- **Locked scope:** commerce/affiliate = OUT of MVP (off-by-default disclosed seam only). No social feed,
-  no Pro tier, no brand house. 3-tab nav (Collection·Lab·You) unless a real Scheduler "Today" ships.
-- **Source-of-truth docs** (Foresight folder): `SCENTRAL-BASELINE.md`, `SCENTRAL-HANDOVER.md`,
-  `SCENTRAL-CLAUDE-CODE-PACK.md`, `SCENTRAL-SCHEDULER-PRD.md`, `SCENTRAL-NOTEBOOKLM-INTEGRATION.md`.
+- **Architecture:** Single product. 4-tab nav: Discover (`/discover`) · My Bottles (`/collection`) · Layering (`/layering`) · You (`/you`).
+- **Free/Pro split:** Free = Discover, My Bottles, Layering, You. Pro = gated behind `components/ui/ProGate.tsx` (`isPro = false`). Do NOT remove gates.
+- **Personas:** See `SCENTRAL_PERSONAS.md`. Gavan (newcomer, plain language). Christopher (enthusiast, expert).
+- **Source-of-truth docs:** `AGENTS.md` (this file), `SCENTRAL_PERSONAS.md`.
 
 If a "fact" is not in these docs, the repo, or the database, it is NOT a fact yet — verify it or label it unverified.
 
@@ -49,7 +47,8 @@ and any "Elite Council breakthrough" framing.
 - **S5 — Flag confidence honestly.** Label every material claim Verified / Assumption / Unknown. No hype framing.
 
 ## 3. Required behaviours
-- Start of session: read this file + the relevant source-of-truth doc(s); state what you grounded on.
+- **Start of session:** read this file + `SCENTRAL_PERSONAS.md` + run the branch hygiene checklist at `skills/branch-hygiene/SKILL.md`. State what you grounded on in your first reply.
+- **Before writing any code:** check if the feature already exists on main (`git log`, `find app -name "page.tsx"`).
 - Before DB/auth changes: inspect first; SHOW the migration/SQL and wait for explicit "approved" before applying.
 - Before claiming a third-party tool does X: web-search and cite, or say it's unverified.
 - When unsure: ask one specific question. Do not guess and proceed.
@@ -58,7 +57,25 @@ and any "Elite Council breakthrough" framing.
 Hardcoding secrets · inventing paths/features/versions · applying migrations · deleting files · force-push ·
 touching existing working routes beyond a task's scope · presenting unverified claims as fact.
 
-## 5. Self-check before finishing any task
+## 5. Branch and merge hygiene (read before creating any branch)
+
+**Before creating a new branch:**
+1. Run `git fetch --all && git log --oneline -5` to see what's already on main.
+2. Run `git branch -a` to list all branches.
+3. Check if the feature you're about to build already exists: `find app -name "page.tsx" | sort`
+4. If a file you're about to create already exists on main, **stop** — do not duplicate it on a new branch. Either work directly on main or extend the existing file.
+
+**Branch creation rule:**
+- Only create a branch if the work is genuinely experimental or risky (DB migrations, major refactors).
+- For additive features (new pages, new components, copy changes), commit directly to main.
+- Never create a branch for work that duplicates something already on main.
+
+**Before finishing:**
+- Run `git diff main --stat` to confirm your branch only touches files relevant to the task.
+- If you see files that already exist on main in your diff with additions only (no deletions), you may be duplicating — verify before committing.
+- Merge to main immediately after the task is complete. Do not leave branches open.
+
+## 6. Self-check before finishing any task
 1. Did I verify every factual claim (paths, versions, capabilities, schema)? How?
 2. Any secrets in my output? (must be no)
 3. Did I stay within source-of-truth scope?
