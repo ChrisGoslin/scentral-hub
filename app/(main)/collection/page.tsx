@@ -33,18 +33,6 @@ export default async function CollectionPage() {
     )
   }
 
-  if ((collectionRows ?? []).length === 0) {
-    return (
-      <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <EmptyState
-          headline="Your collection is empty"
-          caption="Find your first bottle on Discover"
-          action={<Link href="/discover"><Button>Browse fragrances →</Button></Link>}
-        />
-      </div>
-    )
-  }
-
   const collectionMap = new Map(
     (collectionRows ?? []).map(r => [r.fragrance_id, r])
   )

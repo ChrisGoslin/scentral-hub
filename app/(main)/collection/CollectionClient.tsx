@@ -154,7 +154,7 @@ export default function CollectionClient({ fragrances, totalCount }: { fragrance
   const supabase = createClient()
   const [seasonFilter, setSeasonFilter] = useState<SeasonFilter>('All')
   const [search, setSearch] = useState('')
-  const [ownedOnly, setOwnedOnly] = useState(false)
+  const [ownedOnly, setOwnedOnly] = useState(true)
 
   // Add bottle sheet state
   const [isAddSheetOpen, setIsAddSheetOpen] = useState(false)
@@ -206,8 +206,8 @@ export default function CollectionClient({ fragrances, totalCount }: { fragrance
 
   const seasonFilters: SeasonFilter[] = ['All', 'Summer', 'All-Year', 'Winter', 'Spring']
 
-  // Owned = has a rating (proxy until proper ownership flag is robust)
-  const ownedFragrances = fragrances.filter(f => f.rating !== null)
+  // Owned = has been added to the user's collection
+  const ownedFragrances = fragrances.filter(f => f.collection_added_at !== null)
   const displayFragrances = ownedOnly ? ownedFragrances : fragrances
 
   const filtered = displayFragrances.filter(f => {
@@ -311,9 +311,9 @@ export default function CollectionClient({ fragrances, totalCount }: { fragrance
         {ownedOnly && ownedFragrances.length === 0 ? (
           <div className="max-w-[360px] mx-auto pt-12 flex flex-col items-center text-center animate-up">
             <div className="w-8 h-[2px] mb-6" style={{ background: 'var(--accent)' }} />
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 26, lineHeight: '32px', color: 'var(--text)' }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: 26, lineHeight: '32px', color: 'var(--text)' }}>
               Your collection starts here.
-            </h2>
+            </p>
             <p style={{ fontSize: 14, lineHeight: '22px', color: 'var(--text-muted)', marginTop: 12 }}>
               Add your first bottle and Scentral will help you get more from it — layering combos, inspired-by alternatives, and what to reach for next.
             </p>

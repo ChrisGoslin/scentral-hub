@@ -12,12 +12,11 @@ export default function OnboardingPage() {
   const router = useRouter()
   const [step, setStep] = useState<Step>(1)
   const [fade, setFade] = useState(true)
-  const [isReady, setIsReady] = useState(false)
+  const [isAlreadyOnboarded, setIsAlreadyOnboarded] = useState(false)
 
   const [step1Choices, setStep1Choices] = useState<string[]>([])
   const [step2Choice, setStep2Choice] = useState<string>('')
   const [step3Choice, setStep3Choice] = useState<string>('')
-  const [isAlreadyOnboarded, setIsAlreadyOnboarded] = useState(false)
 
   // Guard: if already onboarded, show a static "you're set up" screen
   useEffect(() => {
@@ -45,6 +44,11 @@ export default function OnboardingPage() {
     
     localStorage.setItem('scentral_onboarded', 'true')
     localStorage.setItem('scentral_vibe', vibeMap[step3Choice] || 'fresh')
+    router.push('/discover')
+  }
+
+  const handleSkip = () => {
+    localStorage.setItem('scentral_onboarded', 'true')
     router.push('/discover')
   }
 
@@ -211,12 +215,12 @@ export default function OnboardingPage() {
           </Button>
 
           <div className="text-center">
-            <Link 
-              href="/discover"
-              className="text-xs uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors"
+            <button 
+              onClick={handleSkip}
+              className="text-xs uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--text)] transition-colors bg-transparent border-none cursor-pointer"
             >
               Skip for now →
-            </Link>
+            </button>
           </div>
         </footer>
       </div>
