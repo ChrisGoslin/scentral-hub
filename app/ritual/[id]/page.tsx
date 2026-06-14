@@ -4,10 +4,12 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import type { SavedSchedule, ScheduleFragrance } from '@/app/(main)/schedule/types'
 
-const publicSupabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
-)
+function getPublicSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
+  )
+}
 
 function getSeason(): string {
   const m = new Date().getMonth() // 0–11
@@ -18,7 +20,7 @@ function getSeason(): string {
 }
 
 async function fetchSchedule(id: string): Promise<SavedSchedule | null> {
-  const { data, error } = await publicSupabase
+  const { data, error } = await getPublicSupabase()
     .from('spritz_schedules')
     .select(`
       id, name, occasion, created_at,
