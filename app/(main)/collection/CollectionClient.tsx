@@ -11,6 +11,7 @@ import Button from '@/components/ui/Button'
 import Sheet from '@/components/ui/Sheet'
 import ErrorInline from '@/components/ui/ErrorInline'
 import LoadingShimmer from '@/components/ui/LoadingShimmer'
+import { getBrandEmoji } from '@/lib/brandEmoji'
 
 export type CollectionFragrance = {
   id: string
@@ -51,30 +52,27 @@ const PHASE_MAP: Record<number, string> = {
 const PHASE_DOT: Record<string, string> = {
   Anchor: 'var(--accent)',
   Modulator: 'var(--positive)',
-  import { getBrandEmoji } from '@/lib/brandEmoji'
+  Top: 'var(--text-muted)',
+}
 
-  export type CollectionFragrance = {
-  ...
-  function FragranceImage({ imageUrl, brand, name }: { imageUrl: string | null; brand: string; name: string }) {
-    const [failed, setFailed] = useState(false)
+function FragranceImage({ imageUrl, brand, name }: { imageUrl: string | null; brand: string; name: string }) {
+  const [failed, setFailed] = useState(false)
 
-    if (!imageUrl || failed) {
-      return (
-        <div
-          className="w-full aspect-square flex flex-col items-center justify-center rounded-[10px] p-2"
-          style={{ background: 'linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%)' }}
-        >
-          <span style={{ fontSize: 32 }}>{getBrandEmoji(brand)}</span>
-          <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', textAlign: 'center', lineHeight: '12px', marginTop: 4 }}>
-            {brand}
-          </p>
-          <p style={{ fontSize: 11, color: 'var(--text)', fontFamily: 'var(--font-display)', textAlign: 'center', lineHeight: '14px', marginTop: 2, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            {name.length > 24 ? name.slice(0, 22) + '…' : name}
-          </p>
-        </div>
-      )
-    }
-
+  if (!imageUrl || failed) {
+    return (
+      <div
+        className="w-full aspect-square flex flex-col items-center justify-center rounded-[10px] p-2"
+        style={{ background: 'linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%)' }}
+      >
+        <span style={{ fontSize: 32 }}>{getBrandEmoji(brand)}</span>
+        <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', textAlign: 'center', lineHeight: '12px', marginTop: 4 }}>
+          {brand}
+        </p>
+        <p style={{ fontSize: 11, color: 'var(--text)', fontFamily: 'var(--font-display)', textAlign: 'center', lineHeight: '14px', marginTop: 2, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          {name.length > 24 ? name.slice(0, 22) + '…' : name}
+        </p>
+      </div>
+    )
   }
 
   return (
@@ -436,7 +434,7 @@ export default function CollectionClient({ fragrances }: { fragrances: Collectio
                   style={{ maxHeight: '40vh', border: '1px solid var(--line)', borderRadius: 'var(--r-card)', background: 'var(--bg)' }}
                 >
                   {isLoadingPicker ? (
-                    <div className="p-8"><LoadingShimmer height={40} /></div>
+                    <div className="p-8"><LoadingShimmer variant="line" /></div>
                   ) : pickerFiltered.length === 0 ? (
                     <p className="p-8 text-center text-sm text-[var(--text-muted)]">No fragrances found</p>
                   ) : (
