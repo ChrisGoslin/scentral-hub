@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useTransition, useEffect } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import Button from '@/components/ui/Button'
@@ -311,14 +312,54 @@ export default function YouClient(props: YouClientProps) {
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--text)', lineHeight: '34px' }}>You</h1>
         </div>
 
-        <div className="flex flex-col items-center justify-center px-6 py-20 gap-6">
-          <EmptyState
-            headline="Sign in to save your formulations."
-            caption="Your saved pairings will appear here once you're signed in."
-            action={
-              <Button onClick={() => setAuthSheetOpen(true)}>Sign in</Button>
-            }
-          />
+        <div className="px-6 py-8 animate-up">
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--text)', lineHeight: '28px' }}>
+            See your scent profile.
+          </h2>
+          <p style={{ fontSize: 14, color: 'var(--text-muted)', marginTop: 8, lineHeight: '20px' }}>
+            Sign in to track what you wear, save combinations, and see patterns in your collection.
+          </p>
+
+          <div className="mt-6 flex flex-col gap-3">
+            {[
+              { label: 'THIS WEEK', value: 'Lattafa Asad', sub: 'Most reached for · 4 wears' },
+              { label: 'STREAK', value: '7 days', sub: "You've worn something every day this week" },
+              { label: 'SAVED', value: '3 combinations', sub: "Asad → Bade'e Al Oud · Office · 2 days ago" }
+            ].map((card, i) => (
+              <Card 
+                key={i} 
+                style={{ 
+                  padding: '14px 16px', 
+                  opacity: 0.45, 
+                  pointerEvents: 'none', 
+                  userSelect: 'none', 
+                  filter: 'blur(2px)' 
+                }}
+              >
+                <p style={{ fontSize: 10, color: 'var(--accent)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                  {card.label}
+                </p>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--text)', marginTop: 2 }}>
+                  {card.value}
+                </p>
+                <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
+                  {card.sub}
+                </p>
+              </Card>
+            ))}
+          </div>
+
+          <div className="mt-6">
+            <Button fullWidth onClick={() => setAuthSheetOpen(true)}>
+              Sign in to see yours
+            </Button>
+            <p className="mt-3 text-center" style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+              No account needed to browse —{' '}
+              <Link href="/discover" className="hover:underline transition-all" style={{ color: 'var(--accent)' }}>
+                Explore scents →
+              </Link>
+            </p>
+          </div>
         </div>
 
         <AuthSheet

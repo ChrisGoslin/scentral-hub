@@ -252,7 +252,32 @@ export default function CollectionClient({ fragrances }: { fragrances: Collectio
 
       {/* Grid */}
       <div className="px-4 py-3">
-        {filtered.length === 0 ? (
+        {ownedOnly && ownedFragrances.length === 0 ? (
+          <div className="max-w-[360px] mx-auto pt-12 flex flex-col items-center text-center animate-up">
+            <div className="w-8 h-[2px] mb-6" style={{ background: 'var(--accent)' }} />
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 26, lineHeight: '32px', color: 'var(--text)' }}>
+              Your collection starts here.
+            </h2>
+            <p style={{ fontSize: 14, lineHeight: '22px', color: 'var(--text-muted)', marginTop: 12 }}>
+              Add your first bottle and Scentral will help you get more from it — layering combos, inspired-by alternatives, and what to reach for next.
+            </p>
+            <div className="mt-7 w-full">
+              <Link href="/discover" className="block w-full">
+                <Button fullWidth>Explore 280+ Scents</Button>
+              </Link>
+            </div>
+            <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 16 }}>
+              Already have bottles?{' '}
+              <Link 
+                href="/layering" 
+                className="hover:underline transition-all" 
+                style={{ color: 'var(--accent)' }}
+              >
+                Add one manually →
+              </Link>
+            </p>
+          </div>
+        ) : filtered.length === 0 ? (
           <EmptyState
             headline="No matches"
             caption="Try adjusting your filters or search term."
