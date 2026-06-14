@@ -5,18 +5,27 @@ import Link from 'next/link'
 import Chip from '@/components/ui/Chip'
 import EmptyState from '@/components/ui/EmptyState'
 import { getBrandEmoji } from '@/lib/brandEmoji'
+import { createClient } from '@/utils/supabase/client'
 
 export type DiscoverFragrance = {
   id: string
   brand: string
   name: string
+  full_name: string
   family: string
   projection: string
   optimal_season: string | null
   plain_description: string | null
   inspired_by: string | null
   image_url: string | null
+  rating: number | null
+  created_at: string
 }
+
+// ── Sort types ───────────────────────────────────────────────────────────────
+
+type SortOption = 'A–Z' | 'Top Rated' | 'Newest' | 'Most Popular'
+const SORT_OPTIONS: SortOption[] = ['A–Z', 'Top Rated', 'Newest', 'Most Popular']
 
 // ── Filter maps ──────────────────────────────────────────────────────────────
 
@@ -85,12 +94,19 @@ function FragranceImage({ imageUrl, brand, name }: { imageUrl: string | null; br
 type Props = {
   fragrances: DiscoverFragrance[]
   error: string | null
+  hasMore: boolean
+  totalCount: number
 }
 
-export default function DiscoverClient({ fragrances, error }: Props) {
+export default function DiscoverClient({ fragrances, error, hasMore, totalCount }: Props) {
+  const [localFragrances, setLocalFragrances] = useState<DiscoverFragrance[]>(fragrances)
+  const [hasMoreLocal, setHasMoreLocal]       = useState(hasMore)
+  const [loadingMore, setLoadingMore]         = useState(false)
+
   const [feel, setFeel]           = useState<string | null>(null)
   const [longevity, setLongevity] = useState<string | null>(null)
   const [brand, setBrand]         = useState<string | null>(null)
+  const [sort, setSort]           = useState<SortOption>('A–Z')
   const [vibeActive, setVibeActive] = useState(false)
 
   const [wishlist, setWishlist]             = useState<Set<string>>(new Set())
@@ -101,13 +117,19 @@ export default function DiscoverClient({ fragrances, error }: Props) {
   const [searchFocused, setSearchFocused] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // On mount: read scentral_vibe and scentral_wishlist from localStorage
+  // On mount: read scentral_vibe, sort, and scentral_wishlist from localStorage
   useEffect(() => {
     const vibe = localStorage.getItem('scentral_vibe')
     if (vibe && VIBE_TO_FEEL[vibe]) {
       setFeel(VIBE_TO_FEEL[vibe])
       setVibeActive(true)
     }
+
+    const savedSort = localStorage.getItem('scentral_discover_sort') as SortOption
+    if (savedSort && SORT_OPTIONS.includes(savedSort)) {
+      setSort(savedSort)
+    }
+
     try {
       const stored = localStorage.getItem('scentral_wishlist')
       if (stored) setWishlist(new Set(JSON.parse(stored) as string[]))
@@ -124,6 +146,11 @@ export default function DiscoverClient({ fragrances, error }: Props) {
     })
   }
 
+  // Persist sort selection
+  useEffect(() => {
+    localStorage.setItem('scentral_discover_sort', sort)
+  }, [sort])
+
   // Debounce search input 200ms
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
@@ -131,8 +158,19 @@ export default function DiscoverClient({ fragrances, error }: Props) {
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
   }, [searchTerm])
 
+  const popularityMap = useMemo(() => {
+    const map: Record<string, number> = {}
+    localFragrances.forEach(f => {
+      if (f.inspired_by) {
+        const key = f.inspired_by.toLowerCase()
+        map[key] = (map[key] || 0) + 1
+      }
+    })
+    return map
+  }, [localFragrances])
+
   const filtered = useMemo(() => {
-    return fragrances.filter(f => {
+    const result = localFragrances.filter(f => {
       // Feel filter
       if (feel) {
         const families  = FEEL_FAMILIES[feel] ?? []
@@ -174,7 +212,30 @@ export default function DiscoverClient({ fragrances, error }: Props) {
 
       return true
     })
-  }, [fragrances, feel, longevity, brand, debouncedSearch, wishlist, wishlistFilter])
+
+    // Sorting
+    return result.sort((a, b) => {
+      if (sort === 'A–Z') {
+        return a.brand.localeCompare(b.brand) || a.name.localeCompare(b.name)
+      }
+      if (sort === 'Top Rated') {
+        if (a.rating === b.rating) return a.brand.localeCompare(b.brand)
+        if (a.rating === null) return 1
+        if (b.rating === null) return -1
+        return b.rating - a.rating
+      }
+      if (sort === 'Newest') {
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      }
+      if (sort === 'Most Popular') {
+        const popA = popularityMap[a.full_name.toLowerCase()] || 0
+        const popB = popularityMap[b.full_name.toLowerCase()] || 0
+        if (popA === popB) return a.brand.localeCompare(b.brand)
+        return popB - popA
+      }
+      return 0
+    })
+  }, [localFragrances, feel, longevity, brand, debouncedSearch, sort, popularityMap, wishlist, wishlistFilter])
 
   function toggleFeel(v: string) {
     setVibeActive(false)
@@ -189,14 +250,49 @@ export default function DiscoverClient({ fragrances, error }: Props) {
     setVibeActive(false)
   }
 
+  async function loadMore() {
+    setLoadingMore(true)
+    const supabase = createClient()
+    const offset = localFragrances.length
+    const { data } = await supabase
+      .from('fragrances')
+      .select('id, brand, name, full_name, family, projection, optimal_season, plain_description, inspired_by, image_url, rating, created_at')
+      .order('brand', { ascending: true })
+      .range(offset, offset + 39)
+    if (data && data.length > 0) {
+      const batch: DiscoverFragrance[] = data.map(f => ({
+        id: f.id,
+        brand: f.brand,
+        name: f.name,
+        full_name: f.full_name ?? `${f.brand} ${f.name}`,
+        family: f.family ?? '',
+        projection: f.projection ?? '',
+        optimal_season: f.optimal_season ?? null,
+        plain_description: f.plain_description ?? null,
+        inspired_by: f.inspired_by ?? null,
+        image_url: f.image_url ?? null,
+        rating: f.rating ? Number(f.rating) : null,
+        created_at: f.created_at,
+      }))
+      setLocalFragrances(prev => [...prev, ...batch])
+      setHasMoreLocal(offset + data.length < totalCount)
+    } else {
+      setHasMoreLocal(false)
+    }
+    setLoadingMore(false)
+  }
+
   const anyFilter = feel !== null || longevity !== null || brand !== null || wishlistFilter
   const anySearch = debouncedSearch.length > 0
 
   const countLabel = (() => {
-    if (!anyFilter && !anySearch) return `${fragrances.length} fragrances`
+    if (!anyFilter && !anySearch) {
+      if (localFragrances.length < totalCount) return `Showing ${localFragrances.length} of ${totalCount}`
+      return `${totalCount} fragrances`
+    }
     if (anySearch && anyFilter)   return `${filtered.length} results`
     if (anySearch)                return `${filtered.length} results for "${debouncedSearch}"`
-    return `${filtered.length} of ${fragrances.length}`
+    return `${filtered.length} of ${localFragrances.length}`
   })()
 
   if (error) {
@@ -345,6 +441,20 @@ export default function DiscoverClient({ fragrances, error }: Props) {
             </Chip>
           </div>
         </div>
+
+        {/* Sort */}
+        <div>
+          <p style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.12em', paddingLeft: 16, marginBottom: 6 }}>
+            Sort
+          </p>
+          <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingLeft: 16, paddingRight: 16, scrollbarWidth: 'none' }}>
+            {SORT_OPTIONS.map(v => (
+              <Chip key={v} selected={sort === v} onClick={() => setSort(v)} style={{ flexShrink: 0 }}>
+                {v}
+              </Chip>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Result count */}
@@ -454,6 +564,28 @@ export default function DiscoverClient({ fragrances, error }: Props) {
               </div>
             </Link>
           ))}
+        </div>
+      )}
+
+      {/* Load more */}
+      {hasMoreLocal && !anyFilter && !anySearch && (
+        <div style={{ padding: '24px 16px', textAlign: 'center' }}>
+          <button
+            onClick={loadMore}
+            disabled={loadingMore}
+            style={{
+              background: 'var(--surface)',
+              border: '1px solid var(--line)',
+              borderRadius: 'var(--r-btn)',
+              padding: '10px 32px',
+              fontSize: 13,
+              color: loadingMore ? 'var(--text-muted)' : 'var(--text)',
+              cursor: loadingMore ? 'not-allowed' : 'pointer',
+              transition: 'border-color var(--motion-fast)',
+            }}
+          >
+            {loadingMore ? 'Loading…' : 'Load more'}
+          </button>
         </div>
       )}
     </div>
