@@ -29,6 +29,7 @@ export default function BottomNav() {
         style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}
       >
         {NAV_ITEMS.map(({ label, href, Icon }) => {
+          // detail pages correctly keep My Bottles active
           const isActive = pathname === href || pathname.startsWith(`${href}/`)
           return (
             <Link

@@ -5,7 +5,12 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   return (
     <>
       <OnboardingGate />
-      <main className="flex-1 pb-20">{children}</main>
+      <main
+        className="flex-1 fade-up"
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 72px)' }}
+      >
+        {children}
+      </main>
       <BottomNav />
     </>
   )
