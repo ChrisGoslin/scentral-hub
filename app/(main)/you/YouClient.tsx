@@ -249,7 +249,7 @@ function RotationIntelligence({ weekWear, ownedCount }: { weekWear: WeekWearEntr
   )
 }
 
-function SettingsSection({ email, onSignOut, signingOut }: { email: string; onSignOut: () => void; signingOut: boolean }) {
+function SettingsSection({ email, onSignOut, signingOut, onReset }: { email: string; onSignOut: () => void; signingOut: boolean; onReset: () => void }) {
   return (
     <div className="flex flex-col gap-1" style={{ borderTop: '1px solid var(--line)', paddingTop: 20 }}>
       <p style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
@@ -279,6 +279,15 @@ function SettingsSection({ email, onSignOut, signingOut }: { email: string; onSi
         </div>
       </div>
 
+      {/* Reset preferences */}
+      <button
+        onClick={onReset}
+        className="text-left py-3 w-full transition-colors"
+        style={{ fontSize: 14, color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer', borderBottom: '1px solid var(--line)' }}
+      >
+        Reset my preferences
+      </button>
+
       {/* Sign out */}
       <button
         onClick={onSignOut}
@@ -303,6 +312,12 @@ export default function YouClient(props: YouClientProps) {
       await supabase.auth.signOut()
       router.refresh()
     })
+  }
+
+  function handleReset() {
+    localStorage.removeItem('scentral_onboarded')
+    localStorage.removeItem('scentral_vibe')
+    router.push('/onboarding')
   }
 
   if (props.state === 'signed-out') {
@@ -469,6 +484,7 @@ export default function YouClient(props: YouClientProps) {
           email={email}
           onSignOut={handleSignOut}
           signingOut={signingOut}
+          onReset={handleReset}
         />
       </div>
     </div>

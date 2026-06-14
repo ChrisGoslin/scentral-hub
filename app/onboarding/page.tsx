@@ -17,6 +17,14 @@ export default function OnboardingPage() {
   const [step1Choices, setStep1Choices] = useState<string[]>([])
   const [step2Choice, setStep2Choice] = useState<string>('')
   const [step3Choice, setStep3Choice] = useState<string>('')
+  const [isAlreadyOnboarded, setIsAlreadyOnboarded] = useState(false)
+
+  // Guard: if already onboarded, show a static "you're set up" screen
+  useEffect(() => {
+    if (localStorage.getItem('scentral_onboarded') === 'true') {
+      setIsAlreadyOnboarded(true)
+    }
+  }, [])
 
   // Handle step transitions with a simple fade
   const transitionTo = (next: Step) => {
@@ -60,6 +68,29 @@ export default function OnboardingPage() {
     (step === 1 && step1Choices.length === 0) || 
     (step === 2 && !step2Choice) || 
     (step === 3 && !step3Choice)
+
+  if (isAlreadyOnboarded) {
+    return (
+      <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] flex flex-col items-center justify-center px-6">
+        <div className="w-full max-w-[480px] text-center" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
+          <span style={{ fontSize: 48, lineHeight: 1 }}>✓</span>
+          <h1 className="text-2xl font-serif">You&apos;re already set up</h1>
+          <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: '1.5' }}>
+            Your preferences are saved. Head to Discover to find your next scent.
+          </p>
+          <Link href="/discover" style={{ width: '100%' }}>
+            <Button fullWidth>Back to Discover →</Button>
+          </Link>
+          <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+            Want to redo it? Go to{' '}
+            <Link href="/you" style={{ color: 'var(--accent)' }}>
+              You → Reset my preferences
+            </Link>
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] flex flex-col items-center">
