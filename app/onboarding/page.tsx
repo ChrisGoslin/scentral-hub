@@ -1,155 +1,193 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Chip from '@/components/ui/Chip'
+import Button from '@/components/ui/Button'
 
 type Step = 1 | 2 | 3
 
 export default function OnboardingPage() {
   const router = useRouter()
   const [step, setStep] = useState<Step>(1)
-  const [selections, setSelections] = useState({
-    experience: '',
-    vibe: '',
-    goal: ''
-  })
+  const [fade, setFade] = useState(true)
+  const [isReady, setIsReady] = useState(false)
 
-  const nextStep = () => setStep((s) => (s + 1) as Step)
-  const prevStep = () => setStep((s) => (s - 1) as Step)
+  const [step1Choices, setStep1Choices] = useState<string[]>([])
+  const [step2Choice, setStep2Choice] = useState<string>('')
+  const [step3Choice, setStep3Choice] = useState<string>('')
 
-  const handleSelection = (field: string, value: string) => {
-    setSelections(prev => ({ ...prev, [field]: value }))
-    if (step < 3) {
-      nextStep()
+  // Handle step transitions with a simple fade
+  const transitionTo = (next: Step) => {
+    setFade(false)
+    setTimeout(() => {
+      setStep(next)
+      setFade(true)
+    }, 200)
+  }
+
+  const handleFinish = () => {
+    const vibeMap: Record<string, string> = {
+      '🔥 Warm & Cosy': 'warm',
+      '💧 Fresh & Clean': 'fresh',
+      '⚡ Bold & Powerful': 'bold',
+      '🌙 Soft & Subtle': 'soft',
     }
+    
+    localStorage.setItem('scentral_onboarded', 'true')
+    localStorage.setItem('scentral_vibe', vibeMap[step3Choice] || 'fresh')
+    router.push('/discover')
   }
 
-  const finishOnboarding = () => {
-    // In a real app, we'd save these preferences. 
-    // For the MVP, we just route them to the relevant discovery area.
-    router.push('/collection?browse=true')
-  }
+  const step1Options = ['Nothing yet', '1–2 bottles', 'A few (3–5)', '5+ and growing']
+  const step2Options = [
+    'Lasts all day without reapplying',
+    'People notice when I walk past',
+    'Safe for the office',
+    'Finding cheaper alternatives to expensive scents',
+    'All of the above'
+  ]
+
+  const vibeCards = [
+    { label: '🔥 Warm & Cosy', sub: 'Rich, amber, smoky. Stays close to skin.' },
+    { label: '💧 Fresh & Clean', sub: 'Light, citrus, crisp. Great for day wear.' },
+    { label: '⚡ Bold & Powerful', sub: 'Loud, commanding, unforgettable.' },
+    { label: '🌙 Soft & Subtle', sub: 'Delicate, skin-close, intimate.' }
+  ]
+
+  const isNextDisabled = 
+    (step === 1 && step1Choices.length === 0) || 
+    (step === 2 && !step2Choice) || 
+    (step === 3 && !step3Choice)
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] flex flex-col items-center justify-center px-6 py-20 transition-colors duration-700">
-      <div className="max-w-xl w-full space-y-12 fade-up">
+    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] flex flex-col items-center">
+      <div className="w-full max-w-[480px] px-6 pt-8 pb-10 flex flex-col min-h-screen">
         
-        {/* Progress header */}
-        <div className="flex justify-between items-center mb-8">
-          <div className="flex gap-2">
-            {[1, 2, 3].map((s) => (
-              <div 
-                key={s} 
-                className={`h-1 w-8 rounded-full transition-all duration-500 ${step >= s ? 'bg-[var(--accent)]' : 'bg-[var(--line)]'}`} 
-              />
-            ))}
-          </div>
-          <Link href="/" className="text-[10px] uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors">
-            Exit
-          </Link>
+        {/* Progress Header */}
+        <div className="flex gap-2 mb-12">
+          {[1, 2, 3].map((s) => (
+            <div 
+              key={s} 
+              className={`h-1 flex-1 rounded-full transition-all duration-500 ${
+                step >= s ? 'bg-[var(--accent)]' : 'bg-[var(--line)]'
+              }`} 
+            />
+          ))}
         </div>
 
-        {/* Step 1: Experience Level */}
-        {step === 1 && (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <div className="space-y-2">
-              <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--accent)] font-bold">Welcome to Scentral</p>
-              <h1 className="text-4xl font-serif italic tracking-tight">How many bottles are in your collection right now?</h1>
+        {/* Content Area */}
+        <div 
+          className={`flex-1 transition-all duration-300 ${
+            fade ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+          }`}
+        >
+          {step === 1 && (
+            <div className="space-y-8">
+              <header className="space-y-2">
+                <h1 className="text-2xl font-serif leading-tight">What's in your collection right now?</h1>
+                <p className="text-sm text-[var(--text-muted)] font-light leading-relaxed">
+                  Don't worry if it's nothing — that's where most people start.
+                </p>
+              </header>
+              <div className="flex flex-wrap gap-3">
+                {step1Options.map((opt) => (
+                  <Chip
+                    key={opt}
+                    selected={step1Choices.includes(opt)}
+                    onClick={() => {
+                      setStep1Choices(prev => 
+                        prev.includes(opt) ? prev.filter(i => i !== opt) : [...prev, opt]
+                      )
+                    }}
+                  >
+                    {opt}
+                  </Chip>
+                ))}
+              </div>
             </div>
-            <div className="grid gap-4">
-              {[
-                { id: 'new', label: 'None, I\'m just starting out', sub: 'I want to find my first signature scent.' },
-                { id: 'occasional', label: 'One or two', sub: 'I have a few for work and going out.' },
-                { id: 'collector', label: 'I\'ve started collecting', sub: 'I have 5+ and I\'m looking for hidden gems.' }
-              ].map((opt) => (
-                <button
-                  key={opt.id}
-                  onClick={() => handleSelection('experience', opt.id)}
-                  className="w-full text-left bg-[var(--surface)] border border-[var(--line)] p-6 transition-all hover:border-[var(--accent)] group shadow-sm"
-                >
-                  <p className="text-sm font-bold uppercase tracking-widest group-hover:text-[var(--accent)] transition-colors">{opt.label}</p>
-                  <p className="text-xs text-[var(--text-muted)] mt-1 font-light">{opt.sub}</p>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+          )}
 
-        {/* Step 2: Vibe / Preference */}
-        {step === 2 && (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <div className="space-y-2">
-              <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--accent)] font-bold">Your Taste</p>
-              <h1 className="text-4xl font-serif italic tracking-tight">What kind of scents usually catch your nose?</h1>
-            </div>
-            <div className="grid gap-4">
-              {[
-                { id: 'fresh', label: 'Fresh & Clean', sub: 'Crisp citrus, ocean air, and clean laundry vibes.' },
-                { id: 'warm', label: 'Warm & Rich', sub: 'Amber, sweet vanilla, and spices that last all day.' },
-                { id: 'bold', label: 'Dark & Woody', sub: 'Leather, oud, and earthy woods with a bold presence.' },
-                { id: 'undecided', label: 'I\'m not sure yet', sub: 'Show me the best-sellers and crowd-pleasers.' }
-              ].map((opt) => (
-                <button
-                  key={opt.id}
-                  onClick={() => handleSelection('vibe', opt.id)}
-                  className="w-full text-left bg-[var(--surface)] border border-[var(--line)] p-6 transition-all hover:border-[var(--accent)] group shadow-sm"
-                >
-                  <p className="text-sm font-bold uppercase tracking-widest group-hover:text-[var(--accent)] transition-colors">{opt.label}</p>
-                  <p className="text-xs text-[var(--text-muted)] mt-1 font-light">{opt.sub}</p>
-                </button>
-              ))}
-            </div>
-            <button onClick={prevStep} className="text-[10px] uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--text)] transition-colors">
-              ← Back
-            </button>
-          </div>
-        )}
-
-        {/* Step 3: Core Pain Point / Goal */}
-        {step === 3 && (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <div className="space-y-2">
-              <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--accent)] font-bold">The Goal</p>
-              <h1 className="text-4xl font-serif italic tracking-tight">What\'s the one thing you want to solve first?</h1>
-            </div>
-            <div className="grid gap-4">
-              {[
-                { id: 'longevity', label: 'Scent fading too fast', sub: 'I want scents that stay on my skin from morning to night.' },
-                { id: 'inspired', label: 'Finding cheaper alternatives', sub: 'I want to find luxury smells at "Christopher" prices.' },
-                { id: 'layering', label: 'Creating something unique', sub: 'I want to learn how to combine bottles I already own.' }
-              ].map((opt) => (
-                <button
-                  key={opt.id}
-                  onClick={() => handleSelection('goal', opt.id)}
-                  className="w-full text-left bg-[var(--surface)] border border-[var(--line)] p-6 transition-all hover:border-[var(--accent)] group shadow-sm"
-                >
-                  <p className="text-sm font-bold uppercase tracking-widest group-hover:text-[var(--accent)] transition-colors">{opt.label}</p>
-                  <p className="text-xs text-[var(--text-muted)] mt-1 font-light">{opt.sub}</p>
-                </button>
-              ))}
-            </div>
-            <div className="flex justify-between items-center pt-4">
-              <button onClick={prevStep} className="text-[10px] uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--text)] transition-colors">
+          {step === 2 && (
+            <div className="space-y-8">
+              <header className="space-y-2">
+                <h1 className="text-2xl font-serif leading-tight">What do you care about most?</h1>
+              </header>
+              <div className="flex flex-col gap-3">
+                {step2Options.map((opt) => (
+                  <Chip
+                    key={opt}
+                    className="justify-start"
+                    selected={step2Choice === opt}
+                    onClick={() => setStep2Choice(opt)}
+                  >
+                    {opt}
+                  </Chip>
+                ))}
+              </div>
+              <button 
+                onClick={() => transitionTo(1)}
+                className="text-xs uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--text)] transition-colors"
+              >
                 ← Back
               </button>
+            </div>
+          )}
+
+          {step === 3 && (
+            <div className="space-y-8">
+              <header className="space-y-2">
+                <h1 className="text-2xl font-serif leading-tight">What kind of scents do you reach for?</h1>
+              </header>
+              <div className="grid grid-cols-2 gap-4">
+                {vibeCards.map((vibe) => (
+                  <div
+                    key={vibe.label}
+                    onClick={() => setStep3Choice(vibe.label)}
+                    className={`p-4 rounded-[var(--r-card)] bg-[var(--surface)] border transition-all cursor-pointer flex flex-col gap-2 ${
+                      step3Choice === vibe.label 
+                        ? 'border-[var(--accent)] shadow-[0_0_0_1px_var(--accent)]' 
+                        : 'border-[var(--line)]'
+                    }`}
+                  >
+                    <p className="text-sm font-bold">{vibe.label}</p>
+                    <p className="text-[11px] text-[var(--text-muted)] leading-tight font-light">{vibe.sub}</p>
+                  </div>
+                ))}
+              </div>
               <button 
-                onClick={finishOnboarding}
-                className="bg-[var(--accent)] text-white px-10 py-4 rounded-[var(--r-btn)] shadow-sm transition-all hover:bg-[var(--accent-press)] active:scale-95 font-bold uppercase tracking-widest text-[10px]"
+                onClick={() => transitionTo(2)}
+                className="text-xs uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--text)] transition-colors"
               >
-                Let\'s begin
+                ← Back
               </button>
             </div>
-          </div>
-        )}
-
-        {/* Footer note for Gavan */}
-        <div className="pt-10 border-t border-[var(--line)]">
-          <p className="text-[11px] text-[var(--text-muted)] font-light leading-relaxed italic">
-            "You don\'t need to know note pyramids or chemical concentrations to find a great scent. 
-            We use plain language to bridge the gap between what you know and the inspired-by world."
-          </p>
+          )}
         </div>
+
+        {/* Footer Actions */}
+        <footer className="mt-12 space-y-6">
+          <Button
+            fullWidth
+            disabled={isNextDisabled}
+            onClick={() => {
+              if (step < 3) transitionTo((step + 1) as Step)
+              else handleFinish()
+            }}
+          >
+            {step === 3 ? 'Finish' : 'Next'}
+          </Button>
+
+          <div className="text-center">
+            <Link 
+              href="/discover"
+              className="text-xs uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors"
+            >
+              Skip for now →
+            </Link>
+          </div>
+        </footer>
       </div>
     </div>
   )
