@@ -13,6 +13,21 @@ const PHASE_LABEL: Record<number, string> = {
   3: 'Top',
 }
 
+const SEASON_CHIP: Record<string, string> = {
+  'High Heat':     '☀️ Summer',
+  'All-Year':      '📅 All year',
+  'Winter/Fall':   '🍂 Winter',
+  'Spring/Summer': '🌸 Spring',
+}
+
+const LONGEVITY_CHIP: Record<string, string> = {
+  'Beast Mode': '🔥 Lasts all day',
+  'Strong':     '💪 Long-lasting',
+  'Moderate':   '⏱ A few hours',
+  'Soft':       '🌤 Light wear',
+  'Light':      '🌤 Light wear',
+}
+
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
 }
@@ -25,7 +40,7 @@ export default async function FragranceDetailPage({ params }: { params: Promise<
   const [{ data, error }, { data: collectionRow }] = await Promise.all([
     supabase
       .from('fragrances')
-      .select('id, brand, name, phase, phase_label, family, projection, anosmia_risk, lean, rating, image_url, use_case, spritz_count, application_zone, maturation, inspired_by, is_user_created')
+      .select('id, brand, name, phase, phase_label, family, projection, anosmia_risk, lean, rating, image_url, use_case, spritz_count, application_zone, maturation, inspired_by, is_user_created, optimal_season')
       .eq('id', id)
       .single(),
     supabase
@@ -52,6 +67,13 @@ export default async function FragranceDetailPage({ params }: { params: Promise<
     inspiredByRef = refRow ?? null
   }
   const phaseLabel = PHASE_LABEL[f.phase] ?? f.phase_label
+
+  const goodForChips = [
+    f.optimal_season ? SEASON_CHIP[f.optimal_season] : null,
+    f.projection ? LONGEVITY_CHIP[f.projection] : null,
+    f.use_case ? `📍 ${f.use_case.charAt(0).toUpperCase()}${f.use_case.slice(1)}` : null,
+    f.lean ? `🎯 ${f.lean}` : null,
+  ].filter((c): c is string => Boolean(c))
 
   const now = new Date()
   const readyAt = collectionRow?.maceration_ready_at ? new Date(collectionRow.maceration_ready_at) : null
@@ -181,6 +203,30 @@ export default async function FragranceDetailPage({ params }: { params: Promise<
           )}
         </div>
 
+        {/* Good for — context chips */}
+        {goodForChips.length > 0 && (
+          <div>
+            <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--text-muted)', marginBottom: 8 }}>
+              Good for
+            </p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
+              {goodForChips.map(chip => (
+                <span key={chip} style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  background: 'var(--surface-2)',
+                  border: '1px solid var(--line)',
+                  borderRadius: 999,
+                  padding: '6px 14px',
+                  fontSize: 12,
+                  color: 'var(--text-muted)',
+                }}>
+                  {chip}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Sensory Anatomy */}
         {f.application_zone && (
           <SensoryAnatomy zone={f.application_zone} />
@@ -234,7 +280,13 @@ export default async function FragranceDetailPage({ params }: { params: Promise<
 
         {/* CTA */}
         <Link href="/layering">
-          <Button fullWidth>Use in Lab →</Button>
+          <Button fullWidth>Try layering this →</Button>
+        </Link>
+        <Link
+          href="/discover"
+          style={{ fontSize: 13, color: 'var(--text-muted)', textAlign: 'center', display: 'block', padding: 8 }}
+        >
+          Back to Discover
         </Link>
       </div>
     </div>
