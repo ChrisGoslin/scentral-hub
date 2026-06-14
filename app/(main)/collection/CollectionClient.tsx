@@ -1,10 +1,16 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/utils/supabase/client'
 import Chip from '@/components/ui/Chip'
 import Card from '@/components/ui/Card'
 import EmptyState from '@/components/ui/EmptyState'
+import Button from '@/components/ui/Button'
+import Sheet from '@/components/ui/Sheet'
+import ErrorInline from '@/components/ui/ErrorInline'
+import LoadingShimmer from '@/components/ui/LoadingShimmer'
 
 export type CollectionFragrance = {
   id: string
@@ -141,10 +147,85 @@ function FragranceCard({ f }: { f: CollectionFragrance }) {
 }
 
 export default function CollectionClient({ fragrances }: { fragrances: CollectionFragrance[] }) {
+  const router = useRouter()
+  const supabase = createClient()
   const [phaseFilter, setPhaseFilter] = useState<PhaseFilter>('All')
   const [seasonFilter, setSeasonFilter] = useState<SeasonFilter>('All')
   const [search, setSearch] = useState('')
   const [ownedOnly, setOwnedOnly] = useState(false)
+
+  // Add bottle sheet state
+  const [isAddSheetOpen, setIsAddSheetOpen] = useState(false)
+  const [pickerSearch, setPickerSearch] = useState('')
+  const [allFragrances, setAllFragrances] = useState<any[]>([])
+  const [isLoadingPicker, setIsLoadingPicker] = useState(false)
+  const [pickerError, setPickerError] = useState<string | null>(null)
+  const [selectedToConfirm, setSelectedToConfirm] = useState<any | null>(null)
+  const [isAdding, setIsAdding] = useState(false)
+  const [addSuccess, setAddSuccess] = useState(false)
+
+  // Fetch all fragrances for picker once
+  useEffect(() => {
+    if (isAddSheetOpen && allFragrances.length === 0) {
+      const fetchAll = async () => {
+        setIsLoadingPicker(true)
+        setPickerError(null)
+        const { data, error } = await supabase
+          .from('fragrances')
+          .select('id, brand, name')
+          .order('brand', { ascending: true })
+        
+        if (error) setPickerError(error.message)
+        else setAllFragrances(data ?? [])
+        setIsLoadingPicker(false)
+      }
+      fetchAll()
+    }
+  }, [isAddSheetOpen, allFragrances.length, supabase])
+
+  const pickerFiltered = useMemo(() => {
+    if (!pickerSearch.trim()) return allFragrances.slice(0, 50) // Show first 50 when idle
+    const q = pickerSearch.toLowerCase()
+    return allFragrances.filter(f => 
+      f.brand.toLowerCase().includes(q) || f.name.toLowerCase().includes(q)
+    ).slice(0, 100)
+  }, [allFragrances, pickerSearch])
+
+  async function handleAddBottle() {
+    if (!selectedToConfirm) return
+    setIsAdding(true)
+    setPickerError(null)
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      setPickerError('You must be signed in to add bottles.')
+      setIsAdding(false)
+      return
+    }
+
+    const { error } = await supabase
+      .from('collections')
+      .insert({
+        user_id: user.id,
+        fragrance_id: selectedToConfirm.id,
+        status: 'owned'
+      })
+
+    if (error) {
+      setPickerError(error.message)
+      setIsAdding(false)
+    } else {
+      setAddSuccess(true)
+      setIsAdding(false)
+      setTimeout(() => {
+        setIsAddSheetOpen(false)
+        setAddSuccess(false)
+        setSelectedToConfirm(null)
+        setPickerSearch('')
+        router.refresh()
+      }, 2000)
+    }
+  }
 
   const phaseFilters: PhaseFilter[] = ['All', 'Anchor', 'Modulator', 'Top']
   const seasonFilters: SeasonFilter[] = ['All', 'Summer', 'All-Year', 'Winter', 'Spring']
@@ -176,19 +257,34 @@ export default function CollectionClient({ fragrances }: { fragrances: Collectio
               {filtered.length} of {fragrances.length} scents
             </p>
           </div>
-          {/* Owned toggle */}
-          <button
-            onClick={() => setOwnedOnly(o => !o)}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-full transition-all"
-            style={{
-              background: ownedOnly ? 'var(--accent)' : 'var(--surface)',
-              border: '1px solid var(--line)',
-              color: ownedOnly ? 'white' : 'var(--text-muted)',
-              fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em',
-            }}
-          >
-            {ownedOnly ? '★ My Bottles' : '☆ All'}
-          </button>
+          <div className="flex items-center gap-3">
+            {/* Add bottle button */}
+            <button
+              onClick={() => setIsAddSheetOpen(true)}
+              style={{
+                width: 32, height: 32, borderRadius: '50%',
+                background: 'var(--accent)', color: 'white',
+                border: 'none', cursor: 'pointer',
+                fontSize: 20, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                paddingBottom: 2
+              }}
+            >
+              +
+            </button>
+            {/* Owned toggle */}
+            <button
+              onClick={() => setOwnedOnly(o => !o)}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full transition-all"
+              style={{
+                background: ownedOnly ? 'var(--accent)' : 'var(--surface)',
+                border: '1px solid var(--line)',
+                color: ownedOnly ? 'white' : 'var(--text-muted)',
+                fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em',
+              }}
+            >
+              {ownedOnly ? '★ My Bottles' : '☆ All'}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -268,13 +364,13 @@ export default function CollectionClient({ fragrances }: { fragrances: Collectio
             </div>
             <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 16 }}>
               Already have bottles?{' '}
-              <Link 
-                href="/layering" 
+              <button 
+                onClick={() => setIsAddSheetOpen(true)}
                 className="hover:underline transition-all" 
-                style={{ color: 'var(--accent)' }}
+                style={{ color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, font: 'inherit' }}
               >
                 Add one manually →
-              </Link>
+              </button>
             </p>
           </div>
         ) : filtered.length === 0 ? (
@@ -290,6 +386,97 @@ export default function CollectionClient({ fragrances }: { fragrances: Collectio
           </div>
         )}
       </div>
+
+      {/* Add Bottle Sheet */}
+      <Sheet open={isAddSheetOpen} onClose={() => setIsAddSheetOpen(false)}>
+        <div className="space-y-6">
+          <header>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--text)' }}>
+              Add a bottle
+            </h2>
+            <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>
+              Search the catalogue to add to your collection.
+            </p>
+          </header>
+
+          {addSuccess ? (
+            <div className="py-12 flex flex-col items-center justify-center animate-up">
+              <span className="text-4xl mb-4">✓</span>
+              <p className="font-bold text-[var(--accent)] uppercase tracking-widest text-xs">Added to your collection</p>
+            </div>
+          ) : (
+            <>
+              <div className="space-y-4">
+                <input
+                  type="search"
+                  placeholder="Search by name or brand..."
+                  value={pickerSearch}
+                  onChange={e => setPickerSearch(e.target.value)}
+                  style={{
+                    width: '100%',
+                    background: 'var(--surface)',
+                    border: '1px solid var(--line)',
+                    borderRadius: 'var(--r-chip)',
+                    color: 'var(--text)',
+                    fontSize: 14,
+                    padding: '12px 16px',
+                    outline: 'none',
+                  }}
+                  autoFocus
+                />
+
+                {pickerError && <ErrorInline message={pickerError} />}
+
+                <div 
+                  className="overflow-y-auto space-y-1" 
+                  style={{ maxHeight: '40vh', border: '1px solid var(--line)', borderRadius: 'var(--r-card)', background: 'var(--bg)' }}
+                >
+                  {isLoadingPicker ? (
+                    <div className="p-8"><LoadingShimmer height={40} /></div>
+                  ) : pickerFiltered.length === 0 ? (
+                    <p className="p-8 text-center text-sm text-[var(--text-muted)]">No fragrances found</p>
+                  ) : (
+                    pickerFiltered.map(f => (
+                      <button
+                        key={f.id}
+                        onClick={() => setSelectedToConfirm(f)}
+                        className="w-full text-left p-3 hover:bg-[var(--surface)] transition-colors border-b border-[var(--line)] last:border-none"
+                        style={{ background: selectedToConfirm?.id === f.id ? 'var(--surface)' : 'transparent' }}
+                      >
+                        <p style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{f.brand}</p>
+                        <p style={{ fontSize: 14, color: 'var(--text)', fontFamily: 'var(--font-display)', marginTop: 1 }}>{f.name}</p>
+                      </button>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              {selectedToConfirm && (
+                <div className="p-4 bg-[var(--surface-subtle)] rounded-[var(--r-card)] border border-[var(--line)] animate-up">
+                  <p className="text-sm mb-4">
+                    Add <span className="font-bold">{selectedToConfirm.brand} {selectedToConfirm.name}</span> to your collection?
+                  </p>
+                  <div className="flex gap-4 items-center">
+                    <Button 
+                      fullWidth 
+                      onClick={handleAddBottle} 
+                      disabled={isAdding}
+                    >
+                      {isAdding ? 'Adding...' : 'Confirm'}
+                    </Button>
+                    <button 
+                      onClick={() => setSelectedToConfirm(null)}
+                      className="text-xs text-[var(--text-muted)] hover:text-[var(--text)] transition-colors underline"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </Sheet>
     </div>
   )
 }
