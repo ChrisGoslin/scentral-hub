@@ -434,7 +434,7 @@ export default function CollectionClient({ fragrances }: { fragrances: Collectio
                   style={{ maxHeight: '40vh', border: '1px solid var(--line)', borderRadius: 'var(--r-card)', background: 'var(--bg)' }}
                 >
                   {isLoadingPicker ? (
-                    <div className="p-8"><LoadingShimmer height={40} /></div>
+                    <div className="p-8"><LoadingShimmer /></div>
                   ) : pickerFiltered.length === 0 ? (
                     <p className="p-8 text-center text-sm text-[var(--text-muted)]">No fragrances found</p>
                   ) : (
