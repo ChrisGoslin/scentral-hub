@@ -11,6 +11,7 @@ import Button from '@/components/ui/Button'
 import Sheet from '@/components/ui/Sheet'
 import ErrorInline from '@/components/ui/ErrorInline'
 import LoadingShimmer from '@/components/ui/LoadingShimmer'
+import { getBrandEmoji } from '@/lib/brandEmoji'
 
 export type CollectionFragrance = {
   id: string
@@ -51,11 +52,10 @@ const PHASE_MAP: Record<number, string> = {
 const PHASE_DOT: Record<string, string> = {
   Anchor: 'var(--accent)',
   Modulator: 'var(--positive)',
-  import { getBrandEmoji } from '@/lib/brandEmoji'
+  Top: 'var(--text-muted)',
+}
 
-  export type CollectionFragrance = {
-  ...
-  function FragranceImage({ imageUrl, brand, name }: { imageUrl: string | null; brand: string; name: string }) {
+function FragranceImage({ imageUrl, brand, name }: { imageUrl: string | null; brand: string; name: string }) {
     const [failed, setFailed] = useState(false)
 
     if (!imageUrl || failed) {
@@ -74,8 +74,6 @@ const PHASE_DOT: Record<string, string> = {
         </div>
       )
     }
-
-  }
 
   return (
     <div className="w-full aspect-square rounded-[10px] overflow-hidden" style={{ background: 'var(--surface-2)' }}>
