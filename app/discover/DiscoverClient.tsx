@@ -103,6 +103,9 @@ export default function DiscoverClient({ fragrances, error, hasMore, totalCount 
   const [hasMoreLocal, setHasMoreLocal]       = useState(hasMore)
   const [loadingMore, setLoadingMore]         = useState(false)
 
+  const [wishlist, setWishlist]   = useState<string[]>([])
+  const [showSaved, setShowSaved] = useState(false)
+
   const [feel, setFeel]           = useState<string | null>(null)
   const [longevity, setLongevity] = useState<string | null>(null)
   const [brand, setBrand]         = useState<string | null>(null)
@@ -125,6 +128,11 @@ export default function DiscoverClient({ fragrances, error, hasMore, totalCount 
     const savedSort = localStorage.getItem('scentral_discover_sort') as SortOption
     if (savedSort && SORT_OPTIONS.includes(savedSort)) {
       setSort(savedSort)
+    }
+
+    const savedWishlist = localStorage.getItem('scentral_wishlist')
+    if (savedWishlist) {
+      try { setWishlist(JSON.parse(savedWishlist)) } catch { /* corrupt data — ignore */ }
     }
   }, [])
 
@@ -189,6 +197,9 @@ export default function DiscoverClient({ fragrances, error, hasMore, totalCount 
         if (!match) return false
       }
 
+      // Saved / wishlist filter
+      if (showSaved && !wishlist.includes(f.id)) return false
+
       return true
     })
 
@@ -214,7 +225,7 @@ export default function DiscoverClient({ fragrances, error, hasMore, totalCount 
       }
       return 0
     })
-  }, [localFragrances, feel, longevity, brand, debouncedSearch, sort, popularityMap])
+  }, [localFragrances, feel, longevity, brand, showSaved, wishlist, debouncedSearch, sort, popularityMap])
 
   function toggleFeel(v: string) {
     setVibeActive(false)
@@ -222,6 +233,14 @@ export default function DiscoverClient({ fragrances, error, hasMore, totalCount 
   }
   function toggleLongevity(v: string) { setLongevity(l => l === v ? null : v) }
   function toggleBrand(v: string)     { setBrand(b => b === v ? null : v) }
+
+  function toggleWishlist(id: string) {
+    setWishlist(prev => {
+      const next = prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+      localStorage.setItem('scentral_wishlist', JSON.stringify(next))
+      return next
+    })
+  }
 
   function clearVibe() {
     localStorage.removeItem('scentral_vibe')
@@ -261,13 +280,16 @@ export default function DiscoverClient({ fragrances, error, hasMore, totalCount 
     setLoadingMore(false)
   }
 
-  const anyFilter = feel !== null || longevity !== null || brand !== null
+  const anyFilter = feel !== null || longevity !== null || brand !== null || showSaved
   const anySearch = debouncedSearch.length > 0
 
   const countLabel = (() => {
     if (!anyFilter && !anySearch) {
       if (localFragrances.length < totalCount) return `Showing ${localFragrances.length} of ${totalCount}`
       return `${totalCount} fragrances`
+    }
+    if (showSaved && feel === null && longevity === null && brand === null && !anySearch) {
+      return `${filtered.length} saved`
     }
     if (anySearch && anyFilter)   return `${filtered.length} results`
     if (anySearch)                return `${filtered.length} results for "${debouncedSearch}"`
@@ -415,6 +437,9 @@ export default function DiscoverClient({ fragrances, error, hasMore, totalCount 
                 {v}
               </Chip>
             ))}
+            <Chip selected={showSaved} onClick={() => setShowSaved(s => !s)} style={{ flexShrink: 0 }}>
+              ❤ Saved
+            </Chip>
           </div>
         </div>
 
@@ -477,8 +502,34 @@ export default function DiscoverClient({ fragrances, error, hasMore, totalCount 
                 onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--accent)')}
                 onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--line)')}
               >
-                {/* Image */}
-                <FragranceImage imageUrl={f.image_url} brand={f.brand} name={f.name} />
+                {/* Image + wishlist toggle */}
+                <div style={{ position: 'relative' }}>
+                  <FragranceImage imageUrl={f.image_url} brand={f.brand} name={f.name} />
+                  <button
+                    onClick={e => { e.preventDefault(); e.stopPropagation(); toggleWishlist(f.id) }}
+                    aria-label={wishlist.includes(f.id) ? 'Remove from wishlist' : 'Add to wishlist'}
+                    style={{
+                      position: 'absolute',
+                      top: 6,
+                      right: 6,
+                      width: 28,
+                      height: 28,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: 'color-mix(in srgb, var(--bg) 70%, transparent)',
+                      border: 'none',
+                      borderRadius: '50%',
+                      cursor: 'pointer',
+                      padding: 0,
+                      color: wishlist.includes(f.id) ? 'var(--accent)' : 'var(--text-muted)',
+                    }}
+                  >
+                    <svg width={18} height={18} viewBox="0 0 24 24" fill={wishlist.includes(f.id) ? 'var(--accent)' : 'none'} stroke={wishlist.includes(f.id) ? 'var(--accent)' : 'currentColor'} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                    </svg>
+                  </button>
+                </div>
 
                 {/* Brand */}
                 <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 2 }}>
