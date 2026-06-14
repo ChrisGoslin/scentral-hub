@@ -15,20 +15,21 @@ export default async function Home() {
   const cookieStore = await cookies()
   const supabase = await createClient(cookieStore)
 
-  const [{ count: totalCount }, { count: ownedCount }] = await Promise.all([
+  const [{ count: totalCount }, { count: ownedCount }, { count: inspiredByCount }] = await Promise.all([
     supabase.from('fragrances').select('*', { count: 'exact', head: true }),
     supabase.from('fragrances').select('*', { count: 'exact', head: true }).eq('is_user_created', false).not('rating', 'is', null),
+    supabase.from('fragrances').select('*', { count: 'exact', head: true }).not('inspired_by', 'is', null),
   ])
 
   const STATS = [
     { value: String(ownedCount ?? 106), label: 'In your collection' },
     { value: String(totalCount ?? 282), label: 'Scents to explore' },
-    { value: '18+', label: 'Fragrance houses' },
+    { value: String(inspiredByCount ?? '76'), label: 'Inspired-by alternatives' },
   ]
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] flex items-center justify-center transition-colors duration-700">
-      <main className="max-w-6xl w-full px-6 py-20 grid grid-cols-1 md:grid-cols-2 gap-20 items-center fade-up">
+    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] flex flex-col items-center transition-colors duration-700">
+      <main className="max-w-6xl w-full px-6 pt-20 pb-10 grid grid-cols-1 md:grid-cols-2 gap-20 items-center fade-up">
 
         {/* Left — hero copy */}
         <section className="space-y-10">
@@ -61,20 +62,6 @@ export default async function Home() {
               Try Layering
             </Link>
           </div>
-
-          {/* Quick nav grid */}
-          <div className="grid grid-cols-2 gap-3">
-            {QUICK_LINKS.map(({ label, sub, href }) => (
-              <Link
-                key={href}
-                href={href}
-                className="group bg-[var(--surface)] border border-[var(--line)] px-5 py-4 transition-all hover:border-[var(--accent)] shadow-sm"
-              >
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)] group-hover:text-[var(--accent)] transition-colors">{label}</p>
-                <p className="text-[11px] text-[var(--text-muted)] mt-1 font-light leading-snug">{sub}</p>
-              </Link>
-            ))}
-          </div>
         </section>
 
         {/* Right — catalogue card */}
@@ -89,7 +76,7 @@ export default async function Home() {
               {STATS.map(({ value, label }) => (
                 <div key={label} className="text-center">
                   <p className="text-3xl font-bold text-[var(--accent)] font-serif">{value}</p>
-                  <p className="text-[9px] uppercase tracking-widest text-[var(--text-muted)] mt-1 font-bold">{label}</p>
+                  <p className="text-[9px] uppercase tracking-widest text-[var(--text-muted)] mt-1 font-bold leading-tight">{label}</p>
                 </div>
               ))}
             </div>
@@ -107,17 +94,67 @@ export default async function Home() {
               ))}
             </div>
           </div>
-
-          {/* Gavan hook — the Christopher moment */}
-          <div className="bg-[var(--surface)] border border-[var(--accent)] px-6 py-5 space-y-2">
-            <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--accent)] font-bold">Ever smelled something and needed it?</p>
-            <p className="text-[13px] text-[var(--text-muted)] font-light leading-relaxed">
-              Middle Eastern houses like Lattafa and Afnan make scents that smell identical to luxury designers — at a fraction of the price. Scentral helps you find them.
-            </p>
-          </div>
         </aside>
-
       </main>
+
+      {/* The Christopher Moment */}
+      <section className="max-w-6xl w-full px-6 py-20 grid grid-cols-1 md:grid-cols-2 gap-10 items-center border-y border-[var(--line)] my-10 bg-[var(--surface-subtle)]">
+        {/* Left Side — Story Card */}
+        <div className="bg-[var(--surface)] border border-[var(--line)] p-10 space-y-6 shadow-sm">
+          <div>
+            <p className="text-[10px] text-[var(--accent)] uppercase tracking-[0.3em] font-bold mb-4">How it starts</p>
+            <h2 className="text-3xl font-serif leading-tight tracking-tight italic">
+              "Your colleague pulls out a bottle."
+            </h2>
+          </div>
+          <p className="text-sm text-[var(--text-muted)] leading-relaxed font-light">
+            You recognise the scent immediately. It's your signature — the one you only buy on sale. 
+            He paid €18. You paid €140. 
+            <br /><br />
+            That's the inspired-by world. Scentral maps it.
+          </p>
+          <Link 
+            href="/discover" 
+            className="inline-block text-[10px] font-bold uppercase tracking-widest text-[var(--accent)] border-b border-[var(--accent)] pb-1 transition-all hover:pr-2"
+          >
+            See the alternatives →
+          </Link>
+        </div>
+
+        {/* Right Side — Mini Cards */}
+        <div className="space-y-4">
+          {[
+            { name: 'Lattafa Asad', inspired: 'Smells like Creed Aventus' },
+            { name: 'Afnan 9PM', inspired: 'Smells like Paco Rabanne Invictus' },
+            { name: 'Armaf Club de Nuit', inspired: 'Smells like Creed Aventus Silver Mountain' },
+          ].map((item, idx) => (
+            <div key={idx} className="bg-[var(--surface)] border-l-2 border-[var(--accent)] p-4 shadow-sm flex flex-col justify-center">
+              <p className="text-xs font-bold uppercase tracking-widest text-[var(--text)]">{item.name}</p>
+              <p className="text-[11px] text-[var(--text-muted)] font-light mt-1 italic">{item.inspired}</p>
+            </div>
+          ))}
+          <p className="text-[12px] text-[var(--text-muted)] font-light mt-4 px-1">
+            + {Math.max(0, (inspiredByCount ?? 76) - 3)} more in the catalogue
+          </p>
+        </div>
+      </section>
+
+      {/* Bottom Nav / Quick Links */}
+      <section className="max-w-6xl w-full px-6 pb-20">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {QUICK_LINKS.map(({ label, sub, href }) => (
+            <Link
+              key={href}
+              href={href}
+              className="group bg-[var(--surface)] border border-[var(--line)] px-5 py-4 transition-all hover:border-[var(--accent)] shadow-sm"
+            >
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)] group-hover:text-[var(--accent)] transition-colors">{label}</p>
+              <p className="text-[11px] text-[var(--text-muted)] mt-1 font-light leading-snug">{sub}</p>
+            </Link>
+          ))}
+        </div>
+      </section>
     </div>
   )
 }
+
