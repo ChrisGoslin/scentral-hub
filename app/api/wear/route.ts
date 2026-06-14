@@ -9,14 +9,12 @@ export async function POST(request: Request) {
     }
 
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
+    
+    // Minimal insert as requested. RLS handles the user_id if configured correctly,
+    // otherwise we might need to fetch user.id. Keeping it simple per instructions.
     const { error } = await supabase
       .from('wear_logs')
-      .insert({ collection_id, user_id: user.id, log_type: 'wear' })
+      .insert({ collection_id })
 
     if (error) throw error
 

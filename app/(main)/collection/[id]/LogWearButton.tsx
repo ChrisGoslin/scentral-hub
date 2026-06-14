@@ -9,11 +9,13 @@ export default function LogWearButton({ collectionId }: { collectionId: string }
     if (state !== 'idle') return
     setState('loading')
     try {
-      await fetch('/api/wear', {
+      const res = await fetch('/api/wear', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ collection_id: collectionId }),
       })
+      if (!res.ok) throw new Error('Failed to log')
+      
       setState('done')
       setTimeout(() => setState('idle'), 2000)
     } catch {
@@ -39,7 +41,7 @@ export default function LogWearButton({ collectionId }: { collectionId: string }
         textAlign: 'center',
       }}
     >
-      {state === 'done' ? 'Logged ✓' : state === 'loading' ? 'Logging…' : 'Log a wear today'}
+      {state === 'done' ? 'Logged ✓' : 'Log a wear'}
     </button>
   )
 }
