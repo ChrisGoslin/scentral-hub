@@ -93,19 +93,36 @@ export default function DiscoverClient({ fragrances, error }: Props) {
   const [brand, setBrand]         = useState<string | null>(null)
   const [vibeActive, setVibeActive] = useState(false)
 
+  const [wishlist, setWishlist]             = useState<Set<string>>(new Set())
+  const [wishlistFilter, setWishlistFilter] = useState(false)
+
   const [searchTerm, setSearchTerm]       = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [searchFocused, setSearchFocused] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // On mount: read scentral_vibe from localStorage and pre-select feel
+  // On mount: read scentral_vibe and scentral_wishlist from localStorage
   useEffect(() => {
     const vibe = localStorage.getItem('scentral_vibe')
     if (vibe && VIBE_TO_FEEL[vibe]) {
       setFeel(VIBE_TO_FEEL[vibe])
       setVibeActive(true)
     }
+    try {
+      const stored = localStorage.getItem('scentral_wishlist')
+      if (stored) setWishlist(new Set(JSON.parse(stored) as string[]))
+    } catch { /* ignore malformed data */ }
   }, [])
+
+  function toggleWishlist(id: string) {
+    setWishlist(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      try { localStorage.setItem('scentral_wishlist', JSON.stringify([...next])) } catch { /* ignore */ }
+      return next
+    })
+  }
 
   // Debounce search input 200ms
   useEffect(() => {
@@ -140,6 +157,9 @@ export default function DiscoverClient({ fragrances, error }: Props) {
         }
       }
 
+      // Wishlist filter
+      if (wishlistFilter && !wishlist.has(f.id)) return false
+
       // Search filter — AND with chips
       if (debouncedSearch) {
         const q = debouncedSearch.toLowerCase()
@@ -154,7 +174,7 @@ export default function DiscoverClient({ fragrances, error }: Props) {
 
       return true
     })
-  }, [fragrances, feel, longevity, brand, debouncedSearch])
+  }, [fragrances, feel, longevity, brand, debouncedSearch, wishlist, wishlistFilter])
 
   function toggleFeel(v: string) {
     setVibeActive(false)
@@ -169,7 +189,7 @@ export default function DiscoverClient({ fragrances, error }: Props) {
     setVibeActive(false)
   }
 
-  const anyFilter = feel !== null || longevity !== null || brand !== null
+  const anyFilter = feel !== null || longevity !== null || brand !== null || wishlistFilter
   const anySearch = debouncedSearch.length > 0
 
   const countLabel = (() => {
@@ -320,6 +340,9 @@ export default function DiscoverClient({ fragrances, error }: Props) {
                 {v}
               </Chip>
             ))}
+            <Chip selected={wishlistFilter} onClick={() => setWishlistFilter(w => !w)} style={{ flexShrink: 0 }}>
+              ❤ Wishlist
+            </Chip>
           </div>
         </div>
       </div>
@@ -368,8 +391,34 @@ export default function DiscoverClient({ fragrances, error }: Props) {
                 onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--accent)')}
                 onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--line)')}
               >
-                {/* Image */}
-                <FragranceImage imageUrl={f.image_url} brand={f.brand} name={f.name} />
+                {/* Image with wishlist heart */}
+                <div style={{ position: 'relative' }}>
+                  <FragranceImage imageUrl={f.image_url} brand={f.brand} name={f.name} />
+                  <button
+                    onClick={e => { e.preventDefault(); e.stopPropagation(); toggleWishlist(f.id) }}
+                    aria-label={wishlist.has(f.id) ? 'Remove from wishlist' : 'Add to wishlist'}
+                    style={{
+                      position: 'absolute',
+                      top: 6,
+                      right: 6,
+                      width: 28,
+                      height: 28,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: 'color-mix(in srgb, var(--bg) 75%, transparent)',
+                      border: 'none',
+                      borderRadius: '50%',
+                      cursor: 'pointer',
+                      padding: 0,
+                      fontSize: 18,
+                      color: wishlist.has(f.id) ? 'var(--accent)' : 'var(--text-muted)',
+                      lineHeight: 1,
+                    }}
+                  >
+                    {wishlist.has(f.id) ? '♥' : '♡'}
+                  </button>
+                </div>
 
                 {/* Brand */}
                 <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 2 }}>
