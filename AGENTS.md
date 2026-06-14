@@ -24,18 +24,38 @@ fictional features, lore like "Agent Luna / Hegemony / Shadow Branching", and ha
 - **Data:** 282 fragrances. Columns include: plain_description, inspired_by, family, projection, optimal_season, use_case, lean.
 - **Stack:** Next.js App Router, Supabase, Vercel, Tailwind. (Verify the exact Next.js version from
   package.json / node_modules — do NOT assert a version from memory.)
-- **Architecture:** Single product. 4-tab nav: Discover (`/discover`) · My Bottles (`/collection`) · Layering (`/layering`) · You (`/you`).
+- **Architecture:** Single product.
+- **Routes:**
+  - `/` (Landing page)
+  - `/discover` (Search and explore catalogue)
+  - `/collection` (My Bottles — user inventory)
+  - `/collection/[id]` (Fragrance detail view)
+  - `/layering` (Lab — combine scents)
+  - `/you` (User profile and insights)
+  - `/dna-match` (Resonance — find similar scents)
+  - `/intelligence` (Wardrobe Intelligence — gated)
+  - `/schedule` (Daily ritual planner)
+  - `/ritual/[id]` (Public shareable ritual page)
+  - `/onboarding` (3-step new user guide)
+  - `/learning` (Guides and tips)
+  - `/profile` (User settings)
+  - `/disclaimer` (Legal)
+  - `/waitlist` (Lead gen)
+- **API Routes:** `/api/aura`, `/api/chemist`, `/api/demo`, `/api/dna-match`, `/api/formulate`, `/api/fragrances`, `/api/generate-image`, `/api/layering`, `/api/scan`, `/api/schedule`, `/api/sommelier`, `/api/waitlist`.
+- **UI Component Library:** `Button`, `Disclosure`, `LoadingShimmer`, `Sheet`, `Card`, `EmptyState`, `ProGate`, `Chip`, `ErrorInline`, `SensoryAnatomy`.
+- **Tables:** `fragrances`, `collections`, `wear_logs`, `layering_combinations`, `layer_recipes`, `spritz_schedules`, `profiles`, `waitlist`.
 - **Free/Pro split:** Free = Discover, My Bottles, Layering, You. Pro = gated behind `components/ui/ProGate.tsx` (`isPro = false`). Do NOT remove gates.
+- **localStorage keys:** `scentral_onboarded`, `scentral_vibe`, `scentral_discover_sort`, `scentral_wishlist`, `scentral-environment`, `scentral-use-cases`.
 - **Personas:** See `SCENTRAL_PERSONAS.md`. Gavan (newcomer, plain language). Christopher (enthusiast, expert).
 - **Source-of-truth docs:** `AGENTS.md` (this file), `SCENTRAL_PERSONAS.md`.
 
 If a "fact" is not in these docs, the repo, or the database, it is NOT a fact yet — verify it or label it unverified.
 
 ### Known fabrications — never reintroduce
-"Morocco Marketplace Demo", "Resonance Engine / pgvector", "Alchemist Knowledge Base / dossiers",
-"300+ fragrances", "Next.js 16" (assert only if package.json confirms), "Agent Luna / Sovereign Focus Group",
+"Morocco Marketplace Demo", "Resonance Engine / pgvector" (unless referring to the `/dna-match` route), "Alchemist Knowledge Base / dossiers",
+"300+ fragrances" (canonical count is 282), "Next.js 16" (assert only if package.json confirms), "Agent Luna / Sovereign Focus Group",
 "Hegemony / Sovereignty", "Shadow Branching / autopilot-shadow", "Olfactory NFTs", "Invisible Commerce",
-and any "Elite Council breakthrough" framing.
+"Shadow Inventory", "Black Market API", and any "Elite Council breakthrough" framing.
 
 ## 2. The five safeguards (hard rules)
 - **S1 — Verify before asserting.** Never state a version, API capability, path, table/column, or third-party

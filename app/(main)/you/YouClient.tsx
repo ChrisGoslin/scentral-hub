@@ -12,6 +12,7 @@ import ErrorInline from '@/components/ui/ErrorInline'
 import LoadingShimmer from '@/components/ui/LoadingShimmer'
 import AuthSheet from '@/components/auth/AuthSheet'
 import WardrobeIntelligence from './WardrobeIntelligence'
+import { getBrandEmoji } from '@/lib/brandEmoji'
 
 export type SavedCombination = {
   id: string
@@ -29,6 +30,13 @@ export type WeekWearEntry = {
   brand: string
   name: string
   count: number
+}
+
+export type WishlistFragrance = {
+  id: string
+  brand: string
+  name: string
+  image_url: string | null
 }
 
 export type YouClientProps =
@@ -306,6 +314,45 @@ export default function YouClient(props: YouClientProps) {
   const [authSheetOpen, setAuthSheetOpen] = useState(false)
   const [signingOut, startSignOut] = useTransition()
 
+  const [wishlistItems, setWishlistItems] = useState<WishlistFragrance[]>([])
+  const [loadingWishlist, setLoadingWishlist] = useState(false)
+
+  useEffect(() => {
+    if (props.state !== 'signed-in') return
+
+    const storedWishlist = localStorage.getItem('scentral_wishlist')
+    if (!storedWishlist) {
+      setWishlistItems([])
+      return
+    }
+
+    try {
+      const ids: string[] = JSON.parse(storedWishlist)
+      if (ids.length === 0) {
+        setWishlistItems([])
+        return
+      }
+
+      const fetchWishlist = async () => {
+        setLoadingWishlist(true)
+        const supabase = createClient()
+        const { data, error } = await supabase
+          .from('fragrances')
+          .select('id, brand, name, image_url')
+          .in('id', ids)
+        
+        if (!error && data) {
+          setWishlistItems(data)
+        }
+        setLoadingWishlist(false)
+      }
+
+      fetchWishlist()
+    } catch (e) {
+      console.error('Error parsing wishlist', e)
+    }
+  }, [props.state])
+
   function handleSignOut() {
     startSignOut(async () => {
       const supabase = createClient()
@@ -442,6 +489,67 @@ export default function YouClient(props: YouClientProps) {
               </div>
             </div>
           )}
+
+          {/* Wishlist Section */}
+          <div className="mb-6">
+            <p style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 12 }}>
+              MY WISHLIST
+            </p>
+            {loadingWishlist ? (
+              <LoadingShimmer variant="line" />
+            ) : wishlistItems.length === 0 ? (
+              <EmptyState 
+                headline="Your wishlist is empty" 
+                caption="Heart a fragrance on Discover to save it here"
+              />
+            ) : (
+              <div 
+                style={{ 
+                  display: 'flex', 
+                  gap: 10, 
+                  overflowX: 'auto', 
+                  paddingBottom: 4, 
+                  scrollbarWidth: 'none',
+                  msOverflowStyle: 'none'
+                }}
+              >
+                {wishlistItems.map((item) => (
+                  <Link 
+                    key={item.id}
+                    href={`/collection/${item.id}`}
+                    style={{ 
+                      minWidth: 140, 
+                      flexShrink: 0,
+                      background: 'var(--surface)', 
+                      border: '1px solid var(--line)', 
+                      borderRadius: 'var(--r-card)', 
+                      padding: 12,
+                      textDecoration: 'none'
+                    }}
+                  >
+                    <div style={{ 
+                      width: '100%', aspectRatio: '1/1', 
+                      background: 'linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%)', 
+                      borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      overflow: 'hidden'
+                    }}>
+                      {item.image_url ? (
+                        <img src={item.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                      ) : (
+                        <span style={{ fontSize: 24 }}>{getBrandEmoji(item.brand)}</span>
+                      )}
+                    </div>
+                    <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 8 }}>
+                      {item.brand}
+                    </p>
+                    <p style={{ fontFamily: 'var(--font-display)', fontSize: 14, color: 'var(--text)', lineHeight: '18px', marginTop: 2, height: 36, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                      {item.name}
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
           
           <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 16 }}>
             {ownedCount} bottle{ownedCount === 1 ? '' : 's'} in your collection
