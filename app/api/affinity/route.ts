@@ -14,11 +14,11 @@ export async function POST(req: NextRequest) {
     if (
       typeof affinity_score !== 'number' ||
       !Number.isInteger(affinity_score) ||
-      affinity_score < 1 ||
+      affinity_score < 0 ||
       affinity_score > 20
     ) {
       return NextResponse.json(
-        { ok: false, error: 'affinity_score must be an integer between 1 and 20' },
+        { ok: false, error: 'affinity_score must be an integer between 0 and 20' },
         { status: 400 }
       )
     }

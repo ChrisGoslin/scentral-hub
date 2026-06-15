@@ -6,6 +6,7 @@ import SensoryAnatomy from '@/components/ui/SensoryAnatomy'
 import SimilarFragrances from './SimilarFragrances'
 import InspiredByClones from './InspiredByClones'
 import LogWearButton from './LogWearButton'
+import AffinityRater from './AffinityRater'
 import { cookies } from 'next/headers'
 
 const PHASE_LABEL: Record<number, string> = {
@@ -55,7 +56,7 @@ export default async function FragranceDetailPage({
       .single(),
     supabase
       .from('collections')
-      .select('id, maceration_started_at, maceration_ready_at')
+      .select('id, affinity_score, maceration_started_at, maceration_ready_at')
       .eq('fragrance_id', id)
       .maybeSingle(),
   ])
@@ -347,6 +348,12 @@ export default async function FragranceDetailPage({
         </Link>
         {collectionRow?.id && (
           <LogWearButton collectionId={collectionRow.id} initialWears={initialWears} initialStreak={initialStreak} />
+        )}
+        {collectionRow?.id && (
+          <AffinityRater
+            collectionId={collectionRow.id}
+            initialAffinityScore={collectionRow.affinity_score ?? null}
+          />
         )}
         <Link
           href="/discover"
