@@ -465,6 +465,50 @@ export default function DiscoverClient({ fragrances, error, hasMore, totalCount 
         </p>
       </div>
 
+      {/* ── New to me strip ─────────────────────────────────────────────────── */}
+      {!anyFilter && !anySearch && (() => {
+        const unseen = localFragrances.filter(f => !wishlist.includes(f.id)).slice(0, 12)
+        if (unseen.length === 0) return null
+        return (
+          <div style={{ paddingBottom: 8 }}>
+            <p style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.12em', paddingLeft: 16, marginBottom: 10 }}>
+              New to me
+            </p>
+            <div style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingLeft: 16, paddingRight: 16, scrollbarWidth: 'none' }}>
+              {unseen.map(f => (
+                <Link
+                  key={f.id}
+                  href={`/collection/${f.id}?from=discover`}
+                  style={{ textDecoration: 'none', flexShrink: 0, width: 120 }}
+                >
+                  <div style={{
+                    background: 'var(--surface)',
+                    border: '1px solid var(--line)',
+                    borderRadius: 'var(--r-card)',
+                    padding: 10,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 6,
+                    transition: 'border-color var(--motion-fast)',
+                  }}
+                    onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--accent)')}
+                    onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--line)')}
+                  >
+                    <FragranceImage imageUrl={f.image_url} brand={f.brand} name={f.name} />
+                    <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                      {f.brand}
+                    </p>
+                    <p style={{ fontFamily: 'var(--font-display)', fontSize: 12, color: 'var(--text)', lineHeight: '15px', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                      {f.name}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )
+      })()}
+
       {/* Grid */}
       {filtered.length === 0 ? (
         <div style={{ padding: '48px 16px', textAlign: 'center' }}>
