@@ -1,5 +1,5 @@
 import { createClient } from '@/utils/supabase/server'
-import CollectionFilters from './CollectionFilters'
+import WardrobeShelf from './WardrobeShelf'
 import { type CollectionFragrance } from './CollectionClient'
 import EmptyState from '@/components/ui/EmptyState'
 import Button from '@/components/ui/Button'
@@ -45,5 +45,5 @@ const collectionMap = new Map(
     status: collectionMap.get(f.id)?.status ?? null,
   }))
 
-  return <CollectionFilters fragrances={fragrances} />
+  return <WardrobeShelf fragrances={fragrances} />
 }

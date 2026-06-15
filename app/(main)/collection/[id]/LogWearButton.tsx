@@ -48,21 +48,14 @@ export default function LogWearButton({ collectionId, initialWears = 0, initialS
           textAlign: 'center',
         }}
       >
-        {state === 'done' ? 'Logged ✓' : 'Log a wear'}
+        {state === 'done'
+          ? 'Logged ✓'
+          : wears > 0
+          ? streak >= 2
+            ? `🔥 ${streak}-day streak`
+            : `Worn ${wears} time${wears !== 1 ? 's' : ''}`
+          : 'Log a wear'}
       </button>
-      
-      {wears > 0 && (
-        <div className="flex items-center justify-between px-1">
-          <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-            Worn {wears} time{wears !== 1 ? 's' : ''}
-          </p>
-          {streak >= 2 && (
-            <p style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 600 }}>
-              {streak}-day streak 🔥
-            </p>
-          )}
-        </div>
-      )}
     </div>
   )
 }
