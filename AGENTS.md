@@ -64,7 +64,7 @@ If a "fact" is not in these docs, the repo, or the database, it is NOT a fact ye
 
 ### Known fabrications — never reintroduce
 "Morocco Marketplace Demo", "Resonance Engine / pgvector" (unless referring to the `/dna-match` route), "Alchemist Knowledge Base / dossiers",
-"300+ fragrances" (canonical count is 282), "Next.js 16" (assert only if package.json confirms), "Agent Luna / Sovereign Focus Group",
+"300+ fragrances" (canonical count is 282), "Agent Luna / Sovereign Focus Group",
 "Hegemony / Sovereignty", "Shadow Branching / autopilot-shadow", "Olfactory NFTs", "Invisible Commerce",
 "Shadow Inventory", "Black Market API", and any "Elite Council breakthrough" framing.
 
@@ -191,7 +191,65 @@ after delegation. Use `verify-cli-claims` skill for high-stakes work.
 **L6 — Horizontal scroll strips clip the last item.** `paddingRight` on a flex scroll container doesn't
 extend past the last child. Add `<div style={{ flexShrink: 0, width: 16 }} />` as trailing spacer.
 
-## 10. Self-check before finishing any task
+## 10. LLM briefing block (copy-paste into Cursor / ChatGPT / other agents)
+
+Use this block when starting a new LLM session on Scentral. It is the canonical summary — keep it in sync when architecture changes.
+
+```
+# Scentral — Project Briefing
+
+## Stack (verified from package.json)
+- Next.js 16.2.9 (App Router, route groups like `(main)`)
+- React 19.2.4
+- Supabase JS 2.x — project `scentral-mvp` (lrkdwobnemczvhpixpky)
+- Deployed on Vercel → scentral-seven.vercel.app
+- Tailwind CSS + CSS variables for all colours (NO hardcoded hex values)
+- @dnd-kit/core + @dnd-kit/sortable for Living Wardrobe drag-and-drop
+
+## Aesthetic
+"Quiet luxury" — off-white/stone backgrounds, Fragrance Gold accent (#c49a3c via var(--accent)),
+editorial typography, generous whitespace. CSS variables only: var(--bg), var(--surface),
+var(--surface-2), var(--text), var(--text-muted), var(--accent), var(--line), var(--r-card), var(--r-btn).
+
+## Architecture rules
+- Server components for all data fetching. Add "use client" only when hooks or browser APIs are needed.
+- isMobile: useEffect + window.innerWidth < 480 resize listener (client components only).
+- Server component responsive sizing: use CSS math — min(45vw, 200px), clamp() — not hooks.
+- Horizontal scroll strips: add <div style={{ flexShrink: 0, width: 16 }} /> as trailing spacer.
+- iOS safe area: paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 96px)'
+- Responsive grids: repeat(auto-fit, minmax(Npx, 1fr)) — never repeat(N, 1fr) hardcoded.
+- Global CSS font scaling: clamp() on --font-size-display / --font-size-body / --font-size-label.
+- overflow-x: hidden on html, body to prevent horizontal scroll on mobile.
+
+## Database tables
+fragrances (282 rows) — plain_description, inspired_by, family, projection, optimal_season, use_case, lean, image_url
+collections — fragrance_id, affinity_score (int 1-20), maceration_started_at, status
+wear_logs — streak calculation is timezone-aware, do not break
+layering_combinations, layer_recipes, spritz_schedules, profiles, waitlist
+
+## localStorage keys
+scentral_onboarded, scentral_vibe, scentral_discover_sort, scentral_wishlist,
+scentral-environment, scentral-use-cases
+
+## Critical business logic
+- affinity_score 16-20 = Top Signatures, 8-15 = Occasion Modifiers, 1-7 = Base Anchors, null/0 = Holding Zone
+- Every dnd-kit drag-drop MUST emit cabinetSnapshot JSON event — feeds future vision pipeline, do not remove
+- rating in DB is 0-10; display as 5-star: Math.round(rating / 2)
+- isPro = false — ProGate is active. Do NOT touch /intelligence, /dna-match, /schedule pages.
+
+## Free/Pro split
+Free: /discover, /collection, /collection/[id], /layering, /you
+Pro (gated): /intelligence, /dna-match, /schedule
+
+## Scripts (run locally — sandbox has no outbound network)
+node scripts/backfill-parfumo-images.mjs --dry-run --limit=5   # Playwright, Parfumo + Fragrantica
+node scripts/migrate-images-to-storage.mjs --dry-run --limit=5 # copy images to Supabase Storage
+node scripts/smoke-test.mjs                                     # hits live Vercel URL
+
+## No secrets in code. Keys in .env.local only. NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SERVICE_KEY.
+```
+
+## 11. Self-check before finishing any task
 1. Did I verify every factual claim (paths, versions, capabilities, schema)? How?
 2. Any secrets in my output? (must be no)
 3. Did I stay within source-of-truth scope?
