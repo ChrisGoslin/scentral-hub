@@ -13,6 +13,7 @@ export type FragranceResult = {
 export function useFragranceSearch(query: string, debounceMs = 200) {
   const [results, setResults] = useState<FragranceResult[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const controllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -20,6 +21,7 @@ export function useFragranceSearch(query: string, debounceMs = 200) {
     if (!trimmed) {
       setResults([]);
       setLoading(false);
+      setError(null);
       return;
     }
 
@@ -29,9 +31,11 @@ export function useFragranceSearch(query: string, debounceMs = 200) {
       controllerRef.current = controller;
 
       setLoading(true);
+      setError(null);
       try {
+        // Fallback to the main route which was updated to accept ?q=
         const res = await fetch(
-          `/api/fragrances/search?q=${encodeURIComponent(trimmed)}`,
+          `/api/fragrances?q=${encodeURIComponent(trimmed)}`,
           { signal: controller.signal }
         );
         if (!res.ok) throw new Error('Search failed');
@@ -39,6 +43,7 @@ export function useFragranceSearch(query: string, debounceMs = 200) {
         setResults(data);
       } catch (err) {
         if (err instanceof Error && err.name === 'AbortError') return;
+        setError(err instanceof Error ? err.message : 'Unknown error');
         setResults([]);
       } finally {
         setLoading(false);
@@ -51,5 +56,5 @@ export function useFragranceSearch(query: string, debounceMs = 200) {
     };
   }, [query, debounceMs]);
 
-  return { results, loading };
+  return { results, loading, error };
 }

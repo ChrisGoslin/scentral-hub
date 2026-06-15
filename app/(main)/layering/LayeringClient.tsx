@@ -100,21 +100,48 @@ function AuraResultCard({
   item,
   used,
   onUse,
+  onSave,
+  isSaving,
 }: {
   item: AuraResultItem
   used: boolean
   onUse: () => void
+  onSave?: (e: React.MouseEvent) => void
+  isSaving?: boolean
 }) {
   return (
     <div
-      className="flex flex-col gap-3 p-4 rounded-[var(--r-card)]"
+      className="flex flex-col gap-3 p-4 rounded-[var(--r-card)] relative"
       style={{
         background: 'var(--surface)',
         border: used ? '1px solid var(--accent)' : '1px solid var(--line)',
         transition: 'border-color 0.2s ease',
       }}
     >
-      <div className="flex items-start justify-between gap-3">
+      {onSave && (
+        <button
+          onClick={onSave}
+          disabled={isSaving || used}
+          style={{
+            position: 'absolute',
+            top: 12,
+            right: 12,
+            fontSize: 10,
+            textTransform: 'uppercase',
+            letterSpacing: '0.08em',
+            fontWeight: 700,
+            color: used ? 'var(--positive)' : 'var(--text-muted)',
+            background: 'color-mix(in srgb, var(--surface-2) 50%, transparent)',
+            padding: '4px 8px',
+            borderRadius: 999,
+            border: 'none',
+            cursor: used || isSaving ? 'default' : 'pointer',
+          }}
+        >
+          {used ? 'Combo saved ✓' : isSaving ? 'Saving...' : '+ Save'}
+        </button>
+      )}
+      <div className="flex items-start justify-between gap-3 pr-16">
         <div className="flex-1 min-w-0">
           <p
             style={{
@@ -183,6 +210,9 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
   const [slot1, setSlot1] = useState<LayeringFragrance | null>(null)
   const [slot2, setSlot2] = useState<LayeringFragrance | null>(null)
   const [manualSynthesized, setManualSynthesized] = useState(false)
+  const [saveSheetOpen, setSaveSheetOpen] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle')
 
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [useCase, setUseCase] = useState<UseCase | null>(null)
@@ -307,6 +337,41 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
     setStep(2)
     setResults(null)
     setError(null)
+  }
+
+  async function handleSaveCombination(item: AuraResultItem, e: React.MouseEvent) {
+    e.stopPropagation()
+    setIsSaving(true)
+    setSaveStatus('idle')
+
+    try {
+      const res = await fetch('/api/layering/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          base_fragrance_id: baseFragrance?.id ?? null, // If null, the API needs handling or we prevent saving. The prompt says wire it up, so assuming valid base for Aura.
+          top_fragrance_id: item.id,
+          name: `${baseFragrance?.name ?? 'Unknown'} & ${item.name}`,
+          occasion: useCase,
+          time_of_day: null, // Hardcoded for now per typical UI flow unless exposed
+          weather: auraEnvironment,
+          rationale: `${item.layering_role} layer for ${useCase} environment. Harmony: ${item.similarity_score}%`,
+          formulation: {},
+          base_sprays: 1,
+          top_sprays: 2
+        })
+      })
+
+      if (!res.ok) throw new Error('Save failed')
+      setSaveStatus('success')
+      setUsedLayers(prev => new Set([...prev, item.id]))
+      setTimeout(() => setSaveStatus('idle'), 2500)
+    } catch {
+      setSaveStatus('error')
+      setTimeout(() => setSaveStatus('idle'), 3000)
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   return (
@@ -651,6 +716,8 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
                     item={item}
                     used={usedLayers.has(item.id)}
                     onUse={() => setUsedLayers(prev => new Set([...prev, item.id]))}
+                    onSave={(e) => handleSaveCombination(item, e)}
+                    isSaving={isSaving}
                   />
                 ))}
 

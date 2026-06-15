@@ -191,6 +191,13 @@ export default function OnboardingPage() {
                   </div>
                 ))}
               </div>
+              
+              {step3Choice && (
+                <p style={{ fontSize: 13, color: 'var(--text-muted)', textAlign: 'center', marginTop: 16 }}>
+                  You'll see {step3Choice} scents first on Discover
+                </p>
+              )}
+
               <button 
                 onClick={() => transitionTo(2)}
                 className="text-xs uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--text)] transition-colors"

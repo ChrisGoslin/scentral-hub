@@ -65,6 +65,10 @@ export default async function Home() {
           </div>
 
           <WaitlistForm />
+          
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', textAlign: 'center', marginTop: 16 }}>
+            Join 800+ fragrance enthusiasts already on the list
+          </p>
         </section>
 
         {/* Right — catalogue card */}

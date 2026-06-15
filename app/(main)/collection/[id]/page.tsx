@@ -76,6 +76,53 @@ export default async function FragranceDetailPage({
       .maybeSingle()
     inspiredByRef = refRow ?? null
   }
+
+  let initialWears = 0
+  let initialStreak = 0
+
+  if (collectionRow?.id) {
+    const { data: logs } = await supabase
+      .from('wear_logs')
+      .select('logged_at')
+      .eq('collection_id', collectionRow.id)
+      .order('logged_at', { ascending: false })
+
+    if (logs) {
+      initialWears = logs.length
+      if (initialWears > 0) {
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+        
+        let streakDate = new Date(today)
+        let logIndex = 0
+
+        const mostRecentWear = new Date(logs[0].logged_at)
+        mostRecentWear.setHours(0, 0, 0, 0)
+
+        // Streak counts if worn today OR yesterday
+        if (mostRecentWear.getTime() === streakDate.getTime() || mostRecentWear.getTime() === streakDate.getTime() - 86400000) {
+          initialStreak = 1
+          streakDate = new Date(mostRecentWear)
+          logIndex = 1
+          streakDate.setDate(streakDate.getDate() - 1)
+
+          while (logIndex < logs.length) {
+            const logDate = new Date(logs[logIndex].logged_at)
+            logDate.setHours(0, 0, 0, 0)
+
+            if (logDate.getTime() === streakDate.getTime()) {
+              initialStreak++
+              streakDate.setDate(streakDate.getDate() - 1)
+            } else if (logDate.getTime() < streakDate.getTime()) {
+               break;
+            }
+            logIndex++
+          }
+        }
+      }
+    }
+  }
+
   const phaseLabel = PHASE_LABEL[f.phase] ?? f.phase_label
 
   const goodForChips = [
@@ -291,7 +338,7 @@ export default async function FragranceDetailPage({
           <Button fullWidth>Try layering this →</Button>
         </Link>
         {collectionRow?.id && (
-          <LogWearButton collectionId={collectionRow.id} />
+          <LogWearButton collectionId={collectionRow.id} initialWears={initialWears} initialStreak={initialStreak} />
         )}
         <Link
           href="/discover"

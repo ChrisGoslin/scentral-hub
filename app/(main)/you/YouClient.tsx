@@ -322,40 +322,92 @@ export default function YouClient(props: YouClientProps) {
     setVibe(localStorage.getItem('scentral_vibe'))
   }, [])
 
+  const [weekWear, setWeekWear] = useState<WeekWearEntry[]>([])
+  const [ownedCount, setOwnedCount] = useState(0)
+
   useEffect(() => {
     if (props.state !== 'signed-in') return
 
+    // Fetch wishlist (existing)
     const storedWishlist = localStorage.getItem('scentral_wishlist')
-    if (!storedWishlist) {
-      setWishlistItems([])
-      return
-    }
-
-    try {
-      const ids: string[] = JSON.parse(storedWishlist)
-      if (ids.length === 0) {
-        setWishlistItems([])
-        return
-      }
-
-      const fetchWishlist = async () => {
-        setLoadingWishlist(true)
-        const supabase = createClient()
-        const { data, error } = await supabase
-          .from('fragrances')
-          .select('id, brand, name, image_url')
-          .in('id', ids)
-        
-        if (!error && data) {
-          setWishlistItems(data)
+    if (storedWishlist) {
+      try {
+        const ids: string[] = JSON.parse(storedWishlist)
+        if (ids.length > 0) {
+          const fetchWishlist = async () => {
+            setLoadingWishlist(true)
+            const supabase = createClient()
+            const { data } = await supabase
+              .from('fragrances')
+              .select('id, brand, name, image_url')
+              .in('id', ids)
+            if (data) setWishlistItems(data)
+            setLoadingWishlist(false)
+          }
+          fetchWishlist()
         }
-        setLoadingWishlist(false)
+      } catch (e) {
+        console.error('Error parsing wishlist', e)
       }
-
-      fetchWishlist()
-    } catch (e) {
-      console.error('Error parsing wishlist', e)
     }
+
+    // Fetch wear logs and collection count
+    const fetchStats = async () => {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      // Owned count
+      const { count } = await supabase
+        .from('collections')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('status', 'owned')
+      
+      setOwnedCount(count ?? 0)
+
+      // Recent wear logs (last 7 days)
+      const sevenDaysAgo = new Date()
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+
+      const { data: logs } = await supabase
+        .from('wear_logs')
+        .select(`
+          id,
+          logged_at,
+          collections (
+            fragrance_id,
+            fragrances ( brand, name )
+          )
+        `)
+        .eq('user_id', user.id)
+        .gte('logged_at', sevenDaysAgo.toISOString())
+        .order('logged_at', { ascending: false })
+
+      if (logs) {
+        const counts: Record<string, { brand: string, name: string, count: number }> = {}
+        logs.forEach((log: any) => {
+          const fid = log.collections?.fragrance_id
+          if (!fid) return
+          if (!counts[fid]) {
+            counts[fid] = {
+              brand: log.collections.fragrances?.brand ?? 'Unknown',
+              name: log.collections.fragrances?.name ?? 'Unknown',
+              count: 0
+            }
+          }
+          counts[fid].count++
+        })
+
+        const aggregated = Object.entries(counts)
+          .map(([id, info]) => ({ fragrance_id: id, ...info }))
+          .sort((a, b) => b.count - a.count)
+
+        setWeekWear(aggregated)
+      }
+    }
+    
+    fetchStats()
   }, [props.state])
 
   function handleSignOut() {
@@ -438,7 +490,7 @@ export default function YouClient(props: YouClientProps) {
     )
   }
 
-  const { email, saves, fetchError, weekWear, ownedCount } = props
+  const { email, saves, fetchError } = props
 
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh', color: 'var(--text)' }}>

@@ -32,6 +32,8 @@ export type CollectionFragrance = {
   maceration_ready_at?: string | null
   collection_added_at?: string | null
   is_user_created?: boolean | null
+  affinity_score?: number | null
+  status?: string | null
 }
 
 type SeasonFilter = 'All' | 'Summer' | 'All-Year' | 'Winter' | 'Spring'
@@ -105,6 +107,13 @@ function FragranceCard({ f }: { f: CollectionFragrance }) {
   const shortName = f.name.length > 24 ? f.name.slice(0, 22) + '…' : f.name
   const mStatus = maturationStatus(f)
 
+  let affinityBadge = null
+  if (f.affinity_score) {
+    if (f.affinity_score >= 16) affinityBadge = '★ Signature'
+    else if (f.affinity_score >= 8) affinityBadge = '◆ Occasion'
+    else if (f.affinity_score >= 1) affinityBadge = '● Base'
+  }
+
   return (
     <Card className="flex flex-col gap-2 transition-colors h-full group">
       <Link href={`/collection/${f.id}`} className="flex flex-col gap-2 flex-1">
@@ -116,9 +125,16 @@ function FragranceCard({ f }: { f: CollectionFragrance }) {
           <p style={{ fontSize: 13, color: 'var(--text)', fontFamily: 'var(--font-display)', lineHeight: '18px', marginTop: 1 }} title={f.name}>
             {shortName}
           </p>
-          <div className="flex items-center gap-1 mt-1">
-            {dot && <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: dot }} />}
-            <p style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: '14px' }}>{phaseLabel}</p>
+          <div className="flex flex-wrap items-center gap-2 mt-1">
+            <div className="flex items-center gap-1">
+              {dot && <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: dot }} />}
+              <p style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: '14px' }}>{phaseLabel}</p>
+            </div>
+            {affinityBadge && (
+              <span style={{ fontSize: 10, color: 'var(--accent)', fontWeight: 600, letterSpacing: '0.04em' }}>
+                {affinityBadge}
+              </span>
+            )}
           </div>
           {mStatus === 'maturing' && (
             <p style={{ fontSize: 10, color: 'var(--accent)', marginTop: 3, lineHeight: '13px' }}>⏳ Maturing</p>
