@@ -1,44 +1,38 @@
-'use client'
-
-import { useEffect, useState } from 'react'
+import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
-import { createClient } from '@/utils/supabase/client'
 
 type CloneRow = {
   id: string
   brand: string
   name: string
-  rating: number | null
+  image_url: string | null
 }
 
 type Props = {
   fragranceName: string
   fragranceBrand: string
+  fragranceId: string
   from?: string
 }
 
-export default function InspiredByClones({ fragranceName, fragranceBrand, from }: Props) {
-  const [clones, setClones] = useState<CloneRow[]>([])
-  const [loading, setLoading] = useState(true)
+export default async function InspiredByClones({ fragranceName, fragranceId, from }: Props) {
+  const supabase = await createClient()
 
-  useEffect(() => {
-    const supabase = createClient()
-    supabase
-      .from('fragrances')
-      .select('id, brand, name, rating')
-      .or(`inspired_by.ilike.%${fragranceName}%,inspired_by.ilike.%${fragranceBrand}%`)
-      .then(({ data }: { data: CloneRow[] | null }) => {
-        setClones(data ?? [])
-        setLoading(false)
-      })
-  }, [fragranceName, fragranceBrand])
+  const { data } = await supabase
+    .from('fragrances')
+    .select('id, brand, name, image_url')
+    .ilike('inspired_by', `%${fragranceName}%`)
+    .neq('id', fragranceId)
+    .limit(6)
 
-  if (loading || clones.length === 0) return null
+  const clones: CloneRow[] = data ?? []
+
+  if (clones.length === 0) return null
 
   return (
     <div className="flex flex-col gap-2">
       <p style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>
-        Clones in your wardrobe
+        Affordable alternatives inspired by this
       </p>
       {clones.map(c => (
         <Link
@@ -51,11 +45,6 @@ export default function InspiredByClones({ fragranceName, fragranceBrand, from }
             <p style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{c.brand}</p>
             <p style={{ fontSize: 14, color: 'var(--text)', fontFamily: 'var(--font-display)' }}>{c.name}</p>
           </div>
-          {c.rating !== null && (
-            <span style={{ fontSize: 11, color: 'var(--accent)', fontVariantNumeric: 'tabular-nums', fontWeight: 700 }}>
-              {c.rating}/10
-            </span>
-          )}
         </Link>
       ))}
     </div>

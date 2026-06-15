@@ -273,7 +273,7 @@ export default async function FragranceDetailPage({
 
         {/* Clones — shown on reference fragrances (no rating, catalogue entry) */}
         {f.rating === null && f.is_user_created === false && (
-          <InspiredByClones fragranceName={f.name} fragranceBrand={f.brand} from={from} />
+          <InspiredByClones fragranceName={f.name} fragranceBrand={f.brand} fragranceId={f.id} from={from} />
         )}
 
         {/* Anosmia — inline pill only */}
