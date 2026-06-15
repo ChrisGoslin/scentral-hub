@@ -7,11 +7,6 @@ import type { ScheduleFragrance, SavedSchedule } from './types'
 
 export const dynamic = 'force-dynamic'
 
-const publicSupabase = createPublicClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
-)
-
 export default async function SchedulePage() {
   // Pro gate — remove this block when billing is ready
   return (
