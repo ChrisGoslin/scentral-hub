@@ -8,11 +8,17 @@
  *   node scripts/backfill-parfumo-images.mjs --limit=20  (only process first N rows)
  *
  * Prerequisites:
- *   - NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in .env.local
+ *   - NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_KEY in .env.local
  *   - Run from repo root: node scripts/backfill-parfumo-images.mjs
+ *
+ * Slug conventions (discovered from live Parfumo page audit):
+ *   PRIMARY:  lowercase-hyphenated   → rare-carbon, 9pm, supremacy-not-only-intense
+ *   FALLBACK: Title_Case_underscores → Interlude_Man, Reflection_Man, Supremacy_Silver
+ * Script tries primary first, retries with fallback on 404.
  */
 
 import { createClient } from '@supabase/supabase-js'
+import { chromium } from 'playwright'
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
 
@@ -22,8 +28,8 @@ const DRY_RUN = process.argv.includes('--dry-run')
 const LIMIT_ARG = process.argv.find(a => a.startsWith('--limit='))
 const LIMIT = LIMIT_ARG ? parseInt(LIMIT_ARG.split('=')[1]) : Infinity
 
-// Delay between requests to avoid rate-limiting (ms)
-const REQUEST_DELAY = 600
+// Playwright is slower — 1.5s between items is safe
+const REQUEST_DELAY = 1500
 
 // ─── Load env ────────────────────────────────────────────────────────────────
 
@@ -59,9 +65,6 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
 
 // ─── Brand slug mapping ───────────────────────────────────────────────────────
-// Maps our DB brand name → Parfumo URL brand segment
-// Parfumo uses Title_Case with underscores (spaces → _)
-// Verified by fetching actual pages.
 
 const BRAND_SLUG = {
   'Afnan': 'Afnan_Perfumes',
@@ -93,107 +96,137 @@ const BRAND_SLUG = {
   'Zimaya': 'Zimaya',
 }
 
-// ─── Name slug transform ──────────────────────────────────────────────────────
-// Parfumo name slug: spaces → _, special chars removed, Title_Case preserved
-// Some known overrides for edge cases.
+// ─── Name slug transforms ─────────────────────────────────────────────────────
+// NAME_OVERRIDES pin exact slugs for known edge-cases (verified from live pages).
 
 const NAME_OVERRIDES = {
-  // Our DB name → Parfumo name slug
-  '9PM EDP': '9pm',
-  '9PM Elixir': '9pm-elixir',
-  'Supremacy Silver': 'Supremacy_Silver',
-  'Interlude Man': 'Interlude_Man',
-  'Interlude Woman': 'Interlude_Woman',
+  '9PM EDP':            '9pm',
+  '9PM Elixir':         '9pm-elixir',
+  'Supremacy Silver':   'Supremacy_Silver',
+  'Interlude Man':      'Interlude_Man',
+  'Interlude Woman':    'Interlude_Woman',
   'Jubilation XXV Men': 'Jubilation_25_for_Men',
-  'Dia Man': 'Dia_for_Men',
-  'Asad': 'asad-1',  // disambiguation suffix on Parfumo
+  'Dia Man':            'Dia_for_Men',
+  'Asad':               'asad-1',
+}
+
+/** Primary: lowercase-hyphenated (matches majority of Parfumo pages) */
+function toLowercaseHyphen(name) {
+  return name
+    .toLowerCase()
+    .replace(/['']/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+/** Fallback: Title_Case_with_underscores (older Parfumo entries) */
+function toTitleUnderscore(name) {
+  return name
+    .replace(/\s+/g, '_')
+    .replace(/[^a-zA-Z0-9_\-]/g, '')
 }
 
 function toParfumoNameSlug(name) {
   if (NAME_OVERRIDES[name]) return NAME_OVERRIDES[name]
-  // Replace spaces with underscores, strip characters Parfumo doesn't use
-  return name
-    .replace(/\s+/g, '_')
-    .replace(/[^a-zA-Z0-9_\-']/g, '')
+  return toLowercaseHyphen(name)
 }
 
-// ─── Fetch og:image from Parfumo ──────────────────────────────────────────────
+// ─── Sleep ────────────────────────────────────────────────────────────────────
 
-async function fetchParfumoImage(brand, name) {
+const sleep = (ms) => new Promise(r => setTimeout(r, ms))
+
+// ─── Visit one Parfumo URL and extract image ──────────────────────────────────
+
+async function fetchPageImage(page, url) {
+  await page.goto(url, { waitUntil: 'load', timeout: 30000 })
+  await sleep(800) // let post-load JS settle
+
+  const title = await page.title()
+  if (/^\s*404\s*$/.test(title) || title.toLowerCase().includes('not found')) {
+    return { imageUrl: null, is404: true }
+  }
+
+  // Primary: og:image meta tag
+  const ogImage = await page.$eval(
+    'meta[property="og:image"]',
+    el => el.getAttribute('content')
+  ).catch(() => null)
+
+  if (ogImage) {
+    return {
+      imageUrl: ogImage.replace('/perfume_social/', '/perfumes/').replace(/\?.*$/, ''),
+      is404: false,
+    }
+  }
+
+  // Fallback: any img from media.parfumo.com in the DOM
+  const domImage = await page.evaluate(() => {
+    for (const img of document.querySelectorAll('img')) {
+      if (img.src && img.src.includes('media.parfumo.com')) return img.src
+    }
+    return null
+  })
+
+  return {
+    imageUrl: domImage
+      ? domImage.replace('/perfume_social/', '/perfumes/').replace(/\?.*$/, '')
+      : null,
+    is404: false,
+  }
+}
+
+// ─── Fetch Parfumo image with dual-slug retry ─────────────────────────────────
+
+async function fetchParfumoImage(page, brand, name) {
   const brandSlug = BRAND_SLUG[brand]
   if (!brandSlug) {
     return { url: null, reason: `No brand slug mapping for "${brand}"` }
   }
 
-  const nameSlug = toParfumoNameSlug(name)
-  const parfumoUrl = `https://www.parfumo.com/Perfumes/${brandSlug}/${nameSlug}`
+  const primarySlug = toParfumoNameSlug(name)
+  // Only compute fallback if no override was used (overrides are already exact)
+  const fallbackSlug = NAME_OVERRIDES[name] ? null : toTitleUnderscore(name)
 
-  let html
+  const primaryUrl = `https://www.parfumo.com/Perfumes/${brandSlug}/${primarySlug}`
+
   try {
-    const res = await fetch(parfumoUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/124.0 Safari/537.36',
-        'Accept': 'text/html',
-        'Accept-Language': 'en-US,en;q=0.9',
-      },
-      redirect: 'follow',
-    })
-    if (!res.ok) {
-      return { url: null, reason: `HTTP ${res.status} from ${parfumoUrl}` }
+    // Attempt 1: primary (lowercase-hyphen) slug
+    const primary = await fetchPageImage(page, primaryUrl)
+
+    if (!primary.is404 && primary.imageUrl) {
+      return { url: primary.imageUrl, reason: null, parfumoUrl: primaryUrl }
     }
-    html = await res.text()
+    if (!primary.is404) {
+      return { url: null, reason: `No image found on ${primaryUrl}` }
+    }
+
+    // Attempt 2: Title_Case_underscores fallback (only triggered on 404)
+    if (fallbackSlug && fallbackSlug !== primarySlug) {
+      const fallbackUrl = `https://www.parfumo.com/Perfumes/${brandSlug}/${fallbackSlug}`
+      await sleep(300)
+      const fallback = await fetchPageImage(page, fallbackUrl)
+
+      if (!fallback.is404 && fallback.imageUrl) {
+        return { url: fallback.imageUrl, reason: null, parfumoUrl: fallbackUrl }
+      }
+      if (!fallback.is404) {
+        return { url: null, reason: `No image found on fallback ${fallbackUrl}` }
+      }
+      return { url: null, reason: `404 on both slugs: "${primarySlug}" and "${fallbackSlug}"` }
+    }
+
+    return { url: null, reason: `404 — page not found at ${primaryUrl}` }
   } catch (err) {
-    return { url: null, reason: `Fetch error: ${err.message}` }
+    return { url: null, reason: `Browser error: ${err.message}` }
   }
-
-  // Detect real 404 by page title — NOT by html.includes('/404') which fires on every
-  // valid Parfumo page (their nav contains the string "/404").
-  if (/<title>\s*404\s*<\/title>/i.test(html) || html.includes('Oops, something went wrong')) {
-    return { url: null, reason: `404 — page not found at ${parfumoUrl}` }
-  }
-
-  // Extract og:image — try multiple attribute orderings and quote styles.
-  // Parfumo's meta tag attribute order can vary across page types.
-  const ogMatch =
-    html.match(/property=["']og:image["'][^>]*content=["']([^"']+)["']/) ??
-    html.match(/content=["']([^"']+)["'][^>]*property=["']og:image["']/) ??
-    html.match(/property="og:image"\s+content="([^"]+)"/) ??
-    html.match(/content="([^"]+)"\s+property="og:image"/)
-
-  if (ogMatch) {
-    // Convert from perfume_social CDN path to perfumes/ direct path for cleaner image
-    // perfume_social: media.parfumo.com/perfume_social/ab/abc123-name_1200.jpg?format=jpg&quality=90
-    // perfumes:       media.parfumo.com/perfumes/ab/abc123-name_1200.jpg (no query string needed)
-    const rawUrl = ogMatch[1]
-    const cleanUrl = rawUrl
-      .replace('/perfume_social/', '/perfumes/')
-      .replace(/\?.*$/, '') // strip query params — the base URL serves full quality
-    return { url: cleanUrl, reason: null, parfumoUrl }
-  }
-
-  // Fallback: scan raw HTML for any media.parfumo.com bottle image URL
-  const cdnMatch = html.match(/https:\/\/media\.parfumo\.com\/perfume(?:s|_social)\/[a-zA-Z0-9/_\-]+\.(?:jpg|jpeg|webp)/)
-  if (cdnMatch) {
-    const cleanUrl = cdnMatch[0]
-      .replace('/perfume_social/', '/perfumes/')
-      .replace(/\?.*$/, '')
-    return { url: cleanUrl, reason: null, parfumoUrl }
-  }
-
-  return { url: null, reason: `Image URL not found in HTML from ${parfumoUrl}` }
 }
-
-// ─── Sleep ────────────────────────────────────────────────────────────────────
-
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
-  console.log(`\n🌸 Parfumo image backfill${DRY_RUN ? ' [DRY RUN]' : ''}`)
+  console.log(`\n🌸 Parfumo image backfill (Playwright)${DRY_RUN ? ' [DRY RUN]' : ''}`)
   console.log('─'.repeat(50))
 
-  // Fetch all fragrances without images
   const { data: rows, error } = await supabase
     .from('fragrances')
     .select('id, brand, name')
@@ -209,41 +242,56 @@ async function main() {
   const toProcess = LIMIT < Infinity ? rows.slice(0, LIMIT) : rows
   console.log(`Found ${rows.length} fragrances without images. Processing ${toProcess.length}.\n`)
 
-  const results = { updated: 0, skipped: 0, failed: 0 }
-  const failures = []
-
-  for (const { id, brand, name } of toProcess) {
-    const { url, reason, parfumoUrl } = await fetchParfumoImage(brand, name)
-
-    if (!url) {
-      console.log(`  ✗ ${brand} — ${name}`)
-      console.log(`    ${reason}`)
-      results.failed++
-      failures.push({ brand, name, reason })
-    } else if (DRY_RUN) {
-      console.log(`  ✓ ${brand} — ${name}`)
-      console.log(`    ${url}`)
-      results.updated++
-    } else {
-      const { error: updateError } = await supabase
-        .from('fragrances')
-        .update({ image_url: url })
-        .eq('id', id)
-
-      if (updateError) {
-        console.log(`  ✗ ${brand} — ${name} (DB write failed: ${updateError.message})`)
-        results.failed++
-        failures.push({ brand, name, reason: updateError.message })
-      } else {
-        console.log(`  ✓ ${brand} — ${name}`)
-        results.updated++
-      }
-    }
-
-    await sleep(REQUEST_DELAY)
+  let browser
+  try {
+    browser = await chromium.launch({ headless: false, slowMo: 100 })
+  } catch {
+    console.error('❌ Could not launch Chromium. Run: npx playwright install chromium')
+    process.exit(1)
   }
 
-  // ─── Summary ───────────────────────────────────────────────────────────────
+  const page = await browser.newPage()
+  await page.setExtraHTTPHeaders({ 'Accept-Language': 'en-US,en;q=0.9' })
+
+  const results = { updated: 0, failed: 0 }
+  const failures = []
+
+  try {
+    for (const { id, brand, name } of toProcess) {
+      const { url, reason, parfumoUrl } = await fetchParfumoImage(page, brand, name)
+
+      if (!url) {
+        console.log(`  ✗ ${brand} — ${name}`)
+        console.log(`    ${reason}`)
+        results.failed++
+        failures.push({ brand, name, reason })
+      } else if (DRY_RUN) {
+        console.log(`  ✓ ${brand} — ${name}`)
+        console.log(`    ${url}`)
+        results.updated++
+      } else {
+        const { error: updateError } = await supabase
+          .from('fragrances')
+          .update({ image_url: url })
+          .eq('id', id)
+
+        if (updateError) {
+          console.log(`  ✗ ${brand} — ${name} (DB write failed: ${updateError.message})`)
+          results.failed++
+          failures.push({ brand, name, reason: updateError.message })
+        } else {
+          console.log(`  ✓ ${brand} — ${name}`)
+          console.log(`    ${url}`)
+          results.updated++
+        }
+      }
+
+      await sleep(REQUEST_DELAY)
+    }
+  } finally {
+    await browser.close()
+  }
+
   console.log('\n' + '─'.repeat(50))
   console.log(`Done. Updated: ${results.updated} | Failed: ${results.failed}`)
 
