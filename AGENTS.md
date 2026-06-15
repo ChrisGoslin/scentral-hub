@@ -11,6 +11,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 **Owner:** Christopher. **Purpose:** prevent invented facts, paths, keys, and scope.
 This is the SINGLE canonical instructions file. `CLAUDE.md` and `GEMINI.md` point here. Read this FIRST, every session, before acting. Begin your first reply by stating in one line what you grounded yourself in.
 **Supplementary reading:** `skills/grounded-agent-guardrails/SKILL.md` — expands the five safeguards with verification commands, known fabrications list, and a session-start checklist.
+**Critical operating rules:** §8 (script execution + network constraint), §9 (lessons learned), §10 (self-check).
 
 ## 0. Why this file exists
 Prior agent runs produced confident "breakthrough" output full of fabricated detail (fake repo paths,
@@ -131,9 +132,69 @@ cd ~/Projects/scentral-hub && npx vercel --prod
 
 This takes ~60s and aliases directly to `scentral-seven.vercel.app`. Confirm READY state before declaring a task done.
 
-## 8. Self-check before finishing any task
+## 8. Script execution rules (critical — read before running any script)
+
+**The Cowork/sandbox bash environment has NO outbound network.** Any script that calls external services
+(Supabase, Parfumo, Fragrantica, Vercel, OpenAI, etc.) will fail with `EAI_AGAIN` or `ECONNREFUSED`.
+
+**Rule: never run external-network scripts from bash.** Instead, give Christopher the exact local command:
+```bash
+cd ~/Projects/scentral-hub
+node scripts/<script-name>.mjs [--dry-run] [--limit=N]
+```
+
+**Scripts that MUST run locally (not in sandbox):**
+- `scripts/backfill-parfumo-images.mjs` — Playwright + Parfumo/Fragrantica image scraping
+- `scripts/migrate-images-to-storage.mjs` — Supabase Storage upload
+- `scripts/backfill-descriptions.mjs` — OpenAI calls
+- `scripts/smoke-test.mjs` — hits live Vercel URL
+- Any script importing `@supabase/supabase-js` and making DB calls
+
+**Scripts that CAN run in bash sandbox** (no network needed):
+- Syntax checks: `node --check scripts/foo.mjs`
+- File manipulation, local transformations, JSON parsing
+- `npm run build` (if dependencies are installed)
+
+**Playwright prerequisite** (first time only, run locally):
+```bash
+npx playwright install chromium
+```
+
+**Image pipeline run order:**
+```bash
+node scripts/backfill-parfumo-images.mjs --dry-run --limit=5   # verify first
+node scripts/backfill-parfumo-images.mjs                        # full backfill
+node scripts/migrate-images-to-storage.mjs --dry-run --limit=5 # verify
+node scripts/migrate-images-to-storage.mjs                      # move to Supabase Storage
+```
+
+## 9. Lessons learned — don't repeat these mistakes
+
+**L1 — Parfumo 404 false-positive:** `html.includes('/404')` returns true on EVERY valid Parfumo page
+because their nav contains `/404`. Always use `/<title>\s*404\s*<\/title>/i.test(html)` instead.
+
+**L2 — Parfumo slug convention:** Most names use lowercase-hyphen (`rare-carbon`, `9pm`). Some older
+entries use Title_Case_underscores (`Interlude_Man`). Script must try lowercase-hyphen first, fall back
+to Title_Case on 404. Use `NAME_OVERRIDES` for confirmed exceptions.
+
+**L3 — Cowork Edit tool race condition:** If Claude Code is actively modifying a file, the Edit tool
+will fail with "File has been modified since read." Fix: use `mcp__workspace__bash` with a heredoc
+(`cat > file << 'EOF'`) to write files atomically. Never rely on Edit/Write for files Claude Code owns.
+
+**L4 — Verify CLI agent output before reporting done:** Claude Code returns confident "Done!" summaries
+that can be wrong (logic not applied, import added without wiring, etc.). Always read the actual file
+after delegation. Use `verify-cli-claims` skill for high-stakes work.
+
+**L5 — Server components can't use React hooks for responsive sizing.** Use CSS math functions:
+`min(45vw, 200px)`, `clamp(1rem, 4vw, 2rem)`. Only add `'use client'` if interactivity is needed.
+
+**L6 — Horizontal scroll strips clip the last item.** `paddingRight` on a flex scroll container doesn't
+extend past the last child. Add `<div style={{ flexShrink: 0, width: 16 }} />` as trailing spacer.
+
+## 10. Self-check before finishing any task
 1. Did I verify every factual claim (paths, versions, capabilities, schema)? How?
 2. Any secrets in my output? (must be no)
 3. Did I stay within source-of-truth scope?
 4. Did I label assumptions vs verified facts?
+5. Does my script need the network? If yes — did I give Christopher the local run command instead of running it myself?
 Fix any unsatisfactory answer before declaring done.
