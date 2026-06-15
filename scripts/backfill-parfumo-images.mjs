@@ -83,6 +83,7 @@ const PARFUMO_BRAND_SLUG = {
   'Lalique': 'Lalique',
   'Lattafa': 'Lattafa',
   'Lattafa Pride': 'Lattafa_Pride',
+  // Parfumo dropped "Fragrances" from the brand path — both tried in fetchFromParfumo
   'Maison Margiela': 'Maison_Margiela_Fragrances',
   'Mancera': 'Mancera',
   'Montale': 'Montale',
@@ -93,6 +94,11 @@ const PARFUMO_BRAND_SLUG = {
   'Xerjoff': 'Xerjoff',
   'Yves Saint Laurent': 'Yves_Saint_Laurent',
   'Zimaya': 'Zimaya',
+}
+
+// Alternative brand slugs to try when the primary 404s
+const PARFUMO_BRAND_SLUG_ALT = {
+  'Maison Margiela': 'Maison_Margiela',
 }
 
 // Exact slug overrides (verified from live pages)
@@ -115,8 +121,17 @@ function toTitleUnderscore(name) {
   return name.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_\-]/g, '')
 }
 
+// Strips common concentration suffixes that Parfumo omits from slugs
+// e.g. "Sauvage EDP" → "Sauvage", "Black Opium EDP Intense" → "Black Opium"
+const SUFFIX_PATTERN = /\s+(EDP|EDT|EDP\s+Intense|EDP\s+Refillable|Eau\s+de\s+Parfum|Eau\s+de\s+Toilette|Parfum|Extrait)$/i
+
 function parfumoNameSlug(name) {
   return PARFUMO_NAME_OVERRIDES[name] ?? toLowercaseHyphen(name)
+}
+
+function strippedNameSlug(name) {
+  const stripped = name.replace(SUFFIX_PATTERN, '').trim()
+  return stripped !== name ? toLowercaseHyphen(stripped) : null
 }
 
 async function fetchFromParfumo(page, brand, name) {
@@ -124,8 +139,19 @@ async function fetchFromParfumo(page, brand, name) {
   if (!brandSlug) return { url: null, reason: `Parfumo: no brand slug for "${brand}"` }
 
   const primarySlug = parfumoNameSlug(name)
-  const fallbackSlug = PARFUMO_NAME_OVERRIDES[name] ? null : toTitleUnderscore(name)
-  const primaryUrl = `https://www.parfumo.com/Perfumes/${brandSlug}/${primarySlug}`
+  const isOverride = Boolean(PARFUMO_NAME_OVERRIDES[name])
+  const fallbackSlug = isOverride ? null : toTitleUnderscore(name)
+  const suffixSlug = isOverride ? null : strippedNameSlug(name)
+  const altBrandSlug = PARFUMO_BRAND_SLUG_ALT[brand] ?? null
+
+  // Build candidate (brandSlug, nameSlug) pairs to try in order
+  const candidates = [
+    [brandSlug, primarySlug],
+    ...(fallbackSlug && fallbackSlug !== primarySlug ? [[brandSlug, fallbackSlug]] : []),
+    ...(suffixSlug && suffixSlug !== primarySlug ? [[brandSlug, suffixSlug]] : []),
+    ...(altBrandSlug ? [[altBrandSlug, primarySlug]] : []),
+    ...(altBrandSlug && suffixSlug ? [[altBrandSlug, suffixSlug]] : []),
+  ]
 
   const tryUrl = async (url) => {
     try {
@@ -133,6 +159,7 @@ async function fetchFromParfumo(page, brand, name) {
       await sleep(600)
       const title = await page.title()
       if (/^\s*404\s*$/.test(title) || title.toLowerCase().includes('not found')) return null
+      if (title.toLowerCase().includes('attention required')) return null  // Cloudflare block
       const ogImage = await page.$eval('meta[property="og:image"]', el => el.getAttribute('content')).catch(() => null)
       if (ogImage) return ogImage.replace('/perfume_social/', '/perfumes/').replace(/\?.*$/, '')
       const domImage = await page.evaluate(() => {
@@ -144,18 +171,16 @@ async function fetchFromParfumo(page, brand, name) {
     } catch { return null }
   }
 
-  const img = await tryUrl(primaryUrl)
-  if (img) return { url: img, reason: null, source: 'parfumo', sourceUrl: primaryUrl }
-
-  if (fallbackSlug && fallbackSlug !== primarySlug) {
-    const fallbackUrl = `https://www.parfumo.com/Perfumes/${brandSlug}/${fallbackSlug}`
+  const triedSlugs = []
+  for (const [bSlug, nSlug] of candidates) {
+    const url = `https://www.parfumo.com/Perfumes/${bSlug}/${nSlug}`
+    const img = await tryUrl(url)
+    if (img) return { url: img, reason: null, source: 'parfumo', sourceUrl: url }
+    triedSlugs.push(`${bSlug}/${nSlug}`)
     await sleep(300)
-    const img2 = await tryUrl(fallbackUrl)
-    if (img2) return { url: img2, reason: null, source: 'parfumo', sourceUrl: fallbackUrl }
-    return { url: null, reason: `Parfumo: 404 on both "${primarySlug}" and "${fallbackSlug}"` }
   }
 
-  return { url: null, reason: `Parfumo: 404 at ${primaryUrl}` }
+  return { url: null, reason: `Parfumo: 404 on all tried: ${triedSlugs.join(', ')}` }
 }
 
 // ─── Source 2: Fragrantica ───────────────────────────────────────────────────
@@ -225,19 +250,28 @@ async function fetchFromFragrantica(page, brand, name) {
 
 // ─── Multi-source orchestrator ────────────────────────────────────────────────
 
-async function fetchImage(page, brand, name) {
+async function fetchImage(browser, page, brand, name) {
   // Try Parfumo first
   const parfumo = await fetchFromParfumo(page, brand, name)
-  if (parfumo.url) return parfumo
+  if (parfumo.url) return { ...parfumo, page }
 
-  // Fall back to Fragrantica
+  // Fall back to Fragrantica — recover page if the browser closed it
   await sleep(500)
-  const fragrantica = await fetchFromFragrantica(page, brand, name)
-  if (fragrantica.url) return fragrantica
+  let activePage = page
+  try {
+    // Quick health check — if the page was closed, this throws
+    await page.evaluate(() => null)
+  } catch {
+    // Browser closed the page (Cloudflare session reset) — open a new one
+    try { activePage = await browser.newPage() } catch { /* browser itself died */ }
+  }
 
-  // Both failed — aggregate reasons
+  const fragrantica = await fetchFromFragrantica(activePage, brand, name)
+  if (fragrantica.url) return { ...fragrantica, page: activePage }
+
   return {
     url: null,
+    page: activePage,
     reason: `All sources failed:\n      Parfumo: ${parfumo.reason}\n      Fragrantica: ${fragrantica.reason}`,
   }
 }
@@ -269,7 +303,7 @@ async function main() {
     process.exit(1)
   }
 
-  const page = await browser.newPage()
+  let page = await browser.newPage()
   await page.setExtraHTTPHeaders({ 'Accept-Language': 'en-US,en;q=0.9' })
 
   const results = { updated: 0, failed: 0 }
@@ -277,7 +311,9 @@ async function main() {
 
   try {
     for (const { id, brand, name } of toProcess) {
-      const { url, reason, source, sourceUrl } = await fetchImage(page, brand, name)
+      const result = await fetchImage(browser, page, brand, name)
+      page = result.page  // may be a new page after crash recovery
+      const { url, reason, source, sourceUrl } = result
 
       if (!url) {
         console.log(`  ✗ ${brand} — ${name}`)
