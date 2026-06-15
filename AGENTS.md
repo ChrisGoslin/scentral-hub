@@ -105,7 +105,22 @@ touching existing working routes beyond a task's scope · presenting unverified 
 - If you see files that already exist on main in your diff with additions only (no deletions), you may be duplicating — verify before committing.
 - Merge to main immediately after the task is complete. Do not leave branches open.
 
-## 6. Self-check before finishing any task
+## 6. Prompt delegation and agent batching (read before running parallel agents)
+
+When multiple prompts are delegated in one session, order them by dependency — do not run all in parallel:
+
+**Dependency order:**
+1. **Foundation first** — schema changes, new API routes, shared components must land on main before anything consumes them.
+2. **Consumers second** — UI pages, hooks, and client components that import from step 1.
+3. **Polish last** — copy, empty states, animations that build on step 2.
+
+**One agent per prompt.** Each prompt goes to exactly one agent. Agents should not be asked to "also do X while you're there" — that causes scope sprawl, duplicate branches, and wasted context.
+
+**Verify before the next batch.** After each round of agents finishes, check `git log --oneline -5` and confirm everything landed on main before writing the next batch of prompts. Avoid writing 10 prompts upfront when earlier ones might block later ones.
+
+**Compact each session early.** Any CLI agent session that has run more than ~5 tasks should compact before continuing. Cowork conversations should compact at natural milestones (end of a feature batch), not when the context runs out.
+
+## 7. Self-check before finishing any task
 1. Did I verify every factual claim (paths, versions, capabilities, schema)? How?
 2. Any secrets in my output? (must be no)
 3. Did I stay within source-of-truth scope?
