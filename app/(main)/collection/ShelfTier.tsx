@@ -13,6 +13,7 @@ interface ShelfTierProps {
   items: CollectionFragrance[]
   locked: boolean
   activeId: string | null
+  isMobile?: boolean
 }
 
 const TIER_ACCENT: Record<string, string> = {
@@ -29,7 +30,7 @@ const TIER_GLOW: Record<string, string> = {
   tier3: 'transparent',
 }
 
-export default function ShelfTier({ tierId, label, sublabel, items, locked, activeId }: ShelfTierProps) {
+export default function ShelfTier({ tierId, label, sublabel, items, locked, activeId, isMobile = false }: ShelfTierProps) {
   const { setNodeRef, isOver } = useDroppable({ id: tierId })
 
   const accent = TIER_ACCENT[tierId] ?? 'rgba(255,255,255,0.2)'
@@ -111,9 +112,12 @@ export default function ShelfTier({ tierId, label, sublabel, items, locked, acti
             style={{
               display: 'flex',
               gap: 8,
-              flexWrap: 'wrap',
+              flexWrap: isMobile ? 'wrap' : 'nowrap',
+              overflowX: isMobile ? 'visible' : 'auto',
               minHeight: 96,
               alignItems: 'flex-end',
+              paddingBottom: isMobile ? 0 : 4,
+              scrollbarWidth: 'none', // hide scrollbar for clean look
             }}
           >
             {items.length === 0 ? (
@@ -139,6 +143,7 @@ export default function ShelfTier({ tierId, label, sublabel, items, locked, acti
                   fragrance={f}
                   locked={locked}
                   isActive={activeId === f.id}
+                  isMobile={isMobile}
                 />
               ))
             )}

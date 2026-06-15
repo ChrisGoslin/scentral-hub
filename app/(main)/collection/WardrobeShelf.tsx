@@ -252,12 +252,20 @@ interface WardrobeShelfProps {
 export default function WardrobeShelf({ fragrances }: WardrobeShelfProps) {
   const owned = fragrances.filter(f => f.collection_added_at != null)
   const [wishlistIds, setWishlistIds] = useState<string[]>([])
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
     try {
       const stored = localStorage.getItem('scentral_wishlist')
       if (stored) setWishlistIds(JSON.parse(stored))
     } catch { /* ignore */ }
+  }, [])
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 480)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
   const wishlist = fragrances.filter(f => wishlistIds.includes(f.id))
@@ -359,7 +367,7 @@ export default function WardrobeShelf({ fragrances }: WardrobeShelfProps) {
   }, [supabase])
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '80vh' }}>
+    <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', minHeight: '80vh' }}>
       {/* Sidebar / tab strip */}
       <WardrobeSidebar viewMode={viewMode} onViewModeChange={setViewMode} />
 
@@ -387,6 +395,7 @@ export default function WardrobeShelf({ fragrances }: WardrobeShelfProps) {
           backgroundBlendMode: 'multiply',
           boxShadow: 'inset 0 20px 40px rgba(0,0,0,0.8)',
           padding: '20px 16px 24px',
+          width: isMobile ? '100%' : 'calc(100% - 80px)', // adjust for sidebar width if needed
         }}
       >
         {viewMode === 'all' && (
@@ -407,6 +416,7 @@ export default function WardrobeShelf({ fragrances }: WardrobeShelfProps) {
                   items={tiers[def.key]}
                   locked={def.locked}
                   activeId={activeId}
+                  isMobile={isMobile}
                 />
               ))}
             </div>

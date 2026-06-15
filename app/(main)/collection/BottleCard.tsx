@@ -10,6 +10,7 @@ interface BottleCardProps {
   fragrance: CollectionFragrance
   locked?: boolean
   isActive?: boolean
+  isMobile?: boolean
 }
 
 function BottleImage({ imageUrl, brand, name }: { imageUrl: string | null; brand: string; name: string }) {
@@ -53,7 +54,7 @@ function BottleImage({ imageUrl, brand, name }: { imageUrl: string | null; brand
   )
 }
 
-export default function BottleCard({ fragrance: f, locked = false, isActive = false }: BottleCardProps) {
+export default function BottleCard({ fragrance: f, locked = false, isActive = false, isMobile = false }: BottleCardProps) {
   const {
     attributes,
     listeners,
@@ -84,7 +85,7 @@ export default function BottleCard({ fragrance: f, locked = false, isActive = fa
     >
       <div
         style={{
-          width: 80,
+          width: isMobile ? 80 : 90,
           padding: 6,
           borderRadius: 8,
           background: isActive

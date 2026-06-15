@@ -120,7 +120,18 @@ When multiple prompts are delegated in one session, order them by dependency —
 
 **Compact each session early.** Any CLI agent session that has run more than ~5 tasks should compact before continuing. Cowork conversations should compact at natural milestones (end of a feature batch), not when the context runs out.
 
-## 7. Self-check before finishing any task
+## 7. Deploying to production
+
+**GitHub auto-deploy is not reliable.** The Vercel webhook on `scentral-hub` has a history of going silent. Do not assume a `git push` will deploy.
+
+**Always deploy explicitly after merging to main:**
+```bash
+cd ~/Projects/scentral-hub && npx vercel --prod
+```
+
+This takes ~60s and aliases directly to `scentral-seven.vercel.app`. Confirm READY state before declaring a task done.
+
+## 8. Self-check before finishing any task
 1. Did I verify every factual claim (paths, versions, capabilities, schema)? How?
 2. Any secrets in my output? (must be no)
 3. Did I stay within source-of-truth scope?
