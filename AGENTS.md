@@ -22,7 +22,7 @@ fictional features, lore like "Agent Luna / Hegemony / Shadow Branching", and ha
 - **Repo:** `ChrisGoslin/scentral` (local folder may be named `scentral-hub` — same repo)
 - **Supabase:** project `scentral-mvp` (`lrkdwobnemczvhpixpky`)
 - **Data:** 282 fragrances. Columns include: plain_description, inspired_by, family, projection, optimal_season, use_case, lean.
-- **Stack:** Next.js App Router, Supabase, Vercel, Tailwind. (Verify the exact Next.js version from
+- **Stack:** Next.js App Router, Supabase, Vercel, Tailwind, `@dnd-kit/core` + `@dnd-kit/sortable` + `@dnd-kit/utilities` (Living Wardrobe). (Verify the exact Next.js version from
   package.json / node_modules — do NOT assert a version from memory.)
 - **Architecture:** Single product.
 - **Routes:**
@@ -43,9 +43,19 @@ fictional features, lore like "Agent Luna / Hegemony / Shadow Branching", and ha
   - `/waitlist` (Lead gen)
 - **API Routes:** `/api/aura`, `/api/chemist`, `/api/demo`, `/api/dna-match`, `/api/formulate`, `/api/fragrances`, `/api/generate-image`, `/api/layering`, `/api/scan`, `/api/schedule`, `/api/sommelier`, `/api/waitlist`.
 - **UI Component Library:** `Button`, `Disclosure`, `LoadingShimmer`, `Sheet`, `Card`, `EmptyState`, `ProGate`, `Chip`, `ErrorInline`, `SensoryAnatomy`.
+- **Collection / Living Wardrobe components** (all in `app/(main)/collection/`): `WardrobeShelf` (walnut-cabinet shelf container), `ShelfTier` (individual 3D shelf row), `BottleCard` (draggable bottle card — dnd-kit sortable), `WardrobeSidebar` (view-mode toggle: All / By House / By Season / Wishlist).
 - **Tables:** `fragrances`, `collections`, `wear_logs`, `layering_combinations`, `layer_recipes`, `spritz_schedules`, `profiles`, `waitlist`.
 - **Free/Pro split:** Free = Discover, My Bottles, Layering, You. Pro = gated behind `components/ui/ProGate.tsx` (`isPro = false`). Do NOT remove gates.
 - **localStorage keys:** `scentral_onboarded`, `scentral_vibe`, `scentral_discover_sort`, `scentral_wishlist`, `scentral-environment`, `scentral-use-cases`.
+- **Living Wardrobe (Collection page):**
+  - Shelf layout — 4 tiers, ordered top-to-bottom by affinity score:
+    - *Top Signatures* (affinity 16–20)
+    - *Occasion Modifiers* (affinity 8–15)
+    - *Base Anchors* (affinity 1–7)
+    - *Holding Zone* (unrated)
+  - Drag-and-drop reorder via dnd-kit; every drop emits a `cabinetSnapshot` JSON event (vision pipeline hook for future computer-vision shelf detection — do NOT remove this hook).
+  - Sidebar view modes: All, By House, By Season, Wishlist.
+  - Visual style: walnut cabinet aesthetic; 3D shelf depth per row.
 - **Personas:** See `SCENTRAL_PERSONAS.md`. Gavan (newcomer, plain language). Christopher (enthusiast, expert).
 - **Source-of-truth docs:** `AGENTS.md` (this file), `SCENTRAL_PERSONAS.md`.
 

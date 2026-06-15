@@ -69,6 +69,11 @@
  | | | |-[id]
  | | | |-page.tsx
  | | | |-CollectionClient.tsx
+ | | | |-CollectionFilters.tsx
+ | | | |-WardrobeShelf.tsx
+ | | | |-ShelfTier.tsx
+ | | | |-BottleCard.tsx
+ | | | |-WardrobeSidebar.tsx
  | | |-layering
  | | | |-LayeringClient.tsx
  | | | |-page.tsx
