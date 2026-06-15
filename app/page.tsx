@@ -30,7 +30,7 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] flex flex-col items-center transition-colors duration-700">
-      <main className="max-w-6xl w-full px-6 pt-20 pb-10 grid grid-cols-1 md:grid-cols-2 gap-20 items-center fade-up">
+      <main className="max-w-6xl w-full px-6 pt-20 pb-10 grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-20 items-center fade-up">
 
         {/* Left — hero copy */}
         <section className="space-y-10">
@@ -40,7 +40,7 @@ export default async function Home() {
           </div>
 
           <div className="space-y-6">
-            <h1 className="text-5xl md:text-7xl font-serif italic leading-tight tracking-tight">
+            <h1 className="text-3xl md:text-5xl lg:text-7xl font-serif italic leading-tight tracking-tight">
               You already<br />
               <span className="text-[var(--text-muted)]">know what you like.</span>
             </h1>
@@ -52,7 +52,7 @@ export default async function Home() {
           <div className="flex flex-wrap gap-6 items-center">
             <Link
               href="/onboarding"
-              className="bg-[var(--accent)] text-white px-10 py-4 rounded-[var(--r-btn)] shadow-sm transition-all hover:bg-[var(--accent-press)] active:scale-95 font-bold uppercase tracking-widest text-[10px]"
+              className="bg-[var(--accent)] text-white px-6 py-3 md:px-10 md:py-4 rounded-[var(--r-btn)] shadow-sm transition-all hover:bg-[var(--accent-press)] active:scale-95 font-bold uppercase tracking-widest text-[10px]"
             >
               Start Here
             </Link>
@@ -73,7 +73,7 @@ export default async function Home() {
 
         {/* Right — catalogue card */}
         <aside className="flex flex-col gap-6">
-          <div className="bg-[var(--surface)] border border-[var(--line)] p-8 space-y-8">
+          <div className="bg-[var(--surface)] border border-[var(--line)] p-5 md:p-8 space-y-8">
             <div>
               <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--text-muted)] font-bold mb-1">What's inside</p>
               <p className="text-[13px] text-[var(--text-muted)] font-light">Fragrances you know. Alternatives you don't — yet.</p>
@@ -83,7 +83,7 @@ export default async function Home() {
               {STATS.map(({ value, label }) => (
                 <div key={label} className="text-center">
                   <p className="text-3xl font-bold text-[var(--accent)] font-serif">{value}</p>
-                  <p className="text-[9px] uppercase tracking-widest text-[var(--text-muted)] mt-1 font-bold leading-tight">{label}</p>
+                  <p className="text-[8px] md:text-[9px] uppercase tracking-widest text-[var(--text-muted)] mt-1 font-bold leading-tight">{label}</p>
                 </div>
               ))}
             </div>
