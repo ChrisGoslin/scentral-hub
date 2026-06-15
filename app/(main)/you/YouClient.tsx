@@ -267,7 +267,7 @@ function SettingsSection({ email, onSignOut, signingOut, onReset }: { email: str
       {/* Account email */}
       <div className="flex items-center justify-between py-3" style={{ borderBottom: '1px solid var(--line)' }}>
         <p style={{ fontSize: 14, color: 'var(--text-muted)' }}>Account</p>
-        <p style={{ fontSize: 13, color: 'var(--text)', maxWidth: '60%', textAlign: 'right', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <p style={{ fontSize: 13, color: 'var(--text)', maxWidth: '55%', textAlign: 'right', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {email}
         </p>
       </div>

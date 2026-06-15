@@ -156,6 +156,7 @@ export default function OnboardingPage() {
                     className="justify-start"
                     selected={step2Choice === opt}
                     onClick={() => setStep2Choice(opt)}
+                    style={{ minHeight: 44 }}
                   >
                     {opt}
                   </Chip>

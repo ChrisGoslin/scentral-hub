@@ -146,28 +146,41 @@ async function fetchParfumoImage(brand, name) {
     return { url: null, reason: `Fetch error: ${err.message}` }
   }
 
-  // Extract og:image — most reliable source of the clean bottle image
-  // Format: <meta ... property="og:image" content="https://media.parfumo.com/perfume_social/...">
-  const ogMatch = html.match(/property="og:image"\s+content="([^"]+)"/)
-    ?? html.match(/content="([^"]+)"\s+property="og:image"/)
-
-  if (!ogMatch) {
-    // Check if it's a 404 page
-    if (html.includes('/404') || html.includes('Oops, something went wrong')) {
-      return { url: null, reason: `404 — page not found at ${parfumoUrl}` }
-    }
-    return { url: null, reason: `og:image not found in HTML from ${parfumoUrl}` }
+  // Detect real 404 by page title — NOT by html.includes('/404') which fires on every
+  // valid Parfumo page (their nav contains the string "/404").
+  if (/<title>\s*404\s*<\/title>/i.test(html) || html.includes('Oops, something went wrong')) {
+    return { url: null, reason: `404 — page not found at ${parfumoUrl}` }
   }
 
-  // Convert from perfume_social CDN path to perfumes/ direct path for cleaner image
-  // perfume_social: media.parfumo.com/perfume_social/ab/abc123-name_1200.jpg?format=jpg&quality=90
-  // perfumes:       media.parfumo.com/perfumes/ab/abc123-name_1200.jpg (no query string needed)
-  const rawUrl = ogMatch[1]
-  const cleanUrl = rawUrl
-    .replace('/perfume_social/', '/perfumes/')
-    .replace(/\?.*$/, '') // strip query params — the base URL serves full quality
+  // Extract og:image — try multiple attribute orderings and quote styles.
+  // Parfumo's meta tag attribute order can vary across page types.
+  const ogMatch =
+    html.match(/property=["']og:image["'][^>]*content=["']([^"']+)["']/) ??
+    html.match(/content=["']([^"']+)["'][^>]*property=["']og:image["']/) ??
+    html.match(/property="og:image"\s+content="([^"]+)"/) ??
+    html.match(/content="([^"]+)"\s+property="og:image"/)
 
-  return { url: cleanUrl, reason: null, parfumoUrl }
+  if (ogMatch) {
+    // Convert from perfume_social CDN path to perfumes/ direct path for cleaner image
+    // perfume_social: media.parfumo.com/perfume_social/ab/abc123-name_1200.jpg?format=jpg&quality=90
+    // perfumes:       media.parfumo.com/perfumes/ab/abc123-name_1200.jpg (no query string needed)
+    const rawUrl = ogMatch[1]
+    const cleanUrl = rawUrl
+      .replace('/perfume_social/', '/perfumes/')
+      .replace(/\?.*$/, '') // strip query params — the base URL serves full quality
+    return { url: cleanUrl, reason: null, parfumoUrl }
+  }
+
+  // Fallback: scan raw HTML for any media.parfumo.com bottle image URL
+  const cdnMatch = html.match(/https:\/\/media\.parfumo\.com\/perfume(?:s|_social)\/[a-zA-Z0-9/_\-]+\.(?:jpg|jpeg|webp)/)
+  if (cdnMatch) {
+    const cleanUrl = cdnMatch[0]
+      .replace('/perfume_social/', '/perfumes/')
+      .replace(/\?.*$/, '')
+    return { url: cleanUrl, reason: null, parfumoUrl }
+  }
+
+  return { url: null, reason: `Image URL not found in HTML from ${parfumoUrl}` }
 }
 
 // ─── Sleep ────────────────────────────────────────────────────────────────────

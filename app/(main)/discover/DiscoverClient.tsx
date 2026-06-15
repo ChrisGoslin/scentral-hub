@@ -117,6 +117,15 @@ export default function DiscoverClient({ fragrances, error, hasMore, totalCount 
   const [searchFocused, setSearchFocused] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 400)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
   // On mount: read scentral_vibe and sort from localStorage
   useEffect(() => {
     const vibe = localStorage.getItem('scentral_vibe')
@@ -521,7 +530,7 @@ export default function DiscoverClient({ fragrances, error, hasMore, totalCount 
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
+            gridTemplateColumns: isMobile ? 'repeat(1, 1fr)' : 'repeat(2, 1fr)',
             gap: 12,
             padding: '0 16px',
           }}
@@ -643,3 +652,4 @@ export default function DiscoverClient({ fragrances, error, hasMore, totalCount 
     </div>
   )
 }
+

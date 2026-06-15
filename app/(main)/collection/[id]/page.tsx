@@ -163,7 +163,7 @@ export default async function FragranceDetailPage({
       {/* Bottle image */}
       <div className="px-8 py-6 flex justify-center">
         {f.image_url ? (
-          <div style={{ width: 200, height: 200, borderRadius: 'var(--r-card)', overflow: 'hidden', background: 'var(--surface-2)' }}>
+          <div style={{ width: 'min(45vw, 200px)', height: 'min(45vw, 200px)', borderRadius: 'var(--r-card)', overflow: 'hidden', background: 'var(--surface-2)' }}>
             <img
               src={f.image_url}
               alt={`${f.brand} ${f.name}`}
@@ -173,7 +173,7 @@ export default async function FragranceDetailPage({
         ) : (
           <div
             style={{
-              width: 200, height: 200,
+              width: 'min(45vw, 200px)', height: 'min(45vw, 200px)',
               borderRadius: 'var(--r-card)',
               background: 'linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%)',
               display: 'flex', flexDirection: 'column',

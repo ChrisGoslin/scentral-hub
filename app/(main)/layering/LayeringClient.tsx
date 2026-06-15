@@ -69,7 +69,7 @@ function HarmonyBadge({ score }: { score: number }) {
   return (
     <div
       className="flex flex-col items-center flex-shrink-0 rounded-[var(--r-btn)] px-3 py-1.5"
-      style={{ background: 'var(--surface-2)', border: `1px solid ${color}` }}
+      style={{ background: 'var(--surface-2)', border: `1px solid ${color}`, maxWidth: '100%' }}
     >
       <span
         style={{
