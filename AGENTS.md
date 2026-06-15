@@ -22,9 +22,8 @@ fictional features, lore like "Agent Luna / Hegemony / Shadow Branching", and ha
 ## 1. Ground truth (the ONLY accepted facts unless re-verified)
 - **Repo:** `ChrisGoslin/scentral` (local folder may be named `scentral-hub` — same repo)
 - **Supabase:** project `scentral-mvp` (`lrkdwobnemczvhpixpky`)
-- **Data:** 282 fragrances. Columns include: plain_description, inspired_by, family, projection, optimal_season, use_case, lean.
-- **Stack:** Next.js App Router, Supabase, Vercel, Tailwind, `@dnd-kit/core` + `@dnd-kit/sortable` + `@dnd-kit/utilities` (Living Wardrobe). (Verify the exact Next.js version from
-  package.json / node_modules — do NOT assert a version from memory.)
+- **Data:** 282 fragrances. Key columns: `plain_description`, `inspired_by`, `family`, `projection`, `optimal_season`, `use_case`, `lean`, `image_url` (populated by backfill scripts — may be null for some rows).
+- **Stack:** Next.js 16.2.9 (App Router, route groups like `(main)`), React 19.2.4, Supabase JS 2.x, Vercel, Tailwind CSS, `@dnd-kit/core` + `@dnd-kit/sortable` + `@dnd-kit/utilities` (Living Wardrobe). Always re-verify version from `package.json` if in doubt — do NOT assert from memory.
 - **Architecture:** Single product.
 - **Routes:**
   - `/` (Landing page)
@@ -42,7 +41,7 @@ fictional features, lore like "Agent Luna / Hegemony / Shadow Branching", and ha
   - `/profile` (User settings)
   - `/disclaimer` (Legal)
   - `/waitlist` (Lead gen)
-- **API Routes:** `/api/aura`, `/api/chemist`, `/api/demo`, `/api/dna-match`, `/api/formulate`, `/api/fragrances`, `/api/generate-image`, `/api/layering`, `/api/scan`, `/api/schedule`, `/api/sommelier`, `/api/waitlist`.
+- **API Routes:** `/api/affinity`, `/api/aura`, `/api/chemist`, `/api/demo`, `/api/dna-match`, `/api/formulate`, `/api/fragrances`, `/api/generate-image`, `/api/layering`, `/api/scan`, `/api/schedule`, `/api/sommelier`, `/api/waitlist`.
 - **UI Component Library:** `Button`, `Disclosure`, `LoadingShimmer`, `Sheet`, `Card`, `EmptyState`, `ProGate`, `Chip`, `ErrorInline`, `SensoryAnatomy`.
 - **Collection / Living Wardrobe components** (all in `app/(main)/collection/`): `WardrobeShelf` (walnut-cabinet shelf container), `ShelfTier` (individual 3D shelf row), `BottleCard` (draggable bottle card — dnd-kit sortable), `WardrobeSidebar` (view-mode toggle: All / By House / By Season / Wishlist).
 - **Tables:** `fragrances`, `collections`, `wear_logs`, `layering_combinations`, `layer_recipes`, `spritz_schedules`, `profiles`, `waitlist`.
@@ -144,8 +143,8 @@ node scripts/<script-name>.mjs [--dry-run] [--limit=N]
 ```
 
 **Scripts that MUST run locally (not in sandbox):**
-- `scripts/backfill-parfumo-images.mjs` — Playwright + Parfumo/Fragrantica image scraping
-- `scripts/migrate-images-to-storage.mjs` — Supabase Storage upload
+- `scripts/backfill-parfumo-images.mjs` — Playwright + Parfumo (primary) + Fragrantica (fallback) image scraping
+- `scripts/migrate-images-to-storage.mjs` — copies external image URLs into Supabase `fragrance-images` bucket
 - `scripts/backfill-descriptions.mjs` — OpenAI calls
 - `scripts/smoke-test.mjs` — hits live Vercel URL
 - Any script importing `@supabase/supabase-js` and making DB calls
@@ -191,9 +190,31 @@ after delegation. Use `verify-cli-claims` skill for high-stakes work.
 **L6 — Horizontal scroll strips clip the last item.** `paddingRight` on a flex scroll container doesn't
 extend past the last child. Add `<div style={{ flexShrink: 0, width: 16 }} />` as trailing spacer.
 
+**L7 — isMobile hook pattern (client components only):**
+```tsx
+const [isMobile, setIsMobile] = useState(false)
+useEffect(() => {
+  const check = () => setIsMobile(window.innerWidth < 480)
+  check()
+  window.addEventListener('resize', check)
+  return () => window.removeEventListener('resize', check)
+}, [])
+```
+Threshold `< 480` for phone, `< 768` for tablet. Never put this in a server component.
+
+**L8 — Responsive grid pattern.** Never use `repeat(N, 1fr)` — it breaks on narrow screens.
+Use `repeat(auto-fit, minmax(80px, 1fr))` so columns collapse naturally to 1 on mobile.
+
+**L9 — Multi-source image scraping.** Single-source scraping creates hard dependency risk.
+`backfill-parfumo-images.mjs` tries Parfumo first (Middle Eastern/niche brands), then Fragrantica
+(Western/designer brands). If adding new brands, check which source has better coverage first.
+
+**L10 — LLM briefing block divergence risk.** §10 summarises §1 for paste-out. When updating §1
+(stack, routes, schema), also update §10 to match. They are NOT auto-synced.
+
 ## 10. LLM briefing block (copy-paste into Cursor / ChatGPT / other agents)
 
-Use this block when starting a new LLM session on Scentral. It is the canonical summary — keep it in sync when architecture changes.
+Use this block when starting a new LLM session on Scentral. It is a summary of §1 — if you update §1 (stack, routes, schema), update this block too. Last verified: 2026-06-16.
 
 ```
 # Scentral — Project Briefing
