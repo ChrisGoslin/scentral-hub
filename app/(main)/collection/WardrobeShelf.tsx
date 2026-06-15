@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback, useRef } from 'react'
+import React, { useState, useCallback, useRef, useEffect } from 'react'
 import {
   DndContext,
   DragEndEvent,
@@ -251,7 +251,16 @@ interface WardrobeShelfProps {
 
 export default function WardrobeShelf({ fragrances }: WardrobeShelfProps) {
   const owned = fragrances.filter(f => f.collection_added_at != null)
-  const wishlist = fragrances.filter(f => f.collection_added_at == null)
+  const [wishlistIds, setWishlistIds] = useState<string[]>([])
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('scentral_wishlist')
+      if (stored) setWishlistIds(JSON.parse(stored))
+    } catch { /* ignore */ }
+  }, [])
+
+  const wishlist = fragrances.filter(f => wishlistIds.includes(f.id))
 
   const [viewMode, setViewMode] = useState<ViewMode>('all')
   const [tiers, setTiers] = useState<TierState>(() => buildInitialTierState(owned))

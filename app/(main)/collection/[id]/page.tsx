@@ -202,6 +202,25 @@ export default async function FragranceDetailPage({
           </p>
         </div>
 
+        {/* Maturation Banner */}
+        {readyAt && readyAt > now && (
+          <div style={{
+            background: 'color-mix(in srgb, var(--accent) 12%, transparent)',
+            border: '1px solid color-mix(in srgb, var(--accent) 30%, transparent)',
+            borderRadius: 'var(--r-card)',
+            padding: '10px 14px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+          }}>
+            <span style={{ fontSize: 18 }}>⏳</span>
+            <div>
+              <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Macerating</p>
+              <p style={{ fontSize: 13, color: 'var(--text)', marginTop: 2 }}>Ready in {Math.ceil((readyAt.getTime() - now.getTime()) / 86400000)} days</p>
+            </div>
+          </div>
+        )}
+
         {/* Rating */}
         {f.rating !== null && (
           <p style={{ fontSize: 14, color: 'var(--accent)', fontVariantNumeric: 'tabular-nums' }}>
@@ -209,17 +228,6 @@ export default async function FragranceDetailPage({
           </p>
         )}
 
-        {/* Maturation status */}
-        {maturationChip === 'maturing' && readyAt && (
-          <span style={{
-            display: 'inline-flex', alignItems: 'center', gap: 4,
-            fontSize: 12, fontWeight: 500, color: 'var(--accent)',
-            background: 'color-mix(in srgb, var(--accent) 12%, transparent)',
-            borderRadius: 999, padding: '4px 10px', alignSelf: 'flex-start',
-          }}>
-            ⏳ Maturing · Ready {formatDate(collectionRow!.maceration_ready_at!)}
-          </span>
-        )}
         {maturationChip === 'macerated' && (
           <span style={{
             display: 'inline-flex', alignItems: 'center', gap: 4,

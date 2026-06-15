@@ -324,6 +324,7 @@ export default function YouClient(props: YouClientProps) {
 
   const [weekWear, setWeekWear] = useState<WeekWearEntry[]>([])
   const [ownedCount, setOwnedCount] = useState(0)
+  const [totalWearsMonth, setTotalWearsMonth] = useState(0)
 
   useEffect(() => {
     if (props.state !== 'signed-in') return
@@ -365,6 +366,19 @@ export default function YouClient(props: YouClientProps) {
         .eq('status', 'owned')
       
       setOwnedCount(count ?? 0)
+
+      // Total wears this month
+      const startOfMonth = new Date()
+      startOfMonth.setDate(1)
+      startOfMonth.setHours(0, 0, 0, 0)
+      
+      const { count: monthCount } = await supabase
+        .from('wear_logs')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .gte('logged_at', startOfMonth.toISOString())
+      
+      setTotalWearsMonth(monthCount ?? 0)
 
       // Recent wear logs (last 7 days)
       const sevenDaysAgo = new Date()
@@ -534,6 +548,21 @@ export default function YouClient(props: YouClientProps) {
 
         {/* Weekly Stats & Owned Count */}
         <section>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 24 }}>
+            <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 'var(--r-card)', padding: 16, textAlign: 'center' }}>
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: 24, color: 'var(--text)' }}>{ownedCount}</p>
+              <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 4 }}>Bottles</p>
+            </div>
+            <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 'var(--r-card)', padding: 16, textAlign: 'center' }}>
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: 24, color: 'var(--text)' }}>{totalWearsMonth}</p>
+              <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 4 }}>Month Wears</p>
+            </div>
+            <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 'var(--r-card)', padding: 16, textAlign: 'center' }}>
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: 24, color: 'var(--text)' }}>{wishlistItems.length}</p>
+              <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 4 }}>Wishlist</p>
+            </div>
+          </div>
+
           <div className="mb-6">
             <p style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 12 }}>
               THIS WEEK
@@ -644,10 +673,6 @@ export default function YouClient(props: YouClientProps) {
               </div>
             )}
           </div>
-          
-          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 16 }}>
-            {ownedCount} bottle{ownedCount === 1 ? '' : 's'} in your collection
-          </p>
         </section>
 
         {/* Saved list */}

@@ -585,6 +585,13 @@ export default function DiscoverClient({ fragrances, error, hasMore, totalCount 
                   {f.name}
                 </p>
 
+                {/* Rating */}
+                {f.rating !== null && (
+                  <div style={{ fontSize: 10, color: 'var(--accent)', marginTop: -2, letterSpacing: '0.1em' }}>
+                    {'★'.repeat(Math.round(f.rating / 2)) + '☆'.repeat(5 - Math.round(f.rating / 2))}
+                  </div>
+                )}
+
                 {/* Plain description */}
                 {f.plain_description && (
                   <p style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: '16px' }}>
