@@ -13,6 +13,7 @@ import ErrorInline from '@/components/ui/ErrorInline'
 import LoadingShimmer from '@/components/ui/LoadingShimmer'
 import { getBrandEmoji } from '@/lib/brandEmoji'
 import { useFragranceSearch } from '@/app/hooks/useFragranceSearch'
+import WardrobeShelf from './WardrobeShelf'
 
 export type CollectionFragrance = {
   id: string
@@ -171,6 +172,7 @@ export default function CollectionClient({ fragrances, totalCount }: { fragrance
   const [seasonFilter, setSeasonFilter] = useState<SeasonFilter>('All')
   const [search, setSearch] = useState('')
   const [ownedOnly, setOwnedOnly] = useState(true)
+  const [wardrobeMode, setWardrobeMode] = useState(false)
 
   // Add bottle sheet state
   const [isAddSheetOpen, setIsAddSheetOpen] = useState(false)
@@ -262,106 +264,124 @@ export default function CollectionClient({ fragrances, totalCount }: { fragrance
             >
               +
             </button>
-            {/* Owned toggle */}
+            {/* Wardrobe toggle */}
             <button
-              onClick={() => setOwnedOnly(o => !o)}
+              onClick={() => setWardrobeMode(m => !m)}
               className="flex items-center gap-2 px-3 py-1.5 rounded-full transition-all"
               style={{
-                background: ownedOnly ? 'var(--accent)' : 'var(--surface)',
+                background: wardrobeMode ? 'var(--burgundy)' : 'var(--surface)',
                 border: '1px solid var(--line)',
-                color: ownedOnly ? 'white' : 'var(--text-muted)',
+                color: wardrobeMode ? 'white' : 'var(--text-muted)',
                 fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em',
               }}
             >
-              {ownedOnly ? '★ My Bottles' : '☆ All'}
+              {wardrobeMode ? '⬛ Wardrobe' : '⬜ Wardrobe'}
             </button>
+            {/* Owned toggle — hidden in wardrobe mode */}
+            {!wardrobeMode && (
+              <button
+                onClick={() => setOwnedOnly(o => !o)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full transition-all"
+                style={{
+                  background: ownedOnly ? 'var(--accent)' : 'var(--surface)',
+                  border: '1px solid var(--line)',
+                  color: ownedOnly ? 'white' : 'var(--text-muted)',
+                  fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em',
+                }}
+              >
+                {ownedOnly ? '★ My Bottles' : '☆ All'}
+              </button>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Search input */}
-      <div className="px-4 pt-3 pb-2">
-        <input
-          type="search"
-          placeholder="Search brand or name…"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          style={{
-            width: '100%',
-            background: 'var(--surface)',
-            border: '1px solid var(--line)',
-            borderRadius: 'var(--r-chip)',
-            color: 'var(--text)',
-            fontSize: 13,
-            padding: '8px 12px',
-            outline: 'none',
-          }}
-          onFocus={e => { e.currentTarget.style.borderColor = 'var(--accent)' }}
-          onBlur={e => { e.currentTarget.style.borderColor = 'var(--line)' }}
-        />
-      </div>
-
-      {/* Season filter chips */}
-      <div className="flex gap-2 px-4 py-2 overflow-x-auto" style={{ borderBottom: '1px solid var(--line)' }}>
-        {seasonFilters.map(s => (
-          <Chip
-            key={s}
-            selected={seasonFilter === s}
-            onClick={() => setSeasonFilter(s)}
-            style={{ flexShrink: 0 }}
-          >
-            {s}
-          </Chip>
-        ))}
-      </div>
-
-      {/* Result count */}
-      <div className="px-4 pt-3">
-        <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-          {filtered.length} result{filtered.length !== 1 ? 's' : ''}
-        </p>
-      </div>
-
-      {/* Grid */}
-      <div className="px-4 py-3">
-        {ownedOnly && ownedFragrances.length === 0 ? (
-          <div className="max-w-[360px] mx-auto pt-12 flex flex-col items-center text-center animate-up">
-            <div className="w-8 h-[2px] mb-6" style={{ background: 'var(--accent)' }} />
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: 26, lineHeight: '32px', color: 'var(--text)' }}>
-              Your collection starts here.
-            </p>
-            <p style={{ fontSize: 14, lineHeight: '22px', color: 'var(--text-muted)', marginTop: 12 }}>
-              Add your first bottle and Scentral will help you get more from it — layering combos, inspired-by alternatives, and what to reach for next.
-            </p>
-            <div className="mt-7 w-full">
-              <Link href="/discover" className="block w-full">
-                <Button fullWidth>Explore 280+ Scents</Button>
-              </Link>
-            </div>
-            <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 16 }}>
-              Already have bottles?{' '}
-              <button 
-                onClick={() => setIsAddSheetOpen(true)}
-                className="hover:underline transition-all" 
-                style={{ color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, font: 'inherit' }}
-              >
-                Add one manually →
-              </button>
-            </p>
+      {/* Wardrobe view */}
+      {wardrobeMode ? (
+        <WardrobeShelf fragrances={fragrances} />
+      ) : (
+        <>
+          <div className="px-4 pt-3 pb-2">
+            <input
+              type="search"
+              placeholder="Search brand or name…"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              style={{
+                width: '100%',
+                background: 'var(--surface)',
+                border: '1px solid var(--line)',
+                borderRadius: 'var(--r-chip)',
+                color: 'var(--text)',
+                fontSize: 13,
+                padding: '8px 12px',
+                outline: 'none',
+              }}
+              onFocus={e => { e.currentTarget.style.borderColor = 'var(--accent)' }}
+              onBlur={e => { e.currentTarget.style.borderColor = 'var(--line)' }}
+            />
           </div>
-        ) : filtered.length === 0 ? (
-          <EmptyState
-            headline="No matches"
-            caption="Try adjusting your filters or search term."
-          />
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-            {filtered.map(f => (
-              <FragranceCard key={f.id} f={f} />
+
+          <div className="flex gap-2 px-4 py-2 overflow-x-auto" style={{ borderBottom: '1px solid var(--line)' }}>
+            {seasonFilters.map(s => (
+              <Chip
+                key={s}
+                selected={seasonFilter === s}
+                onClick={() => setSeasonFilter(s)}
+                style={{ flexShrink: 0 }}
+              >
+                {s}
+              </Chip>
             ))}
           </div>
-        )}
-      </div>
+
+          <div className="px-4 pt-3">
+            <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+              {filtered.length} result{filtered.length !== 1 ? 's' : ''}
+            </p>
+          </div>
+
+          <div className="px-4 py-3">
+            {ownedOnly && ownedFragrances.length === 0 ? (
+              <div className="max-w-[360px] mx-auto pt-12 flex flex-col items-center text-center animate-up">
+                <div className="w-8 h-[2px] mb-6" style={{ background: 'var(--accent)' }} />
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: 26, lineHeight: '32px', color: 'var(--text)' }}>
+                  Your collection starts here.
+                </p>
+                <p style={{ fontSize: 14, lineHeight: '22px', color: 'var(--text-muted)', marginTop: 12 }}>
+                  Add your first bottle and Scentral will help you get more from it — layering combos, inspired-by alternatives, and what to reach for next.
+                </p>
+                <div className="mt-7 w-full">
+                  <Link href="/discover" className="block w-full">
+                    <Button fullWidth>Explore 280+ Scents</Button>
+                  </Link>
+                </div>
+                <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 16 }}>
+                  Already have bottles?{' '}
+                  <button
+                    onClick={() => setIsAddSheetOpen(true)}
+                    className="hover:underline transition-all"
+                    style={{ color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, font: 'inherit' }}
+                  >
+                    Add one manually →
+                  </button>
+                </p>
+              </div>
+            ) : filtered.length === 0 ? (
+              <EmptyState
+                headline="No matches"
+                caption="Try adjusting your filters or search term."
+              />
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                {filtered.map(f => (
+                  <FragranceCard key={f.id} f={f} />
+                ))}
+              </div>
+            )}
+          </div>
+        </>
+      )}
 
       {/* Add Bottle Sheet */}
       <Sheet open={isAddSheetOpen} onClose={() => setIsAddSheetOpen(false)}>
