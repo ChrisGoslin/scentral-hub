@@ -8,6 +8,7 @@ import InspiredByClones from './InspiredByClones'
 import LogWearButton from './LogWearButton'
 import AffinityRater from './AffinityRater'
 import { cookies } from 'next/headers'
+import { getBrandEmoji } from '@/lib/brandEmoji'
 
 const PHASE_LABEL: Record<number, string> = {
   1: 'Anchor',
@@ -75,7 +76,51 @@ export default async function FragranceDetailPage({
     inspiredByRef = refRow ?? null
   }
 
-  // ... (streak and wear logic remains the same) ...
+  let initialWears = 0
+  let initialStreak = 0
+
+  if (collectionRow?.id) {
+    const { data: logs } = await supabase
+      .from('wear_logs')
+      .select('logged_at')
+      .eq('collection_id', collectionRow.id)
+      .order('logged_at', { ascending: false })
+
+    if (logs) {
+      initialWears = logs.length
+      if (initialWears > 0) {
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+
+        let streakDate = new Date(today)
+        let logIndex = 0
+
+        const mostRecentWear = new Date(logs[0].logged_at)
+        mostRecentWear.setHours(0, 0, 0, 0)
+
+        // Streak counts if worn today OR yesterday
+        if (mostRecentWear.getTime() === streakDate.getTime() || mostRecentWear.getTime() === streakDate.getTime() - 86400000) {
+          initialStreak = 1
+          streakDate = new Date(mostRecentWear)
+          logIndex = 1
+          streakDate.setDate(streakDate.getDate() - 1)
+
+          while (logIndex < logs.length) {
+            const logDate = new Date(logs[logIndex].logged_at)
+            logDate.setHours(0, 0, 0, 0)
+
+            if (logDate.getTime() === streakDate.getTime()) {
+              initialStreak++
+              streakDate.setDate(streakDate.getDate() - 1)
+            } else if (logDate.getTime() < streakDate.getTime()) {
+               break;
+            }
+            logIndex++
+          }
+        }
+      }
+    }
+  }
 
   const phaseLabel = PHASE_LABEL[f.phase] ?? f.phase_label
 
