@@ -146,7 +146,8 @@ async function handleCaptcha(page) {
     await page.$('iframe[src*="recaptcha"]').catch(() => null)
 
   if (hasCaptcha) {
-    console.log('  ⚠️  CAPTCHA / Cloudflare detected! Please solve it in the browser window...')
+    console.log('  ⚠️  CAPTCHA / Cloudflare detected! Waiting 10s before polling for resolution...')
+    await sleep(10000)
     // Wait for the title to change or the challenge to disappear
     await page.waitForFunction(() => {
       const t = document.title.toLowerCase()
