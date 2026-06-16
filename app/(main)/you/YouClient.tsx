@@ -309,6 +309,33 @@ function SettingsSection({ email, onSignOut, signingOut, onReset }: { email: str
   )
 }
 
+function StatTiles({ ownedCount, weekWear }: { ownedCount: number; weekWear: WeekWearEntry[] }) {
+  const totalWears = weekWear.reduce((sum, e) => sum + e.count, 0)
+  const topPick = weekWear[0]?.name ?? '—'
+  const displayTopPick = topPick.length > 12 ? topPick.slice(0, 12) + '...' : topPick
+
+  return (
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))',
+      gap: 12
+    }}>
+      <div style={{ background: 'var(--surface)', borderRadius: 'var(--r-card)', padding: '16px 12px', textAlign: 'center' }}>
+        <p style={{ fontSize: 28, fontWeight: 700, color: 'var(--text)', fontFamily: 'var(--font-display)' }}>{ownedCount}</p>
+        <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)', marginTop: 4 }}>Bottles</p>
+      </div>
+      <div style={{ background: 'var(--surface)', borderRadius: 'var(--r-card)', padding: '16px 12px', textAlign: 'center' }}>
+        <p style={{ fontSize: 28, fontWeight: 700, color: 'var(--text)', fontFamily: 'var(--font-display)' }}>{totalWears}</p>
+        <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)', marginTop: 4 }}>This week</p>
+      </div>
+      <div style={{ background: 'var(--surface)', borderRadius: 'var(--r-card)', padding: '16px 12px', textAlign: 'center' }}>
+        <p style={{ fontSize: 28, fontWeight: 700, color: 'var(--text)', fontFamily: 'var(--font-display)' }}>{displayTopPick}</p>
+        <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)', marginTop: 4 }}>Top pick</p>
+      </div>
+    </div>
+  )
+}
+
 export default function YouClient(props: YouClientProps) {
   const router = useRouter()
   const [authSheetOpen, setAuthSheetOpen] = useState(false)
@@ -322,8 +349,8 @@ export default function YouClient(props: YouClientProps) {
     setVibe(localStorage.getItem('scentral_vibe'))
   }, [])
 
-  const [weekWear, setWeekWear] = useState<WeekWearEntry[]>([])
-  const [ownedCount, setOwnedCount] = useState(0)
+  const [weekWear, setWeekWear] = useState<WeekWearEntry[]>(props.state === 'signed-in' ? props.weekWear : [])
+  const [ownedCount, setOwnedCount] = useState(props.state === 'signed-in' ? props.ownedCount : 0)
   const [totalWearsMonth, setTotalWearsMonth] = useState(0)
 
   useEffect(() => {
@@ -514,6 +541,8 @@ export default function YouClient(props: YouClientProps) {
       </div>
 
       <div className="px-4 py-6 flex flex-col gap-6">
+        <StatTiles ownedCount={ownedCount} weekWear={weekWear} />
+
         {/* My Vibe */}
         <section>
           <p style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 12 }}>
@@ -546,23 +575,8 @@ export default function YouClient(props: YouClientProps) {
           </button>
         </section>
 
-        {/* Weekly Stats & Owned Count */}
+        {/* Weekly Stats Section */}
         <section>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 24 }}>
-            <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 'var(--r-card)', padding: 16, textAlign: 'center' }}>
-              <p style={{ fontFamily: 'var(--font-display)', fontSize: 24, color: 'var(--text)' }}>{ownedCount}</p>
-              <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 4 }}>Bottles</p>
-            </div>
-            <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 'var(--r-card)', padding: 16, textAlign: 'center' }}>
-              <p style={{ fontFamily: 'var(--font-display)', fontSize: 24, color: 'var(--text)' }}>{totalWearsMonth}</p>
-              <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 4 }}>Month Wears</p>
-            </div>
-            <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 'var(--r-card)', padding: 16, textAlign: 'center' }}>
-              <p style={{ fontFamily: 'var(--font-display)', fontSize: 24, color: 'var(--text)' }}>{wishlistItems.length}</p>
-              <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 4 }}>Wishlist</p>
-            </div>
-          </div>
-
           <div className="mb-6">
             <p style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 12 }}>
               THIS WEEK

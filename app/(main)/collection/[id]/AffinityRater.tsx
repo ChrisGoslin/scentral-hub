@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 const CHIPS = [
   { label: '● Everyday',  score: 5  },
@@ -22,6 +23,7 @@ type Props = {
 }
 
 export default function AffinityRater({ collectionId, initialAffinityScore }: Props) {
+  const router = useRouter()
   const [activeScore, setActiveScore] = useState(() => getActiveScore(initialAffinityScore))
 
   async function handleSelect(score: number) {
@@ -35,6 +37,7 @@ export default function AffinityRater({ collectionId, initialAffinityScore }: Pr
       })
       const json = await res.json()
       if (!json.ok) throw new Error(json.error)
+      router.refresh()
     } catch {
       setActiveScore(prev)
     }

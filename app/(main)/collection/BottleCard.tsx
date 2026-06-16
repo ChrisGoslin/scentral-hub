@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import Image from 'next/image'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { getBrandEmoji } from '@/lib/brandEmoji'
@@ -43,11 +44,13 @@ function BottleImage({ imageUrl, brand, name }: { imageUrl: string | null; brand
   }
 
   return (
-    <div style={{ width: '100%', aspectRatio: '1', borderRadius: 6, overflow: 'hidden', background: 'rgba(255,255,255,0.05)' }}>
-      <img
-        src={imageUrl}
+    <div style={{ width: '100%', aspectRatio: '1', borderRadius: 6, overflow: 'hidden', background: 'rgba(255,255,255,0.05)', position: 'relative' }}>
+      <Image
+        src={imageUrl || '/placeholder-bottle.png'}
         alt={`${brand} ${name}`}
-        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+        fill
+        sizes="80px"
+        style={{ objectFit: 'contain', padding: 2 }}
         onError={() => setFailed(true)}
       />
     </div>

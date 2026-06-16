@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
+import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import Button from '@/components/ui/Button'
 import SensoryAnatomy from '@/components/ui/SensoryAnatomy'
@@ -7,6 +8,7 @@ import SimilarFragrances from './SimilarFragrances'
 import InspiredByClones from './InspiredByClones'
 import LogWearButton from './LogWearButton'
 import AffinityRater from './AffinityRater'
+import { getBrandEmoji } from '@/lib/brandEmoji'
 import { cookies } from 'next/headers'
 
 const PHASE_LABEL: Record<number, string> = {
@@ -30,7 +32,9 @@ const LONGEVITY_CHIP: Record<string, string> = {
   'Light':      '🌤 Light wear',
 }
 
-// ... rest of the helper functions ...
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+}
 
 export default async function FragranceDetailPage({ 
   params, 
@@ -75,7 +79,50 @@ export default async function FragranceDetailPage({
     inspiredByRef = refRow ?? null
   }
 
-  // ... (streak and wear logic remains the same) ...
+  let initialWears = 0
+  let initialStreak = 0
+
+  if (collectionRow?.id) {
+    const { data: logs } = await supabase
+      .from('wear_logs')
+      .select('logged_at')
+      .eq('collection_id', collectionRow.id)
+      .order('logged_at', { ascending: false })
+
+    if (logs) {
+      initialWears = logs.length
+      if (initialWears > 0) {
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+        
+        let streakDate = new Date(today)
+        let logIndex = 0
+
+        const mostRecentWear = new Date(logs[0].logged_at)
+        mostRecentWear.setHours(0, 0, 0, 0)
+
+        if (mostRecentWear.getTime() === streakDate.getTime() || mostRecentWear.getTime() === streakDate.getTime() - 86400000) {
+          initialStreak = 1
+          streakDate = new Date(mostRecentWear)
+          logIndex = 1
+          streakDate.setDate(streakDate.getDate() - 1)
+
+          while (logIndex < logs.length) {
+            const logDate = new Date(logs[logIndex].logged_at)
+            logDate.setHours(0, 0, 0, 0)
+
+            if (logDate.getTime() === streakDate.getTime()) {
+              initialStreak++
+              streakDate.setDate(streakDate.getDate() - 1)
+            } else if (logDate.getTime() < streakDate.getTime()) {
+               break;
+            }
+            logIndex++
+          }
+        }
+      }
+    }
+  }
 
   const phaseLabel = PHASE_LABEL[f.phase] ?? f.phase_label
 
@@ -116,11 +163,14 @@ export default async function FragranceDetailPage({
       {/* Bottle image */}
       <div className="px-8 py-6 flex justify-center">
         {f.image_url ? (
-          <div style={{ width: 'min(45vw, 200px)', height: 'min(45vw, 200px)', borderRadius: 'var(--r-card)', overflow: 'hidden', background: 'var(--surface-2)' }}>
-            <img
+          <div style={{ width: 'min(45vw, 200px)', height: 'min(45vw, 200px)', borderRadius: 'var(--r-card)', overflow: 'hidden', background: 'var(--surface-2)', position: 'relative' }}>
+            <Image
               src={f.image_url}
               alt={`${f.brand} ${f.name}`}
-              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+              fill
+              priority
+              sizes="(max-width: 768px) 45vw, 200px"
+              style={{ objectFit: 'contain', padding: 12 }}
             />
           </div>
         ) : (
@@ -161,7 +211,47 @@ export default async function FragranceDetailPage({
           )}
         </div>
 
-        {/* ... (Maturation Banner and Rating remain the same) ... */}
+        {/* Maturation Banner */}
+        {readyAt && readyAt > now && (
+          <div style={{
+            background: 'color-mix(in srgb, var(--accent) 12%, transparent)',
+            border: '1px solid color-mix(in srgb, var(--accent) 30%, transparent)',
+            borderRadius: 'var(--r-card)',
+            padding: '10px 14px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+          }}>
+            <span style={{ fontSize: 18 }}>⏳</span>
+            <div>
+              <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Macerating</p>
+              <p style={{ fontSize: 13, color: 'var(--text)', marginTop: 2 }}>Ready in {Math.ceil((readyAt.getTime() - now.getTime()) / 86400000)} days</p>
+            </div>
+          </div>
+        )}
+
+        {/* Rating */}
+        {f.rating !== null && (
+          <p style={{ fontSize: 14, color: 'var(--accent)', fontVariantNumeric: 'tabular-nums' }}>
+            {f.rating}/10
+          </p>
+        )}
+
+        {maturationChip === 'macerated' && (
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: 4,
+            fontSize: 12, fontWeight: 500, color: 'var(--positive)',
+            background: 'color-mix(in srgb, var(--positive) 12%, transparent)',
+            borderRadius: 999, padding: '4px 10px', alignSelf: 'flex-start',
+          }}>
+            Macerated ✓
+          </span>
+        )}
+        {maturationChip === 'recommended' && (
+          <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+            Maceration: {f.maturation} recommended
+          </p>
+        )}
 
         {/* Metadata */}
         <div className="flex flex-col gap-2">
@@ -177,9 +267,45 @@ export default async function FragranceDetailPage({
               <span style={{ fontSize: 13, color: 'var(--text)', textAlign: 'right', maxWidth: '60%' }}>{f.application_zone}</span>
             </div>
           )}
+          {f.spritz_count && (
+            <div className="flex justify-between">
+              <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>Sprays</span>
+              <span style={{ fontSize: 13, color: 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>{f.spritz_count}</span>
+            </div>
+          )}
         </div>
 
-        {/* ... (Good for chips and Sensory Anatomy remain the same) ... */}
+        {/* Good for — context chips */}
+        {goodForChips.length > 0 && (
+          <div>
+            <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--text-muted)', marginBottom: 8 }}>
+              Good for
+            </p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
+              {goodForChips.map(chip => (
+                <span key={chip} style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  background: 'var(--surface-2)',
+                  border: '1px solid var(--line)',
+                  borderRadius: 999,
+                  padding: '6px 14px',
+                  fontSize: 12,
+                  color: 'var(--text-muted)',
+                }}>
+                  {chip}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Sensory Anatomy */}
+        {f.application_zone && (
+          <SensoryAnatomy zone={f.application_zone} />
+        )}
+
+        {/* Resonance — Find Similar */}
+        <SimilarFragrances fragranceId={f.id} />
 
         {/* Inspired By — "Smells like" card */}
         {(f.clone_target || f.inspired_by) && (
@@ -209,9 +335,19 @@ export default async function FragranceDetailPage({
           </div>
         )}
 
-        {/* Clones — shown on reference fragrances */}
+        {/* Clones — shown on reference fragrances (no rating, catalogue entry) */}
         {f.rating === null && f.is_user_created === false && (
           <InspiredByClones fragranceName={f.name} fragranceBrand={f.brand} fragranceId={f.id} from={from} />
+        )}
+
+        {/* Anosmia — inline pill only */}
+        {f.anosmia_risk === 'High' && (
+          <span
+            title="High anosmia risk — wear in open environments and space from other high-ARR fragrances"
+            style={{ fontSize: 10, color: 'var(--text-muted)', border: '1px solid var(--line)', background: 'var(--surface)', borderRadius: 999, padding: '2px 8px', display: 'inline-block', cursor: 'help' }}
+          >
+            ⚠ High ARR
+          </span>
         )}
 
         {/* CTA */}
@@ -227,6 +363,12 @@ export default async function FragranceDetailPage({
             initialAffinityScore={collectionRow.affinity_score ?? null}
           />
         )}
+        <Link
+          href="/discover"
+          style={{ fontSize: 13, color: 'var(--text-muted)', textAlign: 'center', display: 'block', padding: 8 }}
+        >
+          Back to Discover
+        </Link>
       </div>
     </div>
   )

@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import Chip from '@/components/ui/Chip'
 import EmptyState from '@/components/ui/EmptyState'
 import { getBrandEmoji } from '@/lib/brandEmoji'
@@ -83,8 +84,14 @@ function FragranceImage({ imageUrl, brand, name }: { imageUrl: string | null; br
     )
   }
   return (
-    <div style={{ width: '100%', aspectRatio: '1 / 1', borderRadius: 10, overflow: 'hidden', background: 'var(--surface-2)' }}>
-      <img src={imageUrl} alt={`${brand} ${name}`} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+    <div style={{ width: '100%', aspectRatio: '1 / 1', borderRadius: 10, overflow: 'hidden', background: 'var(--surface-2)', position: 'relative' }}>
+      <Image
+        src={imageUrl || '/placeholder-bottle.png'}
+        alt={`${brand} ${name}`}
+        fill
+        sizes="(max-width: 768px) 50vw, 25vw"
+        style={{ objectFit: 'contain', padding: 4 }}
+      />
     </div>
   )
 }

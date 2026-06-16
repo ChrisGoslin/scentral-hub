@@ -136,6 +136,32 @@ function strippedNameSlug(name) {
   return stripped !== name ? toLowercaseHyphen(stripped) : null
 }
 
+async function handleCaptcha(page) {
+  const title = await page.title().catch(() => '')
+  const hasCaptcha = 
+    title.toLowerCase().includes('attention required') || 
+    title.toLowerCase().includes('cloudflare') || 
+    title.toLowerCase().includes('robot') ||
+    await page.$('iframe[src*="challenges.cloudflare.com"]').catch(() => null) ||
+    await page.$('iframe[src*="recaptcha"]').catch(() => null)
+
+  if (hasCaptcha) {
+    console.log('  ⚠️  CAPTCHA / Cloudflare detected! Please solve it in the browser window...')
+    // Wait for the title to change or the challenge to disappear
+    await page.waitForFunction(() => {
+      const t = document.title.toLowerCase()
+      const challenge = document.querySelector('iframe[src*="challenges.cloudflare.com"]') || 
+                        document.querySelector('iframe[src*="recaptcha"]')
+      return !t.includes('attention required') && !t.includes('cloudflare') && !t.includes('robot') && !challenge
+    }, { timeout: 60000 }).catch(() => {
+      console.log('  ⏳ Timed out waiting for manual CAPTCHA resolution.')
+    })
+    await sleep(1500)
+    return true
+  }
+  return false
+}
+
 async function fetchFromParfumo(page, brand, name) {
   const brandSlug = PARFUMO_BRAND_SLUG[brand]
   if (!brandSlug) return { url: null, reason: `Parfumo: no brand slug for "${brand}"` }
@@ -159,9 +185,12 @@ async function fetchFromParfumo(page, brand, name) {
     try {
       await page.goto(url, { waitUntil: 'load', timeout: 20000 })
       await sleep(600)
+      
+      await handleCaptcha(page)
+      
       const title = await page.title()
       if (/^\s*404\s*$/.test(title) || title.toLowerCase().includes('not found')) return null
-      if (title.toLowerCase().includes('attention required')) return null  // Cloudflare block
+      
       const ogImage = await page.$eval('meta[property="og:image"]', el => el.getAttribute('content')).catch(() => null)
       if (ogImage) return ogImage.replace('/perfume_social/', '/perfumes/').replace(/\?.*$/, '')
       const domImage = await page.evaluate(() => {
@@ -229,6 +258,8 @@ async function fetchFromFragrantica(page, brand, name) {
   try {
     await page.goto(searchUrl, { waitUntil: 'load', timeout: 25000 })
     await sleep(800)
+    
+    await handleCaptcha(page)
 
     // Find the first result link that matches our brand slug
     const productUrl = await page.evaluate((bSlug) => {
@@ -241,6 +272,8 @@ async function fetchFromFragrantica(page, brand, name) {
 
     await page.goto(productUrl, { waitUntil: 'load', timeout: 25000 })
     await sleep(600)
+    
+    await handleCaptcha(page)
 
     const ogImage = await page.$eval('meta[property="og:image"]', el => el.getAttribute('content')).catch(() => null)
     if (ogImage) return { url: ogImage, reason: null, source: 'fragrantica', sourceUrl: productUrl }

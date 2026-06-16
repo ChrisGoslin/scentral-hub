@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useCallback, useRef, useEffect } from 'react'
+import Image from 'next/image'
 import {
   DndContext,
   DragEndEvent,
@@ -154,12 +155,16 @@ function MiniBottle({ f }: { f: CollectionFragrance }) {
     )
   }
   return (
-    <img
-      src={f.image_url}
-      alt={`${f.brand} ${f.name}`}
-      style={{ width: '100%', aspectRatio: '1', objectFit: 'contain', borderRadius: 4 }}
-      onError={() => setFailed(true)}
-    />
+    <div style={{ width: '100%', aspectRatio: '1', position: 'relative' }}>
+      <Image
+        src={f.image_url || '/placeholder-bottle.png'}
+        alt={`${f.brand} ${f.name}`}
+        fill
+        sizes="64px"
+        style={{ objectFit: 'contain', borderRadius: 4 }}
+        onError={() => setFailed(true)}
+      />
+    </div>
   )
 }
 

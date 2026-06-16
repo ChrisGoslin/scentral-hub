@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import Chip from '@/components/ui/Chip'
@@ -80,11 +81,13 @@ function FragranceImage({ imageUrl, brand, name }: { imageUrl: string | null; br
   }
 
   return (
-    <div className="w-full aspect-square rounded-[10px] overflow-hidden" style={{ background: 'var(--surface-2)' }}>
-      <img
-        src={imageUrl}
+    <div className="w-full aspect-square rounded-[10px] overflow-hidden relative" style={{ background: 'var(--surface-2)' }}>
+      <Image
+        src={imageUrl || '/placeholder-bottle.png'}
         alt={`${brand} ${name}`}
-        className="w-full h-full object-contain"
+        fill
+        sizes="(max-width: 768px) 50vw, 25vw"
+        style={{ objectFit: 'contain', padding: 4 }}
         onError={() => setFailed(true)}
       />
     </div>
