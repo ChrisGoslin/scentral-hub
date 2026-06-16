@@ -13,9 +13,8 @@ export default function OnboardingPage() {
   const [step, setStep] = useState<Step>(1)
   const [fade, setFade] = useState(true)
 
-  const [step1Choices, setStep1Choices] = useState<string[]>([])
+  const [step1Choice, setStep1Choice] = useState<string>('')
   const [step2Choice, setStep2Choice] = useState<string>('')
-  const [step3Choice, setStep3Choice] = useState<string>('')
 
   // Guard: if already onboarded, skip immediately
   useEffect(() => {
@@ -35,14 +34,14 @@ export default function OnboardingPage() {
 
   const handleFinish = () => {
     const vibeMap: Record<string, string> = {
-      '🔥 Warm & Cosy': 'warm',
-      '💧 Fresh & Clean': 'fresh',
-      '⚡ Bold & Powerful': 'bold',
-      '🌙 Soft & Subtle': 'soft',
+      'Warm & Rich': 'warm',
+      'Fresh & Clean': 'fresh',
+      'Bold & Lasting': 'bold',
+      'Light & Subtle': 'soft',
     }
-    
+
     localStorage.setItem('scentral_onboarded', 'true')
-    localStorage.setItem('scentral_vibe', vibeMap[step3Choice] || 'fresh')
+    localStorage.setItem('scentral_vibe', vibeMap[step1Choice] || 'fresh')
     router.push('/discover')
   }
 
@@ -51,45 +50,28 @@ export default function OnboardingPage() {
     router.push('/discover')
   }
 
-  const step1Options = ['Nothing yet', '1–2 bottles', 'A few (3–5)', '5+ and growing']
-  const step2Options = [
-    'Lasts all day without reapplying',
-    'People notice when I walk past',
-    'Safe for the office',
-    'Finding cheaper alternatives to expensive scents',
-    'All of the above'
-  ]
-
-  const vibeCards = [
-    { label: '🔥 Warm & Cosy', sub: 'Rich, amber, smoky. Stays close to skin.' },
-    { label: '💧 Fresh & Clean', sub: 'Light, citrus, crisp. Great for day wear.' },
-    { label: '⚡ Bold & Powerful', sub: 'Loud, commanding, unforgettable.' },
-    { label: '🌙 Soft & Subtle', sub: 'Delicate, skin-close, intimate.' }
-  ]
-
-  const isNextDisabled = 
-    (step === 1 && step1Choices.length === 0) || 
-    (step === 2 && !step2Choice) || 
-    (step === 3 && !step3Choice)
+  const isNextDisabled =
+    (step === 1 && !step1Choice) ||
+    (step === 2 && !step2Choice)
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] flex flex-col items-center">
-      <div className="w-full max-w-[480px] px-6 pt-8 pb-10 flex flex-col min-h-screen">
-        
+    <div className="min-h-[100dvh] bg-[var(--bg)] text-[var(--text)] flex flex-col items-center">
+      <div className="w-full max-w-[480px] px-6 pt-8 pb-10 flex flex-col min-h-[100dvh]">
+
         {/* Progress Header */}
         <div className="flex gap-2 mb-12">
           {[1, 2, 3].map((s) => (
-            <div 
-              key={s} 
+            <div
+              key={s}
               className={`h-1 flex-1 rounded-full transition-all duration-500 ${
                 step >= s ? 'bg-[var(--accent)]' : 'bg-[var(--line)]'
-              }`} 
+              }`}
             />
           ))}
         </div>
 
         {/* Content Area */}
-        <div 
+        <div
           className={`flex-1 transition-all duration-300 ${
             fade ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
           }`}
@@ -97,21 +79,17 @@ export default function OnboardingPage() {
           {step === 1 && (
             <div className="space-y-8">
               <header className="space-y-2">
-                <h1 className="text-2xl font-serif leading-tight">What's in your collection right now?</h1>
+                <h1 className="text-2xl font-serif leading-tight">What draws you to a scent?</h1>
                 <p className="text-sm text-[var(--text-muted)] font-light leading-relaxed">
-                  Don't worry if it's nothing — that's where most people start.
+                  We'll tailor your discovery feed to match your sensory identity.
                 </p>
               </header>
               <div className="flex flex-wrap gap-3">
-                {step1Options.map((opt) => (
+                {['Warm & Rich', 'Fresh & Clean', 'Bold & Lasting', 'Light & Subtle'].map((opt) => (
                   <Chip
                     key={opt}
-                    selected={step1Choices.includes(opt)}
-                    onClick={() => {
-                      setStep1Choices(prev => 
-                        prev.includes(opt) ? prev.filter(i => i !== opt) : [...prev, opt]
-                      )
-                    }}
+                    selected={step1Choice === opt}
+                    onClick={() => setStep1Choice(prev => prev === opt ? '' : opt)}
                   >
                     {opt}
                   </Chip>
@@ -123,10 +101,10 @@ export default function OnboardingPage() {
           {step === 2 && (
             <div className="space-y-8">
               <header className="space-y-2">
-                <h1 className="text-2xl font-serif leading-tight">What do you care about most?</h1>
+                <h1 className="text-2xl font-serif leading-tight">How would you describe your collection?</h1>
               </header>
               <div className="flex flex-col gap-3">
-                {step2Options.map((opt) => (
+                {['Just starting (1–5 bottles)', 'Growing (6–15 bottles)', 'Established (16+ bottles)'].map((opt) => (
                   <Chip
                     key={opt}
                     className="justify-start"
@@ -138,7 +116,7 @@ export default function OnboardingPage() {
                   </Chip>
                 ))}
               </div>
-              <button 
+              <button
                 onClick={() => transitionTo(1)}
                 className="text-xs uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--text)] transition-colors"
               >
@@ -149,33 +127,13 @@ export default function OnboardingPage() {
 
           {step === 3 && (
             <div className="space-y-8">
-              <header className="space-y-2">
-                <h1 className="text-2xl font-serif leading-tight">What kind of scents do you reach for?</h1>
-              </header>
-              <div className="grid grid-cols-2 gap-4">
-                {vibeCards.map((vibe) => (
-                  <div
-                    key={vibe.label}
-                    onClick={() => setStep3Choice(vibe.label)}
-                    className={`p-4 rounded-[var(--r-card)] bg-[var(--surface)] border transition-all cursor-pointer flex flex-col gap-2 ${
-                      step3Choice === vibe.label 
-                        ? 'border-[var(--accent)] shadow-[0_0_0_1px_var(--accent)]' 
-                        : 'border-[var(--line)]'
-                    }`}
-                  >
-                    <p className="text-sm font-bold">{vibe.label}</p>
-                    <p className="text-[11px] text-[var(--text-muted)] leading-tight font-light">{vibe.sub}</p>
-                  </div>
-                ))}
-              </div>
-              
-              {step3Choice && (
-                <p style={{ fontSize: 13, color: 'var(--text-muted)', textAlign: 'center', marginTop: 16 }}>
-                  You'll see {step3Choice} scents first on Discover
+              <header className="space-y-6">
+                <h1 className="text-2xl font-serif leading-tight">Your wardrobe is ready.</h1>
+                <p className="text-sm text-[var(--text-muted)] font-light leading-relaxed">
+                  Tap Discover to explore your personalised catalogue.
                 </p>
-              )}
-
-              <button 
+              </header>
+              <button
                 onClick={() => transitionTo(2)}
                 className="text-xs uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--text)] transition-colors"
               >
@@ -195,11 +153,11 @@ export default function OnboardingPage() {
               else handleFinish()
             }}
           >
-            {step === 3 ? 'Finish' : 'Next'}
+            {step === 3 ? 'Go to Discover' : 'Next'}
           </Button>
 
           <div className="text-center">
-            <button 
+            <button
               onClick={handleSkip}
               className="text-xs uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--text)] transition-colors bg-transparent border-none cursor-pointer"
             >

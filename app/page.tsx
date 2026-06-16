@@ -35,7 +35,7 @@ export default async function Home() {
   ]
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] flex flex-col items-center transition-colors duration-700">
+    <div className="min-h-[100dvh] bg-[var(--bg)] text-[var(--text)] flex flex-col items-center transition-colors duration-700">
       <main className="max-w-6xl w-full px-6 pt-20 pb-10 grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-20 items-center fade-up">
 
         {/* Left — hero copy */}
@@ -47,11 +47,11 @@ export default async function Home() {
 
           <div className="space-y-6">
             <h1 className="text-3xl md:text-5xl lg:text-7xl font-serif italic leading-tight tracking-tight">
-              You already<br />
-              <span className="text-[var(--text-muted)]">know what you like.</span>
+              Your Digital<br />
+              <span className="text-[var(--text-muted)]">Fragrance Intelligence App.</span>
             </h1>
             <p className="text-[var(--text-muted)] max-w-xl text-lg font-light leading-relaxed">
-              Scentral helps you find more of it — discover inspired-by alternatives, build combinations that last all day, and track the bottles you love.
+              Discover inspired-by alternatives, catalogue your personal collection, and unlock the science of scent layering.
             </p>
           </div>
 
@@ -60,7 +60,7 @@ export default async function Home() {
               href="/onboarding"
               className="bg-[var(--accent)] text-white px-6 py-3 md:px-10 md:py-4 rounded-[var(--r-btn)] shadow-sm transition-all hover:bg-[var(--accent-press)] active:scale-95 font-bold uppercase tracking-widest text-[10px]"
             >
-              Start Here
+              Start building your wardrobe
             </Link>
             <Link
               href="/collection"
@@ -73,7 +73,7 @@ export default async function Home() {
           <WaitlistForm />
           
           <p style={{ fontSize: 13, color: 'var(--text-muted)', textAlign: 'center', marginTop: 16 }}>
-            Join 800+ fragrance enthusiasts already on the list
+            Join 800+ collectors already building their digital wardrobe.
           </p>
         </section>
 
@@ -110,24 +110,21 @@ export default async function Home() {
         </aside>
       </main>
 
-      {/* The Christopher Moment */}
+      {/* Signature Moment */}
       <section className="max-w-6xl w-full px-6 py-20 grid grid-cols-1 md:grid-cols-2 gap-10 items-center border-y border-[var(--line)] my-10 bg-[var(--surface-subtle)]">
         {/* Left Side — Story Card */}
         <div className="bg-[var(--surface)] border border-[var(--line)] p-10 space-y-6 shadow-sm">
           <div>
-            <p className="text-[10px] text-[var(--accent)] uppercase tracking-[0.3em] font-bold mb-4">How it starts</p>
+            <p className="text-[10px] text-[var(--accent)] uppercase tracking-[0.3em] font-bold mb-4">How it works</p>
             <h2 className="text-3xl font-serif leading-tight tracking-tight italic">
-              "Your colleague pulls out a bottle."
+              Recognise a signature instantly.
             </h2>
           </div>
           <p className="text-sm text-[var(--text-muted)] leading-relaxed font-light">
-            You recognise the scent immediately. It's your signature — the one you only buy on sale. 
-            He paid €18. You paid €140. 
-            <br /><br />
-            That's the inspired-by world. Scentral maps it.
+            Scentral maps the olfactory DNA of the world's most coveted scents to reveal premium, accessible alternatives — without the luxury markup.
           </p>
-          <Link 
-            href="/discover" 
+          <Link
+            href="/discover"
             className="inline-block text-[10px] font-bold uppercase tracking-widest text-[var(--accent)] border-b border-[var(--accent)] pb-1 transition-all hover:pr-2"
           >
             See the alternatives →
