@@ -1,34 +1,17 @@
 /**
  * manual-image-helper.mjs
- * Interactive CLI for manually filling fragrance image_url gaps.
- *
- * For each fragrance without an image:
- *   - Opens a Google Images search in your browser
- *   - Prompts you to paste the image URL
- *   - Saves it to the DB immediately
- *
+ * Helps the user manually find and save fragrance image URLs.
+ * 
  * Usage:
  *   node scripts/manual-image-helper.mjs
  *   node scripts/manual-image-helper.mjs --limit=20
- *   node scripts/manual-image-helper.mjs --brand="Tom Ford"   (one brand at a time)
- *
- * Tip: right-click any Google Images result → "Copy image address" and paste here.
- * Prefer official brand CDN URLs or press/media URLs over retailer thumbnails.
  */
 
 import { createClient } from '@supabase/supabase-js'
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
-import { createInterface } from 'readline'
 import { execSync } from 'child_process'
-
-// ─── Config ──────────────────────────────────────────────────────────────────
-
-const LIMIT_ARG = process.argv.find(a => a.startsWith('--limit='))
-const LIMIT = LIMIT_ARG ? parseInt(LIMIT_ARG.split('=')[1]) : Infinity
-
-const BRAND_ARG = process.argv.find(a => a.startsWith('--brand='))
-const BRAND_FILTER = BRAND_ARG ? BRAND_ARG.split('=').slice(1).join('=').replace(/^["']|["']$/g, '') : null
+import { createInterface } from 'readline'
 
 // ─── Load env ────────────────────────────────────────────────────────────────
 
@@ -46,7 +29,7 @@ function loadEnv() {
       if (!process.env[key]) process.env[key] = val
     }
   } catch {
-    console.warn('⚠️  Could not load .env.local')
+    console.warn('⚠️  Could not load .env.local — falling back to process.env')
   }
 }
 
@@ -62,120 +45,97 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function openBrowser(url) {
-  try {
-    // macOS: open | Linux: xdg-open | Windows: start
-    const cmd = process.platform === 'win32' ? 'start' : process.platform === 'linux' ? 'xdg-open' : 'open'
-    execSync(`${cmd} "${url}"`, { stdio: 'ignore' })
-  } catch {
-    console.log(`  🔗 ${url}`)
-  }
-}
-
-function prompt(rl, question) {
-  return new Promise(resolve => rl.question(question, resolve))
-}
-
-function googleImagesUrl(brand, name) {
-  const q = encodeURIComponent(`${brand} ${name} perfume bottle official`)
-  return `https://www.google.com/search?tbm=isch&q=${q}`
-}
-
-// ─── Main ─────────────────────────────────────────────────────────────────────
+// ─── Main ────────────────────────────────────────────────────────────────────
 
 async function main() {
-  console.log('\n🖼️  Manual image helper')
-  if (BRAND_FILTER) console.log(`   Brand filter: ${BRAND_FILTER}`)
-  console.log('─'.repeat(55))
-  console.log('  Right-click any Google Images result → "Copy image address"')
-  console.log('  Press Enter with no input to skip.')
-  console.log('─'.repeat(55))
+  const limitArg = process.argv.find(a => a.startsWith('--limit='))
+  const limit = limitArg ? parseInt(limitArg.split('=')[1]) : Infinity
 
-  // Query fragrances missing images
+  const brandArg = process.argv.find(a => a.startsWith('--brand='))
+  const brandFilter = brandArg ? brandArg.split('=')[1].replace(/^["']|["']$/g, '') : null
+
+  console.log('📡 Fetching fragrances with missing images' + (brandFilter ? ` for brand "${brandFilter}"` : '') + '...')
+  
   let query = supabase
     .from('fragrances')
     .select('id, brand, name')
     .is('image_url', null)
-    .order('brand')
-    .order('name')
 
-  if (BRAND_FILTER) query = query.eq('brand', BRAND_FILTER)
+  if (brandFilter) {
+    query = query.eq('brand', brandFilter)
+  }
 
-  const { data: rows, error } = await query
-  if (error) { console.error('❌ Supabase:', error.message); process.exit(1) }
+  const { data: fragrances, error } = await query
+    .order('brand', { ascending: true })
+    .order('name', { ascending: true })
+    .limit(limit)
 
-  const toProcess = LIMIT < Infinity ? rows.slice(0, LIMIT) : rows
-  const total = toProcess.length
+  if (error) {
+    console.error('❌ DB error:', error.message)
+    process.exit(1)
+  }
 
-  if (total === 0) {
-    console.log('\n✅ No missing images' + (BRAND_FILTER ? ` for ${BRAND_FILTER}` : '') + '.')
+  if (!fragrances || fragrances.length === 0) {
+    console.log('✅ All fragrances have images!')
     return
   }
 
-  console.log(`\nFound ${rows.length} missing${BRAND_FILTER ? ` for ${BRAND_FILTER}` : ''}. Processing ${total}.\n`)
+  const total = fragrances.length
+  let saved = 0
+  let skipped = 0
 
-  const rl = createInterface({ input: process.stdin, output: process.stdout })
+  const rl = createInterface({
+    input: process.stdin,
+    output: process.stdout
+  })
 
-  const results = { saved: 0, skipped: 0, failed: 0 }
+  const question = (query) => new Promise(resolve => rl.question(query, resolve))
 
-  // Open one Google Images tab per brand (efficient — not one per fragrance)
-  // We'll open brand tabs as we encounter new brands
-  let lastBrand = null
-
-  for (let i = 0; i < toProcess.length; i++) {
-    const { id, brand, name } = toProcess[i]
-
-    // Open a new browser tab when brand changes — less noise than per-fragrance
-    if (brand !== lastBrand) {
-      const brandSearchUrl = `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(brand + ' perfume bottle')}`
-      openBrowser(brandSearchUrl)
-      lastBrand = brand
-      if (i > 0) console.log() // spacing between brands
-      console.log(`\n── ${brand} ──`)
+  for (let i = 0; i < total; i++) {
+    const f = fragrances[i]
+    console.log(`\n[${i + 1}/${total}] ${f.brand} — ${f.name}`)
+    
+    const searchUrl = `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(f.brand + ' ' + f.name + ' perfume bottle official')}`
+    
+    try {
+      execSync(`open "${searchUrl}"`)
+    } catch (err) {
+      console.warn('  ⚠️  Could not open browser automatically.')
     }
 
-    // Specific search printed (but not auto-opened — brand tab is already there)
-    const specificUrl = googleImagesUrl(brand, name)
-    console.log(`\n[${i + 1}/${total}] ${name}`)
-    console.log(`  Search: ${specificUrl}`)
-
-    const input = await prompt(rl, '  URL: ')
+    const input = await question('Paste image URL (or Enter to skip): ')
     const url = input.trim()
 
-    if (!url) {
-      console.log('  — Skipped')
-      results.skipped++
-      continue
-    }
+    if (url) {
+      const { error: updateError } = await supabase
+        .from('fragrances')
+        .update({ image_url: url })
+        .eq('id', f.id)
 
-    const { error: updateError } = await supabase
-      .from('fragrances')
-      .update({ image_url: url })
-      .eq('id', id)
-
-    if (updateError) {
-      console.log(`  ✗ DB error: ${updateError.message}`)
-      results.failed++
+      if (updateError) {
+        console.log(`  ✗ DB error: ${updateError.message}`)
+      } else {
+        console.log('  ✓ Saved')
+        saved++
+      }
     } else {
-      console.log('  ✓ Saved')
-      results.saved++
+      console.log('  — Skipped')
+      skipped++
     }
   }
 
   rl.close()
 
-  // Summary
-  console.log('\n' + '─'.repeat(55))
-  console.log(`Done. Saved: ${results.saved} | Skipped: ${results.skipped} | Failed: ${results.failed}`)
-
-  // Show remaining count
+  // Final count of remaining
   const { count } = await supabase
     .from('fragrances')
-    .select('id', { count: 'exact', head: true })
+    .select('*', { count: 'exact', head: true })
     .is('image_url', null)
-  console.log(`Still missing in DB: ${count ?? '?'}`)
+
+  console.log('\n─── Summary ───')
+  console.log(`Saved:   ${saved}`)
+  console.log(`Skipped: ${skipped}`)
+  console.log(`Remaining in DB: ${count ?? 0}`)
 }
 
-main().catch(err => { console.error('Unexpected error:', err); process.exit(1) })
+main()

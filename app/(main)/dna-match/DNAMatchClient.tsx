@@ -23,7 +23,7 @@ interface DNAMatchResult {
   cached: boolean;
 }
 
-export default function ResonanceClient({ fragrances }: { fragrances: Fragrance[] }) {
+export default function CompareScentsClient({ fragrances }: { fragrances: Fragrance[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [fragA, setFragA] = useState<Fragrance | null>(null);
@@ -33,7 +33,7 @@ export default function ResonanceClient({ fragrances }: { fragrances: Fragrance[
   const [searchA, setSearchA] = useState('');
   const [searchB, setSearchB] = useState('');
 
-  // Deep-link: pre-seed Essence Alpha from ?a=<id> (Collection "See similar" handoff)
+  // Deep-link: pre-seed from ?a=<id> (Collection "See similar" handoff)
   useEffect(() => {
     const aId = searchParams.get('a');
     if (!aId) return;
@@ -79,7 +79,7 @@ export default function ResonanceClient({ fragrances }: { fragrances: Fragrance[
       if (data.success) {
         setResult(data);
       } else {
-        console.error('Resonance synthesis failed:', data.error);
+        console.error('Harmony check failed:', data.error);
       }
     } catch (error) {
       console.error('Request failed:', error);
@@ -103,17 +103,17 @@ export default function ResonanceClient({ fragrances }: { fragrances: Fragrance[
       {/* Flush header — matches Wardrobe / You */}
       <header className="px-4 pt-8 pb-4 md:px-6" style={{ borderBottom: '1px solid var(--line)' }}>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--text)', lineHeight: '34px' }}>
-          Olfactory Resonance
+          Compare Scents
         </h1>
         <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
-          Synthesize the chemical harmony between two essences.
+          Check the harmony between two fragrances and see how they work together.
         </p>
       </header>
 
       <div className="px-4 py-5 space-y-8 md:max-w-4xl md:mx-auto md:px-6 md:py-10 md:space-y-12">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-12 md:items-center">
           <FragrancePicker
-            label="Essence Alpha"
+            label="First Fragrance"
             selected={fragA}
             search={searchA}
             onSearchChange={setSearchA}
@@ -122,7 +122,7 @@ export default function ResonanceClient({ fragrances }: { fragrances: Fragrance[
           />
 
           <FragrancePicker
-            label="Essence Beta"
+            label="Second Fragrance"
             selected={fragB}
             search={searchB}
             onSearchChange={setSearchB}
@@ -142,7 +142,7 @@ export default function ResonanceClient({ fragrances }: { fragrances: Fragrance[
                 : { background: 'var(--accent)', color: 'var(--bg)' }
             }
           >
-            {loading ? 'Synthesizing Resonance…' : 'Find Resonance'}
+            {loading ? 'Checking Harmony…' : 'Check Harmony'}
           </button>
         </div>
 
@@ -155,7 +155,6 @@ export default function ResonanceClient({ fragrances }: { fragrances: Fragrance[
 
         {result && !loading && fragA && fragB && (
           <div className="fade-up border rounded-3xl p-8 md:p-10 shadow-sm text-center space-y-8" style={{ background: 'var(--surface)', borderColor: 'var(--line)' }}>
-            {/* Two-fragrance context header — never lose what was compared */}
             <div className="flex items-center justify-center gap-4">
               <div className="text-right min-w-0">
                 <p className="text-[10px] uppercase font-bold tracking-widest truncate" style={{ color: 'var(--text-muted)' }}>{fragA.brand}</p>
@@ -175,7 +174,7 @@ export default function ResonanceClient({ fragrances }: { fragrances: Fragrance[
               className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full font-semibold text-sm transition-all hover:opacity-80 active:scale-95"
               style={{ background: 'var(--accent)', color: 'var(--bg)' }}
             >
-              Send to Atelier →
+              Try Layering These →
             </button>
 
             <div className="space-y-4">
@@ -186,13 +185,12 @@ export default function ResonanceClient({ fragrances }: { fragrances: Fragrance[
                 {result.category}
               </div>
 
-              {/* Editorial note — shown by default, no toggle */}
               <div className="max-w-xl mx-auto mt-2 p-6 rounded-2xl italic leading-relaxed border text-left" style={{ background: 'var(--bg)', color: 'var(--text-muted)', borderColor: 'var(--line)' }}>
                 {result.narrative}
               </div>
             </div>
 
-            {result.cached && <div className="text-[10px] font-mono tracking-widest uppercase" style={{ color: 'var(--text-muted)' }}>🔄 Retrieved from Archives</div>}
+            {result.cached && <div className="text-[10px] font-mono tracking-widest uppercase" style={{ color: 'var(--text-muted)' }}>🔄 Match Found in Archives</div>}
 
             <ChemistPanel
               fragranceAId={fragA.id}
@@ -204,7 +202,6 @@ export default function ResonanceClient({ fragrances }: { fragrances: Fragrance[
         )}
       </div>
 
-      {/* Float above the bottom nav (≈56px) + safe-area inset */}
       <aside className="fixed right-4 z-50" style={{ bottom: 'calc(56px + env(safe-area-inset-bottom, 0px) + 16px)' }}>
         <AudioChord />
       </aside>
@@ -230,7 +227,6 @@ function FragrancePicker({
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  // Close dropdown on outside tap
   useEffect(() => {
     if (!open) return;
     function handle(e: PointerEvent) {
@@ -247,7 +243,7 @@ function FragrancePicker({
       {!selected ? (
         <input
           type="text"
-          placeholder="Search essences..."
+          placeholder="Search for a bottle..."
           value={search}
           onChange={(e) => { onSearchChange(e.target.value); setOpen(true); }}
           onFocus={() => setOpen(true)}
