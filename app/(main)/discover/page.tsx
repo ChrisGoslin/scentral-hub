@@ -14,7 +14,7 @@ export default async function DiscoverPage() {
       .range(0, 39),
     supabase
       .from('fragrances')
-      .select('*', { count: 'exact', head: true }),
+      .select('id', { count: 'exact', head: true }),
   ])
 
   const fragrances: DiscoverFragrance[] = (data ?? []).map(f => ({

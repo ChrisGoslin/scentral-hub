@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import Chip from '@/components/ui/Chip'
 import EmptyState from '@/components/ui/EmptyState'
+import Button from '@/components/ui/Button'
 import { getBrandEmoji } from '@/lib/brandEmoji'
 import { createClient } from '@/utils/supabase/client'
 
@@ -105,9 +106,9 @@ type Props = {
   totalCount: number
 }
 
-export default function DiscoverClient({ fragrances, error, hasMore, totalCount }: Props) {
+export default function DiscoverClient({ fragrances, error, hasMore: initialHasMore, totalCount }: Props) {
   const [localFragrances, setLocalFragrances] = useState<DiscoverFragrance[]>(fragrances)
-  const [hasMoreLocal, setHasMoreLocal]       = useState(hasMore)
+  const [hasMore, setHasMore]             = useState(initialHasMore)
   const [loadingMore, setLoadingMore]         = useState(false)
 
   const [wishlist, setWishlist]   = useState<string[]>([])
@@ -264,6 +265,16 @@ export default function DiscoverClient({ fragrances, error, hasMore, totalCount 
     setVibeActive(false)
   }
 
+  function clearFilters() {
+    setFeel(null)
+    setLongevity(null)
+    setBrand(null)
+    setShowSaved(false)
+    setSearchTerm('')
+    setDebouncedSearch('')
+    setVibeActive(false)
+  }
+
   async function loadMore() {
     setLoadingMore(true)
     const supabase = createClient()
@@ -289,9 +300,11 @@ export default function DiscoverClient({ fragrances, error, hasMore, totalCount 
         created_at: f.created_at,
       }))
       setLocalFragrances(prev => [...prev, ...batch])
-      setHasMoreLocal(offset + data.length < totalCount)
+      if (data.length < 40 || (offset + data.length) >= totalCount) {
+        setHasMore(false)
+      }
     } else {
-      setHasMoreLocal(false)
+      setHasMore(false)
     }
     setLoadingMore(false)
   }
@@ -529,8 +542,13 @@ export default function DiscoverClient({ fragrances, error, hasMore, totalCount 
       {filtered.length === 0 ? (
         <div style={{ padding: '48px 16px', textAlign: 'center' }}>
           <EmptyState
-            headline="Nothing matching"
-            caption="Try a different feel or clear a filter"
+            headline="Nothing matches"
+            caption="Try clearing a filter or searching something else"
+            action={
+              <Button onClick={clearFilters} variant="secondary">
+                Clear filters
+              </Button>
+            }
           />
         </div>
       ) : (
@@ -636,8 +654,8 @@ export default function DiscoverClient({ fragrances, error, hasMore, totalCount 
       )}
 
       {/* Load more */}
-      {hasMoreLocal && !anyFilter && !anySearch && (
-        <div style={{ padding: '24px 16px', textAlign: 'center' }}>
+      <div style={{ padding: '24px 16px', textAlign: 'center' }}>
+        {hasMore ? (
           <button
             onClick={loadMore}
             disabled={loadingMore}
@@ -654,8 +672,12 @@ export default function DiscoverClient({ fragrances, error, hasMore, totalCount 
           >
             {loadingMore ? 'Loading…' : 'Load more'}
           </button>
-        </div>
-      )}
+        ) : (
+          <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-muted)', padding: '16px 0' }}>
+            All {localFragrances.length} fragrances loaded
+          </p>
+        )}
+      </div>
     </div>
   )
 }
