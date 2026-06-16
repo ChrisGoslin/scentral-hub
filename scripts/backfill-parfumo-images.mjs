@@ -114,7 +114,9 @@ const PARFUMO_NAME_OVERRIDES = {
 }
 
 function toLowercaseHyphen(name) {
-  return name.toLowerCase().replace(/['']/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+  return name
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .toLowerCase().replace(/['']/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
 }
 
 function toTitleUnderscore(name) {
@@ -205,7 +207,15 @@ const FRAGRANTICA_BRAND_SLUG = {
   'Xerjoff': 'Xerjoff',
   'Yves Saint Laurent': 'Yves-Saint-Laurent',
   'Cremo': 'Cremo',
-  // Middle Eastern brands not on Fragrantica — skip to Parfumo
+  'Afnan': 'Afnan',
+  'Lattafa': 'Lattafa',
+  'Lattafa Pride': 'Lattafa',
+  'Rasasi': 'Rasasi',
+  'Swiss Arabian': 'Swiss-Arabian',
+  'Khadlaj': 'Khadlaj',
+  'Arabiyat Prestige': 'Arabiyat-Prestige',
+  'French Avenue': 'French-Avenue',
+  // Brands genuinely not on Fragrantica fall through to Parfumo-only
 }
 
 async function fetchFromFragrantica(page, brand, name) {
