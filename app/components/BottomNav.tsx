@@ -2,13 +2,14 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Archive, FlaskConical, Compass, User } from 'lucide-react'
+import { Archive, FlaskConical, Compass, User, Users } from 'lucide-react'
 
 // Free tier — always visible in the main nav
 const NAV_ITEMS = [
   { label: 'Discover',   href: '/discover',   Icon: Compass },
   { label: 'My Bottles', href: '/collection', Icon: Archive },
   { label: 'Layering',   href: '/layering',   Icon: FlaskConical },
+  { label: 'Social',     href: '/social',      Icon: Users },
   { label: 'You',        href: '/you',         Icon: User },
 ]
 
@@ -26,7 +27,7 @@ export default function BottomNav() {
     >
       <div
         className="mx-auto grid h-14 max-w-md items-center"
-        style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}
+        style={{ gridTemplateColumns: 'repeat(5, 1fr)' }}
       >
         {NAV_ITEMS.map(({ label, href, Icon }) => {
           // detail pages correctly keep My Bottles active

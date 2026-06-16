@@ -31,6 +31,7 @@ fictional features, lore like "Agent Luna / Hegemony / Shadow Branching", and ha
   - `/collection` (My Bottles — user inventory)
   - `/collection/[id]` (Fragrance detail view)
   - `/layering` (Lab — combine scents)
+  - `/social` (Community — curated TikTok/YouTube fragrance content, no auth)
   - `/you` (User profile and insights)
   - `/dna-match` (Resonance — find similar scents)
   - `/intelligence` (Wardrobe Intelligence — gated)
@@ -277,7 +278,7 @@ scentral-environment, scentral-use-cases
 - isPro = false — ProGate is active. Do NOT touch /intelligence, /dna-match, /schedule pages.
 
 ## Free/Pro split
-Free: /discover, /collection, /collection/[id], /layering, /you
+Free: /discover, /collection, /collection/[id], /layering, /social, /you
 Pro (gated): /intelligence, /dna-match, /schedule
 
 ## Scripts (run locally — sandbox has no outbound network)
