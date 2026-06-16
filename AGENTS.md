@@ -212,6 +212,24 @@ Use `repeat(auto-fit, minmax(80px, 1fr))` so columns collapse naturally to 1 on 
 **L10 — LLM briefing block divergence risk.** §10 summarises §1 for paste-out. When updating §1
 (stack, routes, schema), also update §10 to match. They are NOT auto-synced.
 
+**L11 — §8's "sandbox has no outbound network" claim needs re-verification.** On 2026-06-16, Claude Code's
+Bash tool ran `backfill-parfumo-images.mjs` (Playwright + live Parfumo/Fragrantica requests),
+`migrate-images-to-storage.mjs` (Supabase Storage uploads), and `npx vercel --prod` directly —
+all succeeded with no `EAI_AGAIN`/`ECONNREFUSED`. This contradicts §8's blanket rule. [Unverified]
+whether this was environment-specific (Claude Code Bash tool vs. the original "Cowork" sandbox §8 was
+written for) — re-check network access at the start of a session before assuming you must hand scripts
+to Christopher; don't take §8 on faith either way.
+
+**L12 — Git lock files from background script runs.** Running a script via `run_in_background` (or any
+backgrounded git/node process) can leave stale `.git/HEAD.lock` / `.git/index.lock` files if the process
+was killed mid-write. Symptom: `fatal: cannot lock ref 'HEAD'`. Fix: `rm -f .git/HEAD.lock .git/index.lock`
+before retrying — safe as long as no git process is actually still running (`ps aux | grep git` to confirm).
+
+**L13 — Accented characters break Parfumo/Fragrantica slug generation.** `toLowercaseHyphen()` strips any
+non-`[a-z0-9]` character to a hyphen, turning `è`/`é`/etc. into a stray `-` instead of being dropped
+(`Bibliothèque` → `biblioth-que` instead of `bibliotheque`). Fix: `.normalize('NFD').replace(/[̀-ͯ]/g, '')`
+before lowercasing, to fold accented letters to their base ASCII form first.
+
 ## 10. LLM briefing block (copy-paste into Cursor / ChatGPT / other agents)
 
 Use this block when starting a new LLM session on Scentral. It is a summary of §1 — if you update §1 (stack, routes, schema), update this block too. Last verified: 2026-06-16.

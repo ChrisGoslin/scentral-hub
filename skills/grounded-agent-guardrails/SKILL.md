@@ -111,7 +111,7 @@ If any answer is unsatisfactory: fix it before declaring done.
 |------|-------|--------------|
 | Repo | `ChrisGoslin/scentral` (local: `scentral-hub`) | `git remote -v` |
 | Supabase project | `scentral-mvp` (`lrkdwobnemczvhpixpky`) | Supabase dashboard |
-| Fragrances | 76 | `SELECT count(*) FROM fragrances` |
+| Fragrances | 282 (218 with `image_url`, 64 pending) | `SELECT count(*), count(image_url) FROM fragrances` |
 | Layering protocols | 4 (Alpha–Delta) | Source-of-truth docs |
 | Stack | Next.js App Router, Supabase, Vercel, Tailwind | package.json |
 | Next.js version | Verify from package.json — do not assert from memory | `cat package.json` |
