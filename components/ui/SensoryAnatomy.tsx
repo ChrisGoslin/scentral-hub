@@ -56,10 +56,14 @@ const ZONES: Record<string, SpritzZone> = {
 
 interface SensoryAnatomyProps {
   zone?: string | null
+  family?: string | null
+  projection?: string | null
   className?: string
 }
 
-export default function SensoryAnatomy({ zone, className }: SensoryAnatomyProps) {
+export default function SensoryAnatomy({ zone, family, projection, className }: SensoryAnatomyProps) {
+  if (!family && !projection) return null
+
   // Map incoming zone string to our coordinates system
   const normalizedZone = zone?.toLowerCase().replace(/\s+/g, '-') || ''
   

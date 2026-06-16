@@ -301,7 +301,11 @@ export default async function FragranceDetailPage({
 
         {/* Sensory Anatomy */}
         {f.application_zone && (
-          <SensoryAnatomy zone={f.application_zone} />
+          <SensoryAnatomy 
+            zone={f.application_zone} 
+            family={f.family}
+            projection={f.projection}
+          />
         )}
 
         {/* Resonance — Find Similar */}

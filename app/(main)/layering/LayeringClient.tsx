@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { Search, X, Check, ArrowLeft } from 'lucide-react'
+import { Search, X, Check, ArrowLeft, Share2 } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Chip from '@/components/ui/Chip'
 import Sheet from '@/components/ui/Sheet'
@@ -213,6 +213,9 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
   const [saveSheetOpen, setSaveSheetOpen] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle')
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const [lastSavedId, setLastSavedId] = useState<string | null>(null)
+  const [sharedId, setSharedId] = useState<string | null>(null)
 
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [useCase, setUseCase] = useState<UseCase | null>(null)
@@ -343,17 +346,19 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
     e.stopPropagation()
     setIsSaving(true)
     setSaveStatus('idle')
+    setSaveError(null)
+    setLastSavedId(item.id)
 
     try {
       const res = await fetch('/api/layering/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          base_fragrance_id: baseFragrance?.id ?? null, // If null, the API needs handling or we prevent saving. The prompt says wire it up, so assuming valid base for Aura.
+          base_fragrance_id: baseFragrance?.id ?? null,
           top_fragrance_id: item.id,
           name: `${baseFragrance?.name ?? 'Unknown'} & ${item.name}`,
           occasion: useCase,
-          time_of_day: null, // Hardcoded for now per typical UI flow unless exposed
+          time_of_day: null,
           weather: auraEnvironment,
           rationale: `${item.layering_role} layer for ${useCase} environment. Harmony: ${item.similarity_score}%`,
           formulation: {},
@@ -362,16 +367,48 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
         })
       })
 
-      if (!res.ok) throw new Error('Save failed')
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Save failed')
+      
       setSaveStatus('success')
       setUsedLayers(prev => new Set([...prev, item.id]))
       setTimeout(() => setSaveStatus('idle'), 2500)
-    } catch {
+    } catch (e) {
       setSaveStatus('error')
-      setTimeout(() => setSaveStatus('idle'), 3000)
+      setSaveError(e instanceof Error ? e.message : 'Could not save combination')
     } finally {
       setIsSaving(false)
     }
+  }
+
+  async function handleShare(item: AuraResultItem) {
+    const base = baseFragrance?.name || 'My anchor'
+    const top = item.name
+    const occasion = useCase || 'daily'
+    const shareText = `I'm wearing ${base} + ${top} — ${occasion} combo 💫 via Scentral`
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Scentral Layering',
+          text: shareText,
+          url: window.location.href,
+        })
+      } catch (err) {
+        if ((err as Error).name !== 'AbortError') {
+          copyToClipboard(shareText, item.id)
+        }
+      }
+    } else {
+      copyToClipboard(shareText, item.id)
+    }
+  }
+
+  function copyToClipboard(text: string, id: string) {
+    navigator.clipboard.writeText(text).then(() => {
+      setSharedId(id)
+      setTimeout(() => setSharedId(null), 2000)
+    })
   }
 
   return (
@@ -709,16 +746,34 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
             )}
 
             {results && results.length > 0 && (
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-6">
                 {results.map(item => (
-                  <AuraResultCard
-                    key={item.id}
-                    item={item}
-                    used={usedLayers.has(item.id)}
-                    onUse={() => setUsedLayers(prev => new Set([...prev, item.id]))}
-                    onSave={(e) => handleSaveCombination(item, e)}
-                    isSaving={isSaving}
-                  />
+                  <div key={item.id} className="flex flex-col gap-3">
+                    <AuraResultCard
+                      item={item}
+                      used={usedLayers.has(item.id)}
+                      onUse={() => setUsedLayers(prev => new Set([...prev, item.id]))}
+                      onSave={(e) => handleSaveCombination(item, e)}
+                      isSaving={isSaving}
+                    />
+
+                    {saveError && lastSavedId === item.id && (
+                      <ErrorInline 
+                        message={saveError} 
+                        onRetry={() => handleSaveCombination(item, { stopPropagation: () => {} } as any)} 
+                      />
+                    )}
+
+                    <Button
+                      fullWidth
+                      variant="secondary"
+                      onClick={() => handleShare(item)}
+                      style={{ border: '1px solid var(--line)' }}
+                    >
+                      <Share2 size={16} className="mr-2" strokeWidth={2} />
+                      {sharedId === item.id ? 'Copied!' : 'Share this layer'}
+                    </Button>
+                  </div>
                 ))}
 
                 {/* Share card — uses top result */}

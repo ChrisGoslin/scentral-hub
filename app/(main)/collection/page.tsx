@@ -1,3 +1,4 @@
+import { Metadata } from 'next'
 import { createClient } from '@/utils/supabase/server'
 import WardrobeShelf from './WardrobeShelf'
 import { type CollectionFragrance } from './CollectionClient'
@@ -5,6 +6,11 @@ import EmptyState from '@/components/ui/EmptyState'
 import Button from '@/components/ui/Button'
 import Link from 'next/link'
 import { cookies } from 'next/headers'
+
+export const metadata: Metadata = {
+  title: 'My Bottles | Scentral',
+  description: 'Your personal fragrance wardrobe. Track your collection, manage bottle levels, and organize your scents on virtual walnut shelves.',
+}
 
 export const dynamic = 'force-dynamic'
 

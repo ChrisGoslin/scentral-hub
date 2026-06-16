@@ -1,7 +1,13 @@
+import { Metadata } from 'next'
 import { createClient } from '@/utils/supabase/server'
 import LayeringClient, { type LayeringFragrance } from './LayeringClient'
 import EmptyState from '@/components/ui/EmptyState'
 import { cookies } from 'next/headers'
+
+export const metadata: Metadata = {
+  title: 'Layering Lab | Scentral',
+  description: 'The Layering Lab. Experiment with fragrance combinations, find scents that work together, and create your own unique scent trails.',
+}
 
 export const dynamic = 'force-dynamic'
 

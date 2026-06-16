@@ -1,7 +1,13 @@
 import Link from 'next/link'
+import { Metadata } from 'next'
 import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
 import WaitlistForm from '@/app/landing/WaitlistForm'
+
+export const metadata: Metadata = {
+  title: 'Scentral — Your Fragrance Wardrobe',
+  description: 'Your personal fragrance wardrobe. Discover inspired-by alternatives, build combinations that last all day, and track the bottles you love.',
+}
 
 const QUICK_LINKS = [
   { label: 'My Bottles', sub: 'Browse and track your collection', href: '/collection' },
