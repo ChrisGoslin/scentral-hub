@@ -22,7 +22,7 @@ function BottleImage({ imageUrl, brand, name }: { imageUrl: string | null; brand
       <div
         style={{
           width: '100%',
-          aspectRatio: '1',
+          aspectRatio: '3/4',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -30,6 +30,7 @@ function BottleImage({ imageUrl, brand, name }: { imageUrl: string | null; brand
           background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)',
           borderRadius: 6,
           padding: 4,
+          position: 'relative',
         }}
       >
         <span style={{ fontSize: 28 }}>{getBrandEmoji(brand)}</span>
@@ -44,13 +45,13 @@ function BottleImage({ imageUrl, brand, name }: { imageUrl: string | null; brand
   }
 
   return (
-    <div style={{ width: '100%', aspectRatio: '1', borderRadius: 6, overflow: 'hidden', background: 'rgba(255,255,255,0.05)', position: 'relative' }}>
+    <div style={{ width: '100%', aspectRatio: '3/4', borderRadius: 6, background: 'rgba(255,255,255,0.05)', position: 'relative' }}>
       <Image
         src={imageUrl || '/placeholder-bottle.png'}
         alt={`${brand} ${name}`}
         fill
         sizes="80px"
-        style={{ objectFit: 'contain', padding: 2 }}
+        style={{ objectFit: 'contain' }}
         onError={() => setFailed(true)}
       />
     </div>

@@ -8,6 +8,7 @@ import EmptyState from '@/components/ui/EmptyState'
 import Button from '@/components/ui/Button'
 import { getBrandEmoji } from '@/lib/brandEmoji'
 import { createClient } from '@/utils/supabase/client'
+import Fuse from 'fuse.js'
 
 export type DiscoverFragrance = {
   id: string
@@ -32,16 +33,23 @@ const SORT_OPTIONS: SortOption[] = ['A–Z', 'Top Rated', 'Newest', 'Most Popula
 // ── Filter maps ──────────────────────────────────────────────────────────────
 
 const FEEL_FAMILIES: Record<string, string[]> = {
-  'Warm & Rich':    ['Woody Oriental', 'Oriental', 'Amber', 'Oud', 'Gourmand'],
-  'Fresh & Clean':  ['Citrus', 'Aquatic', 'Green', 'Fresh Spicy'],
-  'Bold & Lasting': ['Leather', 'Tobacco', 'Smoky', 'Resinous'],
-  'Light & Subtle': [],
+  'Warm & Rich':    ['Woody Oriental', 'Woody/Oriental', 'Oriental', 'Amber', 'Oud', 'Gourmand', 'Spicy', 'Musk', 'Vanilla', 'Balsamic'],
+  'Fresh & Clean':  ['Citrus', 'Aquatic', 'Green', 'Fresh Spicy', 'Fresh', 'Aromatic', 'Floral', 'Marine'],
+  'Bold & Lasting': ['Leather', 'Tobacco', 'Smoky', 'Resinous', 'Chypre', 'Fougere', 'Fougère', 'Woody'],
+  'Light & Subtle': ['Floral', 'Powdery', 'Light', 'Soft Floral', 'Soft', 'White Floral', 'Sheer'],
 }
 const FEEL_PROJECTIONS: Record<string, string[]> = {
-  'Warm & Rich':    [],
-  'Fresh & Clean':  [],
+  'Warm & Rich':    ['Beast Mode', 'Strong', 'Moderate'],
+  'Fresh & Clean':  ['Soft', 'Moderate', 'Light'],
   'Bold & Lasting': ['Beast Mode', 'Strong'],
-  'Light & Subtle': ['Soft', 'Moderate'],
+  'Light & Subtle': ['Soft', 'Moderate', 'Light'],
+}
+
+const FEEL_AMBIENT: Record<string, string> = {
+  'Warm & Rich':    'rgba(180, 83, 9, 0.08)',   // amber
+  'Fresh & Clean':  'rgba(6, 182, 212, 0.07)',   // cyan
+  'Bold & Lasting': 'rgba(67, 20, 7, 0.09)',     // deep smoke
+  'Light & Subtle': 'rgba(167, 139, 250, 0.07)', // lavender
 }
 
 const LONGEVITY_PROJECTIONS: Record<string, string[]> = {
@@ -66,12 +74,13 @@ function FragranceImage({ imageUrl, brand, name }: { imageUrl: string | null; br
     return (
       <div
         style={{
-          width: '100%', aspectRatio: '1 / 1',
+          width: '100%', aspectRatio: '3/4',
           display: 'flex', flexDirection: 'column',
           alignItems: 'center', justifyContent: 'center',
           background: 'linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%)',
           borderRadius: 10,
           padding: 8, gap: 4,
+          position: 'relative'
         }}
       >
         <span style={{ fontSize: 32 }}>{getBrandEmoji(brand)}</span>
@@ -85,13 +94,13 @@ function FragranceImage({ imageUrl, brand, name }: { imageUrl: string | null; br
     )
   }
   return (
-    <div style={{ width: '100%', aspectRatio: '1 / 1', borderRadius: 10, overflow: 'hidden', background: 'var(--surface-2)', position: 'relative' }}>
+    <div style={{ width: '100%', aspectRatio: '3/4', borderRadius: 10, background: 'var(--surface-2)', position: 'relative' }}>
       <Image
         src={imageUrl || '/placeholder-bottle.png'}
         alt={`${brand} ${name}`}
         fill
         sizes="(max-width: 768px) 50vw, 25vw"
-        style={{ objectFit: 'contain', padding: 4 }}
+        style={{ objectFit: 'contain' }}
       />
     </div>
   )
@@ -110,6 +119,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
   const [localFragrances, setLocalFragrances] = useState<DiscoverFragrance[]>(fragrances)
   const [hasMore, setHasMore]             = useState(initialHasMore)
   const [loadingMore, setLoadingMore]         = useState(false)
+  const [isStreaming, setIsStreaming]         = useState(false)
 
   const [wishlist, setWishlist]   = useState<string[]>([])
   const [showSaved, setShowSaved] = useState(false)
@@ -125,6 +135,9 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
   const [searchFocused, setSearchFocused] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  const [semanticResults, setSemanticResults] = useState<DiscoverFragrance[]>([])
+  const [isSemanticSearching, setIsSemanticSearching] = useState(false)
+
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
@@ -134,124 +147,88 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // On mount: read scentral_vibe and sort from localStorage
-  useEffect(() => {
-    const vibe = localStorage.getItem('scentral_vibe')
-    if (vibe && VIBE_TO_FEEL[vibe]) {
-      setFeel(VIBE_TO_FEEL[vibe])
-      setVibeActive(true)
-    }
-
-    const savedSort = localStorage.getItem('scentral_discover_sort') as SortOption
-    if (savedSort && SORT_OPTIONS.includes(savedSort)) {
-      setSort(savedSort)
-    }
-
-    const savedWishlist = localStorage.getItem('scentral_wishlist')
-    if (savedWishlist) {
-      try { setWishlist(JSON.parse(savedWishlist)) } catch { /* corrupt data — ignore */ }
-    }
-  }, [])
-
-  // Persist sort selection
-  useEffect(() => {
-    localStorage.setItem('scentral_discover_sort', sort)
-  }, [sort])
-
-  // Debounce search input 200ms
+  // Unified Hybrid Search: Local (Fuse.js) + Semantic (Vector)
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(() => setDebouncedSearch(searchTerm), 200)
-    return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
+    debounceRef.current = setTimeout(() => setDebouncedSearch(searchTerm), 300)
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+    }
   }, [searchTerm])
 
-  const popularityMap = useMemo(() => {
-    const map: Record<string, number> = {}
-    localFragrances.forEach(f => {
-      if (f.inspired_by) {
-        const key = f.inspired_by.toLowerCase()
-        map[key] = (map[key] || 0) + 1
-      }
-    })
-    return map
-  }, [localFragrances])
+  // Local fuzzy search
+  const fuse = useMemo(
+    () => new Fuse(localFragrances, {
+      keys: ['brand', 'name', 'family', 'plain_description'],
+      threshold: 0.3,
+      includeScore: true,
+    }),
+    [localFragrances]
+  )
 
-  const filtered = useMemo(() => {
-    const result = localFragrances.filter(f => {
-      // Feel filter
-      if (feel) {
-        const families  = FEEL_FAMILIES[feel] ?? []
-        const projs     = FEEL_PROJECTIONS[feel] ?? []
-        const matchFam  = families.length  > 0 && families.some(fam => f.family.toLowerCase().includes(fam.toLowerCase()))
-        const matchProj = projs.length     > 0 && projs.some(p => f.projection.toLowerCase().includes(p.toLowerCase()))
-        if (!matchFam && !matchProj) return false
-      }
+  const localResults = useMemo(
+    () => debouncedSearch
+      ? fuse.search(debouncedSearch).map(result => result.item)
+      : [],
+    [debouncedSearch, fuse]
+  )
 
-      // Longevity filter
-      if (longevity) {
-        const projs = LONGEVITY_PROJECTIONS[longevity] ?? []
-        if (!projs.some(p => f.projection.toLowerCase().includes(p.toLowerCase()))) return false
-      }
+  // Semantic vector search (if debouncedSearch)
+  useEffect(() => {
+    if (!debouncedSearch || debouncedSearch.trim().length === 0) {
+      setSemanticResults([])
+      return
+    }
 
-      // Brand filter
-      if (brand) {
-        if (brand === 'Other') {
-          if (KNOWN_BRANDS.some(kb => f.brand.toLowerCase().includes(kb.toLowerCase()))) return false
-        } else {
-          if (!f.brand.toLowerCase().includes(brand.toLowerCase())) return false
+    setIsSemanticSearching(true)
+    const supabase = createClient()
+
+    ;(async () => {
+      try {
+        // Call embedding API endpoint
+        const embRes = await fetch('/api/fragrances?search=' + encodeURIComponent(debouncedSearch), {
+          method: 'GET',
+        })
+        if (!embRes.ok) {
+          console.error('Embedding failed', embRes.status)
+          return
         }
-      }
-
-      // Search filter — AND with chips
-      if (debouncedSearch) {
-        const q = debouncedSearch.toLowerCase()
-        const match = (
-          f.brand.toLowerCase().includes(q) ||
-          f.name.toLowerCase().includes(q) ||
-          (f.inspired_by?.toLowerCase().includes(q) ?? false) ||
-          (f.plain_description?.toLowerCase().includes(q) ?? false)
+        const { similar_fragrances: results } = await embRes.json()
+        setSemanticResults(
+          (results ?? [])
+            .slice(0, 6)
+            .map((r: any) => ({
+              id: r.id,
+              brand: r.brand,
+              name: r.name,
+              full_name: r.full_name,
+              family: r.family,
+              projection: r.projection,
+              optimal_season: r.optimal_season,
+              plain_description: r.plain_description,
+              inspired_by: r.inspired_by,
+              image_url: r.image_url,
+              rating: r.rating,
+              created_at: r.created_at,
+            }))
         )
-        if (!match) return false
+      } catch (e) {
+        console.error('Vector search error', e)
+      } finally {
+        setIsSemanticSearching(false)
       }
+    })()
+  }, [debouncedSearch])
 
-      // Saved / wishlist filter
-      if (showSaved && !wishlist.includes(f.id)) return false
+  // Wishlist sync
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('scentral_wishlist')
+      if (stored) setWishlist(JSON.parse(stored))
+    } catch { /* ignore */ }
+  }, [])
 
-      return true
-    })
-
-    // Sorting
-    return result.sort((a, b) => {
-      if (sort === 'A–Z') {
-        return a.brand.localeCompare(b.brand) || a.name.localeCompare(b.name)
-      }
-      if (sort === 'Top Rated') {
-        if (a.rating === b.rating) return a.brand.localeCompare(b.brand)
-        if (a.rating === null) return 1
-        if (b.rating === null) return -1
-        return b.rating - a.rating
-      }
-      if (sort === 'Newest') {
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      }
-      if (sort === 'Most Popular') {
-        const popA = popularityMap[a.full_name.toLowerCase()] || 0
-        const popB = popularityMap[b.full_name.toLowerCase()] || 0
-        if (popA === popB) return a.brand.localeCompare(b.brand)
-        return popB - popA
-      }
-      return 0
-    })
-  }, [localFragrances, feel, longevity, brand, showSaved, wishlist, debouncedSearch, sort, popularityMap])
-
-  function toggleFeel(v: string) {
-    setVibeActive(false)
-    setFeel(f => f === v ? null : v)
-  }
-  function toggleLongevity(v: string) { setLongevity(l => l === v ? null : v) }
-  function toggleBrand(v: string)     { setBrand(b => b === v ? null : v) }
-
-  function toggleWishlist(id: string) {
+  const toggleWishlist = (id: string) => {
     setWishlist(prev => {
       const next = prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
       localStorage.setItem('scentral_wishlist', JSON.stringify(next))
@@ -259,33 +236,101 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
     })
   }
 
-  function clearVibe() {
-    localStorage.removeItem('scentral_vibe')
-    setFeel(null)
-    setVibeActive(false)
-  }
+  // Filtering
+  const anyFilter = !!(feel || longevity || brand)
+  const anySearch = searchTerm.trim().length > 0
 
-  function clearFilters() {
+  const filtered = useMemo(() => {
+    let results: DiscoverFragrance[] = localFragrances
+
+    // Search (hybrid)
+    if (anySearch) {
+      const searchIds = new Set([...localResults, ...semanticResults].map(f => f.id))
+      results = results.filter(f => searchIds.has(f.id))
+    }
+
+    // Feel filter
+    if (feel) {
+      const families = FEEL_FAMILIES[feel] || []
+      const projections = FEEL_PROJECTIONS[feel] || []
+      results = results.filter(f =>
+        families.includes(f.family) || projections.includes(f.projection)
+      )
+    }
+
+    // Longevity filter
+    if (longevity) {
+      const projections = LONGEVITY_PROJECTIONS[longevity] || []
+      results = results.filter(f => projections.includes(f.projection))
+    }
+
+    // Brand filter
+    if (brand) {
+      if (brand === 'Other') {
+        results = results.filter(f => !KNOWN_BRANDS.includes(f.brand))
+      } else {
+        results = results.filter(f => f.brand === brand)
+      }
+    }
+
+    // Wishlist filter
+    if (showSaved) {
+      results = results.filter(f => wishlist.includes(f.id))
+    }
+
+    // Sort
+    const sorted = [...results]
+    if (sort === 'A–Z') {
+      sorted.sort((a, b) => a.name.localeCompare(b.name))
+    } else if (sort === 'Top Rated') {
+      sorted.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
+    } else if (sort === 'Newest') {
+      sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    } else if (sort === 'Most Popular') {
+      sorted.sort((a, b) => {
+        const aWishes = wishlist.includes(a.id) ? 1 : 0
+        const bWishes = wishlist.includes(b.id) ? 1 : 0
+        return bWishes - aWishes || (b.rating ?? 0) - (a.rating ?? 0)
+      })
+    }
+
+    return sorted
+  }, [localFragrances, localResults, semanticResults, feel, longevity, brand, showSaved, wishlist, sort, anySearch])
+
+  const countLabel = (() => {
+    const base = `${filtered.length} fragrance${filtered.length !== 1 ? 's' : ''}`
+    if (!anyFilter && !anySearch) return base
+    if (feel) return `${base} • ${feel}`
+    if (longevity) return `${base} • ${longevity}`
+    if (brand) return `${base} • ${brand}`
+    if (showSaved) return `${base} • Saved`
+    return base
+  })()
+
+  const toggleFeel = (f: string) => setFeel(feel === f ? null : f)
+  const toggleLongevity = (l: string) => setLongevity(longevity === l ? null : l)
+  const toggleBrand = (b: string) => setBrand(brand === b ? null : b)
+  const clearFilters = () => {
     setFeel(null)
     setLongevity(null)
     setBrand(null)
     setShowSaved(false)
     setSearchTerm('')
-    setDebouncedSearch('')
-    setVibeActive(false)
   }
 
-  async function loadMore() {
+  const loadMore = async () => {
+    if (!hasMore || loadingMore) return
     setLoadingMore(true)
-    const supabase = createClient()
     const offset = localFragrances.length
-    const { data } = await supabase
+    const supabase = createClient()
+    const { data, error: err } = await supabase
       .from('fragrances')
       .select('id, brand, name, full_name, family, projection, optimal_season, plain_description, inspired_by, image_url, rating, created_at')
       .order('brand', { ascending: true })
-      .range(offset, offset + 39)
-    if (data && data.length > 0) {
-      const batch: DiscoverFragrance[] = data.map(f => ({
+      .range(offset, offset + 99)
+
+    if (!err && data) {
+      const mapped: DiscoverFragrance[] = data.map(f => ({
         id: f.id,
         brand: f.brand,
         name: f.name,
@@ -299,133 +344,58 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
         rating: f.rating ? Number(f.rating) : null,
         created_at: f.created_at,
       }))
-      setLocalFragrances(prev => [...prev, ...batch])
-      if (data.length < 40 || (offset + data.length) >= totalCount) {
-        setHasMore(false)
-      }
-    } else {
-      setHasMore(false)
+      setLocalFragrances(prev => [...prev, ...mapped])
+      setHasMore(mapped.length === 100)
     }
     setLoadingMore(false)
   }
 
-  const anyFilter = feel !== null || longevity !== null || brand !== null || showSaved
-  const anySearch = debouncedSearch.length > 0
-
-  const countLabel = (() => {
-    if (!anyFilter && !anySearch) {
-      if (localFragrances.length < totalCount) return `Showing ${localFragrances.length} of ${totalCount}`
-      return `${totalCount} fragrances`
-    }
-    if (showSaved && feel === null && longevity === null && brand === null && !anySearch) {
-      return `${filtered.length} saved`
-    }
-    if (anySearch && anyFilter)   return `${filtered.length} results`
-    if (anySearch)                return `${filtered.length} results for "${debouncedSearch}"`
-    return `${filtered.length} of ${localFragrances.length}`
-  })()
-
   if (error) {
     return (
-      <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <EmptyState headline="Couldn't load fragrances" caption={error} />
+      <div style={{ minHeight: '100dvh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <EmptyState
+          headline="Couldn't load fragrances"
+          caption={error}
+        />
       </div>
     )
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--text)', paddingBottom: 96 }}>
-
-      {/* placeholder colour — can't be set via inline styles */}
-      <style>{`
-        .discover-search::placeholder { color: var(--text-muted); }
-      `}</style>
-
+    <div style={{
+      minHeight: '100dvh',
+      background: 'var(--bg)',
+      overflowY: 'auto',
+      overscrollBehavior: 'contain',
+      WebkitOverflowScrolling: 'touch',
+    }}>
       {/* Header */}
-      <div style={{ padding: '28px 16px 0' }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--text)', lineHeight: '34px' }}>
-          Discover
-        </h1>
-        <p style={{ fontSize: 14, color: 'var(--text-muted)', marginTop: 4 }}>
-          Find your next scent
-        </p>
-      </div>
-
-      {/* Search bar */}
-      <div style={{ padding: '16px 16px 0', position: 'relative' }}>
-        <input
-          type="text"
-          className="discover-search"
-          value={searchTerm}
-          onChange={e => setSearchTerm(e.target.value)}
-          onFocus={() => setSearchFocused(true)}
-          onBlur={() => setSearchFocused(false)}
-          placeholder="Search by name or designer..."
-          style={{
-            width: '100%',
-            minHeight: 44,
-            background: 'var(--surface)',
-            border: `1px solid ${searchFocused ? 'var(--accent)' : 'var(--line)'}`,
-            borderRadius: 'var(--r-btn)',
-            padding: '0 40px 0 14px',
-            fontSize: 14,
-            color: 'var(--text)',
-            outline: 'none',
-            boxShadow: searchFocused ? '0 0 0 2px color-mix(in srgb, var(--accent) 20%, transparent)' : 'none',
-            boxSizing: 'border-box',
-            transition: 'border-color 0.15s, box-shadow 0.15s',
-          }}
-        />
-        {searchTerm && (
-          <button
-            onClick={() => { setSearchTerm(''); setDebouncedSearch('') }}
-            aria-label="Clear search"
+      <div style={{ padding: '16px 16px 24px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div>
+          <p style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>
+            Discover Fragrances
+          </p>
+          <input
+            type="text"
+            placeholder="Search by brand or scent…"
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            onFocus={() => setSearchFocused(true)}
+            onBlur={() => setSearchFocused(false)}
             style={{
-              position: 'absolute',
-              right: 28,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              fontSize: 16,
-              color: 'var(--text-muted)',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              padding: '4px 0',
-              lineHeight: 1,
-            }}
-          >
-            ✕
-          </button>
-        )}
-      </div>
-
-      {/* Filters */}
-      <div style={{ padding: '16px 0 0', display: 'flex', flexDirection: 'column', gap: 10 }}>
-
-        {/* Vibe dismissal pill */}
-        {vibeActive && (
-          <div style={{ paddingLeft: 16 }}>
-            <span style={{
-              display: 'inline-flex', alignItems: 'center', gap: 6,
-              fontSize: 12, color: 'var(--text-muted)',
+              width: '100%',
+              padding: '10px 14px',
+              fontSize: 14,
               background: 'var(--surface)',
-              border: '1px solid var(--line)',
-              borderRadius: 999,
-              padding: '4px 12px',
-            }}>
-              Showing results for your vibe
-              <span
-                role="button"
-                tabIndex={0}
-                onClick={clearVibe}
-                onKeyDown={e => e.key === 'Enter' && clearVibe()}
-                style={{ color: 'var(--accent)', cursor: 'pointer' }}
-              >
-                · Clear
-              </span>
-            </span>
-          </div>
-        )}
+              border: searchFocused ? '1px solid var(--accent)' : '1px solid var(--line)',
+              borderRadius: 'var(--r-card)',
+              color: 'var(--text)',
+              fontFamily: 'var(--font-body)',
+              transition: 'border-color 0.15s',
+              boxSizing: 'border-box',
+            }}
+          />
+        </div>
 
         {/* Feel */}
         <div>
@@ -433,11 +403,23 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
             Feel
           </p>
           <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingLeft: 16, paddingRight: 16, scrollbarWidth: 'none' }}>
-            {Object.keys(FEEL_FAMILIES).map(v => (
-              <Chip key={v} selected={feel === v} onClick={() => toggleFeel(v)} style={{ flexShrink: 0 }}>
-                {v}
-              </Chip>
-            ))}
+            {Object.keys(FEEL_FAMILIES).map(v => {
+              const isActive = feel === v
+              return (
+                <Chip 
+                  key={v} 
+                  selected={isActive} 
+                  onClick={() => toggleFeel(v)} 
+                  style={{ 
+                    flexShrink: 0,
+                    boxShadow: isActive ? `0 0 0 1px var(--accent), 0 2px 8px ${FEEL_AMBIENT[v]}` : 'none',
+                    transition: 'box-shadow 0.3s ease, background 0.3s ease, color 0.15s',
+                  }}
+                >
+                  {v}
+                </Chip>
+              )
+            })}
           </div>
         </div>
 
@@ -488,11 +470,33 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
       </div>
 
       {/* Result count */}
-      <div style={{ padding: '16px 16px 8px' }}>
+      <div style={{ padding: '16px 16px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
           {countLabel}
         </p>
+        {isSemanticSearching && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div className="resonance-loader" />
+            <span style={{ fontSize: 11, color: 'var(--accent)', fontWeight: 500, letterSpacing: '0.05em' }}>
+              RESONATING...
+            </span>
+          </div>
+        )}
       </div>
+
+      <style>{`
+        @keyframes pulse-gold {
+          0% { opacity: 0.4; transform: scale(0.95); }
+          50% { opacity: 1; transform: scale(1.05); }
+          100% { opacity: 0.4; transform: scale(0.95); }
+        }
+        .resonance-loader {
+          width: 6px; height: 6px;
+          background: var(--accent);
+          border-radius: 50%;
+          animation: pulse-gold 1.5s infinite ease-in-out;
+        }
+      `}</style>
 
       {/* ── New to me strip ─────────────────────────────────────────────────── */}
       {!anyFilter && !anySearch && (() => {
@@ -647,6 +651,21 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
                     Smells like {f.inspired_by}
                   </div>
                 )}
+
+                {/* Resonance Badge */}
+                {debouncedSearch && semanticResults.some(sr => sr.id === f.id) && (
+                  <div style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 4,
+                    fontSize: 9, fontWeight: 700,
+                    color: 'var(--accent)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    marginTop: 4,
+                  }}>
+                    <div style={{ width: 4, height: 4, background: 'var(--accent)', borderRadius: '50%' }} />
+                    Resonance Match
+                  </div>
+                )}
               </div>
             </Link>
           ))}
@@ -678,7 +697,9 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
           </p>
         )}
       </div>
+
+      {/* Bottom spacer */}
+      <div style={{ height: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }} />
     </div>
   )
 }
-

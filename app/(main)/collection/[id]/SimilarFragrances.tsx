@@ -100,7 +100,7 @@ export default function SimilarFragrances({ fragranceId }: { fragranceId: string
       
       <div 
         className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
       >
         {results.map(r => (
           <Link
@@ -117,21 +117,20 @@ export default function SimilarFragrances({ fragranceId }: { fragranceId: string
             }}
           >
             <div style={{ 
-              width: 64, 
-              height: 64, 
+              width: '100%',
+              aspectRatio: '3/4',
               margin: '0 auto 8px',
               position: 'relative',
               background: 'var(--surface-2)',
               borderRadius: 8,
-              overflow: 'hidden'
             }}>
               {r.image_url ? (
                 <Image
                   src={r.image_url}
                   alt={r.name}
-                  width={64}
-                  height={64}
-                  style={{ objectFit: 'contain', padding: 4 }}
+                  fill
+                  sizes="120px"
+                  style={{ objectFit: 'contain' }}
                 />
               ) : (
                 <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>

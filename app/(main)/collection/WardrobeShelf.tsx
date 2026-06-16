@@ -155,7 +155,7 @@ function MiniBottle({ f }: { f: CollectionFragrance }) {
     )
   }
   return (
-    <div style={{ width: '100%', aspectRatio: '1', position: 'relative' }}>
+    <div style={{ width: '100%', aspectRatio: '3/4', position: 'relative' }}>
       <Image
         src={f.image_url || '/placeholder-bottle.png'}
         alt={`${f.brand} ${f.name}`}
@@ -176,7 +176,7 @@ function ByHouseView({ items }: { items: CollectionFragrance[] }) {
   }, {})
   const brands = Object.keys(byBrand).sort()
   return (
-    <div style={{ paddingTop: 4 }}>
+    <div style={{ paddingTop: 4, paddingBottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }}>
       {brands.map(brand => (
         <GroupShelf key={brand} label={brand} items={byBrand[brand]} />
       ))}
@@ -186,7 +186,7 @@ function ByHouseView({ items }: { items: CollectionFragrance[] }) {
 
 function BySeasonView({ items }: { items: CollectionFragrance[] }) {
   return (
-    <div style={{ paddingTop: 4 }}>
+    <div style={{ paddingTop: 4, paddingBottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }}>
       {SEASON_GROUPS.map(sg => (
         <GroupShelf
           key={sg.label}
@@ -200,7 +200,7 @@ function BySeasonView({ items }: { items: CollectionFragrance[] }) {
 
 function WishlistView({ items }: { items: CollectionFragrance[] }) {
   return (
-    <div style={{ paddingTop: 4 }}>
+    <div style={{ paddingTop: 4, paddingBottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }}>
       <div style={{ marginBottom: 8, paddingLeft: 4, display: 'flex', alignItems: 'baseline', gap: 8 }}>
         <span style={{ fontFamily: 'var(--font-display)', fontSize: 13, color: 'rgba(248,247,245,0.9)' }}>
           Not Yet Owned
@@ -400,7 +400,10 @@ export default function WardrobeShelf({ fragrances }: WardrobeShelfProps) {
           backgroundBlendMode: 'multiply',
           boxShadow: 'inset 0 20px 40px rgba(0,0,0,0.8)',
           padding: '20px 16px 24px',
-          width: isMobile ? '100%' : 'calc(100% - 80px)', // adjust for sidebar width if needed
+          width: isMobile ? '100%' : 'calc(100% - 80px)',
+          overflowY: 'auto',
+          overscrollBehavior: 'contain',
+          WebkitOverflowScrolling: 'touch',
         }}
       >
         {viewMode === 'all' && (
@@ -425,6 +428,7 @@ export default function WardrobeShelf({ fragrances }: WardrobeShelfProps) {
                 />
               ))}
             </div>
+            <div style={{ height: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }} />
           </DndContext>
         )}
 
