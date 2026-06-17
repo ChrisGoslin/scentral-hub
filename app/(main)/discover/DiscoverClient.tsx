@@ -33,10 +33,10 @@ const SORT_OPTIONS: SortOption[] = ['A–Z', 'Top Rated', 'Newest', 'Most Popula
 // ── Filter maps ──────────────────────────────────────────────────────────────
 
 const FEEL_FAMILIES: Record<string, string[]> = {
-  'Warm & Rich':    ['Amber', 'Oriental', 'Woody Oriental', 'Oud', 'Gourmand', 'Resinous', 'Tobacco', 'Vanilla'],
-  'Fresh & Clean':  ['Citrus', 'Aquatic', 'Green', 'Fresh', 'Aromatic', 'Fougère'],
-  'Bold & Lasting': ['Leather', 'Tobacco', 'Smoky', 'Chypre', 'Woody', 'Oud', 'Resinous'],
-  'Light & Subtle': ['Floral', 'Chypre', 'Powdery', 'Musk', 'Fresh', 'Citrus', 'Green', 'White Floral'],
+  'Light & Subtle': ['Floral', 'Chypre', 'Powdery', 'Musk', 'Fresh', 'Citrus', 'Green'],
+  'Warm & Rich':    ['Amber', 'Oriental', 'Woody Oriental', 'Oud', 'Gourmand', 'Resinous'],
+  'Fresh & Clean':  ['Citrus', 'Aquatic', 'Green', 'Fresh', 'Aromatic'],
+  'Bold & Lasting': ['Leather', 'Tobacco', 'Smoky', 'Chypre', 'Woody'],
 }
 const FEEL_PROJECTIONS: Record<string, string[]> = {
   'Warm & Rich':    ['Heavy', 'Strong', 'Massive', 'Moderate'],
@@ -192,7 +192,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
   // Unified Hybrid Search: Local (Fuse.js) + Semantic (Vector)
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(() => setDebouncedSearch(searchTerm), 300)
+    debounceRef.current = setTimeout(() => setDebouncedSearch(searchTerm), 250)
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current)
     }
@@ -214,12 +214,10 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
     [localFragrances]
   )
 
-  const localResults = useMemo(
-    () => debouncedSearch
-      ? fuse.search(debouncedSearch).map(result => result.item)
-      : [],
-    [debouncedSearch, fuse]
-  )
+  const searchResults = useMemo(() => {
+    if (!debouncedSearch.trim()) return localFragrances
+    return fuse.search(debouncedSearch).map(r => r.item)
+  }, [debouncedSearch, fuse, localFragrances])
 
   // Semantic vector search (if debouncedSearch)
   useEffect(() => {
@@ -289,12 +287,13 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
   const anySearch = searchTerm.trim().length > 0
 
   const filtered = useMemo(() => {
-    let results: DiscoverFragrance[] = localFragrances
+    let results: DiscoverFragrance[] = searchResults
 
-    // Search (hybrid)
-    if (anySearch) {
-      const searchIds = new Set([...localResults, ...semanticResults].map(f => f.id))
-      results = results.filter(f => searchIds.has(f.id))
+    // Hybrid with Semantic results
+    if (debouncedSearch && semanticResults.length > 0) {
+      const searchIds = new Set(results.map(f => f.id))
+      const sements = semanticResults.filter(f => !searchIds.has(f.id))
+      results = [...results, ...sements]
     }
 
     // Feel filter — OR logic with null safety
@@ -306,8 +305,8 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
           (f.family     && families.some(fam  => (FEEL_FAMILIES[fam]    || []).includes(f.family)))
         const matchProj = projs.length === 0 ||
           (f.projection && projs.some(proj    => (FEEL_PROJECTIONS[proj] || []).includes(f.projection)))
-        if (!matchFam && !matchProj) return false
-        return true
+        
+        return matchFam || matchProj
       })
     }
 
