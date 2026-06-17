@@ -296,6 +296,16 @@ function SettingsSection({ email, onSignOut, signingOut, onReset }: { email: str
         Reset my preferences
       </button>
 
+      {/* Legal Links */}
+      <div className="flex flex-col">
+        <Link href="/privacy" className="text-left py-3 w-full border-b border-[var(--line)]" style={{ fontSize: 14, color: 'var(--text-muted)', textDecoration: 'none' }}>
+          Privacy Policy
+        </Link>
+        <Link href="/terms" className="text-left py-3 w-full border-b border-[var(--line)]" style={{ fontSize: 14, color: 'var(--text-muted)', textDecoration: 'none' }}>
+          Terms of Service
+        </Link>
+      </div>
+
       {/* Sign out */}
       <button
         onClick={onSignOut}
