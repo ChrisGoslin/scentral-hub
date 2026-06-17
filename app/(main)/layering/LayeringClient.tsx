@@ -6,6 +6,7 @@ import { Search, X, Check, ArrowLeft, Share2 } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Chip from '@/components/ui/Chip'
 import Sheet from '@/components/ui/Sheet'
+import LayeringRules from '@/components/ui/LayeringRules'
 import LoadingShimmer from '@/components/ui/LoadingShimmer'
 import ErrorInline from '@/components/ui/ErrorInline'
 import AuraShareCard, { type AuraShareData } from '@/app/components/AuraShareCard'
@@ -429,6 +430,7 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
         <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
           Find two scents that work together
         </p>
+        <LayeringRules />
       </div>
 
       <div className="px-4 py-6">

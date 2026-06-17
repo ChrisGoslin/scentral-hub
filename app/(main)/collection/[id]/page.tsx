@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import Button from '@/components/ui/Button'
 import SensoryAnatomy from '@/components/ui/SensoryAnatomy'
+import DidYouKnow from '@/components/ui/DidYouKnow'
 import SimilarFragrances from './SimilarFragrances'
 import InspiredByClones from './InspiredByClones'
 import LogWearButton from './LogWearButton'
@@ -149,7 +150,7 @@ export default async function FragranceDetailPage({
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--text)' }}>
+    <div style={{ minHeight: '100dvh', background: 'var(--bg)', color: 'var(--text)' }}>
       {/* Back nav */}
       <div className="px-4 pt-6 pb-2">
         <Link
@@ -307,6 +308,8 @@ export default async function FragranceDetailPage({
             projection={f.projection}
           />
         )}
+
+        <DidYouKnow family={f.family} />
 
         {/* Resonance — Find Similar */}
         <SimilarFragrances fragranceId={f.id} />

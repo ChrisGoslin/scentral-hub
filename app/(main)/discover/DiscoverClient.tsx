@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import Chip from '@/components/ui/Chip'
 import EmptyState from '@/components/ui/EmptyState'
+import PersonaTipTicker from '@/components/ui/PersonaTipTicker'
 import Button from '@/components/ui/Button'
 import { getBrandEmoji } from '@/lib/brandEmoji'
 import { createClient } from '@/utils/supabase/client'
@@ -164,6 +165,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
 
   // ── Persona theme state ───────────────────────────────────────────────────
   const [activePersona, setActivePersona] = useState<typeof PERSONA_THEMES[string] | null>(null)
+  const [activePersonaId, setActivePersonaId] = useState<string | null>(null)
   const [personaVisible, setPersonaVisible] = useState(false)
   const [showPersonaBanner, setShowPersonaBanner] = useState(true)
 
@@ -181,6 +183,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
     const urlPersona = params.get('persona')
     const personaId = urlPersona ?? localStorage.getItem('scentral_persona')
     if (personaId && PERSONA_THEMES[personaId]) {
+      setActivePersonaId(personaId)
       setActivePersona(PERSONA_THEMES[personaId])
       setTimeout(() => setPersonaVisible(true), 50) // trigger fade-in after paint
     }
@@ -596,6 +599,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
       })()}
 
       {/* Grid */}
+      <PersonaTipTicker personaId={activePersonaId} />
       {filtered.length === 0 ? (
         <div style={{ padding: '48px 16px', textAlign: 'center' }}>
           <EmptyState
