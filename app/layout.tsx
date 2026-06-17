@@ -4,6 +4,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import "../lib/design/tokens.css";
 import PWARegistration from "./components/PWARegistration";
+import AnalyticsProvider from "./components/AnalyticsProvider";
 
 const instrument = Instrument_Serif({
   subsets: ["latin"],
@@ -69,10 +70,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={`h-[100dvh] antialiased ${instrument.variable} ${satoshi.variable}`}>
       <body className="min-h-[100dvh] flex flex-col" style={{ background: "var(--bg)", color: "var(--text)", fontFamily: "var(--font-ui)" }}>
-        <PWARegistration />
-        <main className="flex-1">
-          {children}
-        </main>
+        <AnalyticsProvider>
+          <PWARegistration />
+          <main className="flex-1">
+            {children}
+          </main>
+        </AnalyticsProvider>
       </body>
     </html>
   );
