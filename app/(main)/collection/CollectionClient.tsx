@@ -67,30 +67,27 @@ function FragranceImage({ imageUrl, brand, name }: { imageUrl: string | null; br
     return (
       <div
         style={{
-          width: '100%', aspectRatio: '1/1',
+          width: '100%', aspectRatio: '3/4',
           display: 'flex', flexDirection: 'column',
           alignItems: 'center', justifyContent: 'center',
           borderRadius: 10,
           padding: 8,
-          background: 'linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%)',
-          position: 'relative', overflow: 'hidden'
+          background: 'var(--surface)',
+          position: 'relative',
+          border: '1px solid var(--line)'
         }}
       >
-        <span style={{ fontSize: 32 }}>{getBrandEmoji(brand)}</span>
-        <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', textAlign: 'center', lineHeight: '12px', marginTop: 4 }}>
-          {brand}
-        </p>
-        <p style={{ fontSize: 11, color: 'var(--text)', fontFamily: 'var(--font-display)', textAlign: 'center', lineHeight: '14px', marginTop: 2, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-          {name.length > 24 ? name.slice(0, 22) + '…' : name}
-        </p>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M9 3h6v3H9zM6 6h12v15H6zM9 11h6M9 15h6" />
+        </svg>
       </div>
     )
   }
 
   return (
-    <div style={{ width: '100%', aspectRatio: '1/1', borderRadius: 10, overflow: 'hidden', position: 'relative', background: 'var(--surface-2)' }}>
+    <div style={{ width: '100%', aspectRatio: '3/4', borderRadius: 10, position: 'relative', background: 'var(--surface-2)' }}>
       <Image
-        src={imageUrl || '/placeholder-bottle.png'}
+        src={imageUrl}
         alt={`${brand} ${name}`}
         fill
         sizes="(max-width: 768px) 50vw, 25vw"
@@ -485,6 +482,9 @@ export default function CollectionClient({ fragrances, totalCount }: { fragrance
           )}
         </div>
       </Sheet>
+
+      {/* Bottom spacer */}
+      <div style={{ height: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }} />
     </div>
   )
 }

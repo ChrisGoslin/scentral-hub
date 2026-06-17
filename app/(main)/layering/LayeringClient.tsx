@@ -412,7 +412,7 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
   }
 
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100vh', color: 'var(--text)' }}>
+    <div style={{ background: 'var(--bg)', minHeight: '100dvh', color: 'var(--text)', overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}>
       {/* Header */}
       <div className="px-4 pt-8 pb-4" style={{ borderBottom: '1px solid var(--line)' }}>
         <h1
@@ -913,6 +913,9 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
           </div>
         </div>
       </Sheet>
+
+      {/* Bottom spacer */}
+      <div style={{ height: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }} />
     </div>
   )
 }

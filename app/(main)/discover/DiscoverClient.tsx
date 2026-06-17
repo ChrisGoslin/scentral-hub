@@ -99,26 +99,23 @@ function FragranceImage({ imageUrl, brand, name }: { imageUrl: string | null; br
           width: '100%', aspectRatio: '3/4',
           display: 'flex', flexDirection: 'column',
           alignItems: 'center', justifyContent: 'center',
-          background: 'linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%)',
+          background: 'var(--surface)',
           borderRadius: 10,
-          padding: 8, gap: 4,
-          position: 'relative'
+          padding: 8,
+          position: 'relative',
+          border: '1px solid var(--line)'
         }}
       >
-        <span style={{ fontSize: 32 }}>{getBrandEmoji(brand)}</span>
-        <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', textAlign: 'center', marginTop: 4 }}>
-          {brand}
-        </p>
-        <p style={{ fontSize: 11, color: 'var(--text)', fontFamily: 'var(--font-display)', textAlign: 'center', lineHeight: '14px', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-          {name.length > 24 ? name.slice(0, 22) + '…' : name}
-        </p>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M9 3h6v3H9zM6 6h12v15H6zM9 11h6M9 15h6" />
+        </svg>
       </div>
     )
   }
   return (
     <div style={{ width: '100%', aspectRatio: '3/4', borderRadius: 10, background: 'var(--surface-2)', position: 'relative' }}>
       <Image
-        src={imageUrl || '/placeholder-bottle.png'}
+        src={imageUrl}
         alt={`${brand} ${name}`}
         fill
         sizes="(max-width: 768px) 50vw, 25vw"

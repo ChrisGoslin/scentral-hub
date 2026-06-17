@@ -1,18 +1,69 @@
 @import "tailwindcss";
 
 :root {
-  --color-bg: #f7f3ee;
-  --color-surface: #faf7f2;
-  --color-surface-2: #fdfcf9;
-  --color-offset: #ede9e2;
-  --color-primary: #a0622a;
-  --color-primary-dark: #7d4a1a;
-  --color-gold: #c49a3c;
-  --color-text: #1e1714;
-  --color-muted: #6b635a;
-  --color-faint: #b5afa8;
-  --color-border: #d8d2ca;
-  --shadow-card: 0 2px 8px rgb(30 23 20 / 8%), 0 12px 28px rgb(30 23 20 / 8%);
+  /* Luxury Tokens (Stone & Gold) */
+  --stone-50: #f9f8f6;
+  --stone-100: #f1efeb;
+  --stone-200: #e5e1da;
+  --stone-300: #d1cbc1;
+  --stone-500: #78716c;
+  --stone-900: #1c1917;
+  --gold-accent: #c49a3c;
+  
+  /* Brand Design Tokens */
+  --color-primary: #A0622A;
+  --color-bg: #F7F3EE;
+  --color-surface: #FAF7F2;
+  --color-surface-2: #FDFCF9;
+  --color-surface-offset: #EDE9E2;
+  --color-text: #1E1714;
+  --color-text-muted: #6B635A;
+  --color-text-faint: #B5AFA8;
+  --color-gold: #C49A3C;
+  --color-border: #D8D2CA;
+  --color-success: #4A7A50;
+  --color-error: #A03050;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(30, 23, 20, 0.08);
+  --shadow-md: 0 4px 16px rgba(30, 23, 20, 0.10);
+  --shadow-lg: 0 12px 40px rgba(30, 23, 20, 0.14);
+  --shadow-card: 0 2px 8px rgba(30, 23, 20, 0.08), 0 8px 24px rgba(30, 23, 20, 0.06);
+  
+  /* Typography */
+  --font-display: 'Instrument Serif', Georgia, serif;
+  --font-body: 'Satoshi', 'Inter', sans-serif;
+
+  /* Legacy Bridge — maps old tokens to new system */
+  --bg: var(--color-bg);
+  --surface: var(--color-surface);
+  --surface-2: var(--color-surface-2);
+  --line: var(--color-border);
+  --text: var(--color-text);
+  --text-muted: var(--color-text-muted);
+  --accent: var(--color-primary);
+  --r-card: 16px;
+  --r-btn: 12px;
+
+  /* Typography Wiring */
+  --font-ui: var(--font-body);
+
+  /* Legacy color aliases */
+  --color-offset: var(--color-surface-offset);
+  --color-primary-dark: #a07e32;
+  --color-muted: var(--color-text-muted);
+  --color-faint: var(--color-text-faint);
+}
+
+[data-theme="dark"] {
+  --color-bg: #161310;
+  --color-surface: #1D1916;
+  --color-surface-2: #231F1B;
+  --color-primary: #D4884A;
+  --color-text: #E8E0D5;
+  --color-text-muted: #9E9589;
+  --color-gold: #E8C060;
+  --color-border: #3A3530;
 }
 
 @media (max-width: 480px) {
@@ -36,12 +87,24 @@
 
 html,
 body {
+  height: 100%;
   min-height: 100%;
 }
 
 html, body {
   overflow-x: hidden;
   max-width: 100vw;
+  height: 100%;
+}
+
+main {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.safe-top {
+  padding-top: env(safe-area-inset-top, 0px);
 }
 
 html {
@@ -80,7 +143,7 @@ img {
 }
 
 .app-shell {
-  min-height: 100vh;
+  min-height: 100dvh;
   display: grid;
   grid-template-columns: minmax(320px, 430px) minmax(260px, 420px);
   align-items: center;
@@ -91,7 +154,7 @@ img {
 
 .phone-frame {
   width: min(100%, 410px);
-  height: min(860px, calc(100vh - 64px));
+  height: min(860px, calc(100dvh - 64px));
   min-height: 680px;
   position: relative;
   overflow: hidden;
@@ -953,6 +1016,13 @@ blockquote {
 
 .fade-up {
   animation: fade-up 0.5s cubic-bezier(0.2, 0.6, 0.2, 1) both;
+}
+
+/* Add top padding for browser mode to accommodate sticky header */
+@media not all and (display-mode: standalone) {
+  .main-content-wrapper {
+    padding-top: 44px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

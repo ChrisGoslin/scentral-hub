@@ -534,7 +534,7 @@ export default function YouClient(props: YouClientProps) {
   const { email, saves, fetchError } = props
 
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100dvh', color: 'var(--text)' }}>
+    <div style={{ background: 'var(--bg)', minHeight: '100dvh', color: 'var(--text)', overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}>
       {/* Header */}
       <div className="px-4 pt-8 pb-4" style={{ borderBottom: '1px solid var(--line)' }}>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--text)', lineHeight: '34px' }}>You</h1>
@@ -716,6 +716,9 @@ export default function YouClient(props: YouClientProps) {
           onReset={handleReset}
         />
       </div>
+
+      {/* Bottom spacer */}
+      <div style={{ height: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }} />
     </div>
   )
 }
