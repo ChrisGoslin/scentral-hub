@@ -2,7 +2,6 @@ import Link from 'next/link'
 import { Metadata } from 'next'
 import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
-import WaitlistForm from '@/app/landing/WaitlistForm'
 
 export const metadata: Metadata = {
   title: 'Scentral — Your Fragrance Wardrobe',
@@ -60,7 +59,7 @@ export default async function Home() {
               href="/onboarding"
               className="bg-[var(--accent)] text-white px-6 py-3 md:px-10 md:py-4 rounded-[var(--r-btn)] shadow-sm transition-all hover:bg-[var(--accent-press)] active:scale-95 font-bold uppercase tracking-widest text-[10px]"
             >
-              Start building your wardrobe
+              Find your scent identity →
             </Link>
             <Link
               href="/collection"
@@ -70,11 +69,28 @@ export default async function Home() {
             </Link>
           </div>
 
-          <WaitlistForm />
-          
-          <p style={{ fontSize: 13, color: 'var(--text-muted)', textAlign: 'center', marginTop: 16 }}>
-            Join 800+ collectors already building their digital wardrobe.
-          </p>
+          <div className="pt-8">
+            <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--text-muted)] font-bold mb-4">Which one are you?</p>
+            <div className="flex flex-row gap-3 overflow-x-auto pb-4 hide-scrollbar snap-x">
+              {[
+                { name: 'The Velvet Intellectual', tagline: 'You collect ideas the way others collect souvenirs.', color: '#c28b5b' },
+                { name: 'The Solar Minimalist', tagline: 'Your scent announces you before you speak.', color: '#4a9a7a' },
+                { name: 'The Dark Alchemist', tagline: 'You wear fragrance as armour and invitation at once.', color: '#8a4a6a' },
+              ].map((p, idx) => (
+                <Link
+                  key={idx}
+                  href="/onboarding"
+                  className="flex-shrink-0 w-[240px] md:w-[280px] bg-[var(--surface)] border border-[var(--line)] shadow-sm transition-all hover:border-[var(--accent)] snap-start flex flex-col group overflow-hidden"
+                  style={{ borderLeftColor: p.color, borderLeftWidth: '3px' }}
+                >
+                  <div className="p-4 md:p-5 flex flex-col justify-between h-full">
+                    <p className="text-[13px] font-bold text-[var(--text)] italic font-serif leading-tight">{p.name}</p>
+                    <p className="text-[11px] text-[var(--text-muted)] mt-2 font-light leading-snug">{p.tagline}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
         </section>
 
         {/* Right — catalogue card */}

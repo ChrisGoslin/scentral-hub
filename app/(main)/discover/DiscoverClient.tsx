@@ -33,23 +33,45 @@ const SORT_OPTIONS: SortOption[] = ['A–Z', 'Top Rated', 'Newest', 'Most Popula
 // ── Filter maps ──────────────────────────────────────────────────────────────
 
 const FEEL_FAMILIES: Record<string, string[]> = {
-  'Warm & Rich':    ['Woody Oriental', 'Woody/Oriental', 'Oriental', 'Amber', 'Oud', 'Gourmand', 'Spicy', 'Musk', 'Vanilla', 'Balsamic'],
-  'Fresh & Clean':  ['Citrus', 'Aquatic', 'Green', 'Fresh Spicy', 'Fresh', 'Aromatic', 'Floral', 'Marine'],
-  'Bold & Lasting': ['Leather', 'Tobacco', 'Smoky', 'Resinous', 'Chypre', 'Fougere', 'Fougère', 'Woody'],
-  'Light & Subtle': ['Floral', 'Powdery', 'Light', 'Soft Floral', 'Soft', 'White Floral', 'Sheer'],
+  'Warm & Rich':    ['Amber', 'Oriental', 'Woody Oriental', 'Oud', 'Gourmand', 'Resinous', 'Tobacco', 'Vanilla'],
+  'Fresh & Clean':  ['Citrus', 'Aquatic', 'Green', 'Fresh', 'Aromatic', 'Fougère'],
+  'Bold & Lasting': ['Leather', 'Tobacco', 'Smoky', 'Chypre', 'Woody', 'Oud', 'Resinous'],
+  'Light & Subtle': ['Floral', 'Chypre', 'Powdery', 'Musk', 'Fresh', 'Citrus', 'Green', 'White Floral'],
 }
 const FEEL_PROJECTIONS: Record<string, string[]> = {
-  'Warm & Rich':    ['Beast Mode', 'Strong', 'Moderate'],
-  'Fresh & Clean':  ['Soft', 'Moderate', 'Light'],
-  'Bold & Lasting': ['Beast Mode', 'Strong'],
-  'Light & Subtle': ['Soft', 'Moderate', 'Light'],
+  'Warm & Rich':    ['Heavy', 'Strong', 'Massive', 'Moderate'],
+  'Fresh & Clean':  ['Light', 'Moderate', 'Soft', 'Whisper'],
+  'Bold & Lasting': ['Heavy', 'Strong', 'Massive', 'Moderate'],
+  'Light & Subtle': ['Light', 'Soft', 'Whisper', 'Moderate'],
 }
 
-const FEEL_AMBIENT: Record<string, string> = {
-  'Warm & Rich':    'rgba(180, 83, 9, 0.08)',   // amber
-  'Fresh & Clean':  'rgba(6, 182, 212, 0.07)',   // cyan
-  'Bold & Lasting': 'rgba(67, 20, 7, 0.09)',     // deep smoke
-  'Light & Subtle': 'rgba(167, 139, 250, 0.07)', // lavender
+const FEEL_AMBIENT: Record<string, { bgGlow: string; chipActive: string }> = {
+  'Warm & Rich':    { bgGlow: 'rgba(160, 98, 42, 0.06)',   chipActive: '#A0622A' },
+  'Fresh & Clean':  { bgGlow: 'rgba(42, 130, 100, 0.06)',  chipActive: '#2A8264' },
+  'Bold & Lasting': { bgGlow: 'rgba(60, 40, 30, 0.08)',    chipActive: '#3C281E' },
+  'Light & Subtle': { bgGlow: 'rgba(140, 110, 180, 0.05)', chipActive: '#8C6EB4' },
+}
+
+// Persona themes — temporary inline map until lib/personas.ts is built
+const PERSONA_THEMES: Record<string, { bgGradient: string; accentColor: string; cardBg: string; name: string }> = {
+  'velvet_intellectual': {
+    name: 'The Velvet Intellectual',
+    accentColor: '#c28b5b',
+    bgGradient: 'linear-gradient(135deg, rgba(44,26,17,0.10) 0%, rgba(92,61,46,0.06) 100%)',
+    cardBg: 'rgba(44,26,17,0.04)',
+  },
+  'solar_minimalist': {
+    name: 'The Solar Minimalist',
+    accentColor: '#4a9a7a',
+    bgGradient: 'linear-gradient(135deg, rgba(74,154,122,0.07) 0%, rgba(200,235,215,0.10) 100%)',
+    cardBg: 'rgba(74,154,122,0.04)',
+  },
+  'dark_alchemist': {
+    name: 'The Dark Alchemist',
+    accentColor: '#8a4a6a',
+    bgGradient: 'linear-gradient(135deg, rgba(40,20,30,0.12) 0%, rgba(100,40,70,0.07) 100%)',
+    cardBg: 'rgba(40,20,30,0.05)',
+  },
 }
 
 const LONGEVITY_PROJECTIONS: Record<string, string[]> = {
@@ -140,11 +162,31 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
 
   const [isMobile, setIsMobile] = useState(false)
 
+  // ── Ambient glow state (driven by active feel chip) ───────────────────────
+  const [activeGlow, setActiveGlow] = useState<string>('transparent')
+
+  // ── Persona theme state ───────────────────────────────────────────────────
+  const [activePersona, setActivePersona] = useState<typeof PERSONA_THEMES[string] | null>(null)
+  const [personaVisible, setPersonaVisible] = useState(false)
+  const [showPersonaBanner, setShowPersonaBanner] = useState(true)
+
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 400)
     checkMobile()
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  // ── Persona mount effect: localStorage + URL param ────────────────────────
+  useEffect(() => {
+    // URL param takes precedence over localStorage
+    const params = new URLSearchParams(window.location.search)
+    const urlPersona = params.get('persona')
+    const personaId = urlPersona ?? localStorage.getItem('scentral_persona')
+    if (personaId && PERSONA_THEMES[personaId]) {
+      setActivePersona(PERSONA_THEMES[personaId])
+      setTimeout(() => setPersonaVisible(true), 50) // trigger fade-in after paint
+    }
   }, [])
 
   // Unified Hybrid Search: Local (Fuse.js) + Semantic (Vector)
@@ -159,9 +201,15 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
   // Local fuzzy search
   const fuse = useMemo(
     () => new Fuse(localFragrances, {
-      keys: ['brand', 'name', 'family', 'plain_description'],
-      threshold: 0.3,
+      keys: [
+        { name: 'name',              weight: 0.4 },
+        { name: 'brand',             weight: 0.3 },
+        { name: 'inspired_by',       weight: 0.2 },
+        { name: 'plain_description', weight: 0.1 },
+      ],
+      threshold: 0.35,
       includeScore: true,
+      minMatchCharLength: 2,
     }),
     [localFragrances]
   )
@@ -249,13 +297,18 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
       results = results.filter(f => searchIds.has(f.id))
     }
 
-    // Feel filter
+    // Feel filter — OR logic with null safety
     if (feel) {
-      const families = FEEL_FAMILIES[feel] || []
-      const projections = FEEL_PROJECTIONS[feel] || []
-      results = results.filter(f =>
-        families.includes(f.family) || projections.includes(f.projection)
-      )
+      const families = [feel]  // array of selected feel chips (single-select today)
+      const projs    = [feel]  // same chip drives both family + projection lookup
+      results = results.filter(f => {
+        const matchFam  = families.length === 0 ||
+          (f.family     && families.some(fam  => (FEEL_FAMILIES[fam]    || []).includes(f.family)))
+        const matchProj = projs.length === 0 ||
+          (f.projection && projs.some(proj    => (FEEL_PROJECTIONS[proj] || []).includes(f.projection)))
+        if (!matchFam && !matchProj) return false
+        return true
+      })
     }
 
     // Longevity filter
@@ -307,7 +360,11 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
     return base
   })()
 
-  const toggleFeel = (f: string) => setFeel(feel === f ? null : f)
+  const toggleFeel = (f: string) => {
+    const next = feel === f ? null : f
+    setFeel(next)
+    setActiveGlow(next ? (FEEL_AMBIENT[next]?.bgGlow ?? 'transparent') : 'transparent')
+  }
   const toggleLongevity = (l: string) => setLongevity(longevity === l ? null : l)
   const toggleBrand = (b: string) => setBrand(brand === b ? null : b)
   const clearFilters = () => {
@@ -547,7 +604,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
         <div style={{ padding: '48px 16px', textAlign: 'center' }}>
           <EmptyState
             headline="Nothing matches"
-            caption="Try clearing a filter or searching something else"
+            caption="Adjust your filters to reveal more inspired-by alternatives."
             action={
               <Button onClick={clearFilters} variant="secondary">
                 Clear filters

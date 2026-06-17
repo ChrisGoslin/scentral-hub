@@ -467,7 +467,7 @@ export default function YouClient(props: YouClientProps) {
 
   if (props.state === 'signed-out') {
     return (
-      <div style={{ background: 'var(--bg)', minHeight: '100vh' }}>
+      <div style={{ background: 'var(--bg)', minHeight: '100dvh' }}>
         <div className="px-4 pt-8 pb-4" style={{ borderBottom: '1px solid var(--line)' }}>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--text)', lineHeight: '34px' }}>You</h1>
         </div>
@@ -534,7 +534,7 @@ export default function YouClient(props: YouClientProps) {
   const { email, saves, fetchError } = props
 
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100vh', color: 'var(--text)' }}>
+    <div style={{ background: 'var(--bg)', minHeight: '100dvh', color: 'var(--text)' }}>
       {/* Header */}
       <div className="px-4 pt-8 pb-4" style={{ borderBottom: '1px solid var(--line)' }}>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--text)', lineHeight: '34px' }}>You</h1>
@@ -621,8 +621,8 @@ export default function YouClient(props: YouClientProps) {
               </div>
             ) : (
               <EmptyState
-                headline="Nothing logged this week"
-                caption="Tap 'Log a wear' on any bottle to track it here"
+                headline="Your scent trail starts here"
+                caption="Log a wear on any bottle to begin tracking your rotation."
               />
             )}
           </div>
@@ -636,9 +636,9 @@ export default function YouClient(props: YouClientProps) {
               <LoadingShimmer variant="line" />
             ) : wishlistItems.length === 0 ? (
               <EmptyState 
-                headline="No saved fragrances" 
-                caption="Heart a fragrance on Discover to save it here"
-                action={<Button variant="secondary" onClick={() => router.push('/discover')}>Browse</Button>}
+                headline="Your wishlist is empty" 
+                caption="Heart a fragrance in the catalogue to save it for later."
+                action={<Button variant="secondary" onClick={() => router.push('/discover')}>Explore Catalogue</Button>}
               />
             ) : (
               <div className="flex flex-col">
