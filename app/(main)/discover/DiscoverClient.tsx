@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import Chip from '@/components/ui/Chip'
 import EmptyState from '@/components/ui/EmptyState'
+import PersonaTipTicker from '@/components/ui/PersonaTipTicker'
 import Button from '@/components/ui/Button'
 import { getBrandEmoji } from '@/lib/brandEmoji'
 import { createClient } from '@/utils/supabase/client'
@@ -34,10 +35,10 @@ const SORT_OPTIONS: SortOption[] = ['A–Z', 'Top Rated', 'Newest', 'Most Popula
 // ── Filter maps ──────────────────────────────────────────────────────────────
 
 const FEEL_FAMILIES: Record<string, string[]> = {
-  'Warm & Rich':    ['Woody Oriental', 'Woody/Oriental', 'Oriental', 'Amber', 'Oud', 'Gourmand', 'Spicy', 'Musk', 'Vanilla', 'Balsamic'],
-  'Fresh & Clean':  ['Citrus', 'Aquatic', 'Green', 'Fresh Spicy', 'Fresh', 'Aromatic', 'Floral', 'Marine'],
-  'Bold & Lasting': ['Leather', 'Tobacco', 'Smoky', 'Resinous', 'Chypre', 'Fougere', 'Fougère', 'Woody'],
-  'Light & Subtle': ['Floral', 'Powdery', 'Light', 'Soft Floral', 'Soft', 'White Floral', 'Sheer'],
+  'Light & Subtle': ['Floral', 'Chypre', 'Powdery', 'Musk', 'Fresh', 'Citrus', 'Green'],
+  'Warm & Rich':    ['Amber', 'Oriental', 'Woody Oriental', 'Oud', 'Gourmand', 'Resinous'],
+  'Fresh & Clean':  ['Citrus', 'Aquatic', 'Green', 'Fresh', 'Aromatic'],
+  'Bold & Lasting': ['Leather', 'Tobacco', 'Smoky', 'Chypre', 'Woody'],
 }
 const FEEL_PROJECTIONS: Record<string, string[]> = {
   'Warm & Rich':    ['Strong', 'Moderate', 'Beast Mode'],
@@ -87,26 +88,23 @@ function FragranceImage({ imageUrl, brand, name }: { imageUrl: string | null; br
           width: '100%', aspectRatio: '3/4',
           display: 'flex', flexDirection: 'column',
           alignItems: 'center', justifyContent: 'center',
-          background: 'linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%)',
+          background: 'var(--surface)',
           borderRadius: 10,
-          padding: 8, gap: 4,
-          position: 'relative'
+          padding: 8,
+          position: 'relative',
+          border: '1px solid var(--line)'
         }}
       >
-        <span style={{ fontSize: 32 }}>{getBrandEmoji(brand)}</span>
-        <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', textAlign: 'center', marginTop: 4 }}>
-          {brand}
-        </p>
-        <p style={{ fontSize: 11, color: 'var(--text)', fontFamily: 'var(--font-display)', textAlign: 'center', lineHeight: '14px', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-          {name.length > 24 ? name.slice(0, 22) + '…' : name}
-        </p>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M9 3h6v3H9zM6 6h12v15H6zM9 11h6M9 15h6" />
+        </svg>
       </div>
     )
   }
   return (
     <div style={{ width: '100%', aspectRatio: '3/4', borderRadius: 10, background: 'var(--surface-2)', position: 'relative' }}>
       <Image
-        src={imageUrl || '/placeholder-bottle.png'}
+        src={imageUrl}
         alt={`${brand} ${name}`}
         fill
         sizes="(max-width: 768px) 50vw, 25vw"
@@ -158,6 +156,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
   const [activePersonaId, setActivePersonaId] = useState<string | null>(null)
   const [personaVisible, setPersonaVisible] = useState(false)
   const [showPersonaBanner, setShowPersonaBanner] = useState(true)
+
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 400)
     checkMobile()
@@ -186,10 +185,11 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
       }
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   // Unified Hybrid Search: Local (Fuse.js) + Semantic (Vector)
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(() => setDebouncedSearch(searchTerm), 300)
+    debounceRef.current = setTimeout(() => setDebouncedSearch(searchTerm), 250)
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current)
     }
@@ -198,19 +198,23 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
   // Local fuzzy search
   const fuse = useMemo(
     () => new Fuse(localFragrances, {
-      keys: ['brand', 'name', 'family', 'plain_description'],
-      threshold: 0.3,
+      keys: [
+        { name: 'name',              weight: 0.4 },
+        { name: 'brand',             weight: 0.3 },
+        { name: 'inspired_by',       weight: 0.2 },
+        { name: 'plain_description', weight: 0.1 },
+      ],
+      threshold: 0.35,
       includeScore: true,
+      minMatchCharLength: 2,
     }),
     [localFragrances]
   )
 
-  const localResults = useMemo(
-    () => debouncedSearch
-      ? fuse.search(debouncedSearch).map(result => result.item)
-      : [],
-    [debouncedSearch, fuse]
-  )
+  const searchResults = useMemo(() => {
+    if (!debouncedSearch.trim()) return localFragrances
+    return fuse.search(debouncedSearch).map(r => r.item)
+  }, [debouncedSearch, fuse, localFragrances])
 
   // Semantic vector search (if debouncedSearch)
   useEffect(() => {
@@ -280,21 +284,27 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
   const anySearch = searchTerm.trim().length > 0
 
   const filtered = useMemo(() => {
-    let results: DiscoverFragrance[] = localFragrances
+    let results: DiscoverFragrance[] = searchResults
 
-    // Search (hybrid)
-    if (anySearch) {
-      const searchIds = new Set([...localResults, ...semanticResults].map(f => f.id))
-      results = results.filter(f => searchIds.has(f.id))
+    // Hybrid with Semantic results
+    if (debouncedSearch && semanticResults.length > 0) {
+      const searchIds = new Set(results.map(f => f.id))
+      const sements = semanticResults.filter(f => !searchIds.has(f.id))
+      results = [...results, ...sements]
     }
 
-    // Feel filter
+    // Feel filter — OR logic with null safety
     if (feel) {
-      const families = FEEL_FAMILIES[feel] || []
-      const projections = FEEL_PROJECTIONS[feel] || []
-      results = results.filter(f =>
-        families.includes(f.family) || projections.includes(f.projection)
-      )
+      const families = [feel]  // array of selected feel chips (single-select today)
+      const projs    = [feel]  // same chip drives both family + projection lookup
+      results = results.filter(f => {
+        const matchFam  = families.length === 0 ||
+          (f.family     && families.some(fam  => (FEEL_FAMILIES[fam]    || []).includes(f.family)))
+        const matchProj = projs.length === 0 ||
+          (f.projection && projs.some(proj    => (FEEL_PROJECTIONS[proj] || []).includes(f.projection)))
+        
+        return matchFam || matchProj
+      })
     }
 
     // Longevity filter
@@ -346,7 +356,11 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
     return base
   })()
 
-  const toggleFeel = (f: string) => setFeel(feel === f ? null : f)
+  const toggleFeel = (f: string) => {
+    const next = feel === f ? null : f
+    setFeel(next)
+    setActiveGlow(next ? (FEEL_AMBIENT[next]?.bgGlow ?? 'transparent') : 'transparent')
+  }
   const toggleLongevity = (l: string) => setLongevity(longevity === l ? null : l)
   const toggleBrand = (b: string) => setBrand(brand === b ? null : b)
   const clearFilters = () => {
@@ -658,11 +672,12 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
       )}
 
       {/* Grid */}
+      <PersonaTipTicker personaId={activePersonaId} />
       {filtered.length === 0 ? (
         <div style={{ padding: '48px 16px', textAlign: 'center' }}>
           <EmptyState
             headline="Nothing matches"
-            caption="Try clearing a filter or searching something else"
+            caption="Adjust your filters to reveal more inspired-by alternatives."
             action={
               <Button onClick={clearFilters} variant="secondary">
                 Clear filters

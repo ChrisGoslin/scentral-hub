@@ -68,11 +68,13 @@ export default function SocialClient() {
   return (
     <div
       style={{
-        minHeight: '100vh',
+        minHeight: '100dvh',
         background: 'var(--bg)',
         color: 'var(--text)',
         paddingTop: 24,
         paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 96px)',
+        overscrollBehavior: 'contain',
+        WebkitOverflowScrolling: 'touch',
       }}
     >
       {/* Header */}

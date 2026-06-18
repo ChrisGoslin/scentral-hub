@@ -17,7 +17,7 @@ export default async function DiscoverPage() {
       .from('fragrances')
       .select('id, brand, name, full_name, family, projection, optimal_season, plain_description, inspired_by, image_url, rating, created_at')
       .order('brand', { ascending: true })
-      .range(0, 39),
+      .range(0, 99),
     supabase
       .from('fragrances')
       .select('id', { count: 'exact', head: true }),

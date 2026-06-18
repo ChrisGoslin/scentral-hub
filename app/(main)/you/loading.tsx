@@ -2,7 +2,7 @@ import LoadingShimmer from '@/components/ui/LoadingShimmer'
 
 export default function YouLoading() {
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100vh' }}>
+    <div style={{ background: 'var(--bg)', minHeight: '100dvh' }}>
       <div className="px-4 pt-8 pb-4" style={{ borderBottom: '1px solid var(--line)' }}>
         <div style={{ height: 34, width: 60, borderRadius: 6, background: 'var(--surface-2)' }} aria-hidden="true" />
       </div>

@@ -66,28 +66,32 @@ function FragranceImage({ imageUrl, brand, name }: { imageUrl: string | null; br
   if (!imageUrl || failed) {
     return (
       <div
-        className="w-full aspect-square flex flex-col items-center justify-center rounded-[10px] p-2"
-        style={{ background: 'linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%)' }}
+        style={{
+          width: '100%', aspectRatio: '3/4',
+          display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center',
+          borderRadius: 10,
+          padding: 8,
+          background: 'var(--surface)',
+          position: 'relative',
+          border: '1px solid var(--line)'
+        }}
       >
-        <span style={{ fontSize: 32 }}>{getBrandEmoji(brand)}</span>
-        <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', textAlign: 'center', lineHeight: '12px', marginTop: 4 }}>
-          {brand}
-        </p>
-        <p style={{ fontSize: 11, color: 'var(--text)', fontFamily: 'var(--font-display)', textAlign: 'center', lineHeight: '14px', marginTop: 2, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-          {name.length > 24 ? name.slice(0, 22) + '…' : name}
-        </p>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M9 3h6v3H9zM6 6h12v15H6zM9 11h6M9 15h6" />
+        </svg>
       </div>
     )
   }
 
   return (
-    <div className="w-full aspect-square rounded-[10px] overflow-hidden relative" style={{ background: 'var(--surface-2)' }}>
+    <div style={{ width: '100%', aspectRatio: '3/4', borderRadius: 10, position: 'relative', background: 'var(--surface-2)' }}>
       <Image
-        src={imageUrl || '/placeholder-bottle.png'}
+        src={imageUrl}
         alt={`${brand} ${name}`}
         fill
         sizes="(max-width: 768px) 50vw, 25vw"
-        style={{ objectFit: 'contain', padding: 4 }}
+        style={{ objectFit: 'contain' }}
         onError={() => setFailed(true)}
       />
     </div>
@@ -241,7 +245,7 @@ export default function CollectionClient({ fragrances, totalCount }: { fragrance
   })
 
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100vh' }}>
+    <div style={{ background: 'var(--bg)', minHeight: '100dvh', overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}>
       {/* Header */}
       <div className="px-4 pt-8 pb-4" style={{ borderBottom: '1px solid var(--line)' }}>
         <div className="flex items-center justify-between">
@@ -348,25 +352,25 @@ export default function CollectionClient({ fragrances, totalCount }: { fragrance
             {ownedOnly && ownedFragrances.length === 0 ? (
               <div className="max-w-[360px] mx-auto pt-12 flex flex-col items-center text-center animate-up">
                 <div className="w-8 h-[2px] mb-6" style={{ background: 'var(--accent)' }} />
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: 26, lineHeight: '32px', color: 'var(--text)' }}>
-                  Your collection starts here.
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: 26, lineHeight: '32px', color: 'var(--text)', fontStyle: 'italic' }}>
+                  Your wardrobe begins here.
                 </p>
-                <p style={{ fontSize: 14, lineHeight: '22px', color: 'var(--text-muted)', marginTop: 12 }}>
-                  Add your first bottle and Scentral will help you get more from it — layering combos, inspired-by alternatives, and what to reach for next.
+                <p style={{ fontSize: 14, lineHeight: '22px', color: 'var(--text-muted)', marginTop: 12, fontWeight: 300 }}>
+                  Add your first bottle to unlock personalised layering combinations, inspired-by alternatives, and curation insights.
                 </p>
                 <div className="mt-7 w-full">
                   <Link href="/discover" className="block w-full">
-                    <Button fullWidth>Explore 280+ Scents</Button>
+                    <Button fullWidth>Explore the Catalogue</Button>
                   </Link>
                 </div>
                 <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 16 }}>
-                  Already have bottles?{' '}
+                  Already have a signature scent?{' '}
                   <button
                     onClick={() => setIsAddSheetOpen(true)}
-                    className="hover:underline transition-all"
-                    style={{ color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, font: 'inherit' }}
+                    className="hover:text-[var(--accent)] transition-all font-bold border-b border-transparent hover:border-[var(--accent)] pb-0.5"
+                    style={{ background: 'none', cursor: 'pointer', padding: 0 }}
                   >
-                    Add one manually →
+                    Add it manually →
                   </button>
                 </p>
               </div>
@@ -478,6 +482,9 @@ export default function CollectionClient({ fragrances, totalCount }: { fragrance
           )}
         </div>
       </Sheet>
+
+      {/* Bottom spacer */}
+      <div style={{ height: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }} />
     </div>
   )
 }

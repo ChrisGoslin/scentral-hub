@@ -22,7 +22,7 @@ function BottleImage({ imageUrl, brand, name }: { imageUrl: string | null; brand
       <div
         style={{
           width: '100%',
-          aspectRatio: '3/4',
+          aspectRatio: '2/3',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -45,7 +45,7 @@ function BottleImage({ imageUrl, brand, name }: { imageUrl: string | null; brand
   }
 
   return (
-    <div style={{ width: '100%', aspectRatio: '3/4', borderRadius: 6, background: 'rgba(255,255,255,0.05)', position: 'relative' }}>
+    <div style={{ width: '100%', aspectRatio: '2/3', borderRadius: 6, background: 'rgba(255,255,255,0.05)', position: 'relative' }}>
       <Image
         src={imageUrl || '/placeholder-bottle.png'}
         alt={`${brand} ${name}`}
@@ -59,6 +59,7 @@ function BottleImage({ imageUrl, brand, name }: { imageUrl: string | null; brand
 }
 
 export default function BottleCard({ fragrance: f, locked = false, isActive = false, isMobile = false }: BottleCardProps) {
+  const [hovered, setHovered] = useState(false)
   const {
     attributes,
     listeners,
@@ -88,6 +89,8 @@ export default function BottleCard({ fragrance: f, locked = false, isActive = fa
       {...(locked ? {} : listeners)}
     >
       <div
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
         style={{
           width: isMobile ? 80 : 90,
           padding: 6,
@@ -100,7 +103,10 @@ export default function BottleCard({ fragrance: f, locked = false, isActive = fa
             : '1px solid rgba(255,255,255,0.1)',
           backdropFilter: locked ? 'blur(4px)' : 'none',
           position: 'relative',
-          transition: 'background var(--motion-fast) var(--ease), border-color var(--motion-fast) var(--ease)',
+          boxShadow: hovered && !isDragging
+            ? '0 8px 24px rgba(0,0,0,0.16), 0 2px 4px rgba(0,0,0,0.08)'
+            : '0 2px 8px rgba(0,0,0,0.10), 0 1px 2px rgba(0,0,0,0.06)',
+          transition: 'background var(--motion-fast) var(--ease), border-color var(--motion-fast) var(--ease), box-shadow 0.2s ease',
         }}
       >
         <BottleImage imageUrl={f.image_url} brand={f.brand} name={f.name} />

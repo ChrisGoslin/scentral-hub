@@ -99,7 +99,7 @@ export default function CompareScentsClient({ fragrances }: { fragrances: Fragra
     : 'var(--accent)';
 
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100vh' }}>
+    <div style={{ background: 'var(--bg)', minHeight: '100dvh' }}>
       {/* Flush header — matches Wardrobe / You */}
       <header className="px-4 pt-8 pb-4 md:px-6" style={{ borderBottom: '1px solid var(--line)' }}>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--text)', lineHeight: '34px' }}>

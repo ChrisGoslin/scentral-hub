@@ -22,7 +22,7 @@ export default async function LayeringPage() {
 
   if (error) {
     return (
-      <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ minHeight: '100dvh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <EmptyState
           headline="Couldn't load fragrances"
           caption={error.message}
@@ -33,10 +33,10 @@ export default async function LayeringPage() {
 
   if ((data ?? []).length === 0) {
     return (
-      <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ minHeight: '100dvh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <EmptyState
-          headline="Build your first combination"
-          caption="Pick an anchor scent to start"
+          headline="Your lab is empty"
+          caption="Once you've added a few bottles, we'll show you how to layer them."
         />
       </div>
     )

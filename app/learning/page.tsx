@@ -77,7 +77,7 @@ export default function LexiconPage() {
   };
 
   return (
-    <div className="min-h-screen bg-stone-50 text-stone-900">
+    <div className="min-h-[100dvh] bg-stone-50 text-stone-900">
       <main className="max-w-4xl mx-auto px-6 py-16 space-y-16">
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-stone-200 pb-12">
           <div className="space-y-3">

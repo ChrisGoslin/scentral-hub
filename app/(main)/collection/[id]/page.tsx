@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import Button from '@/components/ui/Button'
 import SensoryAnatomy from '@/components/ui/SensoryAnatomy'
+import DidYouKnow from '@/components/ui/DidYouKnow'
 import SimilarFragrances from './SimilarFragrances'
 import InspiredByClones from './InspiredByClones'
 import LogWearButton from './LogWearButton'
@@ -149,7 +150,7 @@ export default async function FragranceDetailPage({
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--text)' }}>
+    <div style={{ minHeight: '100dvh', background: 'var(--bg)', color: 'var(--text)' }}>
       {/* Back nav */}
       <div className="px-4 pt-6 pb-2">
         <Link
@@ -308,6 +309,8 @@ export default async function FragranceDetailPage({
           />
         )}
 
+        <DidYouKnow family={f.family} />
+
         {/* Resonance — Find Similar */}
         <SimilarFragrances fragranceId={f.id} />
 
@@ -324,9 +327,14 @@ export default async function FragranceDetailPage({
             </p>
             {inspiredByRef ? (
               <Link href={`/collection/${inspiredByRef.id}`} style={{ textDecoration: 'none' }}>
-                <p style={{ fontSize: 20, fontFamily: 'var(--font-display)', color: 'var(--text)', marginTop: 6, lineHeight: '24px' }}>
-                  {inspiredByRef.brand} {inspiredByRef.name} →
-                </p>
+                <div style={{ marginTop: 6, lineHeight: '24px' }}>
+                  <span style={{ fontSize: 13, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block' }}>
+                    {inspiredByRef.brand}
+                  </span>
+                  <span style={{ fontSize: 20, fontFamily: 'var(--font-display)', color: 'var(--text)' }}>
+                    {inspiredByRef.name} →
+                  </span>
+                </div>
               </Link>
             ) : (
               <p style={{ fontSize: 20, fontFamily: 'var(--font-display)', color: 'var(--text)', marginTop: 6, lineHeight: '24px' }}>

@@ -28,7 +28,7 @@ const [{ data, error }, { data: collectionRows }] = await Promise.all([
 ])
 if (error) {
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div style={{ minHeight: '100dvh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <EmptyState
         headline="Couldn't load fragrances"
         caption={error.message}

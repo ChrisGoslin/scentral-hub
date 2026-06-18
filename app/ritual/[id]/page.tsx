@@ -214,7 +214,7 @@ export default async function RitualPage({ params }: { params: Promise<{ id: str
     <div
       style={{
         background: 'var(--bg)',
-        minHeight: '100vh',
+        minHeight: '100dvh',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',

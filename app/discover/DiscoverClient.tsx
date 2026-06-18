@@ -297,14 +297,14 @@ export default function DiscoverClient({ fragrances, error, hasMore, totalCount 
 
   if (error) {
     return (
-      <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ minHeight: '100dvh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <EmptyState headline="Couldn't load fragrances" caption={error} />
       </div>
     )
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--text)', paddingBottom: 96 }}>
+    <div style={{ minHeight: '100dvh', background: 'var(--bg)', color: 'var(--text)', paddingBottom: 96 }}>
 
       {/* placeholder colour — can't be set via inline styles */}
       <style>{`

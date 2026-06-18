@@ -28,7 +28,7 @@ const ARCHETYPES: { id: Archetype; label: string; description: string }[] = [
 ];
 
 const s: Record<string, React.CSSProperties> = {
-  page: { minHeight: '100vh', backgroundColor: '#06070a', color: '#ffffff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '48px 24px', fontFamily: 'system-ui, -apple-system, sans-serif' },
+  page: { minHeight: '100dvh', backgroundColor: '#06070a', color: '#ffffff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '48px 24px', fontFamily: 'system-ui, -apple-system, sans-serif' },
   inner: { maxWidth: '560px', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0' },
   wordmark: { fontFamily: 'Georgia, "Times New Roman", serif', fontStyle: 'italic', fontSize: 'clamp(2.5rem, 8vw, 4.5rem)', fontWeight: '400', letterSpacing: '-0.02em', color: '#ffffff', margin: '0 0 24px', lineHeight: '1' },
   tagline: { fontSize: 'clamp(0.95rem, 2.5vw, 1.1rem)', color: '#a0a8b8', textAlign: 'center', margin: '0 0 10px', lineHeight: '1.5', maxWidth: '420px' },
