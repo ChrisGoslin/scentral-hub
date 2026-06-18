@@ -32,3 +32,33 @@
 - cabinetSnapshot JSON event in WardrobeShelf — never remove (feeds future CV pipeline)
 - DB projection values are ONLY: Beast Mode, Strong, Moderate, Medium, Weak
 - Commit additive features to main; branch only for risky migrations
+
+---
+
+## ⚠️ How to maintain this file (READ BEFORE EDITING)
+
+This file was previously corrupted by a fabricating agent that introduced fictional lore:
+"Hegemony", "Olfactory NFTs", "Invisible Commerce", "Shadow Branching", "Enshrinement Shelf",
+"Dynamic Aura", "Reinforcement Sommelier", "Sillage telemetry network" — none of these are real features.
+AGENTS.md §1 lists the full known fabrications — never reintroduce them.
+
+**Rules for keeping this file honest:**
+
+1. **Only mark something [x] complete after `git log --oneline` confirms it landed on main.**
+   Do not mark complete based on an agent's "Done!" summary.
+
+2. **Only list features that exist in the codebase.** If you're not sure, run:
+   `find app -name "*.tsx" | sort` and check before adding to Completed.
+
+3. **When starting a new session**, update the Completed / In progress sections to reflect
+   what actually shipped. Do not carry forward items that were never verified.
+
+4. **Do not invent phase names or feature names** not already in LAUNCH_PLAN.md or AGENTS.md.
+   Proposed features go in LAUNCH_PLAN.md, not here.
+
+5. **After every Cowork or Claude Code session**, run:
+   ```bash
+   cd ~/Projects/scentral-hub
+   git add -A && git commit -m "docs: update PROJECTS.md to reflect current build state"
+   git push origin main
+   ```
