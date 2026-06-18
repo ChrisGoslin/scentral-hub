@@ -8,6 +8,7 @@ import EmptyState from '@/components/ui/EmptyState'
 import Button from '@/components/ui/Button'
 import { getBrandEmoji } from '@/lib/brandEmoji'
 import { createClient } from '@/utils/supabase/client'
+import { getPersonaById } from '@/lib/personas'
 import Fuse from 'fuse.js'
 
 export type DiscoverFragrance = {
@@ -39,23 +40,32 @@ const FEEL_FAMILIES: Record<string, string[]> = {
   'Light & Subtle': ['Floral', 'Powdery', 'Light', 'Soft Floral', 'Soft', 'White Floral', 'Sheer'],
 }
 const FEEL_PROJECTIONS: Record<string, string[]> = {
-  'Warm & Rich':    ['Beast Mode', 'Strong', 'Moderate'],
-  'Fresh & Clean':  ['Soft', 'Moderate', 'Light'],
-  'Bold & Lasting': ['Beast Mode', 'Strong'],
-  'Light & Subtle': ['Soft', 'Moderate', 'Light'],
+  'Warm & Rich':    ['Strong', 'Moderate', 'Beast Mode'],
+  'Fresh & Clean':  ['Weak', 'Moderate', 'Medium'],
+  'Bold & Lasting': ['Beast Mode', 'Strong', 'Moderate'],
+  'Light & Subtle': ['Weak', 'Medium', 'Moderate'],
 }
 
-const FEEL_AMBIENT: Record<string, string> = {
-  'Warm & Rich':    'rgba(180, 83, 9, 0.08)',   // amber
-  'Fresh & Clean':  'rgba(6, 182, 212, 0.07)',   // cyan
-  'Bold & Lasting': 'rgba(67, 20, 7, 0.09)',     // deep smoke
-  'Light & Subtle': 'rgba(167, 139, 250, 0.07)', // lavender
+const FEEL_AMBIENT: Record<string, { bgGlow: string; chipActive: string }> = {
+  'Warm & Rich':    { bgGlow: 'rgba(160, 98, 42, 0.06)',   chipActive: '#A0622A' },
+  'Fresh & Clean':  { bgGlow: 'rgba(42, 130, 100, 0.06)',  chipActive: '#2A8264' },
+  'Bold & Lasting': { bgGlow: 'rgba(60, 40, 30, 0.08)',    chipActive: '#3C281E' },
+  'Light & Subtle': { bgGlow: 'rgba(140, 110, 180, 0.05)', chipActive: '#8C6EB4' },
+}
+
+// Maps persona's preferred families to the closest FEEL chip key
+function familyToFeel(families: string[]): string | null {
+  const familySet = new Set(families)
+  if (['Leather', 'Tobacco', 'Smoky', 'Resinous', 'Oud'].some(f => familySet.has(f))) return 'Bold & Lasting'
+  if (['Amber', 'Oriental', 'Woody Oriental', 'Gourmand'].some(f => familySet.has(f))) return 'Warm & Rich'
+  if (['Citrus', 'Aquatic', 'Green', 'Fresh Spicy', 'Floral', 'Fresh'].some(f => familySet.has(f))) return 'Fresh & Clean'
+  return null
 }
 
 const LONGEVITY_PROJECTIONS: Record<string, string[]> = {
   'Lasts all day':  ['Beast Mode', 'Strong'],
-  'A few hours':    ['Moderate'],
-  'Quick burst':    ['Soft', 'Light'],
+  'A few hours':    ['Moderate', 'Medium'],
+  'Quick burst':    ['Weak'],
 }
 
 const KNOWN_BRANDS = ['Lattafa', 'Afnan', 'Rasasi', 'Armaf', 'Swiss Arabian']
@@ -140,6 +150,14 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
 
   const [isMobile, setIsMobile] = useState(false)
 
+  // ── Ambient glow state (driven by active feel chip) ───────────────────────
+  const [activeGlow, setActiveGlow] = useState<string>('transparent')
+
+  // ── Persona theme state ───────────────────────────────────────────────────
+  const [activePersona, setActivePersona] = useState<ReturnType<typeof getPersonaById> | null>(null)
+  const [activePersonaId, setActivePersonaId] = useState<string | null>(null)
+  const [personaVisible, setPersonaVisible] = useState(false)
+  const [showPersonaBanner, setShowPersonaBanner] = useState(true)
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 400)
     checkMobile()
@@ -147,6 +165,27 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
+  // ── Persona mount effect: localStorage + URL param ────────────────────────
+  useEffect(() => {
+    // URL param takes precedence over localStorage
+    const params = new URLSearchParams(window.location.search)
+    const urlPersona = params.get('persona')
+    const personaId = urlPersona ?? localStorage.getItem('scentral_persona')
+    if (personaId) {
+      const persona = getPersonaById(personaId)
+      if (persona) {
+        setActivePersonaId(personaId)
+        setActivePersona(persona)
+        // Pre-apply persona's preferred families as the initial feel chip
+        const initialFeel = familyToFeel(persona.discover_filters.families)
+        if (initialFeel) {
+          setFeel(initialFeel)
+          setActiveGlow(FEEL_AMBIENT[initialFeel]?.bgGlow ?? 'transparent')
+        }
+        setTimeout(() => setPersonaVisible(true), 80) // trigger fade-in after paint
+      }
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
   // Unified Hybrid Search: Local (Fuse.js) + Semantic (Vector)
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
@@ -295,7 +334,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
     }
 
     return sorted
-  }, [localFragrances, localResults, semanticResults, feel, longevity, brand, showSaved, wishlist, sort, anySearch])
+  }, [localFragrances, semanticResults, feel, longevity, brand, showSaved, wishlist, sort, anySearch, searchResults, debouncedSearch])
 
   const countLabel = (() => {
     const base = `${filtered.length} fragrance${filtered.length !== 1 ? 's' : ''}`
@@ -362,9 +401,28 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
   }
 
   return (
+    <div style={{ position: 'relative' }}>
+      {/* Ambient feel-filter colour wash — sits behind all content */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 0,
+          pointerEvents: 'none',
+          background: activeGlow,
+          transition: 'background 0.5s ease',
+        }}
+      />
     <div style={{
+      position: 'relative',
+      zIndex: 1,
       minHeight: '100dvh',
       background: 'var(--bg)',
+      backgroundImage: activePersona && personaVisible
+        ? activePersona.ui_theme.bgGradient
+        : undefined,
+      transition: 'background-image 0.4s ease',
       overflowY: 'auto',
       overscrollBehavior: 'contain',
       WebkitOverflowScrolling: 'touch',
@@ -410,9 +468,11 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
                   key={v} 
                   selected={isActive} 
                   onClick={() => toggleFeel(v)} 
-                  style={{ 
+                  style={{
                     flexShrink: 0,
-                    boxShadow: isActive ? `0 0 0 1px var(--accent), 0 2px 8px ${FEEL_AMBIENT[v]}` : 'none',
+                    boxShadow: isActive
+                      ? `0 0 0 1px ${FEEL_AMBIENT[v]?.chipActive ?? 'var(--accent)'}, 0 2px 12px ${FEEL_AMBIENT[v]?.bgGlow ?? 'transparent'}`
+                      : 'none',
                     transition: 'box-shadow 0.3s ease, background 0.3s ease, color 0.15s',
                   }}
                 >
@@ -541,6 +601,61 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
           </div>
         )
       })()}
+
+      {/* ── Persona banner ──────────────────────────────────────────────── */}
+      {activePersona && showPersonaBanner && (
+        <div
+          style={{
+            margin: '0 16px 16px',
+            padding: '12px 14px',
+            borderRadius: 'var(--r-card)',
+            borderLeft: `3px solid ${activePersona.ui_theme.accentColor}`,
+            background: activePersona.ui_theme.cardBg,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 10,
+            opacity: personaVisible ? 1 : 0,
+            transform: personaVisible ? 'translateY(0)' : 'translateY(-6px)',
+            transition: 'opacity 0.35s ease, transform 0.35s ease',
+          }}
+        >
+          <div>
+            <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 2 }}>
+              Curated for
+            </p>
+            <p style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 14,
+              color: activePersona.ui_theme.accentColor,
+              fontStyle: 'italic',
+            }}>
+              {activePersona.name}
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              setShowPersonaBanner(false)
+              setFeel(null)
+              setActiveGlow('transparent')
+            }}
+            aria-label="Show all fragrances"
+            style={{
+              fontSize: 11,
+              color: 'var(--text-muted)',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '4px 8px',
+              borderRadius: 4,
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
+            }}
+          >
+            Show everything →
+          </button>
+        </div>
+      )}
 
       {/* Grid */}
       {filtered.length === 0 ? (
@@ -700,6 +815,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
 
       {/* Bottom spacer */}
       <div style={{ height: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }} />
+    </div>
     </div>
   )
 }
