@@ -1,7 +1,7 @@
+import { Suspense } from 'react'
 import Link from 'next/link'
-import { createClient } from '@/utils/supabase/server'
-import { cookies } from 'next/headers'
 import WaitlistForm from '@/app/landing/WaitlistForm'
+import { StatsCard, StatsCardFallback, InspiredByMore, InspiredByMoreFallback } from '@/app/landing/LandingStats'
 
 const QUICK_LINKS = [
   { label: 'My Bottles', sub: 'Browse and track your collection', href: '/collection' },
@@ -12,22 +12,7 @@ const QUICK_LINKS = [
 
 export const dynamic = 'force-dynamic'
 
-export default async function Home() {
-  const cookieStore = await cookies()
-  const supabase = await createClient(cookieStore)
-
-  const [{ count: totalCount }, { count: ownedCount }, { count: inspiredByCount }] = await Promise.all([
-    supabase.from('fragrances').select('*', { count: 'exact', head: true }),
-    supabase.from('fragrances').select('*', { count: 'exact', head: true }).eq('is_user_created', false).not('rating', 'is', null),
-    supabase.from('fragrances').select('*', { count: 'exact', head: true }).not('inspired_by', 'is', null),
-  ])
-
-  const STATS = [
-    { value: String(ownedCount ?? 106), label: 'In your collection' },
-    { value: String(totalCount ?? 282), label: 'Scents to explore' },
-    { value: String(inspiredByCount ?? '76'), label: 'Inspired-by alternatives' },
-  ]
-
+export default function Home() {
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] flex flex-col items-center transition-colors duration-700">
       <main className="max-w-6xl w-full px-6 pt-20 pb-10 grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-20 items-center fade-up">
@@ -79,14 +64,9 @@ export default async function Home() {
               <p className="text-[13px] text-[var(--text-muted)] font-light">Fragrances you know. Alternatives you don't — yet.</p>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
-              {STATS.map(({ value, label }) => (
-                <div key={label} className="text-center">
-                  <p className="text-3xl font-bold text-[var(--accent)] font-serif">{value}</p>
-                  <p className="text-[8px] md:text-[9px] uppercase tracking-widest text-[var(--text-muted)] mt-1 font-bold leading-tight">{label}</p>
-                </div>
-              ))}
-            </div>
+            <Suspense fallback={<StatsCardFallback />}>
+              <StatsCard />
+            </Suspense>
 
             <div className="pt-4 border-t border-[var(--line)] space-y-3">
               {[
@@ -140,9 +120,9 @@ export default async function Home() {
               <p className="text-[11px] text-[var(--text-muted)] font-light mt-1 italic">{item.inspired}</p>
             </div>
           ))}
-          <p className="text-[12px] text-[var(--text-muted)] font-light mt-4 px-1">
-            + {Math.max(0, (inspiredByCount ?? 76) - 3)} more in the catalogue
-          </p>
+          <Suspense fallback={<InspiredByMoreFallback />}>
+            <InspiredByMore />
+          </Suspense>
         </div>
       </section>
 
