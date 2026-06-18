@@ -45,7 +45,7 @@ export default async function CompareScentPage() {
   const fragrances = await loadFragrances();
 
   return (
-    <Suspense fallback={<div style={{ minHeight: '100vh', background: 'var(--bg)' }} />}>
+    <Suspense fallback={<div style={{ minHeight: '100dvh', background: 'var(--bg)' }} />}>
       <DNAMatchClient fragrances={fragrances} />
     </Suspense>
   );

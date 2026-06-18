@@ -1,186 +1,325 @@
 import Link from 'next/link'
 import { Metadata } from 'next'
-import { createClient } from '@/utils/supabase/server'
-import { cookies } from 'next/headers'
+import { PERSONAS } from '@/lib/personas'
 
 export const metadata: Metadata = {
-  title: 'Scentral — Your Fragrance Wardrobe',
-  description: 'Your personal fragrance wardrobe. Discover inspired-by alternatives, build combinations that last all day, and track the bottles you love.',
+  title: 'Scentral — Your Scent Wardrobe',
+  description:
+    'Discover, collect and understand the fragrances that define you — guided by your personal scent identity.',
 }
 
-const QUICK_LINKS = [
-  { label: 'My Bottles', sub: 'Browse and track your collection', href: '/collection' },
-  { label: 'Layer Builder', sub: 'Combine two scents that work together', href: '/layering' },
-  { label: 'Find a Scent', sub: 'Explore 280+ fragrances by feel', href: '/collection?browse=true' },
-  { label: 'Compare Scents', sub: 'See how similar two fragrances really are', href: '/dna-match' },
+const HOW_IT_WORKS = [
+  {
+    icon: '🧪',
+    heading: 'Take the Sanctuary Profiler',
+    body: '3 questions. Your scent persona revealed.',
+  },
+  {
+    icon: '🗂',
+    heading: 'Build your wardrobe',
+    body: 'Rate, collect and organise every fragrance you own.',
+  },
+  {
+    icon: '✨',
+    heading: 'Discover inspired-by gems',
+    body: '500+ affordable alternatives to designer and niche.',
+  },
 ]
 
-export const dynamic = 'force-dynamic'
-
-export default async function Home() {
-  const cookieStore = await cookies()
-  const supabase = await createClient(cookieStore)
-
-  const [{ count: totalCount }, { count: ownedCount }, { count: inspiredByCount }] = await Promise.all([
-    supabase.from('fragrances').select('*', { count: 'exact', head: true }),
-    supabase.from('fragrances').select('*', { count: 'exact', head: true }).eq('is_user_created', false).not('rating', 'is', null),
-    supabase.from('fragrances').select('*', { count: 'exact', head: true }).not('inspired_by', 'is', null),
-  ])
-
-  const STATS = [
-    { value: String(ownedCount ?? 106), label: 'In your collection' },
-    { value: String(totalCount ?? 282), label: 'Scents to explore' },
-    { value: String(inspiredByCount ?? '76'), label: 'Inspired-by alternatives' },
-  ]
-
+export default function Home() {
   return (
-    <div className="min-h-[100dvh] bg-[var(--bg)] text-[var(--text)] flex flex-col items-center transition-colors duration-700">
-      <main className="max-w-6xl w-full px-6 pt-20 pb-10 grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-20 items-center fade-up">
+    <div
+      style={{
+        minHeight: '100dvh',
+        background: 'var(--bg)',
+        color: 'var(--text)',
+        fontFamily: 'var(--font-body)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+      }}
+    >
+      {/* ── Hero ── */}
+      <section
+        style={{
+          width: '100%',
+          minHeight: '100dvh',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          textAlign: 'center',
+          padding: '64px 24px',
+          boxSizing: 'border-box',
+        }}
+      >
+        {/* Eyebrow rule */}
+        <div
+          style={{
+            width: 40,
+            height: 1,
+            background: 'var(--accent)',
+            marginBottom: 24,
+          }}
+        />
 
-        {/* Left — hero copy */}
-        <section className="space-y-10">
-          <div>
-            <div className="w-12 h-0.5 bg-[var(--accent)] mb-6" />
-            <p className="text-[10px] uppercase tracking-[0.4em] text-[var(--text-muted)] font-bold">Scentral</p>
-          </div>
+        <h1
+          style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 'clamp(2.2rem, 7vw, 5rem)',
+            fontStyle: 'italic',
+            fontWeight: 400,
+            lineHeight: 1.1,
+            letterSpacing: '-0.02em',
+            color: 'var(--text)',
+            margin: '0 0 20px',
+            maxWidth: 700,
+          }}
+        >
+          Your scent wardrobe.
+          <br />
+          <span style={{ color: 'var(--text-muted)' }}>Finally organised.</span>
+        </h1>
 
-          <div className="space-y-6">
-            <h1 className="text-3xl md:text-5xl lg:text-7xl font-serif italic leading-tight tracking-tight">
-              Your Digital<br />
-              <span className="text-[var(--text-muted)]">Fragrance Intelligence App.</span>
-            </h1>
-            <p className="text-[var(--text-muted)] max-w-xl text-lg font-light leading-relaxed">
-              Discover inspired-by alternatives, catalogue your personal collection, and unlock the science of scent layering.
-            </p>
-          </div>
+        <p
+          style={{
+            fontSize: 14,
+            color: 'var(--text-muted)',
+            maxWidth: 280,
+            lineHeight: 1.6,
+            margin: '0 0 40px',
+            fontWeight: 400,
+          }}
+        >
+          Discover, collect and understand the fragrances that define you —
+          guided by your personal scent identity.
+        </p>
 
-          <div className="flex flex-wrap gap-6 items-center">
+        <Link
+          href="/onboarding"
+          style={{
+            display: 'inline-block',
+            background: 'var(--accent)',
+            color: '#fff',
+            fontSize: 11,
+            fontWeight: 700,
+            letterSpacing: '0.15em',
+            textTransform: 'uppercase',
+            padding: '14px 32px',
+            borderRadius: 'var(--r-btn)',
+            textDecoration: 'none',
+            marginBottom: 16,
+            transition: 'opacity 0.2s',
+          }}
+        >
+          Find my scent identity →
+        </Link>
+
+        <Link
+          href="/discover"
+          style={{
+            fontSize: 12,
+            color: 'var(--text-muted)',
+            textDecoration: 'none',
+            borderBottom: '1px solid var(--line)',
+            paddingBottom: 2,
+            transition: 'color 0.2s',
+          }}
+        >
+          Browse the collection
+        </Link>
+      </section>
+
+      {/* ── How it works ── */}
+      <section
+        style={{
+          width: '100%',
+          maxWidth: 960,
+          padding: '64px 24px',
+          boxSizing: 'border-box',
+        }}
+      >
+        <p
+          style={{
+            fontSize: 10,
+            fontWeight: 700,
+            letterSpacing: '0.35em',
+            textTransform: 'uppercase',
+            color: 'var(--text-muted)',
+            textAlign: 'center',
+            marginBottom: 40,
+          }}
+        >
+          How it works
+        </p>
+
+        {/* 3-column on desktop, stacked on mobile */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: 24,
+          }}
+        >
+          {HOW_IT_WORKS.map(({ icon, heading, body }) => (
+            <div
+              key={heading}
+              style={{
+                background: 'var(--surface)',
+                border: '1px solid var(--line)',
+                borderRadius: 'var(--r-card)',
+                padding: '28px 24px',
+                textAlign: 'center',
+              }}
+            >
+              <span
+                style={{
+                  fontSize: 28,
+                  display: 'block',
+                  marginBottom: 16,
+                  lineHeight: 1,
+                }}
+                role="img"
+                aria-hidden="true"
+              >
+                {icon}
+              </span>
+              <p
+                style={{
+                  fontFamily: 'var(--font-display)',
+                  fontStyle: 'italic',
+                  fontSize: 16,
+                  color: 'var(--text)',
+                  marginBottom: 8,
+                  lineHeight: 1.3,
+                }}
+              >
+                {heading}
+              </p>
+              <p
+                style={{
+                  fontSize: 13,
+                  color: 'var(--text-muted)',
+                  lineHeight: 1.5,
+                }}
+              >
+                {body}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Persona teasers ── */}
+      <section
+        style={{
+          width: '100%',
+          maxWidth: 960,
+          padding: '0 24px 80px',
+          boxSizing: 'border-box',
+        }}
+      >
+        <h2
+          style={{
+            fontFamily: 'var(--font-display)',
+            fontStyle: 'italic',
+            fontSize: 'clamp(1.6rem, 4vw, 2.4rem)',
+            fontWeight: 400,
+            textAlign: 'center',
+            color: 'var(--text)',
+            marginBottom: 32,
+            letterSpacing: '-0.01em',
+          }}
+        >
+          Which identity are you?
+        </h2>
+
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+            gap: 16,
+          }}
+        >
+          {PERSONAS.map((persona) => (
             <Link
+              key={persona.id}
               href="/onboarding"
-              className="bg-[var(--accent)] text-white px-6 py-3 md:px-10 md:py-4 rounded-[var(--r-btn)] shadow-sm transition-all hover:bg-[var(--accent-press)] active:scale-95 font-bold uppercase tracking-widest text-[10px]"
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                background: persona.ui_theme.cardBg,
+                backgroundImage: persona.ui_theme.bgGradient,
+                border: '1px solid var(--line)',
+                borderLeft: `3px solid ${persona.ui_theme.accentColor}`,
+                borderRadius: 'var(--r-card)',
+                padding: '28px 24px',
+                textDecoration: 'none',
+                minHeight: 160,
+                transition: 'box-shadow 0.2s, border-color 0.2s',
+              }}
             >
-              Find your scent identity →
-            </Link>
-            <Link
-              href="/collection"
-              className="text-[var(--text)] border-b border-[var(--text)] pb-1 hover:text-[var(--accent)] hover:border-[var(--accent)] transition-all uppercase tracking-[0.2em] text-[10px] font-bold"
-            >
-              My Bottles
-            </Link>
-          </div>
-
-          <div className="pt-8">
-            <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--text-muted)] font-bold mb-4">Which one are you?</p>
-            <div className="flex flex-row gap-3 overflow-x-auto pb-4 hide-scrollbar snap-x">
-              {[
-                { name: 'The Velvet Intellectual', tagline: 'You collect ideas the way others collect souvenirs.', color: '#c28b5b' },
-                { name: 'The Solar Minimalist', tagline: 'Your scent announces you before you speak.', color: '#4a9a7a' },
-                { name: 'The Dark Alchemist', tagline: 'You wear fragrance as armour and invitation at once.', color: '#8a4a6a' },
-              ].map((p, idx) => (
-                <Link
-                  key={idx}
-                  href="/onboarding"
-                  className="flex-shrink-0 w-[240px] md:w-[280px] bg-[var(--surface)] border border-[var(--line)] shadow-sm transition-all hover:border-[var(--accent)] snap-start flex flex-col group overflow-hidden"
-                  style={{ borderLeftColor: p.color, borderLeftWidth: '3px' }}
+              <div>
+                <p
+                  style={{
+                    fontFamily: 'var(--font-display)',
+                    fontStyle: 'italic',
+                    fontSize: 18,
+                    fontWeight: 400,
+                    color: persona.ui_theme.accentColor,
+                    marginBottom: 8,
+                    lineHeight: 1.25,
+                  }}
                 >
-                  <div className="p-4 md:p-5 flex flex-col justify-between h-full">
-                    <p className="text-[13px] font-bold text-[var(--text)] italic font-serif leading-tight">{p.name}</p>
-                    <p className="text-[11px] text-[var(--text-muted)] mt-2 font-light leading-snug">{p.tagline}</p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
+                  {persona.name}
+                </p>
+                <p
+                  style={{
+                    fontSize: 12,
+                    color: 'var(--text-muted)',
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {persona.narrative.tagline}
+                </p>
+              </div>
 
-        {/* Right — catalogue card */}
-        <aside className="flex flex-col gap-6">
-          <div className="bg-[var(--surface)] border border-[var(--line)] p-5 md:p-8 space-y-8">
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--text-muted)] font-bold mb-1">What's inside</p>
-              <p className="text-[13px] text-[var(--text-muted)] font-light">Fragrances you know. Alternatives you don't — yet.</p>
-            </div>
-
-            <div className="grid grid-cols-3 gap-4">
-              {STATS.map(({ value, label }) => (
-                <div key={label} className="text-center">
-                  <p className="text-3xl font-bold text-[var(--accent)] font-serif">{value}</p>
-                  <p className="text-[8px] md:text-[9px] uppercase tracking-widest text-[var(--text-muted)] mt-1 font-bold leading-tight">{label}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="pt-4 border-t border-[var(--line)] space-y-3">
-              {[
-                { label: 'Warm & rich', hint: 'Oud · Amber · Musk · Leather' },
-                { label: 'Fresh & elegant', hint: 'Florals · Spice · Citrus' },
-                { label: 'Bold & lasting', hint: 'Resin · Wood · Aquatic' },
-              ].map(({ label, hint }) => (
-                <div key={label} className="flex justify-between items-center">
-                  <span className="text-[11px] font-bold text-[var(--text)]">{label}</span>
-                  <span className="text-[10px] text-[var(--text-muted)]">{hint}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </aside>
-      </main>
-
-      {/* Signature Moment */}
-      <section className="max-w-6xl w-full px-6 py-20 grid grid-cols-1 md:grid-cols-2 gap-10 items-center border-y border-[var(--line)] my-10 bg-[var(--surface-subtle)]">
-        {/* Left Side — Story Card */}
-        <div className="bg-[var(--surface)] border border-[var(--line)] p-10 space-y-6 shadow-sm">
-          <div>
-            <p className="text-[10px] text-[var(--accent)] uppercase tracking-[0.3em] font-bold mb-4">How it works</p>
-            <h2 className="text-3xl font-serif leading-tight tracking-tight italic">
-              Recognise a signature instantly.
-            </h2>
-          </div>
-          <p className="text-sm text-[var(--text-muted)] leading-relaxed font-light">
-            Scentral maps the olfactory DNA of the world's most coveted scents to reveal premium, accessible alternatives — without the luxury markup.
-          </p>
-          <Link
-            href="/discover"
-            className="inline-block text-[10px] font-bold uppercase tracking-widest text-[var(--accent)] border-b border-[var(--accent)] pb-1 transition-all hover:pr-2"
-          >
-            See the alternatives →
-          </Link>
-        </div>
-
-        {/* Right Side — Mini Cards */}
-        <div className="space-y-4">
-          {[
-            { name: 'Lattafa Asad', inspired: 'Smells like Creed Aventus' },
-            { name: 'Afnan 9PM', inspired: 'Smells like Paco Rabanne Invictus' },
-            { name: 'Armaf Club de Nuit', inspired: 'Smells like Creed Aventus Silver Mountain' },
-          ].map((item, idx) => (
-            <div key={idx} className="bg-[var(--surface)] border-l-2 border-[var(--accent)] p-4 shadow-sm flex flex-col justify-center">
-              <p className="text-xs font-bold uppercase tracking-widest text-[var(--text)]">{item.name}</p>
-              <p className="text-[11px] text-[var(--text-muted)] font-light mt-1 italic">{item.inspired}</p>
-            </div>
-          ))}
-          <p className="text-[12px] text-[var(--text-muted)] font-light mt-4 px-1">
-            + {Math.max(0, (inspiredByCount ?? 76) - 3)} more in the catalogue
-          </p>
-        </div>
-      </section>
-
-      {/* Bottom Nav / Quick Links */}
-      <section className="max-w-6xl w-full px-6 pb-20">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {QUICK_LINKS.map(({ label, sub, href }) => (
-            <Link
-              key={href}
-              href={href}
-              className="group bg-[var(--surface)] border border-[var(--line)] px-5 py-4 transition-all hover:border-[var(--accent)] shadow-sm"
-            >
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)] group-hover:text-[var(--accent)] transition-colors">{label}</p>
-              <p className="text-[11px] text-[var(--text-muted)] mt-1 font-light leading-snug">{sub}</p>
+              <p
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: persona.ui_theme.accentColor,
+                  marginTop: 20,
+                  letterSpacing: '0.05em',
+                }}
+              >
+                Explore →
+              </p>
             </Link>
           ))}
         </div>
       </section>
+
+      {/* ── Footer ── */}
+      <footer
+        style={{
+          width: '100%',
+          borderTop: '1px solid var(--line)',
+          padding: '24px',
+          textAlign: 'center',
+          boxSizing: 'border-box',
+        }}
+      >
+        <p
+          style={{
+            fontSize: 11,
+            color: 'var(--text-muted)',
+          }}
+        >
+          Scentral · Made for fragrance obsessives
+        </p>
+      </footer>
     </div>
   )
 }
-

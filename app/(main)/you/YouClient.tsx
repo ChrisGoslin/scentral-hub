@@ -43,6 +43,18 @@ export type YouClientProps =
   | { state: 'signed-out' }
   | { state: 'signed-in'; email: string; saves: SavedCombination[]; fetchError: string | null; weekWear: WeekWearEntry[]; ownedCount: number }
 
+type Persona = {
+  name: string
+  narrative: { tagline: string }
+  ui_theme: { cardBg: string; accentColor: string }
+}
+
+type EngagementState = {
+  isWornToday: boolean
+  isAtRisk: boolean
+  streak: number
+}
+
 function formatDate(iso: string | null): string {
   if (!iso) return ''
   const d = new Date(iso)
@@ -319,6 +331,80 @@ function SettingsSection({ email, onSignOut, signingOut, onReset }: { email: str
   )
 }
 
+function EngagementPrompt({ engagement }: { engagement: EngagementState }) {
+  if (engagement.isWornToday) {
+    return (
+      <div className="flex items-center gap-2 mb-4">
+        <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-success)' }} />
+        <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+          Worn today · <span style={{ color: 'var(--text)' }}>{engagement.streak} day streak</span>
+        </p>
+      </div>
+    )
+  }
+
+  if (engagement.isAtRisk) {
+    return (
+      <div 
+        className="p-4 rounded-xl border mb-6 animate-pulse" 
+        style={{ background: '#fffbeb', borderColor: '#fef3c7', borderLeft: '4px solid #d97706' }}
+      >
+        <p style={{ fontSize: 11, fontWeight: 700, color: '#92400e', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          At Risk
+        </p>
+        <p style={{ fontSize: 13, color: '#92400e', marginTop: 2 }}>
+          Keep your {engagement.streak} day streak alive. Log a wear before midnight.
+        </p>
+      </div>
+    )
+  }
+
+  return null
+}
+
+function PersonaCard({ persona }: { persona: Persona }) {
+  const router = useRouter()
+  return (
+    <div
+      className="relative rounded-[16px] p-5 mb-2 overflow-hidden shadow-sm border"
+      style={{
+        background: persona.ui_theme.cardBg,
+        borderColor: `${persona.ui_theme.accentColor}30`,
+        borderLeft: `4px solid ${persona.ui_theme.accentColor}`,
+        '--persona-accent': persona.ui_theme.accentColor,
+      } as React.CSSProperties}
+    >
+      <p style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.12em', fontWeight: 700 }}>
+        Your Scent Identity
+      </p>
+      <p style={{ fontSize: 22, fontFamily: 'var(--font-display)', color: 'var(--text)', marginTop: 4 }}>
+        {persona.name}
+      </p>
+      <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4, lineHeight: '18px' }}>
+        {persona.narrative.tagline}
+      </p>
+      <button 
+        onClick={() => router.push('/onboarding')}
+        style={{ 
+          background: 'none', 
+          border: 'none', 
+          padding: 0, 
+          fontSize: 11, 
+          color: 'var(--text-muted)', 
+          marginTop: 12, 
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 4
+        }}
+        className="hover:opacity-70 transition-opacity"
+      >
+        Retake profiler <span style={{ color: 'var(--persona-accent)' }}>→</span>
+      </button>
+    </div>
+  )
+}
+
 function StatTiles({ ownedCount, weekWear }: { ownedCount: number; weekWear: WeekWearEntry[] }) {
   const totalWears = weekWear.reduce((sum, e) => sum + e.count, 0)
   const topPick = weekWear[0]?.name ?? '—'
@@ -355,8 +441,45 @@ export default function YouClient(props: YouClientProps) {
   const [loadingWishlist, setLoadingWishlist] = useState(false)
   const [vibe, setVibe] = useState<string | null>(null)
 
+  const [mounted, setMounted] = useState(false)
+  const [persona, setPersona] = useState<Persona | null>(null)
+  const [engagement, setEngagement] = useState<EngagementState>({
+    isWornToday: false,
+    isAtRisk: false,
+    streak: 0
+  })
+
   useEffect(() => {
     setVibe(localStorage.getItem('scentral_vibe'))
+
+    // 1. Persona
+    const storedPersona = localStorage.getItem('scentral_persona')
+    if (storedPersona) {
+      try {
+        setPersona(JSON.parse(storedPersona))
+      } catch (e) {
+        console.error('Failed to parse persona', e)
+      }
+    }
+
+    // 2. Engagement & Streak
+    const now = new Date()
+    const lastWearRaw = localStorage.getItem('scentral_last_wear')
+    const lastWearDate = lastWearRaw ? new Date(lastWearRaw) : null
+    
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    const isWornToday = lastWearDate ? lastWearDate >= startOfToday : false
+    const currentHour = now.getHours()
+    
+    const storedStreak = parseInt(localStorage.getItem('scentral_streak') || '0', 10)
+    
+    setEngagement({
+      isWornToday,
+      isAtRisk: !isWornToday && currentHour >= 18,
+      streak: storedStreak
+    })
+
+    setMounted(true)
   }, [])
 
   const [weekWear, setWeekWear] = useState<WeekWearEntry[]>(props.state === 'signed-in' ? props.weekWear : [])
@@ -475,6 +598,19 @@ export default function YouClient(props: YouClientProps) {
     router.push('/onboarding')
   }
 
+  if (!mounted) {
+    return (
+      <div style={{ background: 'var(--bg)', minHeight: '100dvh' }}>
+        <div className="px-4 pt-8 pb-4" style={{ borderBottom: '1px solid var(--line)' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--text)', lineHeight: '34px' }}>You</h1>
+        </div>
+        <div className="px-4 py-6">
+          <LoadingShimmer variant="card" />
+        </div>
+      </div>
+    )
+  }
+
   if (props.state === 'signed-out') {
     return (
       <div style={{ background: 'var(--bg)', minHeight: '100dvh' }}>
@@ -551,6 +687,9 @@ export default function YouClient(props: YouClientProps) {
       </div>
 
       <div className="px-4 py-6 flex flex-col gap-6">
+        {persona && <PersonaCard persona={persona} />}
+        <EngagementPrompt engagement={engagement} />
+        
         <StatTiles ownedCount={ownedCount} weekWear={weekWear} />
 
         {/* My Vibe */}

@@ -8,7 +8,7 @@ export default function ProfilePage() {
   ]
 
   return (
-    <div className="min-h-screen bg-stone-50 text-stone-900 px-6 py-12">
+    <div className="min-h-[100dvh] bg-stone-50 text-stone-900 px-6 py-12">
       <div className="max-w-md mx-auto space-y-12">
         <header className="space-y-4 text-center">
           <div className="w-24 h-24 bg-stone-200 rounded-full mx-auto border-2 border-white shadow-sm flex items-center justify-center">

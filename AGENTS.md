@@ -47,7 +47,10 @@ fictional features, lore like "Agent Luna / Hegemony / Shadow Branching", and ha
 - **Collection / Living Wardrobe components** (all in `app/(main)/collection/`): `WardrobeShelf` (walnut-cabinet shelf container), `ShelfTier` (individual 3D shelf row), `BottleCard` (draggable bottle card — dnd-kit sortable), `WardrobeSidebar` (view-mode toggle: All / By House / By Season / Wishlist).
 - **Tables:** `fragrances`, `collections`, `wear_logs`, `layering_combinations`, `layer_recipes`, `spritz_schedules`, `profiles`, `waitlist`.
 - **Free/Pro split:** Free = Discover, My Bottles, Layering, You. Pro = gated behind `components/ui/ProGate.tsx` (`isPro = false`). Do NOT remove gates.
-- **localStorage keys:** `scentral_onboarded`, `scentral_vibe`, `scentral_discover_sort`, `scentral_wishlist`, `scentral-environment`, `scentral-use-cases`.
+- **localStorage keys:** `scentral_onboarded`, `scentral_persona`, `scentral_persona_name`, `scentral_wishlist`, `scentral_discover_sort`, `scentral-environment`, `scentral-use-cases`.
+  - Note: `scentral_vibe` (legacy) still bridged via `VIBE_TO_FEEL` map in DiscoverClient — do not remove the bridge.
+- **Persona engine:** `lib/personas.ts` — single source of truth. 3 personas: `velvet_intellectual`, `solar_minimalist`, `dark_alchemist`. Import `getPersonaById` or `PERSONAS` from here; never duplicate persona data inline.
+- **DB projection column — VALID VALUES ONLY:** `Beast Mode`, `Strong`, `Moderate`, `Medium`, `Weak`. Values `Light`, `Soft`, `Whisper`, `Heavy`, `Massive` do NOT exist in the DB. Any filter using these will return 0 results.
 - **Living Wardrobe (Collection page):**
   - Shelf layout — 4 tiers, ordered top-to-bottom by affinity score:
     - *Top Signatures* (affinity 16–20)
@@ -233,7 +236,7 @@ before lowercasing, to fold accented letters to their base ASCII form first.
 
 ## 10. LLM briefing block (copy-paste into Cursor / ChatGPT / other agents)
 
-Use this block when starting a new LLM session on Scentral. It is a summary of §1 — if you update §1 (stack, routes, schema), update this block too. Last verified: 2026-06-16.
+Use this block when starting a new LLM session on Scentral. It is a summary of §1 — if you update §1 (stack, routes, schema), update this block too. Last verified: 2026-06-18.
 
 ```
 # Scentral — Project Briefing
@@ -268,8 +271,17 @@ wear_logs — streak calculation is timezone-aware, do not break
 layering_combinations, layer_recipes, spritz_schedules, profiles, waitlist
 
 ## localStorage keys
-scentral_onboarded, scentral_vibe, scentral_discover_sort, scentral_wishlist,
-scentral-environment, scentral-use-cases
+scentral_onboarded, scentral_persona, scentral_persona_name, scentral_wishlist,
+scentral_discover_sort, scentral-environment, scentral-use-cases
+(scentral_vibe is legacy — bridged via VIBE_TO_FEEL in DiscoverClient, do not remove)
+
+## Persona engine
+lib/personas.ts — single source of truth. 3 personas: velvet_intellectual, solar_minimalist, dark_alchemist.
+Import getPersonaById or PERSONAS from here. Never inline persona data.
+
+## DB projection values (VERIFIED — only these exist)
+Beast Mode, Strong, Moderate, Medium, Weak
+DO NOT use: Light, Soft, Whisper, Heavy, Massive — they are not in the DB.
 
 ## Critical business logic
 - affinity_score 16-20 = Top Signatures, 8-15 = Occasion Modifiers, 1-7 = Base Anchors, null/0 = Holding Zone

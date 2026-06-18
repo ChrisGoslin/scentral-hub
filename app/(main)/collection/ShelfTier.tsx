@@ -72,7 +72,7 @@ export default function ShelfTier({ tierId, label, sublabel, items, locked, acti
           position: 'relative',
           background: `linear-gradient(180deg, ${glow} 0%, rgba(0,0,0,0.25) 100%)`,
           borderTop: `2px solid ${accent}`,
-          boxShadow: `0 4px 12px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08)`,
+          boxShadow: `0 4px 16px rgba(0,0,0,0.12), 0 1px 0 rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08)`,
           borderRadius: 2,
           padding: '10px 10px 14px',
           transition: 'background var(--motion-fast) var(--ease)',

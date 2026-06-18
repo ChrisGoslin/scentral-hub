@@ -33,7 +33,7 @@ export default function DisclaimerPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-stone-50 text-stone-900">
+    <div className="min-h-[100dvh] bg-stone-50 text-stone-900">
       <div className="max-w-3xl mx-auto px-6 py-16">
         <header className="mb-16 border-b border-stone-200 pb-8">
           <h1 className="editorial-title text-4xl mb-4">Disclaimer &amp; Terms</h1>

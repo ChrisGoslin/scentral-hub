@@ -1,15 +1,6 @@
 @import "tailwindcss";
 
 :root {
-  /* Luxury Tokens (Stone & Gold) */
-  --stone-50: #f9f8f6;
-  --stone-100: #f1efeb;
-  --stone-200: #e5e1da;
-  --stone-300: #d1cbc1;
-  --stone-500: #78716c;
-  --stone-900: #1c1917;
-  --gold-accent: #c49a3c;
-  
   /* Brand Design Tokens */
   --color-primary: #A0622A;
   --color-bg: #F7F3EE;
@@ -25,23 +16,23 @@
   --color-error: #A03050;
   
   /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(30, 23, 20, 0.08);
-  --shadow-md: 0 4px 16px rgba(30, 23, 20, 0.10);
-  --shadow-lg: 0 12px 40px rgba(30, 23, 20, 0.14);
-  --shadow-card: 0 2px 8px rgba(30, 23, 20, 0.08), 0 8px 24px rgba(30, 23, 20, 0.06);
+  --shadow-sm: 0 1px 3px oklch(0.2 0.02 60 / 0.08);
+  --shadow-md: 0 4px 16px oklch(0.2 0.02 60 / 0.10);
+  --shadow-lg: 0 12px 40px oklch(0.2 0.02 60 / 0.14);
+  --shadow-card: 0 2px 8px oklch(0.2 0.02 60 / 0.08), 0 8px 24px oklch(0.2 0.02 60 / 0.06);
   
   /* Typography */
   --font-display: 'Instrument Serif', Georgia, serif;
   --font-body: 'Satoshi', 'Inter', sans-serif;
 
   /* Legacy Bridge — maps old tokens to new system */
+  --accent: var(--color-primary);
   --bg: var(--color-bg);
   --surface: var(--color-surface);
   --surface-2: var(--color-surface-2);
-  --line: var(--color-border);
   --text: var(--color-text);
   --text-muted: var(--color-text-muted);
-  --accent: var(--color-primary);
+  --line: var(--color-border);
   --r-card: 16px;
   --r-btn: 12px;
 

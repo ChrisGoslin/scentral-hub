@@ -111,7 +111,7 @@ function GroupShelf({ label, items }: { label: string; items: CollectionFragranc
       <div style={{
         background: 'rgba(0,0,0,0.25)',
         borderTop: '2px solid rgba(196,154,60,0.3)',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.6)',
+        boxShadow: '0 4px 16px rgba(0,0,0,0.12), 0 1px 0 rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.6)',
         borderRadius: 2,
         padding: '10px 10px 14px',
         display: 'flex',
@@ -214,7 +214,7 @@ function WishlistView({ items }: { items: CollectionFragrance[] }) {
         backdropFilter: 'blur(8px)',
         WebkitBackdropFilter: 'blur(8px)',
         borderTop: '2px solid rgba(255,255,255,0.15)',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
+        boxShadow: '0 4px 16px rgba(0,0,0,0.12), 0 1px 0 rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.4)',
         borderRadius: 2,
         padding: '10px 10px 14px',
         display: 'flex',
@@ -390,11 +390,11 @@ export default function WardrobeShelf({ fragrances }: WardrobeShelfProps) {
             ),
             repeating-linear-gradient(
               178deg,
-              rgb(88,48,18) 0px,
-              rgb(58,26,10) 8px,
-              rgb(110,62,24) 18px,
-              rgb(58,26,10) 28px,
-              rgb(80,42,14) 40px
+              var(--cabinet-grain-a, rgb(88,48,18)) 0px,
+              var(--cabinet-grain-b, rgb(58,26,10)) 8px,
+              var(--cabinet-grain-c, rgb(110,62,24)) 18px,
+              var(--cabinet-grain-b, rgb(58,26,10)) 28px,
+              var(--cabinet-grain-d, rgb(80,42,14)) 40px
             )
           `,
           backgroundBlendMode: 'multiply',

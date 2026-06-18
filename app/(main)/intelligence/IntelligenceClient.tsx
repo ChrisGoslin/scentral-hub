@@ -550,7 +550,7 @@ export default function IntelligenceClient({ fragrances }: IntelligenceClientPro
   const [activeFamily, setActiveFamily] = useState<string | null>(null)
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] pb-24">
+    <div className="min-h-[100dvh] bg-[var(--bg)] text-[var(--text)] pb-24">
       <header className="px-6 pt-12 pb-8 border-b border-[var(--line)]">
         <h1 className="text-4xl font-serif italic tracking-tight">Intelligence</h1>
         <p className="text-sm text-[var(--text-muted)] font-light mt-2">Surface deep patterns across your collection.</p>

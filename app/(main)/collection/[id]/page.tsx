@@ -327,9 +327,14 @@ export default async function FragranceDetailPage({
             </p>
             {inspiredByRef ? (
               <Link href={`/collection/${inspiredByRef.id}`} style={{ textDecoration: 'none' }}>
-                <p style={{ fontSize: 20, fontFamily: 'var(--font-display)', color: 'var(--text)', marginTop: 6, lineHeight: '24px' }}>
-                  {inspiredByRef.brand} {inspiredByRef.name} →
-                </p>
+                <div style={{ marginTop: 6, lineHeight: '24px' }}>
+                  <span style={{ fontSize: 13, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block' }}>
+                    {inspiredByRef.brand}
+                  </span>
+                  <span style={{ fontSize: 20, fontFamily: 'var(--font-display)', color: 'var(--text)' }}>
+                    {inspiredByRef.name} →
+                  </span>
+                </div>
               </Link>
             ) : (
               <p style={{ fontSize: 20, fontFamily: 'var(--font-display)', color: 'var(--text)', marginTop: 6, lineHeight: '24px' }}>

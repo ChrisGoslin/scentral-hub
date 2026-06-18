@@ -123,7 +123,7 @@ export default function ScheduleClient({ fragrances, savedSchedules: initialSave
   }
 
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100vh', paddingBottom: 100 }}>
+    <div style={{ background: 'var(--bg)', minHeight: '100dvh', paddingBottom: 100 }}>
       {/* Header */}
       <div className="px-4 pt-8 pb-4 border-b border-[var(--line)] flex justify-between items-end">
         <div>
