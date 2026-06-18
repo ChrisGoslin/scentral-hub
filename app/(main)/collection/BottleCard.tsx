@@ -14,6 +14,17 @@ interface BottleCardProps {
   isMobile?: boolean
 }
 
+const ORIGIN_BADGE: Record<
+  NonNullable<CollectionFragrance['origin_code']>,
+  { label: string; bg: string; color: string }
+> = {
+  B: { label: 'B', bg: 'rgba(196,154,60,0.25)',  color: 'rgba(220,180,80,0.95)'  }, // Bought — amber/gold
+  D: { label: 'D', bg: 'rgba(40,160,140,0.22)',  color: 'rgba(80,200,180,0.95)'  }, // Decant — teal/muted
+  T: { label: 'T', bg: 'rgba(140,140,140,0.20)', color: 'rgba(190,190,190,0.90)' }, // Tester — grey
+  O: { label: 'O', bg: 'rgba(100,80,200,0.20)',  color: 'rgba(160,140,240,0.90)' }, // Ordered — blue/purple muted
+  W: { label: 'W', bg: 'rgba(220,100,140,0.20)', color: 'rgba(240,160,180,0.90)' }, // Wishlist — soft rose
+}
+
 function BottleImage({ imageUrl, brand, name }: { imageUrl: string | null; brand: string; name: string }) {
   const [failed, setFailed] = useState(false)
 
@@ -110,6 +121,29 @@ export default function BottleCard({ fragrance: f, locked = false, isActive = fa
         }}
       >
         <BottleImage imageUrl={f.image_url} brand={f.brand} name={f.name} />
+
+        {f.origin_code && ORIGIN_BADGE[f.origin_code] && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 4,
+              left: 4,
+              background: ORIGIN_BADGE[f.origin_code].bg,
+              color: ORIGIN_BADGE[f.origin_code].color,
+              fontSize: 10,
+              fontWeight: 800,
+              textTransform: 'uppercase',
+              letterSpacing: '0.04em',
+              padding: '2px 5px',
+              borderRadius: 999,
+              border: '1px solid rgba(255,255,255,0.15)',
+              lineHeight: 1.4,
+              pointerEvents: 'none',
+            }}
+          >
+            {ORIGIN_BADGE[f.origin_code].label}
+          </div>
+        )}
 
         {locked && (
           <div

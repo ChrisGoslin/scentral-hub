@@ -20,11 +20,11 @@ export default async function CollectionPage() {
 const [{ data, error }, { data: collectionRows }] = await Promise.all([
   supabase
     .from('fragrances')
-    .select('id, brand, name, phase, phase_label, family, projection, anosmia_risk, lean, rating, image_url, optimal_season, maturation')
+    .select('id, brand, name, phase, phase_label, family, projection, anosmia_risk, lean, rating, image_url, optimal_season, maturation, use_case')
     .order('brand', { ascending: true }),
   supabase
     .from('collections')
-    .select('fragrance_id, created_at, maceration_started_at, maceration_ready_at, affinity_score, status'),
+    .select('fragrance_id, created_at, maceration_started_at, maceration_ready_at, affinity_score, status, origin_code'),
 ])
 if (error) {
   return (
@@ -43,12 +43,14 @@ const collectionMap = new Map(
 
   const fragrances: CollectionFragrance[] = (data ?? []).map(f => ({
     ...f,
+    use_case: f.use_case ?? null,
     maturation: f.maturation ?? null,
     maceration_started_at: collectionMap.get(f.id)?.maceration_started_at ?? null,
     maceration_ready_at: collectionMap.get(f.id)?.maceration_ready_at ?? null,
     collection_added_at: collectionMap.get(f.id)?.created_at ?? null,
     affinity_score: collectionMap.get(f.id)?.affinity_score ?? null,
     status: collectionMap.get(f.id)?.status ?? null,
+    origin_code: (collectionMap.get(f.id)?.origin_code ?? null) as 'B' | 'D' | 'T' | 'O' | 'W' | null,
   }))
 
   return <WardrobeShelf fragrances={fragrances} />
