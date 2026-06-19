@@ -3,15 +3,14 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Archive, FlaskConical, Compass, User, Users } from 'lucide-react'
+import { Archive, FlaskConical, Dna, Calendar, User } from 'lucide-react'
 
-// Free tier — always visible in the main nav
 const NAV_ITEMS = [
-  { label: 'Discover',   href: '/discover',   Icon: Compass },
-  { label: 'My Bottles', href: '/collection', Icon: Archive },
-  { label: 'Layering',   href: '/layering',   Icon: FlaskConical },
-  { label: 'Social',     href: '/social',      Icon: Users },
-  { label: 'You',        href: '/you',         Icon: User },
+  { label: 'Wardrobe',  href: '/collection', Icon: Archive },
+  { label: 'Lab',       href: '/layering',   Icon: FlaskConical },
+  { label: 'Resonance', href: '/dna-match',  Icon: Dna },
+  { label: 'Ritual',    href: '/schedule',   Icon: Calendar },
+  { label: 'You',       href: '/you',        Icon: User },
 ]
 
 export default function BottomNav() {
