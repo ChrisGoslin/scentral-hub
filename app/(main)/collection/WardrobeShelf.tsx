@@ -405,9 +405,12 @@ export default function WardrobeShelf({ fragrances }: WardrobeShelfProps) {
       }
     }
 
-    // Vision pipeline snapshot
+    // Vision pipeline snapshot — fires in all environments; future CV pipeline listens via window event
+    const snap: CabinetSnapshot = buildSnapshot(newTiers, new Date().toISOString())
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('cabinetSnapshot', { detail: snap }))
+    }
     if (process.env.NODE_ENV === 'development') {
-      const snap: CabinetSnapshot = buildSnapshot(newTiers, new Date().toISOString())
       console.log('[Wardrobe Vision Pipeline]', JSON.stringify(snap, null, 2))
     }
   }, [supabase])

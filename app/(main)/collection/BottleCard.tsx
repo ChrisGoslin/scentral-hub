@@ -4,9 +4,11 @@ import React, { useState } from 'react'
 import Image from 'next/image'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { ShoppingBag } from 'lucide-react'
 import { getBrandEmoji } from '@/lib/brandEmoji'
 import { type CollectionFragrance } from './CollectionClient'
 import WearLogModal from './WearLogModal'
+import BuyLinks from '@/app/components/BuyLinks'
 
 interface BottleCardProps {
   fragrance: CollectionFragrance
@@ -19,11 +21,11 @@ const ORIGIN_BADGE: Record<
   NonNullable<CollectionFragrance['origin_code']>,
   { label: string; bg: string; color: string }
 > = {
-  B: { label: 'B', bg: 'rgba(196,154,60,0.25)',  color: 'rgba(220,180,80,0.95)'  }, // Bought — amber/gold
-  D: { label: 'D', bg: 'rgba(40,160,140,0.22)',  color: 'rgba(80,200,180,0.95)'  }, // Decant — teal/muted
-  T: { label: 'T', bg: 'rgba(140,140,140,0.20)', color: 'rgba(190,190,190,0.90)' }, // Tester — grey
-  O: { label: 'O', bg: 'rgba(100,80,200,0.20)',  color: 'rgba(160,140,240,0.90)' }, // Ordered — blue/purple muted
-  W: { label: 'W', bg: 'rgba(220,100,140,0.20)', color: 'rgba(240,160,180,0.90)' }, // Wishlist — soft rose
+  B: { label: 'B', bg: 'rgba(196,154,60,0.25)',  color: 'rgba(220,180,80,0.95)'  },
+  D: { label: 'D', bg: 'rgba(40,160,140,0.22)',  color: 'rgba(80,200,180,0.95)'  },
+  T: { label: 'T', bg: 'rgba(140,140,140,0.20)', color: 'rgba(190,190,190,0.90)' },
+  O: { label: 'O', bg: 'rgba(100,80,200,0.20)',  color: 'rgba(160,140,240,0.90)' },
+  W: { label: 'W', bg: 'rgba(220,100,140,0.20)', color: 'rgba(240,160,180,0.90)' },
 }
 
 function BottleImage({ imageUrl, brand, name }: { imageUrl: string | null; brand: string; name: string }) {
@@ -94,6 +96,7 @@ function BottleImage({ imageUrl, brand, name }: { imageUrl: string | null; brand
 export default function BottleCard({ fragrance: f, locked = false, isActive = false, isMobile = false }: BottleCardProps) {
   const [hovered, setHovered] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isBuyOpen, setIsBuyOpen] = useState(false)
   const {
     attributes,
     listeners,
@@ -215,47 +218,85 @@ export default function BottleCard({ fragrance: f, locked = false, isActive = fa
           )}
 
           {!locked && !isDragging && (hovered || isMobile) && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                setIsModalOpen(true);
-              }}
-              onPointerDown={(e) => {
-                // Prevent drag initialization when clicking the button
-                e.stopPropagation();
-              }}
+            <div
               style={{
                 position: 'absolute',
                 bottom: -16,
                 left: '50%',
                 transform: 'translateX(-50%)',
-                background: 'var(--surface, rgba(250, 247, 242, 1))',
-                color: 'var(--text-muted)',
-                border: '1px solid var(--line)',
-                borderRadius: 999,
-                padding: '4px 10px',
-                fontSize: 10,
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                letterSpacing: '0.04em',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
+                display: 'flex',
+                gap: 4,
                 zIndex: 10,
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                whiteSpace: 'nowrap',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = 'var(--accent, var(--color-primary, rgba(160, 98, 42, 1)))';
-                e.currentTarget.style.borderColor = 'var(--accent, var(--color-primary, rgba(160, 98, 42, 1)))';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = 'var(--text-muted)';
-                e.currentTarget.style.borderColor = 'var(--line)';
               }}
             >
-              Log Wear
-            </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  e.preventDefault()
+                  setIsModalOpen(true)
+                }}
+                onPointerDown={(e) => { e.stopPropagation() }}
+                style={{
+                  background: 'var(--surface, rgba(250, 247, 242, 1))',
+                  color: 'var(--text-muted)',
+                  border: '1px solid var(--line)',
+                  borderRadius: 999,
+                  padding: '4px 10px',
+                  fontSize: 10,
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                  whiteSpace: 'nowrap',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = 'var(--accent, var(--color-primary, rgba(160, 98, 42, 1)))'
+                  e.currentTarget.style.borderColor = 'var(--accent, var(--color-primary, rgba(160, 98, 42, 1)))'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = 'var(--text-muted)'
+                  e.currentTarget.style.borderColor = 'var(--line)'
+                }}
+              >
+                Log Wear
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  e.preventDefault()
+                  setIsBuyOpen(v => !v)
+                }}
+                onPointerDown={(e) => { e.stopPropagation() }}
+                title="Find this fragrance"
+                style={{
+                  background: 'var(--surface, rgba(250, 247, 242, 1))',
+                  color: 'var(--text-muted)',
+                  border: '1px solid var(--line)',
+                  borderRadius: 999,
+                  width: 26,
+                  height: 26,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                  flexShrink: 0,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = 'var(--accent, var(--color-primary, rgba(160, 98, 42, 1)))'
+                  e.currentTarget.style.borderColor = 'var(--accent, var(--color-primary, rgba(160, 98, 42, 1)))'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = 'var(--text-muted)'
+                  e.currentTarget.style.borderColor = 'var(--line)'
+                }}
+              >
+                <ShoppingBag size={12} />
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -265,6 +306,58 @@ export default function BottleCard({ fragrance: f, locked = false, isActive = fa
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       />
+      {isBuyOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 50,
+            display: 'flex',
+            alignItems: 'flex-end',
+            justifyContent: 'center',
+          }}
+          onClick={() => setIsBuyOpen(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: 'var(--surface)',
+              border: '1px solid var(--line)',
+              borderRadius: '16px 16px 0 0',
+              padding: '20px 20px calc(env(safe-area-inset-bottom, 0px) + 24px)',
+              width: '100%',
+              maxWidth: 480,
+              boxShadow: '0 -8px 40px rgba(0,0,0,0.15)',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+              <div>
+                <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--text-muted)', marginBottom: 4 }}>
+                  Find this fragrance
+                </p>
+                <p style={{ fontSize: 15, fontFamily: 'var(--font-display)', color: 'var(--text)' }}>
+                  {f.brand} {f.name}
+                </p>
+              </div>
+              <button
+                onClick={() => setIsBuyOpen(false)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--text-muted)',
+                  fontSize: 20,
+                  cursor: 'pointer',
+                  padding: 4,
+                  lineHeight: 1,
+                }}
+              >
+                ×
+              </button>
+            </div>
+            <BuyLinks fragranceName={f.name} brand={f.brand} />
+          </div>
+        </div>
+      )}
     </>
   )
 }

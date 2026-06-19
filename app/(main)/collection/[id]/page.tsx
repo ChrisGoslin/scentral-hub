@@ -13,6 +13,7 @@ import { getBrandEmoji } from '@/lib/brandEmoji'
 import { cookies } from 'next/headers'
 import { Users } from 'lucide-react'
 import { getSimilarityExplanation } from '@/lib/similarity'
+import BuyLinks from '@/app/components/BuyLinks'
 
 const PHASE_LABEL: Record<number, string> = {
   1: 'Anchor',
@@ -389,6 +390,14 @@ export default async function FragranceDetailPage({
             ⚠ High ARR
           </span>
         )}
+
+        {/* Find this fragrance — affiliate retailer links */}
+        <div>
+          <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--text-muted)', marginBottom: 10 }}>
+            Find this fragrance
+          </p>
+          <BuyLinks fragranceName={f.name} brand={f.brand} />
+        </div>
 
         {/* CTA */}
         <Link href="/layering">
