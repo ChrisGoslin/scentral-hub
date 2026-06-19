@@ -14,6 +14,7 @@ import ErrorInline from '@/components/ui/ErrorInline'
 import LoadingShimmer from '@/components/ui/LoadingShimmer'
 import { getBrandEmoji } from '@/lib/brandEmoji'
 import { useFragranceSearch } from '@/app/hooks/useFragranceSearch'
+import { track } from '@/lib/posthog'
 import WardrobeShelf from './WardrobeShelf'
 
 export type CollectionFragrance = {
@@ -219,6 +220,7 @@ export default function CollectionClient({ fragrances, totalCount }: { fragrance
       setLocalPickerError(error.message)
       setIsAdding(false)
     } else {
+      track('bottle_added', { fragrance_id: selectedToConfirm.id, fragrance_name: `${selectedToConfirm.brand} ${selectedToConfirm.name}` })
       setAddSuccess(true)
       setIsAdding(false)
       setTimeout(() => {
