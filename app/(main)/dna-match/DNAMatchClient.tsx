@@ -4,6 +4,7 @@ import { useState, useMemo, useRef, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import AudioChord from '@/app/components/AudioChord';
 import dynamic from 'next/dynamic';
+import { track } from '@/lib/posthog';
 
 const ChemistPanel = dynamic(() => import('@/components/ChemistPanel'), { ssr: false });
 
@@ -78,6 +79,7 @@ export default function CompareScentsClient({ fragrances }: { fragrances: Fragra
       const data = await res.json();
       if (data.success) {
         setResult(data);
+        track('dna_match_completed', { score: data.score, category: data.category });
       } else {
         console.error('Harmony check failed:', data.error);
       }

@@ -9,6 +9,13 @@ if (typeof window !== 'undefined') {
       capture_pageview: false,
       persistence: 'localStorage',
       autocapture: false,
+      session_recording: {
+        maskAllInputs: false,
+        maskInputFn: (text, element) => {
+          if (element?.attributes?.getNamedItem('data-ph-no-mask')) return text;
+          return text;
+        },
+      },
     })
   }
 }
