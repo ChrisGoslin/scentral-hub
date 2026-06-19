@@ -70,13 +70,14 @@ export default function ShelfTier({ tierId, label, sublabel, items, locked, acti
       <div
         style={{
           position: 'relative',
-          background: `linear-gradient(180deg, ${glow} 0%, rgba(0,0,0,0.25) 100%)`,
-          borderTop: `2px solid ${accent}`,
-          boxShadow: `0 4px 16px rgba(0,0,0,0.12), 0 1px 0 rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08)`,
+          background: 'linear-gradient(180deg, rgba(139,90,43,0.15) 0%, rgba(101,64,28,0.25) 40%, rgba(80,50,20,0.35) 100%)',
+          borderBottom: '3px solid rgba(60,35,10,0.4)',
+          boxShadow: '0 4px 12px rgba(40,20,5,0.2), inset 0 1px 0 rgba(255,200,120,0.15)',
           borderRadius: 2,
-          padding: '10px 10px 14px',
+          minHeight: 140,
+          padding: '16px 12px 8px',
           transition: 'background var(--motion-fast) var(--ease)',
-          outline: isOver && !locked ? `1px solid rgba(196,154,60,0.4)` : 'none',
+          outline: isOver && !locked ? '1px solid rgba(196,154,60,0.4)' : 'none',
         }}
       >
         {/* Warm down-lighting strip */}
@@ -114,7 +115,7 @@ export default function ShelfTier({ tierId, label, sublabel, items, locked, acti
               gap: 8,
               flexWrap: isMobile ? 'wrap' : 'nowrap',
               overflowX: isMobile ? 'visible' : 'auto',
-              minHeight: 96,
+              minHeight: 110,
               alignItems: 'flex-end',
               paddingBottom: isMobile ? 0 : 4,
               scrollbarWidth: 'none', // hide scrollbar for clean look
@@ -150,6 +151,7 @@ export default function ShelfTier({ tierId, label, sublabel, items, locked, acti
           </div>
         </SortableContext>
       </div>
+      <div style={{ height:8, background:'linear-gradient(180deg,rgba(30,15,5,0.2),transparent)', marginBottom:24 }} />
     </div>
   )
 }

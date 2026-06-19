@@ -1,31 +1,45 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Collection (My Bottles)', () => {
+test.describe('Collection (Living Wardrobe)', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
-    await page.evaluate(() => {
+    // Set onboarding complete to avoid redirects
+    await page.addInitScript(() => {
       localStorage.setItem('scentral_onboarded', 'true');
     });
   });
 
-  test('shows empty state when no bottles owned', async ({ page }) => {
-    // Assuming a fresh session has 0 bottles (since we aren't signed in)
+  test('can load living wardrobe and toggle view modes', async ({ page }) => {
     await page.goto('/collection');
-    // Align with the headline in CollectionClient.tsx
-    await expect(page.getByText('Your collection starts here.', { exact: true })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Explore 280+ Scents' })).toBeVisible();
+
+    // Confirm that we are on the collection page
+    await expect(page).toHaveURL(/\/collection/);
+
+    // Sidebar view modes should be visible (we select by text or first matching button)
+    await expect(page.getByRole('button', { name: 'All' }).first()).toBeVisible();
+    await expect(page.getByRole('button', { name: 'By House' }).first()).toBeVisible();
+    await expect(page.getByRole('button', { name: 'By Season' }).first()).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Wishlist' }).first()).toBeVisible();
+
+    // Toggle to By House
+    await page.getByRole('button', { name: 'By House' }).first().click();
+    
+    // Toggle to By Season
+    await page.getByRole('button', { name: 'By Season' }).first().click();
+
+    // Toggle to Wishlist
+    await page.getByRole('button', { name: 'Wishlist' }).first().click();
   });
 
-  test('can open add bottle sheet', async ({ page }) => {
+  test('can activate sensory lenses', async ({ page }) => {
     await page.goto('/collection');
-    // Use exact match for the + button to avoid matching '280+ Scents'
-    await page.getByRole('button', { name: '+', exact: true }).click();
+
+    // Sensory lenses like "Comfort" or "Executive" should be toggleable in the sidebar/strip
+    const comfortLensBtn = page.getByRole('button', { name: /Comfort/i }).first();
+    await expect(comfortLensBtn).toBeVisible();
+    await comfortLensBtn.click();
     
-    await expect(page.getByText('Add a bottle', { exact: true })).toBeVisible();
-    const searchInput = page.getByPlaceholder('Search by name or brand...');
-    await searchInput.fill('Lattafa');
-    
-    // Wait for results to appear in the scrollable list
-    await expect(page.locator('button').filter({ hasText: 'Lattafa' }).first()).toBeVisible({ timeout: 15000 });
+    const execLensBtn = page.getByRole('button', { name: /Executive/i }).first();
+    await expect(execLensBtn).toBeVisible();
+    await execLensBtn.click();
   });
 });

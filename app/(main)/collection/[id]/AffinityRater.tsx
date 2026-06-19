@@ -25,10 +25,13 @@ type Props = {
 export default function AffinityRater({ collectionId, initialAffinityScore }: Props) {
   const router = useRouter()
   const [activeScore, setActiveScore] = useState(() => getActiveScore(initialAffinityScore))
+  const [pulseScore, setPulseScore] = useState<number | null>(null)
 
   async function handleSelect(score: number) {
     const prev = activeScore
     setActiveScore(score)
+    setPulseScore(score)
+    setTimeout(() => setPulseScore(null), 400)
     try {
       const res = await fetch('/api/affinity', {
         method: 'POST',
@@ -55,6 +58,7 @@ export default function AffinityRater({ collectionId, initialAffinityScore }: Pr
             <button
               key={chip.label}
               onClick={() => handleSelect(chip.score)}
+              className={pulseScore === chip.score ? 'chip-pulse' : undefined}
               style={{
                 padding: '6px 14px',
                 borderRadius: 999,

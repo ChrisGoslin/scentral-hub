@@ -11,6 +11,8 @@ import LogWearButton from './LogWearButton'
 import AffinityRater from './AffinityRater'
 import { getBrandEmoji } from '@/lib/brandEmoji'
 import { cookies } from 'next/headers'
+import { Users } from 'lucide-react'
+import { getSimilarityExplanation } from '@/lib/similarity'
 
 const PHASE_LABEL: Record<number, string> = {
   1: 'Anchor',
@@ -49,7 +51,7 @@ export default async function FragranceDetailPage({
   const cookieStore = await cookies()
   const supabase = await createClient(cookieStore)
 
-  const [{ data, error }, { data: collectionRow }] = await Promise.all([
+  const [{ data, error }, { data: collectionRow }, { data: proofData }] = await Promise.all([
     supabase
       .from('fragrances')
       .select('id, brand, name, phase, phase_label, family, projection, anosmia_risk, lean, rating, image_url, use_case, spritz_count, application_zone, maturation, inspired_by, is_user_created, optimal_season, clone_target, plain_description')
@@ -60,7 +62,13 @@ export default async function FragranceDetailPage({
       .select('id, affinity_score, maceration_started_at, maceration_ready_at')
       .eq('fragrance_id', id)
       .maybeSingle(),
+    supabase
+      .rpc('get_fragrance_social_proof', { fragrance_ids: [id] })
+      .maybeSingle()
   ])
+
+  const proof = proofData as any
+  const ownerCount = proof?.owner_count ? Number(proof.owner_count) : 0
 
   if (error || !data) {
     notFound()
@@ -149,6 +157,10 @@ export default async function FragranceDetailPage({
     maturationChip = 'recommended'
   }
 
+  const explanation = (f.clone_target || f.inspired_by)
+    ? getSimilarityExplanation(85, f.clone_target || f.inspired_by || '', f.name)
+    : null
+
   return (
     <div style={{ minHeight: '100dvh', background: 'var(--bg)', color: 'var(--text)' }}>
       {/* Back nav */}
@@ -205,6 +217,12 @@ export default async function FragranceDetailPage({
           <p style={{ fontSize: 14, color: 'var(--text-muted)', marginTop: 4 }}>
             {phaseLabel} · {f.family}
           </p>
+          {ownerCount > 0 && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '13px', color: 'var(--text-muted)', marginTop: 6 }}>
+              <Users size={14} style={{ color: 'var(--accent)' }} />
+              <span>{ownerCount} {ownerCount === 1 ? 'person in the Scentral community owns this' : 'people in the Scentral community own this'}</span>
+            </div>
+          )}
           {f.plain_description && (
             <p style={{ fontSize: 15, fontStyle: 'italic', color: 'var(--text)', marginTop: 12, lineHeight: '22px' }}>
               "{f.plain_description}"
@@ -341,9 +359,19 @@ export default async function FragranceDetailPage({
                 {f.clone_target || f.inspired_by}
               </p>
             )}
-            <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6 }}>
-              A fraction of the price — same vibe.
-            </p>
+            {explanation && (
+              <>
+                <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 8, lineHeight: 1.5 }}>
+                  <strong style={{ color: 'var(--text)', fontFamily: 'var(--font-display)' }}>
+                    {explanation.title}
+                  </strong>
+                  {' — '}{explanation.summary}
+                </p>
+                <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6 }}>
+                  💡 {explanation.guidance.when_to_choose}
+                </p>
+              </>
+            )}
           </div>
         )}
 

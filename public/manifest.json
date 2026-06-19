@@ -4,6 +4,7 @@
   "description": "Discover and track your fragrance collection",
   "start_url": "/discover",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#F7F3EE",
   "theme_color": "#A0622A",
   "icons": [

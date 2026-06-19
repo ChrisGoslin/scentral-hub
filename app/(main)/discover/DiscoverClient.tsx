@@ -11,6 +11,7 @@ import { getBrandEmoji } from '@/lib/brandEmoji'
 import { createClient } from '@/utils/supabase/client'
 import { getPersonaById } from '@/lib/personas'
 import Fuse from 'fuse.js'
+import { track } from '@/lib/posthog'
 
 export type DiscoverFragrance = {
   id: string
@@ -25,6 +26,7 @@ export type DiscoverFragrance = {
   image_url: string | null
   rating: number | null
   created_at: string
+  owner_count: number
 }
 
 // ── Sort types ───────────────────────────────────────────────────────────────
@@ -166,23 +168,37 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
 
   // ── Persona mount effect: localStorage + URL param ────────────────────────
   useEffect(() => {
+    // 1. Sort preference
+    const storedSort = localStorage.getItem('scentral_discover_sort') as SortOption | null
+    if (storedSort && SORT_OPTIONS.includes(storedSort)) {
+      setSort(storedSort)
+    }
+
+    // 2. Persona processing
     // URL param takes precedence over localStorage
     const params = new URLSearchParams(window.location.search)
     const urlPersona = params.get('persona')
     const personaId = urlPersona ?? localStorage.getItem('scentral_persona')
+    let defaultPersonaFeel = null
+
     if (personaId) {
       const persona = getPersonaById(personaId)
       if (persona) {
         setActivePersonaId(personaId)
         setActivePersona(persona)
         // Pre-apply persona's preferred families as the initial feel chip
-        const initialFeel = familyToFeel(persona.discover_filters.families)
-        if (initialFeel) {
-          setFeel(initialFeel)
-          setActiveGlow(FEEL_AMBIENT[initialFeel]?.bgGlow ?? 'transparent')
-        }
+        defaultPersonaFeel = familyToFeel(persona.discover_filters.families)
         setTimeout(() => setPersonaVisible(true), 80) // trigger fade-in after paint
       }
+    }
+
+    // 3. Feel preference (overrides persona default if it exists)
+    const storedFeel = localStorage.getItem('scentral_discover_feel')
+    const initialFeel = storedFeel !== null ? (storedFeel || null) : defaultPersonaFeel
+
+    if (initialFeel) {
+      setFeel(initialFeel)
+      setActiveGlow(FEEL_AMBIENT[initialFeel]?.bgGlow ?? 'transparent')
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -273,8 +289,13 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
 
   const toggleWishlist = (id: string) => {
     setWishlist(prev => {
-      const next = prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+      const isRemoving = prev.includes(id)
+      const next = isRemoving ? prev.filter(x => x !== id) : [...prev, id]
       localStorage.setItem('scentral_wishlist', JSON.stringify(next))
+      track('wishlist_toggled', {
+        fragrance_id: id,
+        action: isRemoving ? 'remove' : 'add',
+      })
       return next
     })
   }
@@ -360,11 +381,19 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
     const next = feel === f ? null : f
     setFeel(next)
     setActiveGlow(next ? (FEEL_AMBIENT[next]?.bgGlow ?? 'transparent') : 'transparent')
+    localStorage.setItem('scentral_discover_feel', next || '')
+    if (next) {
+      track('feel_filter_applied', {
+        feel: next,
+      })
+    }
   }
   const toggleLongevity = (l: string) => setLongevity(longevity === l ? null : l)
   const toggleBrand = (b: string) => setBrand(brand === b ? null : b)
   const clearFilters = () => {
     setFeel(null)
+    setActiveGlow('transparent')
+    localStorage.setItem('scentral_discover_feel', '')
     setLongevity(null)
     setBrand(null)
     setShowSaved(false)
@@ -383,6 +412,14 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
       .range(offset, offset + 99)
 
     if (!err && data) {
+      const ids = data.map(f => f.id)
+      const { data: ownerCounts } = ids.length
+        ? await supabase.rpc('fragrance_owner_counts', { fragrance_ids: ids })
+        : { data: null }
+      const ownerCountById = new Map<string, number>(
+        (ownerCounts ?? []).map((row: { fragrance_id: string; owner_count: number }) => [row.fragrance_id, row.owner_count])
+      )
+
       const mapped: DiscoverFragrance[] = data.map(f => ({
         id: f.id,
         brand: f.brand,
@@ -396,6 +433,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
         image_url: f.image_url ?? null,
         rating: f.rating ? Number(f.rating) : null,
         created_at: f.created_at,
+        owner_count: ownerCountById.get(f.id) ?? 0,
       }))
       setLocalFragrances(prev => [...prev, ...mapped])
       setHasMore(mapped.length === 100)
@@ -535,7 +573,10 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
           </p>
           <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingLeft: 16, paddingRight: 16, scrollbarWidth: 'none' }}>
             {SORT_OPTIONS.map(v => (
-              <Chip key={v} selected={sort === v} onClick={() => setSort(v)} style={{ flexShrink: 0 }}>
+              <Chip key={v} selected={sort === v} onClick={() => {
+                setSort(v)
+                localStorage.setItem('scentral_discover_sort', v)
+              }} style={{ flexShrink: 0 }}>
                 {v}
               </Chip>
             ))}
@@ -652,6 +693,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
               setShowPersonaBanner(false)
               setFeel(null)
               setActiveGlow('transparent')
+              localStorage.setItem('scentral_discover_feel', '')
             }}
             aria-label="Show all fragrances"
             style={{
@@ -752,6 +794,13 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: 14, color: 'var(--text)', lineHeight: '18px' }}>
                   {f.name}
                 </p>
+
+                {/* Owner count */}
+                {f.owner_count > 0 && (
+                  <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: -4 }}>
+                    {f.owner_count} {f.owner_count === 1 ? 'person owns' : 'own'} this
+                  </p>
+                )}
 
                 {/* Rating */}
                 {f.rating !== null && (

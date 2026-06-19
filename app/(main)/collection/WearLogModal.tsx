@@ -331,21 +331,31 @@ export default function WearLogModal({
     const ratingInt = Math.min(5, Math.round(baseRating + avgVector * 2))
 
     try {
-      const { error: dbError } = await supabase.from('wear_logs').insert({
-        user_id: effectiveUserId,
-        fragrance_id: fragranceId,
-        worn_on: new Date().toISOString().slice(0, 10),
-        occasion: occasion || null,
-        weather: weather || null,
-        rating: ratingInt,
-        metadata: {
-          temporal_curve: temporalCurve,
-          overall_rating: overallRating,
-          context_tags: contextTags,
+      const response = await fetch('/api/wear-log', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          user_id: effectiveUserId,
+          fragrance_id: fragranceId,
+          worn_on: new Date().toISOString().slice(0, 10),
+          occasion: occasion || null,
+          weather: weather || null,
+          rating: ratingInt,
+          metadata: {
+            temporal_curve: temporalCurve,
+            overall_rating: overallRating,
+            context_tags: contextTags,
+          },
+        }),
       })
 
-      if (dbError) throw dbError
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to save wear log')
+      }
 
       onSaved?.()
       onClose()

@@ -318,6 +318,10 @@ export default function Home() {
           }}
         >
           Scentral · Made for fragrance obsessives
+          <br /><br />
+          <Link href="/privacy" style={{ textDecoration: 'none', color: 'inherit' }}>Privacy</Link>
+          {' · '}
+          <Link href="/terms" style={{ textDecoration: 'none', color: 'inherit' }}>Terms</Link>
         </p>
       </footer>
     </div>

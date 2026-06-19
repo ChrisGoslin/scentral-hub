@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { getPersonaByInputs, type Persona } from '@/lib/personas'
+import { track } from '@/lib/posthog'
 
 // ─── Sanctuary options ────────────────────────────────────────────────────────
 const SANCTUARIES = [
@@ -68,6 +69,10 @@ export default function OnboardingPage() {
     localStorage.setItem('scentral_onboarded', 'true')
     localStorage.setItem('scentral_persona', persona.id)
     localStorage.setItem('scentral_persona_name', persona.name)
+    track('persona_set', {
+      persona_id: persona.id,
+      step: 'reveal_confirmed',
+    })
     router.push(`/discover?persona=${persona.id}`)
   }
 
