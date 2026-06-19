@@ -16,6 +16,7 @@ import { getBrandEmoji } from '@/lib/brandEmoji'
 import { useFragranceSearch } from '@/app/hooks/useFragranceSearch'
 import { track } from '@/lib/posthog'
 import WardrobeShelf from './WardrobeShelf'
+import { CollectionShelfModal } from '@/components/collection/CollectionShelfModal'
 
 export type CollectionFragrance = {
   id: string
@@ -193,20 +194,33 @@ export default function CollectionClient({ fragrances, totalCount }: { fragrance
   const [isAdding, setIsAdding] = useState(false)
   const [addSuccess, setAddSuccess] = useState(false)
   const [localPickerError, setLocalPickerError] = useState<string | null>(null)
+  const [isShelfModalOpen, setIsShelfModalOpen] = useState(false)
+  const [pendingBottleForModal, setPendingBottleForModal] = useState<any | null>(null)
 
   const pickerError = pickerErrorHook || localPickerError
 
   async function handleAddBottle() {
     if (!selectedToConfirm) return
-    setIsAdding(true)
-    setLocalPickerError(null)
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       setLocalPickerError('You must be signed in to add bottles.')
-      setIsAdding(false)
       return
     }
+
+    // Check if tier0 (Top Signatures) already has 20 bottles
+    const ownedInTier0 = ownedFragrances.filter(f => f.affinity_score && f.affinity_score >= 16)
+    if (ownedInTier0.length >= 20) {
+      // Open modal to choose which to demote
+      setPendingBottleForModal(selectedToConfirm)
+      setIsShelfModalOpen(true)
+      setIsAddSheetOpen(false)
+      return
+    }
+
+    // Normal add flow
+    setIsAdding(true)
+    setLocalPickerError(null)
 
     const { error } = await supabase
       .from('collections')
@@ -230,6 +244,49 @@ export default function CollectionClient({ fragrances, totalCount }: { fragrance
         setPickerSearch('')
         router.refresh()
       }, 2000)
+    }
+  }
+
+  async function handleDemoteBottle(bottleIdToDemote: string) {
+    if (!pendingBottleForModal) return
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      setLocalPickerError('You must be signed in.')
+      return
+    }
+
+    try {
+      // Demote the selected bottle to Occasion tier (score 11)
+      await supabase
+        .from('collections')
+        .update({ affinity_score: 11 })
+        .eq('fragrance_id', bottleIdToDemote)
+        .eq('user_id', user.id)
+
+      // Add the new bottle
+      await supabase
+        .from('collections')
+        .insert({
+          user_id: user.id,
+          fragrance_id: pendingBottleForModal.id,
+          status: 'owned',
+          affinity_score: 18 // Top Signatures tier
+        })
+
+      track('bottle_added_with_demote', {
+        fragrance_id: pendingBottleForModal.id,
+        fragrance_name: `${pendingBottleForModal.brand} ${pendingBottleForModal.name}`,
+        demoted_id: bottleIdToDemote
+      })
+
+      setIsShelfModalOpen(false)
+      setPendingBottleForModal(null)
+      setSelectedToConfirm(null)
+      setPickerSearch('')
+      router.refresh()
+    } catch (err) {
+      setLocalPickerError(err instanceof Error ? err.message : 'Failed to update shelf')
     }
   }
 
@@ -393,6 +450,18 @@ export default function CollectionClient({ fragrances, totalCount }: { fragrance
           </div>
         </>
       )}
+
+      {/* Shelf Modal — triggers when 20-bottle ceiling is hit */}
+      <CollectionShelfModal
+        isOpen={isShelfModalOpen}
+        onClose={() => {
+          setIsShelfModalOpen(false)
+          setPendingBottleForModal(null)
+        }}
+        onDemote={handleDemoteBottle}
+        newBottle={pendingBottleForModal ? { id: pendingBottleForModal.id, full_name: `${pendingBottleForModal.brand} ${pendingBottleForModal.name}` } : { id: '', full_name: '' }}
+        currentTopShelf={ownedFragrances.filter(f => f.affinity_score && f.affinity_score >= 16).map(f => ({ id: f.id, full_name: `${f.brand} ${f.name}` }))}
+      />
 
       {/* Add Bottle Sheet */}
       <Sheet open={isAddSheetOpen} onClose={() => setIsAddSheetOpen(false)}>

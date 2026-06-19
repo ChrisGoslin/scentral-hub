@@ -48,3 +48,34 @@
   --font-display: var(--font-fraunces, "Fraunces", Georgia, serif);
   --font-ui: var(--font-inter, "Inter", -apple-system, "Segoe UI", Roboto, sans-serif);
 }
+
+/* Dark mode theme */
+[data-theme="dark"] {
+  /* Backgrounds */
+  --bg: #1a1917;
+  --surface: #2a2a27;
+  --surface-light: #3a3a36;
+  --surface-2: #3a3a36;
+
+  /* Text */
+  --text: #f5f5f4;
+  --text-muted: #999;
+
+  /* Accent — warmer gold for dark mode */
+  --accent: #d4a070;
+  --accent-press: #c49a3c;
+
+  /* Secondary accent */
+  --burgundy: #e86383;
+  --burgundy-press: #d96380;
+
+  /* Deep editorial surface */
+  --surface-deep: #f5f5f4;
+
+  /* Semantic */
+  --line: #3a3a36;
+  --line-light: #2a2a27;
+  --positive: #4ade80;
+  --warning: #fb923c;
+  --danger: #f87171;
+}
