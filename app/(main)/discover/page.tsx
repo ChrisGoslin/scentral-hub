@@ -23,6 +23,14 @@ export default async function DiscoverPage() {
       .select('id', { count: 'exact', head: true }),
   ])
 
+  const ids = (data ?? []).map(f => f.id)
+  const { data: ownerCounts } = ids.length
+    ? await supabase.rpc('fragrance_owner_counts', { fragrance_ids: ids })
+    : { data: null }
+  const ownerCountById = new Map<string, number>(
+    (ownerCounts ?? []).map((row: { fragrance_id: string; owner_count: number }) => [row.fragrance_id, row.owner_count])
+  )
+
   const fragrances: DiscoverFragrance[] = (data ?? []).map(f => ({
     id: f.id,
     brand: f.brand,
@@ -36,6 +44,7 @@ export default async function DiscoverPage() {
     image_url: f.image_url ?? null,
     rating: f.rating ? Number(f.rating) : null,
     created_at: f.created_at,
+    owner_count: ownerCountById.get(f.id) ?? 0,
   }))
 
   const hasMore = (data?.length ?? 0) < (totalCount ?? 0)

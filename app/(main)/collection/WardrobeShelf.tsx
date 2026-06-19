@@ -16,7 +16,7 @@ import { arrayMove } from '@dnd-kit/sortable'
 import { createClient } from '@/utils/supabase/client'
 import { type CollectionFragrance } from './CollectionClient'
 import ShelfTier from './ShelfTier'
-import WardrobeSidebar, { type ViewMode } from './WardrobeSidebar'
+import WardrobeSidebar, { type ViewMode, type LensKey, type LensFilters } from './WardrobeSidebar'
 import { getBrandEmoji } from '@/lib/brandEmoji'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -97,7 +97,7 @@ function findContainer(tiers: TierState, id: string): TierKey | undefined {
 
 // ─── Sub-views ───────────────────────────────────────────────────────────────
 
-function GroupShelf({ label, items }: { label: string; items: CollectionFragrance[] }) {
+function GroupShelf({ label, items, isHighlighted = false }: { label: string; items: CollectionFragrance[], isHighlighted?: boolean }) {
   return (
     <div style={{ marginBottom: 20 }}>
       <div style={{ marginBottom: 6, paddingLeft: 4, display: 'flex', alignItems: 'baseline', gap: 8 }}>
@@ -109,7 +109,7 @@ function GroupShelf({ label, items }: { label: string; items: CollectionFragranc
         </span>
       </div>
       <div style={{
-        background: 'rgba(0,0,0,0.25)',
+        background: isHighlighted ? 'rgba(160, 98, 42, 0.15)' : 'rgba(0,0,0,0.25)',
         borderTop: '2px solid rgba(196,154,60,0.3)',
         boxShadow: '0 4px 16px rgba(0,0,0,0.12), 0 1px 0 rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.6)',
         borderRadius: 2,
@@ -169,16 +169,30 @@ function MiniBottle({ f }: { f: CollectionFragrance }) {
 }
 
 function ByHouseView({ items }: { items: CollectionFragrance[] }) {
+  const [activePersona, setActivePersona] = useState<string | null>(null)
+
+  useEffect(() => {
+    setActivePersona(localStorage.getItem('scentral_persona'))
+  }, [])
+
   const byBrand = items.reduce<Record<string, CollectionFragrance[]>>((acc, f) => {
     if (!acc[f.brand]) acc[f.brand] = []
     acc[f.brand].push(f)
     return acc
   }, {})
   const brands = Object.keys(byBrand).sort()
+
+  const shouldHighlight = (brand: string) => {
+    if (activePersona === 'velvet_intellectual' || activePersona === 'dark_alchemist') {
+      return ['Lattafa', 'Afnan', 'Khadlaj'].includes(brand)
+    }
+    return false
+  }
+
   return (
     <div style={{ paddingTop: 4, paddingBottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }}>
       {brands.map(brand => (
-        <GroupShelf key={brand} label={brand} items={byBrand[brand]} />
+        <GroupShelf key={brand} label={brand} items={byBrand[brand]} isHighlighted={shouldHighlight(brand)} />
       ))}
     </div>
   )
@@ -276,8 +290,35 @@ export default function WardrobeShelf({ fragrances }: WardrobeShelfProps) {
   const wishlist = fragrances.filter(f => wishlistIds.includes(f.id))
 
   const [viewMode, setViewMode] = useState<ViewMode>('all')
+  const [activeLens, setActiveLens] = useState<LensKey | null>(null)
+  const [lensFilters, setLensFilters] = useState<LensFilters | null>(null)
   const [tiers, setTiers] = useState<TierState>(() => buildInitialTierState(owned))
   const [activeId, setActiveId] = useState<string | null>(null)
+
+  function applyLensFilter(items: CollectionFragrance[]): CollectionFragrance[] {
+    if (!lensFilters) return items
+    return items.filter(f => {
+      const matchProjection = !lensFilters.projections || lensFilters.projections.includes(f.projection)
+      const matchSeason = !lensFilters.seasons || lensFilters.seasons.includes(f.optimal_season ?? '')
+      const matchUseCase = !lensFilters.useCases || (
+        f.use_case != null &&
+        lensFilters.useCases.some(u => f.use_case!.toLowerCase().includes(u))
+      )
+      // Agadir: projection AND season; Executive/Comfort: projection OR useCase
+      if (lensFilters.seasons && lensFilters.useCases) {
+        return matchProjection && (matchSeason || matchUseCase)
+      }
+      if (lensFilters.seasons) {
+        return matchProjection && matchSeason
+      }
+      return matchProjection || matchUseCase
+    })
+  }
+
+  function handleLensSelect(lens: LensKey | null, filters: LensFilters | null) {
+    setActiveLens(lens)
+    setLensFilters(filters)
+  }
 
   // Ref keeps DnD handlers from going stale between renders
   const tiersRef = useRef<TierState>(tiers)
@@ -374,7 +415,12 @@ export default function WardrobeShelf({ fragrances }: WardrobeShelfProps) {
   return (
     <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', minHeight: '80vh' }}>
       {/* Sidebar / tab strip */}
-      <WardrobeSidebar viewMode={viewMode} onViewModeChange={setViewMode} />
+      <WardrobeSidebar
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        activeLens={activeLens}
+        onLensSelect={handleLensSelect}
+      />
 
       {/* Cabinet frame */}
       <div
@@ -421,7 +467,7 @@ export default function WardrobeShelf({ fragrances }: WardrobeShelfProps) {
                   tierId={def.key}
                   label={def.label}
                   sublabel={def.sublabel}
-                  items={tiers[def.key]}
+                  items={applyLensFilter(tiers[def.key])}
                   locked={def.locked}
                   activeId={activeId}
                   isMobile={isMobile}
@@ -432,9 +478,9 @@ export default function WardrobeShelf({ fragrances }: WardrobeShelfProps) {
           </DndContext>
         )}
 
-        {viewMode === 'byHouse' && <ByHouseView items={owned} />}
-        {viewMode === 'bySeason' && <BySeasonView items={owned} />}
-        {viewMode === 'wishlist' && <WishlistView items={wishlist} />}
+        {viewMode === 'byHouse' && <ByHouseView items={applyLensFilter(owned)} />}
+        {viewMode === 'bySeason' && <BySeasonView items={applyLensFilter(owned)} />}
+        {viewMode === 'wishlist' && <WishlistView items={applyLensFilter(wishlist)} />}
       </div>
     </div>
   )

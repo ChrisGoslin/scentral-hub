@@ -11,7 +11,7 @@ export const initAnalytics = () => {
     }
 
     posthog.init(key, {
-      api_host: 'https://eu.posthog.com',
+      api_host: 'https://eu.i.posthog.com',
       capture_pageview: false, // We'll handle this manually or via Next.js router
       persistence: 'localStorage',
       autocapture: false, // Disable autocapture to ensure PII safety

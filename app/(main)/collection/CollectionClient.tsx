@@ -29,6 +29,7 @@ export type CollectionFragrance = {
   rating: number | null
   image_url: string | null
   optimal_season: string | null
+  use_case?: string | null
   maturation?: string | null
   maceration_started_at?: string | null
   maceration_ready_at?: string | null
@@ -36,6 +37,7 @@ export type CollectionFragrance = {
   is_user_created?: boolean | null
   affinity_score?: number | null
   status?: string | null
+  origin_code?: 'B' | 'D' | 'T' | 'O' | 'W' | null
 }
 
 type SeasonFilter = 'All' | 'Summer' | 'All-Year' | 'Winter' | 'Spring'

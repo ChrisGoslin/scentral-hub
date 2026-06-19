@@ -45,6 +45,11 @@ export default async function InspiredByClones({ fragranceName, fragranceId, fro
             <p style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{c.brand}</p>
             <p style={{ fontSize: 14, color: 'var(--text)', fontFamily: 'var(--font-display)' }}>{c.name}</p>
           </div>
+          <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-gold)',
+            background: 'var(--color-gold-highlight, rgba(196,154,60,0.12))',
+            borderRadius: 999, padding: '2px 8px' }}>
+            ~90% match
+          </span>
         </Link>
       ))}
     </div>

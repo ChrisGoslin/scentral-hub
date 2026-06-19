@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
+import { getPersonaById } from '@/lib/personas'
 import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
 import Chip from '@/components/ui/Chip'
@@ -284,6 +285,28 @@ function SettingsSection({ email, onSignOut, signingOut, onReset }: { email: str
         </p>
       </div>
 
+      {/* Push Notifications toggle */}
+      <div className="flex items-center justify-between py-3" style={{ borderBottom: '1px solid var(--line)' }}>
+        <div>
+          <p style={{ fontSize: 14, color: 'var(--text)' }}>Push notifications</p>
+          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>Maceration alerts & streak protection</p>
+        </div>
+        <button
+          onClick={async () => {
+            try {
+              const { registerPush } = await import('@/lib/push')
+              await registerPush()
+              alert('Push notifications enabled!')
+            } catch (e: any) {
+              alert('Failed to enable push: ' + e.message)
+            }
+          }}
+          style={{ padding: '6px 12px', fontSize: 12, borderRadius: 999, background: 'var(--surface-2)', border: '1px solid var(--line)', color: 'var(--text)' }}
+        >
+          Enable
+        </button>
+      </div>
+
       {/* Affiliate disclosure toggle — non-functional placeholder */}
       <div className="flex items-center justify-between py-3" style={{ borderBottom: '1px solid var(--line)', opacity: 0.45 }}>
         <div>
@@ -307,6 +330,13 @@ function SettingsSection({ email, onSignOut, signingOut, onReset }: { email: str
       >
         Reset my preferences
       </button>
+
+      {/* Scentral Pro */}
+      <div className="flex flex-col">
+        <Link href="/pro" className="text-left py-3 w-full border-b border-[var(--line)]" style={{ fontSize: 14, color: 'var(--accent)', textDecoration: 'none', fontWeight: 600 }}>
+          ✦ Unlock Scentral Pro
+        </Link>
+      </div>
 
       {/* Legal Links */}
       <div className="flex flex-col">
@@ -455,10 +485,9 @@ export default function YouClient(props: YouClientProps) {
     // 1. Persona
     const storedPersona = localStorage.getItem('scentral_persona')
     if (storedPersona) {
-      try {
-        setPersona(JSON.parse(storedPersona))
-      } catch (e) {
-        console.error('Failed to parse persona', e)
+      const p = getPersonaById(storedPersona)
+      if (p) {
+        setPersona(p)
       }
     }
 

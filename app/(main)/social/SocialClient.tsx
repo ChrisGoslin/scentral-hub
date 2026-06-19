@@ -1,6 +1,9 @@
 'use client'
 
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import Script from 'next/script'
+import { createClient } from '@/utils/supabase/client'
 
 interface TikTokVideo {
   handle: string
@@ -205,6 +208,112 @@ export default function SocialClient() {
       </div>
 
       <Script src="https://www.tiktok.com/embed.js" strategy="lazyOnload" />
+
+      {/* Trending Right Now */}
+      <TrendingSection />
+    </div>
+  )
+}
+
+const TRENDING_FRAGRANCES = [
+  { name: 'Asad', brand: 'Lattafa', creator: '@extraitderayen', reason: "3.2M views this week. The winter oud moment." },
+  { name: 'Hareem Al Sultan', brand: 'Khadlaj', creator: '@milanscents', reason: "1.8M views. 'Cheaper than Baccarat Red.'" },
+  { name: '9PM', brand: 'Afnan', creator: '@danielrenefragrances', reason: "900K views. The everyman powerhouse." },
+]
+
+function TrendingSection() {
+  const [resolvedIds, setResolvedIds] = useState<Record<string, string>>({})
+
+  useEffect(() => {
+    async function resolveIds() {
+      const supabase = createClient()
+      const { data } = await supabase
+        .from('fragrances')
+        .select('id, name')
+        .in('name', TRENDING_FRAGRANCES.map(f => f.name))
+      
+      if (data) {
+        const map: Record<string, string> = {}
+        data.forEach(d => { map[d.name] = d.id })
+        setResolvedIds(map)
+      }
+    }
+    resolveIds()
+  }, [])
+
+  return (
+    <div style={{ marginTop: 40 }}>
+      <h2
+        className="px-4"
+        style={{
+          fontSize: 13,
+          fontWeight: 700,
+          textTransform: 'uppercase',
+          letterSpacing: '0.08em',
+          color: 'var(--text-muted)',
+          marginBottom: 12,
+        }}
+      >
+        Trending Right Now
+      </h2>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '0 16px' }}>
+        {TRENDING_FRAGRANCES.map(tf => {
+          const id = resolvedIds[tf.name]
+          const CardContent = (
+            <div
+              style={{
+                background: 'var(--surface)',
+                borderRadius: 'var(--r-card)',
+                padding: '16px',
+                border: '1px solid var(--line)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 8,
+                transition: 'transform var(--motion-fast) ease, box-shadow var(--motion-fast) ease',
+              }}
+              onMouseEnter={(e) => {
+                if (id) {
+                  e.currentTarget.style.transform = 'scale(1.02)'
+                  e.currentTarget.style.boxShadow = 'var(--shadow-md)'
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (id) {
+                  e.currentTarget.style.transform = 'scale(1)'
+                  e.currentTarget.style.boxShadow = 'none'
+                }
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <p style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                    {tf.brand}
+                  </p>
+                  <p style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--text)', marginTop: 2 }}>
+                    {tf.name}
+                  </p>
+                </div>
+                {id && (
+                  <span style={{ fontSize: 11, color: 'var(--accent)', fontWeight: 600 }}>Explore →</span>
+                )}
+              </div>
+              <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                <span style={{ fontWeight: 600, color: 'var(--text)' }}>{tf.creator}</span>{' — '}{tf.reason}
+              </p>
+            </div>
+          )
+
+          return id ? (
+            <Link key={tf.name} href={`/collection/${id}?from=social`} style={{ textDecoration: 'none', color: 'inherit' }}>
+              {CardContent}
+            </Link>
+          ) : (
+            <div key={tf.name}>
+              {CardContent}
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }

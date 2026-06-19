@@ -1032,3 +1032,13 @@ blockquote {
     scroll-behavior: auto !important;
   }
 }
+
+@keyframes chip-pulse {
+  0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 40%, transparent); }
+  70%  { box-shadow: 0 0 0 8px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+.chip-pulse {
+  animation: chip-pulse 400ms ease-out;
+}
