@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local sync/orchestrator artifacts — never commit
+.tmp.driveupload/
+.launch-logs/
