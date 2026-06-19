@@ -3,14 +3,14 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Archive, FlaskConical, Dna, Calendar, User } from 'lucide-react'
+import { Archive, FlaskConical, Compass, Calendar, User } from 'lucide-react'
 
 const NAV_ITEMS = [
-  { label: 'Wardrobe',  href: '/collection', Icon: Archive },
-  { label: 'Lab',       href: '/layering',   Icon: FlaskConical },
-  { label: 'Resonance', href: '/dna-match',  Icon: Dna },
-  { label: 'Ritual',    href: '/schedule',   Icon: Calendar },
-  { label: 'You',       href: '/you',        Icon: User },
+  { label: 'Wardrobe', href: '/collection', Icon: Archive },
+  { label: 'Lab',      href: '/layering',   Icon: FlaskConical },
+  { label: 'Discover', href: '/discover',   Icon: Compass },
+  { label: 'Ritual',   href: '/schedule',   Icon: Calendar },
+  { label: 'You',      href: '/you',        Icon: User },
 ]
 
 export default function BottomNav() {
