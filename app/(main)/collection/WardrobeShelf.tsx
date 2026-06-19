@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback, useRef, useEffect } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import {
   DndContext,
   DragEndEvent,
@@ -18,6 +19,8 @@ import { type CollectionFragrance } from './CollectionClient'
 import ShelfTier from './ShelfTier'
 import WardrobeSidebar, { type ViewMode, type LensKey, type LensFilters } from './WardrobeSidebar'
 import { getBrandEmoji } from '@/lib/brandEmoji'
+import EmptyState from '@/components/ui/EmptyState'
+import Button from '@/components/ui/Button'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -286,6 +289,22 @@ export default function WardrobeShelf({ fragrances }: WardrobeShelfProps) {
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
+
+  if (owned.length === 0) {
+    return (
+      <div style={{ minHeight: '100dvh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+        <EmptyState
+          headline="Your wardrobe is waiting"
+          caption="Add your first bottle from Discover to start building your collection."
+          action={
+            <Link href="/discover" style={{ textDecoration: 'none' }}>
+              <Button>Explore Fragrances</Button>
+            </Link>
+          }
+        />
+      </div>
+    )
+  }
 
   const wishlist = fragrances.filter(f => wishlistIds.includes(f.id))
 

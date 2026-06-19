@@ -718,8 +718,8 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
       {filtered.length === 0 ? (
         <div style={{ padding: '48px 16px', textAlign: 'center' }}>
           <EmptyState
-            headline="Nothing matches"
-            caption="Adjust your filters to reveal more inspired-by alternatives."
+            headline="No fragrances match right now"
+            caption="Try adjusting your filters to find your next scent."
             action={
               <Button onClick={clearFilters} variant="secondary">
                 Clear filters

@@ -1,7 +1,9 @@
 import { Metadata } from 'next'
+import Link from 'next/link'
 import { createClient } from '@/utils/supabase/server'
 import LayeringClient, { type LayeringFragrance } from './LayeringClient'
 import EmptyState from '@/components/ui/EmptyState'
+import Button from '@/components/ui/Button'
 import { cookies } from 'next/headers'
 
 export const metadata: Metadata = {
@@ -33,10 +35,15 @@ export default async function LayeringPage() {
 
   if ((data ?? []).length === 0) {
     return (
-      <div style={{ minHeight: '100dvh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ minHeight: '100dvh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
         <EmptyState
-          headline="Your lab is empty"
-          caption="Once you've added a few bottles, we'll show you how to layer them."
+          headline="Your lab is waiting"
+          caption="Add a few bottles to your collection first, then explore layering combinations."
+          action={
+            <Link href="/collection" style={{ textDecoration: 'none' }}>
+              <Button variant="secondary">Go to My Bottles</Button>
+            </Link>
+          }
         />
       </div>
     )
