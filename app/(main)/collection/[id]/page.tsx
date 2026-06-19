@@ -9,6 +9,7 @@ import SimilarFragrances from './SimilarFragrances'
 import InspiredByClones from './InspiredByClones'
 import LogWearButton from './LogWearButton'
 import AffinityRater from './AffinityRater'
+import { NotesPyramid, WearLogButton } from './FragranceDetailClient'
 import { getBrandEmoji } from '@/lib/brandEmoji'
 import { cookies } from 'next/headers'
 import { Users } from 'lucide-react'
@@ -55,7 +56,7 @@ export default async function FragranceDetailPage({
   const [{ data, error }, { data: collectionRow }, { data: proofData }] = await Promise.all([
     supabase
       .from('fragrances')
-      .select('id, brand, name, phase, phase_label, family, projection, anosmia_risk, lean, rating, image_url, use_case, spritz_count, application_zone, maturation, inspired_by, is_user_created, optimal_season, clone_target, plain_description')
+      .select('id, brand, name, phase, phase_label, family, projection, anosmia_risk, lean, rating, image_url, use_case, spritz_count, application_zone, maturation, inspired_by, is_user_created, optimal_season, clone_target, plain_description, pyramid')
       .eq('id', id)
       .single(),
     supabase
@@ -317,6 +318,19 @@ export default async function FragranceDetailPage({
               ))}
             </div>
           </div>
+        )}
+
+        {/* Notes Pyramid */}
+        <NotesPyramid pyramid={f.pyramid} />
+
+        {/* Log a Wear Button */}
+        {collectionRow?.id && (
+          <WearLogButton
+            fragranceId={f.id}
+            fragranceName={f.name}
+            brandName={f.brand}
+            collectionId={collectionRow.id}
+          />
         )}
 
         {/* Sensory Anatomy */}
