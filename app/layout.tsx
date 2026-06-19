@@ -1,17 +1,39 @@
 import type { Metadata, Viewport } from "next";
+import { Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import "../lib/design/tokens.css";
 import PWARegistration from "./components/PWARegistration";
 import AnalyticsProvider from "./components/AnalyticsProvider";
 import { Providers } from "./providers";
 import PageTracker from "./components/PageTracker";
+import DeferredFontLink from "./components/DeferredFontLink";
+
+const instrumentSerif = Instrument_Serif({
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
+  variable: "--font-instrument-serif",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://scentral-seven.vercel.app"),
   title: "Scentral",
   description: "Discover and track your fragrance collection",
   manifest: "/manifest.json",
   icons: {
     apple: "/icons/icon-192.png",
+  },
+  openGraph: {
+    siteName: "Scentral",
+    title: "Scentral — Your Scent Wardrobe",
+    description: "Discover, collect and understand the fragrances that define you.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Scentral — Your Scent Wardrobe",
+    description: "Discover, collect and understand the fragrances that define you.",
   },
   appleWebApp: {
     capable: true,
@@ -47,12 +69,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-[100dvh] antialiased">
+    <html lang="en" className={`h-[100dvh] antialiased ${instrumentSerif.variable}`}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
-        <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap" rel="stylesheet" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <DeferredFontLink />
       </head>
       <body className="min-h-[100dvh] flex flex-col" style={{ background: "var(--bg)", color: "var(--text)", fontFamily: "var(--font-ui)" }}>
         <Providers>

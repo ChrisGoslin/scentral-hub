@@ -2,10 +2,23 @@ import Link from 'next/link'
 import { Metadata } from 'next'
 import { PERSONAS } from '@/lib/personas'
 
+const TITLE = 'Scentral — Your Scent Wardrobe'
+const DESCRIPTION =
+  'Discover, collect and understand the fragrances that define you — guided by your personal scent identity.'
+
 export const metadata: Metadata = {
-  title: 'Scentral — Your Scent Wardrobe',
-  description:
-    'Discover, collect and understand the fragrances that define you — guided by your personal scent identity.',
+  title: TITLE,
+  description: DESCRIPTION,
+  openGraph: {
+    title: TITLE,
+    description: DESCRIPTION,
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: TITLE,
+    description: DESCRIPTION,
+  },
 }
 
 const HOW_IT_WORKS = [
