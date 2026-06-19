@@ -236,22 +236,34 @@ export default function OnboardingPage() {
         minHeight: '100dvh',
       }}>
 
-        {/* Progress bar + step counter */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 40 }}>
-          <div style={{ display: 'flex', gap: 6, flex: 1 }}>
-            {[1, 2, 3].map(s => (
+        {/* Progress dots + header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 40 }}>
+          <div style={{ display: 'flex', gap: 8 }}>
+            {[1, 2, 3, 4].map(s => (
               <div key={s} style={{
-                height: 3, flex: 1, borderRadius: 2,
-                background: step >= s ? 'var(--accent, #A0622A)' : 'var(--line, #D8D2CA)',
-                opacity: step === s ? 1 : step > s ? 0.5 : 0.3,
-                transition: 'background 300ms ease, opacity 300ms ease',
+                width: 8, height: 8, borderRadius: '50%',
+                background: s <= step ? 'var(--accent, #A0622A)' : 'transparent',
+                border: `1.5px solid ${s <= step ? 'var(--accent, #A0622A)' : 'var(--line, #D8D2CA)'}`,
+                transition: 'background 300ms ease, border-color 300ms ease',
               }} />
             ))}
           </div>
-          {stepLabel && (
-            <span style={{ fontSize: 11, color: 'var(--text-muted)', letterSpacing: '0.05em', minWidth: 24, textAlign: 'right' }}>
-              {stepLabel}
-            </span>
+          {step <= 3 && (
+            <button
+              onClick={handleSkip}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--text-muted)',
+                fontSize: 11,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                cursor: 'pointer',
+                padding: 0,
+              }}
+            >
+              Skip
+            </button>
           )}
         </div>
 
@@ -380,11 +392,6 @@ export default function OnboardingPage() {
               Find my scent identity →
             </button>
           )}
-          <div style={{ textAlign: 'center' }}>
-            <button onClick={handleSkip} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer', padding: '8px 0' }}>
-              Skip for now →
-            </button>
-          </div>
         </footer>
       </div>
     </div>
