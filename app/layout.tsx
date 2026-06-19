@@ -17,7 +17,7 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://scentral-hub.vercel.app"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://scentral-seven.vercel.app"),
   title: "Scentral",
   description: "Discover and track your fragrance collection",
   manifest: "/manifest.json",
@@ -28,14 +28,12 @@ export const metadata: Metadata = {
     siteName: "Scentral",
     title: "Scentral — Your Scent Wardrobe",
     description: "Discover, collect and understand the fragrances that define you.",
-    images: [{ url: "/images/landing-art.svg", width: 1200, height: 630, alt: "Scentral" }],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "Scentral — Your Scent Wardrobe",
     description: "Discover, collect and understand the fragrances that define you.",
-    images: ["/images/landing-art.svg"],
   },
   appleWebApp: {
     capable: true,
