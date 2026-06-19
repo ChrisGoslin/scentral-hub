@@ -5,8 +5,35 @@
 
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/6.4.1/workbox-sw.js');
 
+const CACHE_VERSION = 'v1';
+const SUPABASE_CACHE = `supabase-data-${CACHE_VERSION}`;
+const IMAGES_CACHE = `fragrance-images-${CACHE_VERSION}`;
+const PAGES_CACHE = `pages-cache-${CACHE_VERSION}`;
+const OFFLINE_CACHE = `offline-fallback-${CACHE_VERSION}`;
+const OFFLINE_URL = '/offline.html';
+const CURRENT_CACHES = [SUPABASE_CACHE, IMAGES_CACHE, PAGES_CACHE, OFFLINE_CACHE];
+
+self.addEventListener('install', (event) => {
+  self.skipWaiting();
+  event.waitUntil(
+    caches.open(OFFLINE_CACHE).then((cache) => cache.add(OFFLINE_URL))
+  );
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((names) =>
+      Promise.all(
+        names
+          .filter((name) => !CURRENT_CACHES.includes(name))
+          .map((name) => caches.delete(name))
+      )
+    ).then(() => self.clients.claim())
+  );
+});
+
 if (workbox) {
-  const { registerRoute } = workbox.routing;
+  const { registerRoute, setCatchHandler } = workbox.routing;
   const { StaleWhileRevalidate, CacheFirst } = workbox.strategies;
   const { ExpirationPlugin } = workbox.expiration;
 
@@ -14,7 +41,7 @@ if (workbox) {
   registerRoute(
     ({ url }) => url.hostname === 'lrkdwobnemczvhpixpky.supabase.co',
     new StaleWhileRevalidate({
-      cacheName: 'supabase-data',
+      cacheName: SUPABASE_CACHE,
       plugins: [
         new ExpirationPlugin({ maxEntries: 50, maxAgeSeconds: 24 * 60 * 60 }),
       ],
@@ -25,7 +52,7 @@ if (workbox) {
   registerRoute(
     ({ request }) => request.destination === 'image',
     new CacheFirst({
-      cacheName: 'fragrance-images',
+      cacheName: IMAGES_CACHE,
       plugins: [
         new ExpirationPlugin({ maxEntries: 200, maxAgeSeconds: 30 * 24 * 60 * 60 }),
       ],
@@ -36,9 +63,18 @@ if (workbox) {
   registerRoute(
     ({ request }) => request.mode === 'navigate',
     new StaleWhileRevalidate({
-      cacheName: 'pages-cache',
+      cacheName: PAGES_CACHE,
     })
   );
+
+  // Offline fallback when both network and cache miss on a navigation
+  setCatchHandler(async ({ request }) => {
+    if (request.mode === 'navigate') {
+      const cache = await caches.open(OFFLINE_CACHE);
+      return (await cache.match(OFFLINE_URL)) || Response.error();
+    }
+    return Response.error();
+  });
 } else {
   console.log('Workbox could not be loaded.');
 }
