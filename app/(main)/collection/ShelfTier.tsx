@@ -4,7 +4,7 @@ import React from 'react'
 import { useDroppable } from '@dnd-kit/core'
 import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable'
 import { type CollectionFragrance } from './CollectionClient'
-import BottleCard from './BottleCard'
+import OptimizedBottleCard from './OptimizedBottleCard'
 
 interface ShelfTierProps {
   tierId: string
@@ -139,7 +139,7 @@ export default function ShelfTier({ tierId, label, sublabel, items, locked, acti
               </div>
             ) : (
               items.map(f => (
-                <BottleCard
+                <OptimizedBottleCard
                   key={f.id}
                   fragrance={f}
                   locked={locked}
