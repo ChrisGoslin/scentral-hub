@@ -12,6 +12,7 @@ import { createClient } from '@/utils/supabase/client'
 import { getPersonaById } from '@/lib/personas'
 import Fuse from 'fuse.js'
 import { track } from '@/lib/posthog'
+import ErrorInline from '@/components/ui/ErrorInline'
 
 export type DiscoverFragrance = {
   id: string
@@ -129,6 +130,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
   const [localFragrances, setLocalFragrances] = useState<DiscoverFragrance[]>(fragrances)
   const [hasMore, setHasMore]             = useState(initialHasMore)
   const [loadingMore, setLoadingMore]         = useState(false)
+  const [loadMoreError, setLoadMoreError] = useState<string | null>(null)
   const [isStreaming, setIsStreaming]         = useState(false)
 
   const [wishlist, setWishlist]   = useState<string[]>([])
@@ -147,6 +149,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
 
   const [semanticResults, setSemanticResults] = useState<DiscoverFragrance[]>([])
   const [isSemanticSearching, setIsSemanticSearching] = useState(false)
+  const [semanticError, setSemanticError] = useState<string | null>(null)
 
   const [isMobile, setIsMobile] = useState(false)
 
@@ -236,10 +239,12 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
   useEffect(() => {
     if (!debouncedSearch || debouncedSearch.trim().length === 0) {
       setSemanticResults([])
+      setSemanticError(null)
       return
     }
 
     setIsSemanticSearching(true)
+    setSemanticError(null)
     const supabase = createClient()
 
     ;(async () => {
@@ -250,6 +255,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
         })
         if (!embRes.ok) {
           console.error('Embedding failed', embRes.status)
+          setSemanticError('Failed to search fragrances. Try again.')
           return
         }
         const { similar_fragrances: results } = await embRes.json()
@@ -271,8 +277,10 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
               created_at: r.created_at,
             }))
         )
+        setSemanticError(null)
       } catch (e) {
         console.error('Vector search error', e)
+        setSemanticError('Connection error while searching. Please try again.')
       } finally {
         setIsSemanticSearching(false)
       }
@@ -403,15 +411,23 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
   const loadMore = async () => {
     if (!hasMore || loadingMore) return
     setLoadingMore(true)
-    const offset = localFragrances.length
-    const supabase = createClient()
-    const { data, error: err } = await supabase
-      .from('fragrances')
-      .select('id, brand, name, full_name, family, projection, optimal_season, plain_description, inspired_by, image_url, rating, created_at')
-      .order('brand', { ascending: true })
-      .range(offset, offset + 99)
+    setLoadMoreError(null)
+    try {
+      const offset = localFragrances.length
+      const supabase = createClient()
+      const { data, error: err } = await supabase
+        .from('fragrances')
+        .select('id, brand, name, full_name, family, projection, optimal_season, plain_description, inspired_by, image_url, rating, created_at')
+        .order('brand', { ascending: true })
+        .range(offset, offset + 99)
 
-    if (!err && data) {
+      if (err) {
+        setLoadMoreError('Failed to load more fragrances. Try again.')
+        return
+      }
+
+      if (!data) return
+
       const ids = data.map(f => f.id)
       const { data: ownerCounts } = ids.length
         ? await supabase.rpc('fragrance_owner_counts', { fragrance_ids: ids })
@@ -437,8 +453,13 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
       }))
       setLocalFragrances(prev => [...prev, ...mapped])
       setHasMore(mapped.length === 100)
+      setLoadMoreError(null)
+    } catch (e) {
+      console.error('Load more error', e)
+      setLoadMoreError('Connection error. Please try again.')
+    } finally {
+      setLoadingMore(false)
     }
-    setLoadingMore(false)
   }
 
   if (error) {
@@ -599,6 +620,17 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
         )}
       </div>
 
+      {/* Semantic search error */}
+      {semanticError && (
+        <div style={{ padding: '8px 16px' }}>
+          <ErrorInline
+            message={semanticError}
+            onRetry={() => setDebouncedSearch(searchTerm)}
+            color="warning"
+          />
+        </div>
+      )}
+
       <style>{`
         @keyframes pulse-gold {
           0% { opacity: 0.4; transform: scale(0.95); }
@@ -718,8 +750,8 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
       {filtered.length === 0 ? (
         <div style={{ padding: '48px 16px', textAlign: 'center' }}>
           <EmptyState
-            headline="Nothing matches"
-            caption="Adjust your filters to reveal more inspired-by alternatives."
+            headline="No fragrances match right now"
+            caption="Try adjusting your filters to find your next scent."
             action={
               <Button onClick={clearFilters} variant="secondary">
                 Clear filters
@@ -848,6 +880,17 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
               </div>
             </Link>
           ))}
+        </div>
+      )}
+
+      {/* Load more error */}
+      {loadMoreError && (
+        <div style={{ padding: '0 16px 16px' }}>
+          <ErrorInline
+            message={loadMoreError}
+            onRetry={loadMore}
+            color="warning"
+          />
         </div>
       )}
 
