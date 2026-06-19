@@ -18,6 +18,7 @@ import { createClient } from '@/utils/supabase/client'
 import { type CollectionFragrance } from './CollectionClient'
 import ShelfTier from './ShelfTier'
 import WardrobeSidebar, { type ViewMode, type LensKey, type LensFilters } from './WardrobeSidebar'
+import { CollectionShelfModal } from '@/components/collection/CollectionShelfModal'
 import { getBrandEmoji } from '@/lib/brandEmoji'
 import EmptyState from '@/components/ui/EmptyState'
 import Button from '@/components/ui/Button'
@@ -275,6 +276,8 @@ export default function WardrobeShelf({ fragrances }: WardrobeShelfProps) {
   const owned = fragrances.filter(f => f.collection_added_at != null)
   const [wishlistIds, setWishlistIds] = useState<string[]>([])
   const [isMobile, setIsMobile] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [pendingBottle, setPendingBottle] = useState<CollectionFragrance | null>(null)
 
   useEffect(() => {
     try {
@@ -365,6 +368,17 @@ export default function WardrobeShelf({ fragrances }: WardrobeShelfProps) {
     if (!activeContainer || !overContainer || activeContainer === overContainer) return
     if (TIER_DEFS.find(d => d.key === overContainer)?.locked) return
 
+    // Check if dropping into tier0 (Top Signatures) and it already has 20 items
+    if (overContainer === 'tier0' && current.tier0.length >= 20) {
+      // Don't allow drop visually, but prepare modal
+      const movedFragrance = current[activeContainer].find(f => f.id === activeItemId)
+      if (movedFragrance) {
+        setPendingBottle(movedFragrance)
+        setIsModalOpen(true)
+      }
+      return
+    }
+
     setTiers(prev => {
       const sourceItems = [...prev[activeContainer]]
       const destItems = [...prev[overContainer]]
@@ -382,6 +396,57 @@ export default function WardrobeShelf({ fragrances }: WardrobeShelfProps) {
       return { ...prev, [activeContainer]: sourceItems, [overContainer]: destItems }
     })
   }
+
+  const onDemote = useCallback(async (bottleIdToDemote: string) => {
+    if (!pendingBottle) return
+
+    const current = tiersRef.current
+    const newTiers: TierState = {
+      tier0: current.tier0.filter(f => f.id !== bottleIdToDemote),
+      tier1: [...current.tier1, current.tier0.find(f => f.id === bottleIdToDemote)!],
+      tier2: current.tier2,
+      tier3: current.tier3,
+    }
+
+    // Move pending bottle from its source tier to tier0
+    const pendingSource = findContainer(current, pendingBottle.id)
+    if (pendingSource && pendingSource !== 'tier0') {
+      newTiers[pendingSource] = newTiers[pendingSource].filter(f => f.id !== pendingBottle.id)
+      newTiers.tier0.push(pendingBottle)
+    }
+
+    setTiers(newTiers)
+    tiersRef.current = newTiers
+
+    // Persist to Supabase
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      await Promise.all([
+        supabase
+          .from('collections')
+          .update({ affinity_score: 11 }) // Move demoted bottle to tier1
+          .eq('fragrance_id', bottleIdToDemote)
+          .eq('user_id', user.id),
+        supabase
+          .from('collections')
+          .update({ affinity_score: 18 }) // Move pending bottle to tier0
+          .eq('fragrance_id', pendingBottle.id)
+          .eq('user_id', user.id),
+      ])
+    }
+
+    // Vision pipeline snapshot
+    const snap: CabinetSnapshot = buildSnapshot(newTiers, new Date().toISOString())
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('cabinetSnapshot', { detail: snap }))
+    }
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[Wardrobe Vision Pipeline]', JSON.stringify(snap, null, 2))
+    }
+
+    setIsModalOpen(false)
+    setPendingBottle(null)
+  }, [pendingBottle, supabase])
 
   const onDragEnd = useCallback(async ({ active, over }: DragEndEvent) => {
     setActiveId(null)
@@ -504,6 +569,22 @@ export default function WardrobeShelf({ fragrances }: WardrobeShelfProps) {
         {viewMode === 'bySeason' && <BySeasonView items={applyLensFilter(owned)} />}
         {viewMode === 'wishlist' && <WishlistView items={applyLensFilter(wishlist)} />}
       </div>
+
+      {/* Collection Shelf Modal — triggers when trying to add 21st bottle to Top Shelf */}
+      <CollectionShelfModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false)
+          setPendingBottle(null)
+        }}
+        onDemote={onDemote}
+        newBottle={
+          pendingBottle
+            ? { id: pendingBottle.id, full_name: `${pendingBottle.brand} ${pendingBottle.name}` }
+            : { id: '', full_name: '' }
+        }
+        currentTopShelf={tiers.tier0.map(f => ({ id: f.id, full_name: `${f.brand} ${f.name}` }))}
+      />
     </div>
   )
 }
