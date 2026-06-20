@@ -44,7 +44,7 @@ fictional features, lore like "Agent Luna / Hegemony / Shadow Branching", and ha
   - `/waitlist` (Lead gen)
 - **API Routes:** `/api/affinity`, `/api/aura`, `/api/chemist`, `/api/demo`, `/api/dna-match`, `/api/formulate`, `/api/fragrances`, `/api/generate-image`, `/api/layering`, `/api/scan`, `/api/schedule`, `/api/sommelier`, `/api/waitlist`.
 - **UI Component Library:** `Button`, `Disclosure`, `LoadingShimmer`, `Sheet`, `Card`, `EmptyState`, `ProGate`, `Chip`, `ErrorInline`, `SensoryAnatomy`.
-- **Collection / Living Wardrobe components** (all in `app/(main)/collection/`): `WardrobeShelf` (walnut-cabinet shelf container), `ShelfTier` (individual 3D shelf row), `BottleCard` (draggable bottle card — dnd-kit sortable), `WardrobeSidebar` (view-mode toggle: All / By House / By Season / Wishlist).
+- **Collection / Living Wardrobe components** (all in `app/(main)/collection/`, except `OptimizedBottleCard`): `WardrobeShelf` (walnut-cabinet shelf container), `ShelfTier` (individual 3D shelf row — items laid out in a CSS grid, dnd-kit `rectSortingStrategy`), `OptimizedBottleCard` (`components/collection/OptimizedBottleCard.tsx` — full-bleed image/family-gradient card with ombre overlay, dnd-kit sortable; `BottleCard.tsx` is dead code, no longer imported anywhere), `WardrobeSidebar` (view-mode toggle: All / By House / By Season / Wishlist).
 - **Tables:** `fragrances`, `collections`, `wear_logs`, `layering_combinations`, `layer_recipes`, `spritz_schedules`, `profiles`, `waitlist`.
 - **Free/Pro split:** Free = Discover, My Bottles, Layering, You. Pro = gated behind `components/ui/ProGate.tsx` (`isPro = false`). Do NOT remove gates.
 - **localStorage keys:** `scentral_onboarded`, `scentral_persona`, `scentral_persona_name`, `scentral_wishlist`, `scentral_discover_sort`, `scentral-environment`, `scentral-use-cases`.
@@ -59,7 +59,7 @@ fictional features, lore like "Agent Luna / Hegemony / Shadow Branching", and ha
     - *Holding Zone* (unrated)
   - Drag-and-drop reorder via dnd-kit; every drop emits a `cabinetSnapshot` JSON event (vision pipeline hook for future computer-vision shelf detection — do NOT remove this hook).
   - Sidebar view modes: All, By House, By Season, Wishlist.
-  - Visual style: walnut cabinet aesthetic; 3D shelf depth per row.
+  - Visual style: walnut-cabinet shelf chrome (wood gradient, down-lighting, front lip) per tier is unchanged; bottle items inside each tier are full-bleed `OptimizedBottleCard` tiles (image or family-gradient background, ombre overlay, hover/active opacity) in a responsive grid — not the original narrow floating bottle icons. Changed 2026-06-20, confirmed with Christopher.
 - **Personas:** See `SCENTRAL_PERSONAS.md`. Gavan (newcomer, plain language). Christopher (enthusiast, expert).
 - **Source-of-truth docs:** `AGENTS.md` (this file), `SCENTRAL_PERSONAS.md`.
 

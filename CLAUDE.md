@@ -7,8 +7,8 @@ New shelf UI being built in `app/(main)/collection/`. See `AGENTS.md §1` for fu
 | Component | Path | Purpose |
 |---|---|---|
 | `WardrobeShelf` | `app/(main)/collection/WardrobeShelf.tsx` | Main shelf container — walnut cabinet aesthetic, hosts all tiers |
-| `ShelfTier` | `app/(main)/collection/ShelfTier.tsx` | Single 3D shelf row, one per affinity tier |
-| `BottleCard` | `app/(main)/collection/BottleCard.tsx` | Draggable bottle card (dnd-kit sortable) |
+| `ShelfTier` | `app/(main)/collection/ShelfTier.tsx` | Single 3D shelf row, one per affinity tier — items in a CSS grid (`rectSortingStrategy`) |
+| `OptimizedBottleCard` | `components/collection/OptimizedBottleCard.tsx` | Full-bleed image/family-gradient bottle card, ombre overlay, dnd-kit sortable. (`app/(main)/collection/BottleCard.tsx` is dead code — not imported anywhere) |
 | `WardrobeSidebar` | `app/(main)/collection/WardrobeSidebar.tsx` | View-mode toggle: All / By House / By Season / Wishlist |
 
 **Stack addition:** `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/utilities`
