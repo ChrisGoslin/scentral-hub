@@ -13,6 +13,7 @@ import { getPersonaById } from '@/lib/personas'
 import Fuse from 'fuse.js'
 import { track } from '@/lib/posthog'
 import ErrorInline from '@/components/ui/ErrorInline'
+import { getFamilyGradient } from '@/lib/familyGradients'
 
 export type DiscoverFragrance = {
   id: string
@@ -82,28 +83,6 @@ const VIBE_TO_FEEL: Record<string, string> = {
 }
 
 // ── Card image ───────────────────────────────────────────────────────────────
-
-// Olfactory family → fallback gradient. Real `family` values are compound,
-// space-separated strings (e.g. "Fresh Aromatic", "Woody Spicy") — match on
-// any word, not the whole string, and fall back to woody if nothing hits.
-const FAMILY_GRADIENTS: Record<string, string> = {
-  woody: 'linear-gradient(135deg, #5c4033 0%, #8d7662 100%)',
-  amber: 'linear-gradient(135deg, #c49a3c 0%, #a67c52 100%)',
-  oriental: 'linear-gradient(135deg, #c49a3c 0%, #a67c52 100%)',
-  fresh: 'linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%)',
-  gourmand: 'linear-gradient(135deg, #d4a373 0%, #8b6f47 100%)',
-  floral: 'linear-gradient(135deg, #e8b4d4 0%, #c67c98 100%)',
-  aquatic: 'linear-gradient(135deg, #87ceeb 0%, #4a90e2 100%)',
-  marine: 'linear-gradient(135deg, #87ceeb 0%, #4a90e2 100%)',
-}
-
-function getFamilyGradient(family: string): string {
-  const words = family.toLowerCase().split(/\s+/)
-  for (const word of words) {
-    if (FAMILY_GRADIENTS[word]) return FAMILY_GRADIENTS[word]
-  }
-  return FAMILY_GRADIENTS.woody
-}
 
 function FragranceCardMedia({
   imageUrl, brand, name, family, compact = false,

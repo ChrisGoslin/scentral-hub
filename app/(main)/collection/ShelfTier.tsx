@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { useDroppable } from '@dnd-kit/core'
-import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable'
+import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable'
 import { type CollectionFragrance } from './CollectionClient'
 import OptimizedBottleCard from '@/components/collection/OptimizedBottleCard'
 
@@ -107,23 +107,20 @@ export default function ShelfTier({ tierId, label, sublabel, items, locked, acti
           }}
         />
 
-        <SortableContext items={items.map(f => f.id)} strategy={horizontalListSortingStrategy}>
+        <SortableContext items={items.map(f => f.id)} strategy={rectSortingStrategy}>
           <div
             ref={setNodeRef}
             style={{
-              display: 'flex',
-              gap: 8,
-              flexWrap: isMobile ? 'wrap' : 'nowrap',
-              overflowX: isMobile ? 'visible' : 'auto',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
+              gap: 10,
               minHeight: 110,
-              alignItems: 'flex-end',
-              paddingBottom: isMobile ? 0 : 4,
-              scrollbarWidth: 'none', // hide scrollbar for clean look
+              paddingBottom: 4,
             }}
           >
             {items.length === 0 ? (
               <div style={{
-                width: '100%',
+                gridColumn: '1 / -1',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
