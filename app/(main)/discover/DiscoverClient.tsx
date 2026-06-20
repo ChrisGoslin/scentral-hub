@@ -83,36 +83,76 @@ const VIBE_TO_FEEL: Record<string, string> = {
 
 // ── Card image ───────────────────────────────────────────────────────────────
 
-function FragranceImage({ imageUrl, brand, name }: { imageUrl: string | null; brand: string; name: string }) {
-  if (!imageUrl) {
-    return (
-      <div
-        style={{
-          width: '100%', aspectRatio: '3/4',
-          display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center',
-          background: 'var(--surface)',
-          borderRadius: 10,
-          padding: 8,
-          position: 'relative',
-          border: '1px solid var(--line)'
-        }}
-      >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M9 3h6v3H9zM6 6h12v15H6zM9 11h6M9 15h6" />
-        </svg>
-      </div>
-    )
+// Olfactory family → fallback gradient. Real `family` values are compound,
+// space-separated strings (e.g. "Fresh Aromatic", "Woody Spicy") — match on
+// any word, not the whole string, and fall back to woody if nothing hits.
+const FAMILY_GRADIENTS: Record<string, string> = {
+  woody: 'linear-gradient(135deg, #5c4033 0%, #8d7662 100%)',
+  amber: 'linear-gradient(135deg, #c49a3c 0%, #a67c52 100%)',
+  oriental: 'linear-gradient(135deg, #c49a3c 0%, #a67c52 100%)',
+  fresh: 'linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%)',
+  gourmand: 'linear-gradient(135deg, #d4a373 0%, #8b6f47 100%)',
+  floral: 'linear-gradient(135deg, #e8b4d4 0%, #c67c98 100%)',
+  aquatic: 'linear-gradient(135deg, #87ceeb 0%, #4a90e2 100%)',
+  marine: 'linear-gradient(135deg, #87ceeb 0%, #4a90e2 100%)',
+}
+
+function getFamilyGradient(family: string): string {
+  const words = family.toLowerCase().split(/\s+/)
+  for (const word of words) {
+    if (FAMILY_GRADIENTS[word]) return FAMILY_GRADIENTS[word]
   }
+  return FAMILY_GRADIENTS.woody
+}
+
+function FragranceCardMedia({
+  imageUrl, brand, name, family, compact = false,
+}: { imageUrl: string | null; brand: string; name: string; family: string; compact?: boolean }) {
+  const [hovered, setHovered] = useState(false)
+  const [pressed, setPressed] = useState(false)
+  const opacity = pressed ? 0.9 : hovered ? 0.8 : 1
+
   return (
-    <div style={{ width: '100%', aspectRatio: '3/4', borderRadius: 10, background: 'var(--surface-2)', position: 'relative' }}>
-      <Image
-        src={imageUrl}
-        alt={`${brand} ${name}`}
-        fill
-        sizes="(max-width: 768px) 50vw, 25vw"
-        style={{ objectFit: 'contain' }}
-      />
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => { setHovered(false); setPressed(false) }}
+      onPointerDown={() => setPressed(true)}
+      onPointerUp={() => setPressed(false)}
+      style={{
+        width: '100%',
+        aspectRatio: '3/4',
+        position: 'relative',
+        backgroundImage: imageUrl ? undefined : getFamilyGradient(family),
+        opacity,
+        transition: 'opacity 150ms ease-out',
+      }}
+    >
+      {imageUrl && (
+        <Image
+          src={imageUrl}
+          alt={`${brand} ${name}`}
+          fill
+          sizes="(max-width: 768px) 50vw, 25vw"
+          style={{ objectFit: 'cover' }}
+        />
+      )}
+      {/* Ombre overlay for text readability */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.15) 45%, transparent 70%)',
+      }} />
+      <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: compact ? 8 : 10 }}>
+        <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.85)', textTransform: 'uppercase', letterSpacing: '0.1em', textShadow: '0 1px 2px rgba(0,0,0,0.4)' }}>
+          {brand}
+        </p>
+        <p style={{
+          fontFamily: 'var(--font-display)', fontSize: compact ? 12 : 14, color: '#fff',
+          lineHeight: compact ? '15px' : '18px', textShadow: '0 1px 3px rgba(0,0,0,0.5)',
+          overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+        }}>
+          {name}
+        </p>
+      </div>
     </div>
   )
 }
@@ -662,25 +702,15 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
                   style={{ textDecoration: 'none', flexShrink: 0, width: 120 }}
                 >
                   <div style={{
-                    background: 'var(--surface)',
                     border: '1px solid var(--line)',
                     borderRadius: 'var(--r-card)',
-                    padding: 10,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 6,
+                    overflow: 'hidden',
                     transition: 'border-color var(--motion-fast)',
                   }}
                     onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--accent)')}
                     onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--line)')}
                   >
-                    <FragranceImage imageUrl={f.image_url} brand={f.brand} name={f.name} />
-                    <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                      {f.brand}
-                    </p>
-                    <p style={{ fontFamily: 'var(--font-display)', fontSize: 12, color: 'var(--text)', lineHeight: '15px', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
-                      {f.name}
-                    </p>
+                    <FragranceCardMedia imageUrl={f.image_url} brand={f.brand} name={f.name} family={f.family} compact />
                   </div>
                 </Link>
               ))}
@@ -779,7 +809,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
                   background: 'var(--surface)',
                   border: '1px solid var(--line)',
                   borderRadius: 'var(--r-card)',
-                  padding: 12,
+                  overflow: 'hidden',
                   display: 'flex',
                   flexDirection: 'column',
                   gap: 8,
@@ -790,7 +820,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
               >
                 {/* Image + wishlist toggle */}
                 <div style={{ position: 'relative' }}>
-                  <FragranceImage imageUrl={f.image_url} brand={f.brand} name={f.name} />
+                  <FragranceCardMedia imageUrl={f.image_url} brand={f.brand} name={f.name} family={f.family} />
                   <button
                     onClick={e => { e.preventDefault(); e.stopPropagation(); toggleWishlist(f.id) }}
                     aria-label={wishlist.includes(f.id) ? 'Remove from wishlist' : 'Add to wishlist'}
@@ -809,6 +839,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
                       cursor: 'pointer',
                       padding: 0,
                       color: wishlist.includes(f.id) ? 'var(--accent)' : 'var(--text-muted)',
+                      zIndex: 2,
                     }}
                   >
                     <svg width={18} height={18} viewBox="0 0 24 24" fill={wishlist.includes(f.id) ? 'var(--accent)' : 'none'} stroke={wishlist.includes(f.id) ? 'var(--accent)' : 'currentColor'} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -817,66 +848,57 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
                   </button>
                 </div>
 
-                {/* Brand */}
-                <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 2 }}>
-                  {f.brand}
-                </p>
+                <div style={{ padding: '0 12px 12px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {/* Owner count */}
+                  {f.owner_count > 0 && (
+                    <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                      {f.owner_count} {f.owner_count === 1 ? 'person owns' : 'own'} this
+                    </p>
+                  )}
 
-                {/* Name */}
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: 14, color: 'var(--text)', lineHeight: '18px' }}>
-                  {f.name}
-                </p>
+                  {/* Rating */}
+                  {f.rating !== null && (
+                    <div style={{ fontSize: 10, color: 'var(--accent)', letterSpacing: '0.1em' }}>
+                      {'★'.repeat(Math.round(f.rating / 2)) + '☆'.repeat(5 - Math.round(f.rating / 2))}
+                    </div>
+                  )}
 
-                {/* Owner count */}
-                {f.owner_count > 0 && (
-                  <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: -4 }}>
-                    {f.owner_count} {f.owner_count === 1 ? 'person owns' : 'own'} this
-                  </p>
-                )}
+                  {/* Plain description */}
+                  {f.plain_description && (
+                    <p style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: '16px' }}>
+                      {f.plain_description}
+                    </p>
+                  )}
 
-                {/* Rating */}
-                {f.rating !== null && (
-                  <div style={{ fontSize: 10, color: 'var(--accent)', marginTop: -2, letterSpacing: '0.1em' }}>
-                    {'★'.repeat(Math.round(f.rating / 2)) + '☆'.repeat(5 - Math.round(f.rating / 2))}
-                  </div>
-                )}
+                  {/* Inspired-by badge */}
+                  {f.inspired_by && (
+                    <div style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 4,
+                      fontSize: 10, fontWeight: 600,
+                      color: 'var(--accent)',
+                      background: 'color-mix(in srgb, var(--accent) 12%, transparent)',
+                      border: '1px solid color-mix(in srgb, var(--accent) 30%, transparent)',
+                      borderRadius: 999, padding: '3px 8px',
+                      alignSelf: 'flex-start',
+                    }}>
+                      Smells like {f.inspired_by}
+                    </div>
+                  )}
 
-                {/* Plain description */}
-                {f.plain_description && (
-                  <p style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: '16px' }}>
-                    {f.plain_description}
-                  </p>
-                )}
-
-                {/* Inspired-by badge */}
-                {f.inspired_by && (
-                  <div style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 4,
-                    fontSize: 10, fontWeight: 600,
-                    color: 'var(--accent)',
-                    background: 'color-mix(in srgb, var(--accent) 12%, transparent)',
-                    border: '1px solid color-mix(in srgb, var(--accent) 30%, transparent)',
-                    borderRadius: 999, padding: '3px 8px',
-                    alignSelf: 'flex-start',
-                  }}>
-                    Smells like {f.inspired_by}
-                  </div>
-                )}
-
-                {/* Resonance Badge */}
-                {debouncedSearch && semanticResults.some(sr => sr.id === f.id) && (
-                  <div style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 4,
-                    fontSize: 9, fontWeight: 700,
-                    color: 'var(--accent)',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                    marginTop: 4,
-                  }}>
-                    <div style={{ width: 4, height: 4, background: 'var(--accent)', borderRadius: '50%' }} />
-                    Resonance Match
-                  </div>
-                )}
+                  {/* Resonance Badge */}
+                  {debouncedSearch && semanticResults.some(sr => sr.id === f.id) && (
+                    <div style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 4,
+                      fontSize: 9, fontWeight: 700,
+                      color: 'var(--accent)',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                    }}>
+                      <div style={{ width: 4, height: 4, background: 'var(--accent)', borderRadius: '50%' }} />
+                      Resonance Match
+                    </div>
+                  )}
+                </div>
               </div>
             </Link>
           ))}
