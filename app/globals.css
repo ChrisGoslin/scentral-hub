@@ -50,11 +50,21 @@
   --color-bg: #161310;
   --color-surface: #1D1916;
   --color-surface-2: #231F1B;
+  --color-surface-offset: #2A2520;
   --color-primary: #D4884A;
   --color-text: #E8E0D5;
   --color-text-muted: #9E9589;
+  --color-text-faint: #6B6360;
   --color-gold: #E8C060;
   --color-border: #3A3530;
+  --color-success: #66B36F;
+  --color-error: #E85C7A;
+
+  /* Dark mode shadows (higher opacity, warmer tone) */
+  --shadow-sm: 0 1px 3px oklch(0 0 0 / 0.24);
+  --shadow-md: 0 4px 16px oklch(0 0 0 / 0.32);
+  --shadow-lg: 0 12px 40px oklch(0 0 0 / 0.42);
+  --shadow-card: 0 2px 8px oklch(0 0 0 / 0.24), 0 8px 24px oklch(0 0 0 / 0.18);
 }
 
 @media (max-width: 480px) {
@@ -109,6 +119,10 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   letter-spacing: 0;
   overscroll-behavior-y: contain;
+}
+
+[data-theme="dark"] body {
+  background: radial-gradient(circle at top left, #201914 0, var(--color-bg) 38%, #0f0d0a 100%);
 }
 
 button,
@@ -1118,4 +1132,17 @@ blockquote {
   backdrop-filter: blur(20px) saturate(1.6) brightness(1.05);
   -webkit-backdrop-filter: blur(20px) saturate(1.6) brightness(1.05);
   border: 1px solid var(--aura-border);
+}
+
+/* Dark mode image enhancements for bottle cards and detail photos */
+[data-theme="dark"] .bottle-card img,
+[data-theme="dark"] .hero-photo img,
+[data-theme="dark"] .detail-bottles img,
+[data-theme="dark"] .mini-bottles img {
+  filter: brightness(1.08) contrast(1.1);
+}
+
+/* Optional: slightly lighter image filter for dark mode */
+.image-dark-mode {
+  filter: brightness(1.08) contrast(1.1);
 }

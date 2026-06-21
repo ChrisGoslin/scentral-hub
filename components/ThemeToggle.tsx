@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { getTheme, toggleTheme as toggleThemeFn } from '@/lib/theme'
 
 export default function ThemeToggle() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
@@ -8,26 +9,13 @@ export default function ThemeToggle() {
 
   useEffect(() => {
     setMounted(true)
-
-    const stored = localStorage.getItem('scentral_theme') as 'light' | 'dark' | null
-    if (stored) {
-      setTheme(stored)
-      document.documentElement.setAttribute('data-theme', stored)
-    } else {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-      const initial = prefersDark ? 'dark' : 'light'
-      setTheme(initial)
-      if (prefersDark) {
-        document.documentElement.setAttribute('data-theme', 'dark')
-      }
-    }
+    const current = getTheme()
+    setTheme(current)
   }, [])
 
   const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light'
+    const newTheme = toggleThemeFn()
     setTheme(newTheme)
-    localStorage.setItem('scentral_theme', newTheme)
-    document.documentElement.setAttribute('data-theme', newTheme)
   }
 
   if (!mounted) return null
