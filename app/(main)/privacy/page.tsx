@@ -1,8 +1,8 @@
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy | Scentral',
-  description: 'How we handle your data at Scentral.',
+  title: 'Privacy Policy | AnotherSense',
+  description: 'How we handle your data at AnotherSense.',
 }
 
 export default function PrivacyPage() {
@@ -17,7 +17,7 @@ export default function PrivacyPage() {
       <section style={{ marginBottom: 32 }}>
         <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>1. Data Sovereignty</h2>
         <p>
-          At Scentral, we believe your fragrance collection is private. Most of your data—including your 
+          At AnotherSense, we believe your fragrance collection is private. Most of your data—including your 
           fragrance ratings, collections, and custom combinations—is processed and stored locally on your 
           device using <strong>localStorage</strong>.
         </p>
@@ -52,7 +52,7 @@ export default function PrivacyPage() {
 
       <div style={{ marginTop: 48, borderTop: '1px solid var(--line)', paddingTop: 24 }}>
         <p style={{ fontSize: 14, color: 'var(--text-muted)' }}>
-          Questions? Reach out via the Scentral Community.
+          Questions? Reach out via the AnotherSense Community.
         </p>
       </div>
     </div>

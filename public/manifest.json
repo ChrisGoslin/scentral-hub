@@ -1,7 +1,7 @@
 {
-  "name": "Scentral",
-  "short_name": "Scentral",
-  "description": "Discover and track your fragrance collection",
+  "name": "AnotherSense",
+  "short_name": "AnotherSense",
+  "description": "Your daily scent ritual",
   "start_url": "/?utm_source=pwa",
   "scope": "/",
   "display": "standalone",

@@ -23,7 +23,7 @@
   
   /* Typography */
   --font-display: var(--font-instrument-serif), Georgia, serif;
-  --font-body: 'Satoshi', 'Inter', sans-serif;
+  --font-body: var(--font-unbounded), 'Unbounded', sans-serif;
 
   /* Legacy Bridge — maps old tokens to new system */
   --accent: var(--color-primary);
@@ -1041,4 +1041,81 @@ blockquote {
 
 .chip-pulse {
   animation: chip-pulse 400ms ease-out;
+}
+
+/* Card hover scale effect — fragrance cards, collection tiles */
+@keyframes card-scale {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.02);
+  }
+}
+
+.card-hover {
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.card-hover:hover {
+  transform: scale(1.02);
+  box-shadow: var(--shadow-md);
+}
+
+/* Button press pattern: scale 0.96 → 1.04 → 1.00 */
+@keyframes button-press {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.96);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.button-press-active {
+  animation: button-press 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Text flash for buttons (e.g., "✓ Logged") */
+@keyframes text-flash {
+  0% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.text-flash {
+  animation: text-flash 1.5s ease-in-out;
+}
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .card-hover,
+  .button-press-active,
+  .text-flash {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .card-hover:hover {
+    transform: none;
+  }
+}
+
+.surface-glass {
+  background: oklch(from var(--surface, oklch(0.15 0.02 60)) calc(l * 1.02) calc(c * 0.8) calc(h + 5deg) / 0.82);
+  backdrop-filter: blur(20px) saturate(1.6) brightness(1.05);
+  -webkit-backdrop-filter: blur(20px) saturate(1.6) brightness(1.05);
+  border: 1px solid var(--aura-border);
 }

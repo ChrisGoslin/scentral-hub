@@ -24,7 +24,7 @@ export default function BottomNav() {
   const currentNavItem = NAV_ITEMS.find(item => 
     pathname === item.href || pathname.startsWith(`${item.href}/`)
   )
-  const pageTitle = currentNavItem ? currentNavItem.label : 'Scentral'
+  const pageTitle = currentNavItem ? currentNavItem.label : 'AnotherSense'
 
   return (
     <>

@@ -1,8 +1,8 @@
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Terms of Service | Scentral',
-  description: 'The Scentral User Agreement.',
+  title: 'Terms of Service | AnotherSense',
+  description: 'The AnotherSense User Agreement.',
 }
 
 export default function TermsPage() {
@@ -17,7 +17,7 @@ export default function TermsPage() {
       <section style={{ marginBottom: 32 }}>
         <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>1. Acceptance of Terms</h2>
         <p>
-          By accessing or using Scentral, you agree to be bound by these terms. Scentral is a 
+          By accessing or using AnotherSense, you agree to be bound by these terms. AnotherSense is a 
           digital fragrance wardrobe tool provided "as is".
         </p>
       </section>
@@ -25,7 +25,7 @@ export default function TermsPage() {
       <section style={{ marginBottom: 32 }}>
         <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>2. Non-Commercial Use</h2>
         <p>
-          Scentral is for personal, non-commercial use. You may not scrape our catalogue or use our 
+          AnotherSense is for personal, non-commercial use. You may not scrape our catalogue or use our 
           proprietary "AURA" layering intelligence for commercial purposes without explicit permission.
         </p>
       </section>
@@ -41,7 +41,7 @@ export default function TermsPage() {
       <section style={{ marginBottom: 32 }}>
         <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>4. Limitation of Liability</h2>
         <p>
-          Scentral is not responsible for any allergic reactions or financial losses resulting from 
+          AnotherSense is not responsible for any allergic reactions or financial losses resulting from 
           purchases made based on app recommendations. Always sample before buying a full bottle.
         </p>
       </section>

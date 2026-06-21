@@ -386,12 +386,12 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
     const base = baseFragrance?.name || 'My anchor'
     const top = item.name
     const occasion = useCase || 'daily'
-    const shareText = `I'm wearing ${base} + ${top} — ${occasion} combo 💫 via Scentral`
+    const shareText = `I'm wearing ${base} + ${top} — ${occasion} combo 💫 via AnotherSense`
 
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Scentral Layering',
+          title: 'AnotherSense Layering',
           text: shareText,
           url: window.location.href,
         })

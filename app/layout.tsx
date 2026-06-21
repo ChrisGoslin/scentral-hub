@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Instrument_Serif } from "next/font/google";
+import { Instrument_Serif, Unbounded } from "next/font/google";
 import "./globals.css";
 import "../lib/design/tokens.css";
 import PWARegistration from "./components/PWARegistration";
@@ -16,29 +16,36 @@ const instrumentSerif = Instrument_Serif({
   display: "swap",
 });
 
+const unbounded = Unbounded({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-unbounded",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://scentral-seven.vercel.app"),
-  title: "Scentral",
-  description: "Discover and track your fragrance collection",
+  title: "AnotherSense",
+  description: "Your daily scent ritual. Remember how you smell.",
   manifest: "/manifest.json",
   icons: {
     apple: "/icons/icon-192.png",
   },
   openGraph: {
-    siteName: "Scentral",
-    title: "Scentral — Your Scent Wardrobe",
+    siteName: "AnotherSense",
+    title: "AnotherSense — Your Daily Scent Ritual",
     description: "Discover, collect and understand the fragrances that define you.",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Scentral — Your Scent Wardrobe",
+    title: "AnotherSense — Your Daily Scent Ritual",
     description: "Discover, collect and understand the fragrances that define you.",
   },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Scentral",
+    title: "AnotherSense",
     startupImage: [
       { url: "/icons/splash/icon_750x1334.png", media: "screen and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" },
       { url: "/icons/splash/icon_828x1792.png", media: "screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" },
@@ -69,7 +76,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`h-[100dvh] antialiased ${instrumentSerif.variable}`}>
+    <html lang="en" className={`h-[100dvh] antialiased ${instrumentSerif.variable} ${unbounded.variable}`}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

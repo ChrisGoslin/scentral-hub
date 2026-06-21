@@ -337,10 +337,10 @@ function SettingsSection({ email, onSignOut, signingOut, onReset }: { email: str
         Reset my preferences
       </button>
 
-      {/* Scentral Pro */}
+      {/* AnotherSense Pro */}
       <div className="flex flex-col">
         <Link href="/pro" className="text-left py-3 w-full border-b border-[var(--line)]" style={{ fontSize: 14, color: 'var(--accent)', textDecoration: 'none', fontWeight: 600 }}>
-          ✦ Unlock Scentral Pro
+          ✦ Unlock AnotherSense Pro
         </Link>
       </div>
 

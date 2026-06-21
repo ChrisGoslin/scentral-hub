@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { Metadata } from 'next'
 import { PERSONAS } from '@/lib/personas'
 
-const TITLE = 'Scentral — Your Scent Wardrobe'
+const TITLE = 'AnotherSense — Your Daily Scent Ritual'
 const DESCRIPTION =
   'Discover, collect and understand the fragrances that define you — guided by your personal scent identity.'
 
@@ -330,7 +330,7 @@ export default function Home() {
             color: 'var(--text-muted)',
           }}
         >
-          Scentral · Made for fragrance obsessives
+          AnotherSense · Your daily scent ritual
           <br /><br />
           <Link href="/privacy" style={{ textDecoration: 'none', color: 'inherit' }}>Privacy</Link>
           {' · '}

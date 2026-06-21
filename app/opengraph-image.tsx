@@ -25,7 +25,7 @@ export default function OpengraphImage() {
             letterSpacing: '-0.02em',
           }}
         >
-          Scentral
+          AnotherSense
         </div>
         <div
           style={{
@@ -36,7 +36,7 @@ export default function OpengraphImage() {
             textTransform: 'uppercase',
           }}
         >
-          Your Scent Wardrobe
+          Your Daily Scent Ritual
         </div>
       </div>
     ),

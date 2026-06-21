@@ -46,12 +46,12 @@ function drawCard(canvas: HTMLCanvasElement, data: AuraShareData) {
   ctx.lineTo(W, 180)
   ctx.stroke()
 
-  // SCENTRAL wordmark
+  // ANOTHERSENSE wordmark
   ctx.fillStyle = '#c49a3c'
   ctx.font = '600 48px serif'
   ctx.letterSpacing = '0.3em'
   ctx.textAlign = 'center'
-  ctx.fillText('SCENTRAL', W / 2, 140)
+  ctx.fillText('ANOTHERSENSE', W / 2, 140)
 
   // AURA badge
   ctx.fillStyle = 'rgba(196,154,60,0.12)'
@@ -171,7 +171,7 @@ function drawCard(canvas: HTMLCanvasElement, data: AuraShareData) {
   ctx.font = '300 26px sans-serif'
   ctx.letterSpacing = '0.15em'
   ctx.textAlign = 'center'
-  ctx.fillText('SCENTRAL.APP', W / 2, 1800)
+  ctx.fillText('ANOTHERSENSE.APP', W / 2, 1800)
 }
 
 function drawFragCard(
@@ -272,7 +272,7 @@ export default function AuraShareCard({ data }: { data: AuraShareData }) {
         await navigator.share({
           files: [file],
           title: `AURA · ${data.harmony_pct}% Harmony`,
-          text: `${data.anchor.name} × ${data.top.name} — synthesised by AURA on Scentral`,
+          text: `${data.anchor.name} × ${data.top.name} — synthesised by AURA on AnotherSense`,
         })
       } else {
         download()

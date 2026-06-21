@@ -8,7 +8,7 @@ import Link from 'next/link'
 import { cookies } from 'next/headers'
 
 export const metadata: Metadata = {
-  title: 'My Bottles | Scentral',
+  title: 'My Bottles | AnotherSense',
   description: 'Your personal fragrance wardrobe. Track your collection, manage bottle levels, and organize your scents on virtual walnut shelves.',
 }
 
