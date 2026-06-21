@@ -20,3 +20,48 @@ New shelf UI being built in `app/(main)/collection/`. See `AGENTS.md §1` for fu
 4. Holding Zone (unrated)
 
 **Vision pipeline hook:** every drag-drop emits a `cabinetSnapshot` JSON event — do not remove this hook; it feeds a future computer-vision shelf detection pipeline.
+
+## Available Skills
+
+Claude Code has access to reusable skills for common tasks. See `docs/SKILLS_GUIDE.md` for complete discovery guide.
+
+### 🧪 Testing Framework
+**Location:** `skills/testing-framework/`  
+**Trigger:** Ask about "testing setup", "smoke tests", "E2E tests", "QA checklist"
+
+**Includes:**
+- Smoke test strategy (HTTP verification)
+- E2E test patterns (Playwright across browsers + mobile)
+- Manual QA checklist (features, accessibility, performance)
+- Troubleshooting guide (20+ common issues & solutions)
+- Working examples: smoke-test, e2e-test, playwright.config
+
+**Quick start:**
+```bash
+# View skill overview
+cat skills/testing-framework/SKILL.md
+
+# Copy working examples
+cp skills/testing-framework/examples/smoke-test.example.mjs scripts/smoke-test.mjs
+```
+
+**When to use:**
+- Setting up testing framework for new feature
+- Debugging test failures
+- Creating QA checklist before release
+- Optimizing test performance
+
+**Resources:**
+- `SKILL.md` — Core documentation (1,800 words)
+- `references/e2e-patterns.md` — Playwright patterns & anti-patterns
+- `references/troubleshooting.md` — Common issues with solutions
+- `examples/` — Working code templates
+- `scripts/validate-test-setup.sh` — Setup validation
+
+### How to Use Skills
+
+1. **Automatically** — Claude detects skill-related questions and references relevant files
+2. **Explicitly** — Ask Claude: "Use the testing-framework skill to help with [task]"
+3. **Manually** — Copy examples from `skills/[skill-name]/examples/` and adapt
+
+See `docs/SKILLS_GUIDE.md` for complete skill discovery guide.
