@@ -1,6 +1,13 @@
-# Scentral — Claude Code Delegate Prompts
-> Run in priority order. Each prompt is self-contained — paste directly into Claude Code or a new Cowork session.
-> Generated: 2026-06-19 | Updated: 2026-06-19 (Prompts 13–32 added)
+# Scentral — Claude Code Delegate Prompts (LEGACY — PRE-ANOTHERSENSE)
+
+> ⚠️ **SUPERSEDED** — These 32 prompts were written before the AnotherSense overhaul (2026-06-20).
+> For the active sprint, use the **12 Epic prompts** in `docs/specs/AnotherSense_Final_UX_Overhaul.md`.
+> For the session handoff template and sprint schedule, see `docs/AnotherSense_Execution_Brief.md`.
+> The prompts below are preserved for reference only. Do NOT run them — they reference old architecture.
+
+---
+
+> Generated: 2026-06-19 | Superseded: 2026-06-20 (AnotherSense overhaul)
 
 ---
 

@@ -102,7 +102,7 @@ export const PERSONAS: Persona[] = [
     },
     discover_filters: {
       families: ['Citrus', 'Aquatic', 'Green', 'Fresh Spicy', 'Floral'],
-      projections: ['Light', 'Moderate', 'Soft'],
+      projections: ['Weak', 'Medium', 'Moderate'],
     },
   },
   {
@@ -139,7 +139,7 @@ export const PERSONAS: Persona[] = [
     },
     discover_filters: {
       families: ['Leather', 'Tobacco', 'Smoky', 'Resinous', 'Woody Oriental', 'Oud'],
-      projections: ['Heavy', 'Strong', 'Massive'],
+      projections: ['Strong', 'Beast Mode', 'Moderate'],
     },
   },
 ]

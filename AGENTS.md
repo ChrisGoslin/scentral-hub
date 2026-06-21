@@ -6,7 +6,10 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ---
 
-# AGENTS.md — Operating rules for ALL CLI agents on Scentral (Claude Code, Antigravity, Gemini, etc.)
+# AGENTS.md — Operating rules for ALL CLI agents on AnotherSense (Claude Code, Antigravity, Gemini, etc.)
+# ⚠️  REBRAND: Display name = "AnotherSense". Repo stays `scentral-hub`. DB stays `scentral-mvp`. All internal names unchanged.
+# 📋 ACTIVE SPRINT: docs/AnotherSense_Execution_Brief.md — 4-week App Store sprint, 12 Epics.
+# 🎯 FULL SPEC:   docs/specs/AnotherSense_Final_UX_Overhaul.md — design system + all Epic prompts.
 
 **Owner:** Christopher. **Purpose:** prevent invented facts, paths, keys, and scope.
 This is the SINGLE canonical instructions file. `CLAUDE.md` and `GEMINI.md` point here. Read this FIRST, every session, before acting. Begin your first reply by stating in one line what you grounded yourself in.
@@ -20,48 +23,78 @@ fictional features, lore like "Agent Luna / Hegemony / Shadow Branching", and ha
 "being wrong" — it's "sounding certain while being wrong."
 
 ## 1. Ground truth (the ONLY accepted facts unless re-verified)
-- **Repo:** `ChrisGoslin/scentral` (local folder may be named `scentral-hub` — same repo)
-- **Supabase:** project `scentral-mvp` (`lrkdwobnemczvhpixpky`)
+- **Display name:** AnotherSense. **Repo:** `scentral-hub` (GitHub: `ChrisGoslin/scentral`). **DB:** `scentral-mvp` (`lrkdwobnemczvhpixpky`). Display-layer rebrand only — do NOT rename repo, DB, or tables.
 - **Data:** 282 fragrances. Key columns: `plain_description`, `inspired_by`, `family`, `projection`, `optimal_season`, `use_case`, `lean`, `image_url` (populated by backfill scripts — may be null for some rows).
 - **Stack:** Next.js 16.2.9 (App Router, route groups like `(main)`), React 19.2.4, Supabase JS 2.x, Vercel, Tailwind CSS, `@dnd-kit/core` + `@dnd-kit/sortable` + `@dnd-kit/utilities` (Living Wardrobe). Always re-verify version from `package.json` if in doubt — do NOT assert from memory.
-- **Architecture:** Single product.
+- **Architecture:** Single product. No auth for MVP — identity via `scentral_anon_id` (localStorage UUID, generated on first load).
 - **Routes:**
-  - `/` (Landing page)
+  - `/` (Landing page — "AnotherSense" branding)
   - `/discover` (Search and explore catalogue)
-  - `/collection` (My Bottles — user inventory)
+  - `/collection` (Apothecary Grid shelf — user inventory)
   - `/collection/[id]` (Fragrance detail view)
   - `/layering` (Lab — combine scents)
   - `/social` (Community — curated TikTok/YouTube fragrance content, no auth)
   - `/you` (User profile and insights)
   - `/dna-match` (Resonance — find similar scents)
   - `/intelligence` (Wardrobe Intelligence — gated)
-  - `/schedule` (Daily ritual planner)
+  - `/schedule` (Legacy daily ritual planner)
+  - `/spritz` ← NEW — Spritz Schedule (Aura swipe card, XP engine, AnatomyIndicator)
+  - `/wheel` ← NEW — Fragrance Wheel (9-axis polar SVG, gap analysis, share as PNG)
   - `/ritual/[id]` (Public shareable ritual page)
-  - `/onboarding` (3-step new user guide)
+  - `/onboarding` (3-step new user guide with ceremony arc animation)
   - `/learning` (Guides and tips)
   - `/profile` (User settings)
   - `/disclaimer` (Legal)
   - `/waitlist` (Lead gen)
 - **API Routes:** `/api/affinity`, `/api/aura`, `/api/chemist`, `/api/demo`, `/api/dna-match`, `/api/formulate`, `/api/fragrances`, `/api/generate-image`, `/api/layering`, `/api/scan`, `/api/schedule`, `/api/sommelier`, `/api/waitlist`.
+  - Future: `/api/aura-copy` (Supabase Edge Function — Claude Haiku copy for Spritz Schedule)
 - **UI Component Library:** `Button`, `Disclosure`, `LoadingShimmer`, `Sheet`, `Card`, `EmptyState`, `ProGate`, `Chip`, `ErrorInline`, `SensoryAnatomy`.
+  - Incoming (Epic 12): `ToastProvider`, `useToast`, `Toast`, `ButtonAsync`, `AuraBubble`
+  - Incoming (Epics 9–10): `AnatomyIndicator`, `SpritzCard`, `FragranceWheel`
 - **Collection / Living Wardrobe components** (all in `app/(main)/collection/`, except `OptimizedBottleCard`): `WardrobeShelf` (walnut-cabinet shelf container), `ShelfTier` (individual 3D shelf row — items laid out in a CSS grid, dnd-kit `rectSortingStrategy`), `OptimizedBottleCard` (`components/collection/OptimizedBottleCard.tsx` — full-bleed image/family-gradient card with ombre overlay, dnd-kit sortable; `BottleCard.tsx` is dead code, no longer imported anywhere), `WardrobeSidebar` (view-mode toggle: All / By House / By Season / Wishlist).
-- **Tables:** `fragrances`, `collections`, `wear_logs`, `layering_combinations`, `layer_recipes`, `spritz_schedules`, `profiles`, `waitlist`.
-- **Free/Pro split:** Free = Discover, My Bottles, Layering, You. Pro = gated behind `components/ui/ProGate.tsx` (`isPro = false`). Do NOT remove gates.
-- **localStorage keys:** `scentral_onboarded`, `scentral_persona`, `scentral_persona_name`, `scentral_wishlist`, `scentral_discover_sort`, `scentral-environment`, `scentral-use-cases`.
+- **Tables (ALL LIVE — verified 2026-06-21):**
+  - `fragrances` (282 rows)
+  - `collections` + `scent_memory text` column ← NEW (added 2026-06-20)
+  - `wear_logs`
+  - `layering_combinations`, `layer_recipes`
+  - `spritz_schedules` (EXISTS — Epic 9 reuses this, do NOT recreate)
+  - `profiles`, `waitlist`
+  - `user_xp` ← NEW: `anon_id text PK`, `total_xp int DEFAULT 0`, `level int DEFAULT 1`
+  - `user_streaks` ← NEW: `anon_id text PK`, `current_streak int DEFAULT 0`, `longest_streak int DEFAULT 0`, `last_worn_date date`
+- **Free/Pro split:** Free = Discover, My Bottles, Layering, You, Spritz, Wheel. Pro = gated behind `components/ui/ProGate.tsx` (`isPro = false`). Do NOT remove gates.
+- **localStorage keys:**
+  - `scentral_anon_id` — UUID identity key (PK for all Supabase user tables)
+  - `scentral_onboarded`, `scentral_persona`, `scentral_persona_name`, `scentral_wishlist`
+  - `scentral_discover_sort`, `scentral-environment`, `scentral-use-cases`
+  - `as_xp` ← NEW — local XP cache (optimistic UI, mirrors `user_xp` in Supabase)
+  - `as_streak` ← NEW — local streak cache
   - Note: `scentral_vibe` (legacy) still bridged via `VIBE_TO_FEEL` map in DiscoverClient — do not remove the bridge.
 - **Persona engine:** `lib/personas.ts` — single source of truth. 3 personas: `velvet_intellectual`, `solar_minimalist`, `dark_alchemist`. Import `getPersonaById` or `PERSONAS` from here; never duplicate persona data inline.
 - **DB projection column — VALID VALUES ONLY:** `Beast Mode`, `Strong`, `Moderate`, `Medium`, `Weak`. Values `Light`, `Soft`, `Whisper`, `Heavy`, `Massive` do NOT exist in the DB. Any filter using these will return 0 results.
 - **Living Wardrobe (Collection page):**
+  - Shelf paradigm: **Apothecary Grid** — 3-column grid, 2:3 aspect ratio, drag physics with `--motion-organic`.
   - Shelf layout — 4 tiers, ordered top-to-bottom by affinity score:
     - *Top Signatures* (affinity 16–20)
     - *Occasion Modifiers* (affinity 8–15)
     - *Base Anchors* (affinity 1–7)
     - *Holding Zone* (unrated)
-  - Drag-and-drop reorder via dnd-kit; every drop emits a `cabinetSnapshot` JSON event (vision pipeline hook for future computer-vision shelf detection — do NOT remove this hook).
+  - Drag-and-drop reorder via dnd-kit; every drop emits a `cabinetSnapshot` JSON event (vision pipeline hook — **NEVER REMOVE THIS HOOK**).
   - Sidebar view modes: All, By House, By Season, Wishlist.
-  - Visual style: walnut-cabinet shelf chrome (wood gradient, down-lighting, front lip) per tier is unchanged; bottle items inside each tier are full-bleed `OptimizedBottleCard` tiles (image or family-gradient background, ombre overlay, hover/active opacity) in a responsive grid — not the original narrow floating bottle icons. Changed 2026-06-20, confirmed with Christopher.
-- **Personas:** See `SCENTRAL_PERSONAS.md`. Gavan (newcomer, plain language). Christopher (enthusiast, expert).
-- **Source-of-truth docs:** `AGENTS.md` (this file), `SCENTRAL_PERSONAS.md`.
+  - Visual style: walnut-cabinet shelf chrome per tier; bottle items are full-bleed `OptimizedBottleCard` tiles in a responsive grid.
+- **Aura:** AI curation character. Rules-based schedule logic + Claude Haiku for italic copy text. Cost: ~£9/month at 1K DAU. Never prescriptive. Writes in Instrument Serif italic.
+- **XP system (6 levels):** The Curious (0), The Enthusiast (100), The Collector (300), The Connoisseur (600), The Curator (1000), The Auteur (1500). Values: swipe-right worn +10 XP, scent memory +5 XP, wishlist add +5 XP, onboarding complete +20 XP.
+- **Design tokens (add to `app/globals.css` or `lib/design/tokens.css`):**
+  - `--aura: oklch(0.72 0.08 60)` — amber-gold glow
+  - `--aura-surface: oklch(0.18 0.04 60 / 0.6)` — dark amber glass
+  - `--aura-border: oklch(0.45 0.06 60 / 0.3)` — subtle amber rim
+  - `--xp-color: oklch(0.78 0.14 85)` — warm gold for XP indicators
+  - `--motion-instant: 80ms cubic-bezier(0.4, 0, 0.2, 1)`
+  - `--motion-responsive: 200ms cubic-bezier(0.2, 0.6, 0.2, 1)`
+  - `--motion-ceremonial: 480ms cubic-bezier(0.16, 1, 0.3, 1)`
+  - `--motion-organic: 800ms cubic-bezier(0.34, 1.56, 0.64, 1)`
+- **Typography:** Instrument Serif italic (emotional/narrative copy, Aura voice) + Unbounded (functional/navigational). Both font variables on the `html` element in `app/layout.tsx`.
+- **Personas:** See `SCENTRAL_PERSONAS.md`. Gavin (newcomer, plain language). Christopher (enthusiast, expert).
+- **Source-of-truth docs:** `AGENTS.md` (this file), `docs/specs/AnotherSense_Final_UX_Overhaul.md` (full spec + all Epic prompts), `docs/AnotherSense_Execution_Brief.md` (4-week sprint plan), `SCENTRAL_PERSONAS.md`.
 
 If a "fact" is not in these docs, the repo, or the database, it is NOT a fact yet — verify it or label it unverified.
 
@@ -234,71 +267,91 @@ non-`[a-z0-9]` character to a hyphen, turning `è`/`é`/etc. into a stray `-` in
 (`Bibliothèque` → `biblioth-que` instead of `bibliotheque`). Fix: `.normalize('NFD').replace(/[̀-ͯ]/g, '')`
 before lowercasing, to fold accented letters to their base ASCII form first.
 
-## 10. LLM briefing block (copy-paste into Cursor / ChatGPT / other agents)
+## 10. LLM briefing block (copy-paste into Claude Code / Cursor / other agents)
 
-Use this block when starting a new LLM session on Scentral. It is a summary of §1 — if you update §1 (stack, routes, schema), update this block too. Last verified: 2026-06-18.
+Use this block at the start of every new CLI agent session. Summary of §1 — update both when §1 changes. Last verified: 2026-06-21.
 
 ```
-# Scentral — Project Briefing
+# AnotherSense — Project Briefing
+# Repo: scentral-hub | DB: scentral-mvp | Display name: AnotherSense (display-layer only, all internal names unchanged)
+
+## Must-read docs before writing any code
+- AGENTS.md — ground truth, safeguards, lessons learned (READ THIS FIRST)
+- docs/specs/AnotherSense_Final_UX_Overhaul.md — full design system + all 12 Epic prompts
+- docs/AnotherSense_Execution_Brief.md — 4-week sprint map, dependency tree, commit rules
 
 ## Stack (verified from package.json)
 - Next.js 16.2.9 (App Router, route groups like `(main)`)
 - React 19.2.4
-- Supabase JS 2.x — project `scentral-mvp` (lrkdwobnemczvhpixpky)
+- Supabase JS 2.x — project scentral-mvp (lrkdwobnemczvhpixpky)
 - Deployed on Vercel → scentral-seven.vercel.app
-- Tailwind CSS + CSS variables for all colours (NO hardcoded hex values)
+- Tailwind CSS + CSS variables for all colours (NO hardcoded hex — ever)
 - @dnd-kit/core + @dnd-kit/sortable for Living Wardrobe drag-and-drop
 
-## Aesthetic
-"Quiet luxury" — off-white/stone backgrounds, Fragrance Gold accent (#c49a3c via var(--accent)),
-editorial typography, generous whitespace. CSS variables only: var(--bg), var(--surface),
-var(--surface-2), var(--text), var(--text-muted), var(--accent), var(--line), var(--r-card), var(--r-btn).
+## Design system — AnotherSense Aura Design Language
+CSS variables only (app/globals.css + lib/design/tokens.css):
+- Base: var(--bg), var(--surface), var(--surface-2), var(--text), var(--text-muted), var(--accent), var(--line)
+- Aura: --aura (oklch 0.72 0.08 60), --aura-surface, --aura-border, --xp-color (oklch 0.78 0.14 85)
+- Motion: --motion-instant (80ms), --motion-responsive (200ms), --motion-ceremonial (480ms), --motion-organic (800ms)
+- Shadows: --shadow-object (8-layer ambient), --shadow-elevated (with --aura accent ring)
+- Material: .surface-glass { background: oklch(.../0.82); backdrop-filter: blur(20px) saturate(1.6) }
+Typography: Instrument Serif italic (Aura/emotional) + Unbounded (nav/functional). Both on html element.
 
 ## Architecture rules
-- Server components for all data fetching. Add "use client" only when hooks or browser APIs are needed.
-- isMobile: useEffect + window.innerWidth < 480 resize listener (client components only).
-- Server component responsive sizing: use CSS math — min(45vw, 200px), clamp() — not hooks.
-- Horizontal scroll strips: add <div style={{ flexShrink: 0, width: 16 }} /> as trailing spacer.
+- Server components for all data fetching. "use client" only when hooks or browser APIs are needed.
+- No auth for MVP. Identity via scentral_anon_id (localStorage UUID, generated on first load).
+- isMobile: useEffect + window.innerWidth < 480 (client components only).
+- Server sizing: CSS math — min(45vw, 200px), clamp() — not hooks.
+- Horizontal scroll: add <div style={{ flexShrink: 0, width: 16 }} /> as trailing spacer.
 - iOS safe area: paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 96px)'
-- Responsive grids: repeat(auto-fit, minmax(Npx, 1fr)) — never repeat(N, 1fr) hardcoded.
-- Global CSS font scaling: clamp() on --font-size-display / --font-size-body / --font-size-label.
-- overflow-x: hidden on html, body to prevent horizontal scroll on mobile.
+- Responsive grids: repeat(auto-fit, minmax(Npx, 1fr)) — never repeat(N, 1fr).
+- overflow-x: hidden on html, body.
 
-## Database tables
+## Routes
+Free: / (landing), /discover, /collection, /collection/[id], /layering, /social, /you
+NEW this sprint: /spritz (Spritz Schedule + XP), /wheel (Fragrance Wheel)
+Pro (gated, do not touch): /intelligence, /dna-match
+Legacy (do not remove): /schedule, /onboarding, /ritual/[id], /waitlist
+
+## Database tables (ALL LIVE — verified 2026-06-21)
 fragrances (282 rows) — plain_description, inspired_by, family, projection, optimal_season, use_case, lean, image_url
-collections — fragrance_id, affinity_score (int 1-20), maceration_started_at, status
+collections — fragrance_id, affinity_score (int 1-20), maceration_started_at, status, scent_memory text (NEW)
 wear_logs — streak calculation is timezone-aware, do not break
-layering_combinations, layer_recipes, spritz_schedules, profiles, waitlist
+user_xp — anon_id (PK), total_xp int, level int 1-6  ← NEW, keyed on scentral_anon_id
+user_streaks — anon_id (PK), current_streak, longest_streak, last_worn_date  ← NEW
+spritz_schedules — EXISTS, reuse for Epic 9 (do not recreate)
+layering_combinations, layer_recipes, profiles, waitlist
 
 ## localStorage keys
-scentral_onboarded, scentral_persona, scentral_persona_name, scentral_wishlist,
+scentral_anon_id — UUID identity key (PK for all Supabase user tables)
+scentral_onboarded, scentral_persona, scentral_persona_name, scentral_wishlist
 scentral_discover_sort, scentral-environment, scentral-use-cases
+as_xp — local XP cache (optimistic UI mirror of user_xp)  ← NEW
+as_streak — local streak cache  ← NEW
 (scentral_vibe is legacy — bridged via VIBE_TO_FEEL in DiscoverClient, do not remove)
 
 ## Persona engine
-lib/personas.ts — single source of truth. 3 personas: velvet_intellectual, solar_minimalist, dark_alchemist.
-Import getPersonaById or PERSONAS from here. Never inline persona data.
+lib/personas.ts — 3 personas: velvet_intellectual, solar_minimalist, dark_alchemist.
+Import getPersonaById or PERSONAS. Never inline persona data.
 
 ## DB projection values (VERIFIED — only these exist)
 Beast Mode, Strong, Moderate, Medium, Weak
-DO NOT use: Light, Soft, Whisper, Heavy, Massive — they are not in the DB.
+DO NOT use: Light, Soft, Whisper, Heavy, Massive — not in DB.
 
 ## Critical business logic
 - affinity_score 16-20 = Top Signatures, 8-15 = Occasion Modifiers, 1-7 = Base Anchors, null/0 = Holding Zone
-- Every dnd-kit drag-drop MUST emit cabinetSnapshot JSON event — feeds future vision pipeline, do not remove
+- NEVER remove cabinetSnapshot CustomEvent from WardrobeShelf.tsx — feeds future vision pipeline
 - rating in DB is 0-10; display as 5-star: Math.round(rating / 2)
-- isPro = false — ProGate is active. Do NOT touch /intelligence, /dna-match, /schedule pages.
+- isPro = false — ProGate is active. Do NOT touch gated routes.
+- XP writes to Supabase user_xp AND as_xp localStorage (optimistic)
+- Spritz Schedule: rules-based Aura logic (lib/aura.ts). Haiku copy via Supabase Edge Function.
 
-## Free/Pro split
-Free: /discover, /collection, /collection/[id], /layering, /social, /you
-Pro (gated): /intelligence, /dna-match, /schedule
+## No secrets in code
+.env.local only: NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SERVICE_KEY (server-side only).
+ANTHROPIC_API_KEY in Supabase Vault — never echoed, never committed.
 
-## Scripts (run locally — sandbox has no outbound network)
-node scripts/backfill-parfumo-images.mjs --dry-run --limit=5   # Playwright, Parfumo + Fragrantica
-node scripts/migrate-images-to-storage.mjs --dry-run --limit=5 # copy images to Supabase Storage
-node scripts/smoke-test.mjs                                     # hits live Vercel URL
-
-## No secrets in code. Keys in .env.local only. NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SERVICE_KEY.
+## Session end checklist
+npm run build must pass. Commit: feat: epic-N <description>. Deploy: npx vercel --prod
 ```
 
 ## 11. Self-check before finishing any task
