@@ -10,15 +10,15 @@ test.describe('Discover Page', () => {
   });
 
   test('can search for fragrances', async ({ page }) => {
+    // ARRANGE
     await page.goto('/discover');
-    
-    const searchInput = page.getByPlaceholder('Search by brand or scent…');
-    await searchInput.fill('Aventus');
-    
-    // Check if results update (wait for debounce or results appearing)
-    // We expect some result or "No fragrances found" if DB is empty (unlikely in this context)
-    // Given the catalogue has 282 fragrances, we expect some matches for common terms.
-    await expect(page.locator('p').filter({ hasText: /fragrance/ }).first()).toBeVisible();
+
+    // ACT
+    await page.getByPlaceholder('Search by brand or scent…').fill('Aventus');
+    await page.waitForLoadState('networkidle');
+
+    // ASSERT
+    await expect(page.locator('p').filter({ hasText: /\d+ fragrances?/ }).first()).toBeVisible();
   });
 
   test('can toggle filters', async ({ page }) => {

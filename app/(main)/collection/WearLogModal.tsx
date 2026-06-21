@@ -2,6 +2,10 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
+import { useTemporalCurve, sliderToVector } from './hooks/useTemporalCurve'
+import { useWearLogForm, WEATHER_OPTIONS, OCCASION_OPTIONS } from './hooks/useWearLogForm'
+import { Stage1, Stage2, Stage3 } from './WearLogStages'
+import { StageDots, ChipGroup } from './WearLogDatePicker'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -16,30 +20,6 @@ export interface WearLogModalProps {
 
 type Stage = 1 | 2 | 3 | 'final'
 
-interface TemporalCurve {
-  stage_1_first_spray: { alignment_vector: number }
-  stage_2_the_heart: { alignment_vector: number }
-  stage_3_dry_down: { alignment_vector: number }
-}
-
-interface ContextTags {
-  weather: string
-  occasion: string
-}
-
-// ─── Constants ───────────────────────────────────────────────────────────────
-
-const STAGE_META: Record<1 | 2 | 3, { label: string; sublabel: string }> = {
-  1: { label: 'First Spray', sublabel: 'How does it smell right now?' },
-  2: { label: 'The Heart', sublabel: '2–3 hours in — how is it evolving?' },
-  3: { label: 'Dry Down', sublabel: '6+ hours later — how did it settle?' },
-}
-
-const ALIGNMENT_EMOJIS = ['😶', '😐', '🙂', '😊', '🤩'] as const
-
-const WEATHER_OPTIONS = ['Hot', 'Mild', 'Cold'] as const
-const OCCASION_OPTIONS = ['Work', 'Casual', 'Evening', 'Sport'] as const
-
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function getOrCreateAnonId(): string {
@@ -52,190 +32,6 @@ function getOrCreateAnonId(): string {
   } catch {
     return crypto.randomUUID()
   }
-}
-
-function sliderToVector(value: number): number {
-  return Math.round((value / 100) * 1000) / 1000
-}
-
-function vectorToEmoji(vector: number): string {
-  const idx = Math.round(vector * 4)
-  return ALIGNMENT_EMOJIS[Math.min(idx, 4)]
-}
-
-// ─── Sub-components ───────────────────────────────────────────────────────────
-
-function StageDots({ current }: { current: Stage }) {
-  const numeric = current === 'final' ? 4 : current
-  return (
-    <div
-      style={{
-        display: 'flex',
-        gap: 8,
-        justifyContent: 'center',
-        marginBottom: 24,
-      }}
-      role="progressbar"
-      aria-valuenow={numeric}
-      aria-valuemin={1}
-      aria-valuemax={4}
-      aria-label={`Step ${numeric} of 4`}
-    >
-      {[1, 2, 3, 4].map((n) => (
-        <div
-          key={n}
-          style={{
-            width: n === numeric ? 20 : 8,
-            height: 8,
-            borderRadius: 999,
-            background:
-              n === numeric
-                ? 'var(--color-gold)'
-                : n < numeric
-                ? 'var(--color-primary)'
-                : 'var(--color-border)',
-            transition: 'width 0.25s ease, background 0.2s ease',
-          }}
-        />
-      ))}
-    </div>
-  )
-}
-
-interface AlignmentSliderProps {
-  value: number
-  onChange: (v: number) => void
-  label: string
-}
-
-function AlignmentSlider({ value, onChange, label }: AlignmentSliderProps) {
-  const vector = sliderToVector(value)
-  const activeEmoji = vectorToEmoji(vector)
-  const dotIndex = Math.round(vector * 4)
-
-  return (
-    <div style={{ width: '100%' }}>
-      {/* Emoji dot track */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          marginBottom: 12,
-          padding: '0 4px',
-        }}
-        aria-label={`${label}: ${activeEmoji}`}
-      >
-        {ALIGNMENT_EMOJIS.map((emoji, i) => (
-          <span
-            key={emoji}
-            style={{
-              fontSize: i === dotIndex ? 32 : 22,
-              opacity: i === dotIndex ? 1 : 0.35,
-              transition: 'font-size 0.15s ease, opacity 0.15s ease',
-              lineHeight: 1,
-              display: 'block',
-            }}
-          >
-            {emoji}
-          </span>
-        ))}
-      </div>
-
-      {/* Native range input — styled via CSS */}
-      <input
-        type="range"
-        min={0}
-        max={100}
-        step={1}
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        aria-label={label}
-        style={{
-          width: '100%',
-          WebkitAppearance: 'none',
-          appearance: 'none',
-          height: 6,
-          borderRadius: 999,
-          background: `linear-gradient(to right, var(--color-primary) 0%, var(--color-gold) ${value}%, var(--color-border) ${value}%, var(--color-border) 100%)`,
-          outline: 'none',
-          cursor: 'pointer',
-        }}
-      />
-
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          marginTop: 6,
-          color: 'var(--color-text-muted)',
-          fontSize: 11,
-          fontWeight: 600,
-          letterSpacing: '0.06em',
-          textTransform: 'uppercase',
-        }}
-      >
-        <span>Off</span>
-        <span>Perfect</span>
-      </div>
-    </div>
-  )
-}
-
-interface ChipGroupProps<T extends string> {
-  label: string
-  options: readonly T[]
-  selected: T | ''
-  onToggle: (v: T) => void
-}
-
-function ChipGroup<T extends string>({
-  label,
-  options,
-  selected,
-  onToggle,
-}: ChipGroupProps<T>) {
-  return (
-    <div style={{ marginBottom: 16 }}>
-      <p
-        style={{
-          fontSize: 10,
-          fontWeight: 700,
-          letterSpacing: '0.12em',
-          textTransform: 'uppercase',
-          color: 'var(--color-text-muted)',
-          marginBottom: 8,
-        }}
-      >
-        {label}
-      </p>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-        {options.map((opt) => {
-          const active = selected === opt
-          return (
-            <button
-              key={opt}
-              type="button"
-              onClick={() => onToggle(opt)}
-              style={{
-                padding: '8px 14px',
-                borderRadius: 999,
-                border: `1.5px solid ${active ? 'var(--color-primary)' : 'var(--color-border)'}`,
-                background: active ? 'var(--color-primary)' : 'var(--color-surface)',
-                color: active ? '#fffaf5' : 'var(--color-text)',
-                fontSize: 13,
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'background 0.15s ease, border-color 0.15s ease, color 0.15s ease',
-              }}
-              aria-pressed={active}
-            >
-              {opt}
-            </button>
-          )
-        })}
-      </div>
-    </div>
-  )
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────

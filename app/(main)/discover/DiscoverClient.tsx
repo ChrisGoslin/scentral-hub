@@ -1,143 +1,26 @@
 'use client'
 
-import { useState, useMemo, useEffect, useRef } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
-import Chip from '@/components/ui/Chip'
 import EmptyState from '@/components/ui/EmptyState'
 import PersonaTipTicker from '@/components/ui/PersonaTipTicker'
 import Button from '@/components/ui/Button'
-import { getBrandEmoji } from '@/lib/brandEmoji'
 import { createClient } from '@/utils/supabase/client'
 import { getPersonaById } from '@/lib/personas'
-import Fuse from 'fuse.js'
 import { track } from '@/lib/posthog'
-import ErrorInline from '@/components/ui/ErrorInline'
-import { getFamilyGradient } from '@/lib/familyGradients'
-import { Users } from 'lucide-react'
-
-export type DiscoverFragrance = {
-  id: string
-  brand: string
-  name: string
-  full_name: string
-  family: string
-  projection: string
-  optimal_season: string | null
-  plain_description: string | null
-  inspired_by: string | null
-  image_url: string | null
-  rating: number | null
-  created_at: string
-  owner_count: number
-}
-
-// ── Sort types ───────────────────────────────────────────────────────────────
-
-type SortOption = 'A–Z' | 'Top Rated' | 'Newest' | 'Most Popular'
-const SORT_OPTIONS: SortOption[] = ['A–Z', 'Top Rated', 'Newest', 'Most Popular']
-
-// ── Filter maps ──────────────────────────────────────────────────────────────
-
-const FEEL_FAMILIES: Record<string, string[]> = {
-  'Light & Subtle': ['Floral', 'Chypre', 'Powdery', 'Musk', 'Fresh', 'Citrus', 'Green'],
-  'Warm & Rich':    ['Amber', 'Oriental', 'Woody Oriental', 'Oud', 'Gourmand', 'Resinous'],
-  'Fresh & Clean':  ['Citrus', 'Aquatic', 'Green', 'Fresh', 'Aromatic'],
-  'Bold & Lasting': ['Leather', 'Tobacco', 'Smoky', 'Chypre', 'Woody'],
-}
-const FEEL_PROJECTIONS: Record<string, string[]> = {
-  'Warm & Rich':    ['Strong', 'Moderate', 'Beast Mode'],
-  'Fresh & Clean':  ['Weak', 'Moderate', 'Medium'],
-  'Bold & Lasting': ['Beast Mode', 'Strong', 'Moderate'],
-  'Light & Subtle': ['Weak', 'Medium', 'Moderate'],
-}
-
-const FEEL_AMBIENT: Record<string, { bgGlow: string; chipActive: string }> = {
-  'Warm & Rich':    { bgGlow: 'rgba(160, 98, 42, 0.06)',   chipActive: '#A0622A' },
-  'Fresh & Clean':  { bgGlow: 'rgba(42, 130, 100, 0.06)',  chipActive: '#2A8264' },
-  'Bold & Lasting': { bgGlow: 'rgba(60, 40, 30, 0.08)',    chipActive: '#3C281E' },
-  'Light & Subtle': { bgGlow: 'rgba(140, 110, 180, 0.05)', chipActive: '#8C6EB4' },
-}
-
-// Maps persona's preferred families to the closest FEEL chip key
-function familyToFeel(families: string[]): string | null {
-  const familySet = new Set(families)
-  if (['Leather', 'Tobacco', 'Smoky', 'Resinous', 'Oud'].some(f => familySet.has(f))) return 'Bold & Lasting'
-  if (['Amber', 'Oriental', 'Woody Oriental', 'Gourmand'].some(f => familySet.has(f))) return 'Warm & Rich'
-  if (['Citrus', 'Aquatic', 'Green', 'Fresh Spicy', 'Floral', 'Fresh'].some(f => familySet.has(f))) return 'Fresh & Clean'
-  return null
-}
-
-const LONGEVITY_PROJECTIONS: Record<string, string[]> = {
-  'Lasts all day':  ['Beast Mode', 'Strong'],
-  'A few hours':    ['Moderate', 'Medium'],
-  'Quick burst':    ['Weak'],
-}
-
-const KNOWN_BRANDS = ['Lattafa', 'Afnan', 'Rasasi', 'Armaf', 'Swiss Arabian']
-
-const VIBE_TO_FEEL: Record<string, string> = {
-  warm:  'Warm & Rich',
-  fresh: 'Fresh & Clean',
-  bold:  'Bold & Lasting',
-  soft:  'Light & Subtle',
-}
-
-// ── Card image ───────────────────────────────────────────────────────────────
-
-function FragranceCardMedia({
-  imageUrl, brand, name, family, compact = false,
-}: { imageUrl: string | null; brand: string; name: string; family: string; compact?: boolean }) {
-  const [hovered, setHovered] = useState(false)
-  const [pressed, setPressed] = useState(false)
-  const opacity = pressed ? 0.9 : hovered ? 0.8 : 1
-
-  return (
-    <div
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => { setHovered(false); setPressed(false) }}
-      onPointerDown={() => setPressed(true)}
-      onPointerUp={() => setPressed(false)}
-      style={{
-        width: '100%',
-        aspectRatio: '3/4',
-        position: 'relative',
-        backgroundImage: imageUrl ? undefined : getFamilyGradient(family),
-        opacity,
-        transition: 'opacity 150ms ease-out',
-      }}
-    >
-      {imageUrl && (
-        <Image
-          src={imageUrl}
-          alt={`${brand} ${name}`}
-          fill
-          sizes="(max-width: 768px) 50vw, 25vw"
-          style={{ objectFit: 'cover' }}
-        />
-      )}
-      {/* Ombre overlay for text readability */}
-      <div style={{
-        position: 'absolute', inset: 0,
-        background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.15) 45%, transparent 70%)',
-      }} />
-      <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: compact ? 8 : 10 }}>
-        <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.85)', textTransform: 'uppercase', letterSpacing: '0.1em', textShadow: '0 1px 2px rgba(0,0,0,0.4)' }}>
-          {brand}
-        </p>
-        <p style={{
-          fontFamily: 'var(--font-display)', fontSize: compact ? 12 : 14, color: '#fff',
-          lineHeight: compact ? '15px' : '18px', textShadow: '0 1px 3px rgba(0,0,0,0.5)',
-          overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-        }}>
-          {name}
-        </p>
-      </div>
-    </div>
-  )
-}
-
-// ── Main component ───────────────────────────────────────────────────────────
+import { DiscoverFilters } from './DiscoverFilters'
+import { DiscoverGrid } from './DiscoverGrid'
+import { useFragranceSearch, type DiscoverFragrance } from '@/lib/useFragranceSearch'
+import {
+  SORT_OPTIONS,
+  FEEL_FAMILIES,
+  FEEL_AMBIENT,
+  LONGEVITY_PROJECTIONS,
+  KNOWN_BRANDS,
+  familyToFeel,
+  type SortOption,
+} from '@/lib/filterConstants'
+import { FragranceCardMedia } from '@/components/discover/FragranceCardMedia'
 
 type Props = {
   fragrances: DiscoverFragrance[]
@@ -148,39 +31,42 @@ type Props = {
 
 export default function DiscoverClient({ fragrances, error, hasMore: initialHasMore, totalCount }: Props) {
   const [localFragrances, setLocalFragrances] = useState<DiscoverFragrance[]>(fragrances)
-  const [hasMore, setHasMore]             = useState(initialHasMore)
-  const [loadingMore, setLoadingMore]         = useState(false)
+  const [hasMore, setHasMore] = useState(initialHasMore)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [loadMoreError, setLoadMoreError] = useState<string | null>(null)
-  const [isStreaming, setIsStreaming]         = useState(false)
 
-  const [wishlist, setWishlist]   = useState<string[]>([])
+  const [wishlist, setWishlist] = useState<string[]>([])
   const [showSaved, setShowSaved] = useState(false)
 
-  const [feel, setFeel]           = useState<string | null>(null)
+  const [feel, setFeel] = useState<string | null>(null)
   const [longevity, setLongevity] = useState<string | null>(null)
-  const [brand, setBrand]         = useState<string | null>(null)
-  const [sort, setSort]           = useState<SortOption>('A–Z')
-  const [vibeActive, setVibeActive] = useState(false)
-
-  const [searchTerm, setSearchTerm]       = useState('')
-  const [debouncedSearch, setDebouncedSearch] = useState('')
-  const [searchFocused, setSearchFocused] = useState(false)
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  const [semanticResults, setSemanticResults] = useState<DiscoverFragrance[]>([])
-  const [isSemanticSearching, setIsSemanticSearching] = useState(false)
-  const [semanticError, setSemanticError] = useState<string | null>(null)
+  const [brand, setBrand] = useState<string | null>(null)
+  const [sort, setSort] = useState<SortOption>('A–Z')
 
   const [isMobile, setIsMobile] = useState(false)
 
-  // ── Ambient glow state (driven by active feel chip) ───────────────────────
+  // Ambient glow state (driven by active feel chip)
   const [activeGlow, setActiveGlow] = useState<string>('transparent')
 
-  // ── Persona theme state ───────────────────────────────────────────────────
+  // Persona theme state
   const [activePersona, setActivePersona] = useState<ReturnType<typeof getPersonaById> | null>(null)
   const [activePersonaId, setActivePersonaId] = useState<string | null>(null)
   const [personaVisible, setPersonaVisible] = useState(false)
   const [showPersonaBanner, setShowPersonaBanner] = useState(true)
+
+  // Use search hook
+  const {
+    searchTerm,
+    setSearchTerm,
+    debouncedSearch,
+    searchFocused,
+    setSearchFocused,
+    searchResults,
+    semanticResults,
+    isSemanticSearching,
+    semanticError,
+    setSemanticError,
+  } = useFragranceSearch(localFragrances)
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 400)
