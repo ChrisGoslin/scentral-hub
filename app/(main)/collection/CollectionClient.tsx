@@ -15,6 +15,7 @@ import LoadingShimmer from '@/components/ui/LoadingShimmer'
 import { getBrandEmoji } from '@/lib/brandEmoji'
 import { useFragranceSearch } from '@/app/hooks/useFragranceSearch'
 import { track } from '@/lib/posthog'
+import { getAffinityTier } from '@/lib/affinity'
 import WardrobeShelf from './WardrobeShelf'
 import { CollectionShelfModal } from '@/components/collection/CollectionShelfModal'
 
@@ -119,12 +120,8 @@ function FragranceCard({ f }: { f: CollectionFragrance }) {
   const shortName = f.name.length > 24 ? f.name.slice(0, 22) + '…' : f.name
   const mStatus = maturationStatus(f)
 
-  let affinityBadge = null
-  if (f.affinity_score) {
-    if (f.affinity_score >= 16) affinityBadge = '★ Signature'
-    else if (f.affinity_score >= 8) affinityBadge = '◆ Occasion'
-    else if (f.affinity_score >= 1) affinityBadge = '● Base'
-  }
+  const affinityData = getAffinityTier(f.affinity_score)
+  const affinityBadge = affinityData.badge
 
   return (
     <Card className="flex flex-col gap-2 transition-colors h-full group">

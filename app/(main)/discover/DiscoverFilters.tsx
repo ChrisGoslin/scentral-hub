@@ -29,7 +29,6 @@ type Props = {
   onBrandToggle: (b: string) => void
   onSortChange: (s: SortOption) => void
   onShowSavedToggle: (v: boolean) => void
-  onClearFilters: () => void
 }
 
 export function DiscoverFilters({

@@ -11,6 +11,7 @@ import type { DiscoverFragrance } from '@/lib/useFragranceSearch'
 
 type Props = {
   filtered: DiscoverFragrance[]
+  countLabel: string
   semanticResults: DiscoverFragrance[]
   debouncedSearch: string
   wishlist: string[]
@@ -30,6 +31,7 @@ type Props = {
 
 export function DiscoverGrid({
   filtered,
+  countLabel,
   semanticResults,
   debouncedSearch,
   wishlist,
@@ -50,7 +52,7 @@ export function DiscoverGrid({
       {/* Result count */}
       <div style={{ padding: '16px 16px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-          {filtered.length} fragrance{filtered.length !== 1 ? 's' : ''}
+          {countLabel}
         </p>
         {isSemanticSearching && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>

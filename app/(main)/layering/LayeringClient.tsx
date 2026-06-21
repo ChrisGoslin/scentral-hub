@@ -74,7 +74,7 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
 
       <div className="px-4 py-6">
         {/* ── Manual mode (pre-filled from DNA Match) ── */}
-        {mode === 'manual' && (
+        {wizard.mode === 'manual' && (
           <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-2">
               <h2
@@ -95,8 +95,8 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
 
             <div className="flex flex-col gap-3">
               {([
-                { label: 'Anchor', frag: slot1 },
-                { label: 'Top Note', frag: slot2 },
+                { label: 'Anchor', frag: wizard.slot1 },
+                { label: 'Top Note', frag: wizard.slot2 },
               ] as const).map(({ label, frag }) => (
                 <div
                   key={label}
@@ -142,8 +142,8 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
               ))}
             </div>
 
-            {!manualSynthesized ? (
-              <Button fullWidth onClick={() => setManualSynthesized(true)}>
+            {!wizard.manualSynthesized ? (
+              <Button fullWidth onClick={() => wizard.setManualSynthesized(true)}>
                 Synthesize
               </Button>
             ) : (
@@ -162,31 +162,31 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
                   Stack ready
                 </p>
                 <p style={{ fontSize: 14, color: 'var(--text)', lineHeight: '20px' }}>
-                  Apply <strong>{slot1?.name}</strong> as your anchor layer, then layer{' '}
-                  <strong>{slot2?.name}</strong> on top. Allow 60–90 seconds between applications.
+                  Apply <strong>{wizard.slot1?.name}</strong> as your anchor layer, then layer{' '}
+                  <strong>{wizard.slot2?.name}</strong> on top. Allow 60–90 seconds between applications.
                 </p>
                 <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                  {slot1?.application_zone && `Anchor: ${slot1.application_zone}`}
-                  {slot1?.application_zone && slot2?.application_zone && ' · '}
-                  {slot2?.application_zone && `Top: ${slot2.application_zone}`}
+                  {wizard.slot1?.application_zone && `Anchor: ${wizard.slot1.application_zone}`}
+                  {wizard.slot1?.application_zone && wizard.slot2?.application_zone && ' · '}
+                  {wizard.slot2?.application_zone && `Top: ${wizard.slot2.application_zone}`}
                 </p>
               </div>
             )}
 
-            {manualSynthesized && slot1 && slot2 && (
-              <ChemistPanel 
-                fragranceAId={slot1.id} 
-                fragranceBId={slot2.id} 
-                fragranceAName={slot1.name} 
-                fragranceBName={slot2.name} 
-                useCase={useCase || undefined}
+            {wizard.manualSynthesized && wizard.slot1 && wizard.slot2 && (
+              <ChemistPanel
+                fragranceAId={wizard.slot1.id}
+                fragranceBId={wizard.slot2.id}
+                fragranceAName={wizard.slot1.name}
+                fragranceBName={wizard.slot2.name}
+                useCase={wizard.useCase || undefined}
               />
             )}
 
             <button
               onClick={() => {
-                setMode('aura')
-                setManualSynthesized(false)
+                wizard.setMode('aura')
+                wizard.setManualSynthesized(false)
               }}
               style={{ fontSize: 13, color: 'var(--text-muted)', textAlign: 'center' }}
             >
@@ -196,7 +196,7 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
         )}
 
         {/* ── Step 1 — Use Case ── */}
-        {mode === 'aura' && step === 1 && (
+        {wizard.mode === 'aura' && wizard.step === 1 && (
           <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-3">
               <StepDots current={1} />
@@ -216,7 +216,7 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
                 AURA will build a layering stack tailored to the context.
               </p>
             </div>
-            {auraEnvironment && (
+            {wizard.auraEnvironment && (
               <p
                 style={{
                   fontSize: 12,
@@ -229,12 +229,12 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
                   alignSelf: 'flex-start',
                 }}
               >
-                Your environment: {auraEnvironment}
+                Your environment: {wizard.auraEnvironment}
               </p>
             )}
             <div className="flex flex-wrap gap-2">
-              {USE_CASES.map(uc => (
-                <Chip key={uc} onClick={() => handleUseCaseSelect(uc)}>
+              {USE_CASES_LIST.map(uc => (
+                <Chip key={uc} onClick={() => wizard.handleUseCaseSelect(uc)}>
                   {uc}
                 </Chip>
               ))}
@@ -243,13 +243,13 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
         )}
 
         {/* ── Step 2 — Base Fragrance ── */}
-        {mode === 'aura' && step === 2 && useCase && (
+        {wizard.mode === 'aura' && wizard.step === 2 && wizard.useCase && (
           <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <StepDots current={2} />
                 <button
-                  onClick={() => { setStep(1); setUseCase(null) }}
+                  onClick={() => { wizard.setStep(1); wizard.handleReset() }}
                   className="flex items-center gap-1 focus-visible:outline-none"
                   style={{ fontSize: 13, color: 'var(--text-muted)' }}
                 >
@@ -266,7 +266,7 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
                   marginTop: 8,
                 }}
               >
-                {useCase}
+                {wizard.useCase}
               </p>
               <h2
                 style={{
@@ -284,7 +284,7 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
               </p>
             </div>
 
-            <Button fullWidth onClick={handleAuraDecides}>
+            <Button fullWidth onClick={wizard.handleAuraDecides}>
               ✦ Let AURA decide
             </Button>
 
@@ -304,7 +304,7 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
             </div>
 
             <button
-              onClick={() => { setPickerQuery(''); setPickerOpen(true) }}
+              onClick={() => { wizard.setPickerQuery(''); wizard.setPickerOpen(true) }}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-[var(--r-card)] text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
               style={{ background: 'var(--surface)', border: '1px solid var(--line)' }}
             >
@@ -321,13 +321,13 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
         )}
 
         {/* ── Step 3 — Results ── */}
-        {mode === 'aura' && step === 3 && (
+        {wizard.mode === 'aura' && wizard.step === 3 && (
           <div className="flex flex-col gap-5">
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <StepDots current={3} />
                 <button
-                  onClick={handleBackToStep2}
+                  onClick={wizard.handleBackToStep2}
                   className="flex items-center gap-1 focus-visible:outline-none"
                   style={{ fontSize: 13, color: 'var(--text-muted)' }}
                 >
@@ -344,7 +344,7 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
                   marginTop: 8,
                 }}
               >
-                {useCase} · Layering Stack
+                {wizard.useCase} · Layering Stack
               </p>
               <h2
                 style={{
@@ -355,11 +355,11 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
                   lineHeight: '28px',
                 }}
               >
-                {baseFragrance ? `Layers for ${baseFragrance.name}` : 'Your AURA stack'}
+                {wizard.baseFragrance ? `Layers for ${wizard.baseFragrance.name}` : 'Your AURA stack'}
               </h2>
             </div>
 
-            {isLoading && (
+            {wizard.isLoading && (
               <div className="flex flex-col gap-3">
                 {[0, 1, 2].map(i => (
                   <div
@@ -379,60 +379,60 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
               </div>
             )}
 
-            {error && (
+            {wizard.error && (
               <ErrorInline
-                message={error}
-                onRetry={() => callAura(baseFragrance)}
+                message={wizard.error}
+                onRetry={() => wizard.callAura(wizard.baseFragrance)}
               />
             )}
 
-            {results && results.length > 0 && (
+            {wizard.results && wizard.results.length > 0 && (
               <div className="flex flex-col gap-6">
-                {results.map(item => (
+                {wizard.results.map((item: AuraResultItem) => (
                   <div key={item.id} className="flex flex-col gap-3">
                     <AuraResultCard
                       item={item}
-                      used={usedLayers.has(item.id)}
-                      onUse={() => setUsedLayers(prev => new Set([...prev, item.id]))}
-                      onSave={(e) => handleSaveCombination(item, e)}
-                      isSaving={isSaving}
+                      used={wizard.usedLayers.has(item.id)}
+                      onUse={() => wizard.toggleUsedLayer(item.id)}
+                      onSave={() => handleSaveCombination({
+                        baseFragrance: wizard.baseFragrance,
+                        topItem: item,
+                        useCase: wizard.useCase,
+                        auraEnvironment: wizard.auraEnvironment,
+                      }).then(() => {
+                        wizard.toggleUsedLayer(item.id)
+                      }).catch(() => {
+                        // Handle error
+                      })}
                     />
-
-                    {saveError && lastSavedId === item.id && (
-                      <ErrorInline 
-                        message={saveError} 
-                        onRetry={() => handleSaveCombination(item, { stopPropagation: () => {} } as any)} 
-                      />
-                    )}
 
                     <Button
                       fullWidth
                       variant="secondary"
-                      onClick={() => handleShare(item)}
+                      onClick={() => handleShareCombination(wizard.baseFragrance, item, wizard.useCase)}
                       style={{ border: '1px solid var(--line)' }}
                     >
-                      <Share2 size={16} className="mr-2" strokeWidth={2} />
-                      {sharedId === item.id ? 'Copied!' : 'Share this layer'}
+                      Share this layer
                     </Button>
                   </div>
                 ))}
 
                 {/* Share card — uses top result */}
-                {results[0] && baseFragrance && (
+                {wizard.results[0] && wizard.baseFragrance && (
                   <AuraShareCard
                     data={{
-                      anchor: { brand: baseFragrance.brand, name: baseFragrance.name, phase: baseFragrance.phase },
-                      top: { brand: results[0].brand, name: results[0].name, phase: results[0].phase ?? 2 },
-                      harmony_pct: results[0].harmony_pct ?? Math.round((results[0].similarity_score ?? 0.7) * 100),
-                      use_case: useCase ?? 'casual',
-                      aura_description: `${results[0].family ?? ''} · ${results[0].layering_role} · ${results[0].projection ?? ''} projection`.replace('·  ·', '·'),
+                      anchor: { brand: wizard.baseFragrance.brand, name: wizard.baseFragrance.name, phase: wizard.baseFragrance.phase },
+                      top: { brand: wizard.results[0].brand, name: wizard.results[0].name, phase: wizard.results[0].phase ?? 2 },
+                      harmony_pct: wizard.results[0].harmony_pct ?? Math.round((wizard.results[0].similarity_score ?? 0.7) * 100),
+                      use_case: wizard.useCase ?? 'casual',
+                      aura_description: `${wizard.results[0].family ?? ''} · ${wizard.results[0].layering_role} · ${wizard.results[0].projection ?? ''} projection`.replace('·  ·', '·'),
                     }}
                   />
                 )}
               </div>
             )}
 
-            {results && results.length === 0 && (
+            {wizard.results && wizard.results.length === 0 && (
               <p
                 style={{
                   fontSize: 14,
@@ -445,8 +445,8 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
               </p>
             )}
 
-            {(results !== null || error) && (
-              <Button variant="secondary" fullWidth onClick={handleReset}>
+            {(wizard.results !== null || wizard.error) && (
+              <Button variant="secondary" fullWidth onClick={wizard.handleReset}>
                 Start over
               </Button>
             )}
@@ -456,8 +456,8 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
 
       {/* Fragrance picker sheet */}
       <Sheet
-        open={pickerOpen}
-        onClose={() => { setPickerOpen(false); setPickerQuery('') }}
+        open={wizard.pickerOpen}
+        onClose={() => { wizard.setPickerOpen(false); wizard.setPickerQuery('') }}
       >
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
@@ -472,7 +472,7 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
               Pick anchor
             </h2>
             <button
-              onClick={() => { setPickerOpen(false); setPickerQuery('') }}
+              onClick={() => { wizard.setPickerOpen(false); wizard.setPickerQuery('') }}
               aria-label="Close picker"
             >
               <X size={18} strokeWidth={1.75} style={{ color: 'var(--text-muted)' }} />
@@ -494,8 +494,8 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
             <input
               type="text"
               placeholder="Search by name or brand…"
-              value={pickerQuery}
-              onChange={e => setPickerQuery(e.target.value)}
+              value={wizard.pickerQuery}
+              onChange={e => wizard.setPickerQuery(e.target.value)}
               autoFocus
               className="w-full pl-9 pr-4 py-2.5 rounded-[var(--r-btn)] text-sm focus:outline-none"
               style={{
@@ -509,19 +509,19 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
           <div className="flex flex-col" style={{ marginLeft: -16, marginRight: -16 }}>
             {filteredFragrances.length === 0 ? (
               <p className="px-4 py-4" style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-                No fragrances match &quot;{pickerQuery}&quot;.
+                No fragrances match &quot;{wizard.pickerQuery}&quot;.
               </p>
             ) : (
               filteredFragrances.map(f => (
                 <button
                   key={f.id}
-                  onClick={() => handleFragrancePick(f)}
+                  onClick={() => wizard.handleFragrancePick(f)}
                   className="w-full flex items-center gap-3 px-4 py-3 transition-colors text-left focus-visible:outline-none"
                   style={{
                     background:
-                      baseFragrance?.id === f.id ? 'var(--surface-2)' : undefined,
+                      wizard.baseFragrance?.id === f.id ? 'var(--surface-2)' : undefined,
                     borderLeft:
-                      baseFragrance?.id === f.id
+                      wizard.baseFragrance?.id === f.id
                         ? '2px solid var(--accent)'
                         : '2px solid transparent',
                   }}
@@ -560,3 +560,5 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
     </div>
   )
 }
+
+export type { LayeringFragrance, AuraResultItem, UseCase }

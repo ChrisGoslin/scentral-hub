@@ -11,8 +11,9 @@ import Card from '@/components/ui/Card'
 import LoadingShimmer from '@/components/ui/LoadingShimmer'
 import AuthSheet from '@/components/auth/AuthSheet'
 import ProfileCard from './ProfileCard'
-import InsightsPanel, { WeekWearEntry, SavedCombination } from './InsightsPanel'
-import ScentProfile from './ScentProfile'
+import InsightsPanel, { type WeekWearEntry, type SavedCombination } from './InsightsPanel'
+
+export type { WeekWearEntry, SavedCombination }
 import { track } from '@/lib/posthog'
 
 export type YouClientProps =
@@ -22,6 +23,8 @@ export type YouClientProps =
       email: string
       weekWear: WeekWearEntry[]
       ownedCount: number
+      saves?: SavedCombination[]
+      fetchError?: string | null
     }
 
 export default function YouClient(props: YouClientProps) {
@@ -241,9 +244,6 @@ export default function YouClient(props: YouClientProps) {
           isAtRisk={engagement.isAtRisk}
           streak={engagement.streak}
         />
-
-        {/* Scent Profile — Weather, Environment, Use cases */}
-        <ScentProfile />
       </div>
 
       {/* Bottom spacer */}

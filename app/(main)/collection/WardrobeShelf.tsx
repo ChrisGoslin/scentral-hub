@@ -20,12 +20,12 @@ import ShelfTier from './ShelfTier'
 import WardrobeSidebar, { type ViewMode, type LensKey, type LensFilters } from './WardrobeSidebar'
 import { CollectionShelfModal } from '@/components/collection/CollectionShelfModal'
 import { getBrandEmoji } from '@/lib/brandEmoji'
+import { AFFINITY_TIER_DEFS, type TierKey, getAffinityTier } from '@/lib/affinity'
 import EmptyState from '@/components/ui/EmptyState'
 import Button from '@/components/ui/Button'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type TierKey = 'tier0' | 'tier1' | 'tier2' | 'tier3'
 type TierState = Record<TierKey, CollectionFragrance[]>
 
 type CabinetSnapshot = {
@@ -37,15 +37,6 @@ type CabinetSnapshot = {
     items: Array<{ slotIndex: number; fragranceId: string; nomenclature: string }>
   }>
 }
-
-// ─── Constants ───────────────────────────────────────────────────────────────
-
-const TIER_DEFS = [
-  { key: 'tier0' as TierKey, type: 'TOP_SHELF_SIGNATURES', label: 'Signatures', sublabel: 'Active Top 20', minScore: 16, maxScore: 20, assignScore: 18, locked: false },
-  { key: 'tier1' as TierKey, type: 'MIDDLE_SHELF', label: 'Occasion Modifiers', sublabel: 'Transitional', minScore: 8, maxScore: 15, assignScore: 11, locked: false },
-  { key: 'tier2' as TierKey, type: 'LOWER_SHELF', label: 'Base Anchors', sublabel: 'Dense Ouds', minScore: 1, maxScore: 7, assignScore: 4, locked: false },
-  { key: 'tier3' as TierKey, type: 'HOLDING_ZONE', label: 'Benching', sublabel: 'New / Unrated', minScore: 0, maxScore: 0, assignScore: 0, locked: true },
-]
 
 const SEASON_GROUPS: Array<{ label: string; values: Array<string | null> }> = [
   { label: 'Summer', values: ['High Heat'] },
@@ -59,11 +50,7 @@ const CABINET_ID = 'CAB-MAIN-001' as const
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function classifyToTier(f: CollectionFragrance): TierKey {
-  const s = f.affinity_score
-  if (s == null || s === 0) return 'tier3'
-  if (s >= 16) return 'tier0'
-  if (s >= 8) return 'tier1'
-  return 'tier2'
+  return getAffinityTier(f.affinity_score).tier
 }
 
 function buildInitialTierState(owned: CollectionFragrance[]): TierState {
@@ -78,7 +65,7 @@ function buildSnapshot(tiers: TierState, updatedAt: string): CabinetSnapshot {
   return {
     cabinetId: CABINET_ID,
     updatedAt,
-    shelves: TIER_DEFS.map((def, i) => ({
+    shelves: AFFINITY_TIER_DEFS.map((def, i) => ({
       shelfIndex: i,
       shelfType: def.type,
       items: tiers[def.key].map((f, si) => ({
@@ -366,7 +353,7 @@ export default function WardrobeShelf({ fragrances }: WardrobeShelfProps) {
     const overContainer = findContainer(current, overId)
 
     if (!activeContainer || !overContainer || activeContainer === overContainer) return
-    if (TIER_DEFS.find(d => d.key === overContainer)?.locked) return
+    if (AFFINITY_TIER_DEFS.find(d => d.key === overContainer)?.locked) return
 
     // Check if dropping into tier0 (Top Signatures) and it already has 20 items
     if (overContainer === 'tier0' && current.tier0.length >= 20) {
@@ -476,7 +463,7 @@ export default function WardrobeShelf({ fragrances }: WardrobeShelfProps) {
     } else {
       // Cross-tier drop: tiers already updated in onDragOver — persist to Supabase
       newTiers = tiersRef.current
-      const tierDef = TIER_DEFS.find(d => d.key === overContainer)
+      const tierDef = AFFINITY_TIER_DEFS.find(d => d.key === overContainer)
       if (tierDef && !tierDef.locked) {
         const { data: { user } } = await supabase.auth.getUser()
         if (user) {
@@ -548,7 +535,7 @@ export default function WardrobeShelf({ fragrances }: WardrobeShelfProps) {
             onDragEnd={onDragEnd}
           >
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {TIER_DEFS.map(def => (
+              {AFFINITY_TIER_DEFS.map(def => (
                 <ShelfTier
                   key={def.key}
                   tierId={def.key}

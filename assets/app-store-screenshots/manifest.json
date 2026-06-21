@@ -1,0 +1,66 @@
+{
+  "platform": "AnotherSense App Store Screenshots",
+  "captured": "2026-06-21T11:55:43.145Z",
+  "ios": {
+    "device": "iPhone 14 Pro",
+    "dimensions": "1284x2778px",
+    "screens": [
+      {
+        "name": "landing",
+        "description": "Landing page",
+        "file": "ios/ios_landing_1284x2778.png"
+      },
+      {
+        "name": "discover",
+        "description": "Discovery & Search",
+        "file": "ios/ios_discover_1284x2778.png"
+      },
+      {
+        "name": "collection",
+        "description": "Living Wardrobe",
+        "file": "ios/ios_collection_1284x2778.png"
+      },
+      {
+        "name": "you",
+        "description": "XP & Personalization",
+        "file": "ios/ios_you_1284x2778.png"
+      },
+      {
+        "name": "spritz",
+        "description": "Spritz Schedule",
+        "file": "ios/ios_spritz_1284x2778.png"
+      }
+    ]
+  },
+  "android": {
+    "device": "Android Pixel 7",
+    "dimensions": "1440x3200px",
+    "screens": [
+      {
+        "name": "landing",
+        "description": "Landing page",
+        "file": "android/android_landing_1440x3200.png"
+      },
+      {
+        "name": "discover",
+        "description": "Discovery & Search",
+        "file": "android/android_discover_1440x3200.png"
+      },
+      {
+        "name": "collection",
+        "description": "Living Wardrobe",
+        "file": "android/android_collection_1440x3200.png"
+      },
+      {
+        "name": "you",
+        "description": "XP & Personalization",
+        "file": "android/android_you_1440x3200.png"
+      },
+      {
+        "name": "spritz",
+        "description": "Spritz Schedule",
+        "file": "android/android_spritz_1440x3200.png"
+      }
+    ]
+  }
+}

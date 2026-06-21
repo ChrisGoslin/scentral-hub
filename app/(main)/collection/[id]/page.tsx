@@ -37,10 +37,6 @@ const LONGEVITY_CHIP: Record<string, string> = {
   'Light':      '🌤 Light wear',
 }
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-}
-
 export default async function FragranceDetailPage({ 
   params, 
   searchParams 
