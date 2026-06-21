@@ -11,6 +11,7 @@ import LoadingShimmer from '@/components/ui/LoadingShimmer'
 import ErrorInline from '@/components/ui/ErrorInline'
 import AuraShareCard, { type AuraShareData } from '@/app/components/AuraShareCard'
 import dynamic from 'next/dynamic'
+import { track } from '@/lib/posthog'
 
 const ChemistPanel = dynamic(() => import('@/components/ChemistPanel'), { ssr: false })
 
@@ -291,12 +292,18 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
     setUsedLayers(new Set())
     setStep(3)
 
+    track('layering_suggestion_requested', {
+      use_case: useCase,
+      has_base_fragrance: base !== null,
+      base_fragrance_id: base?.id ?? '',
+    })
+
     try {
       const res = await fetch('/api/aura', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          use_case: useCase,
+          use_case: useCase ?? '',
           base_fragrance_id: base?.id ?? null,
           ...(auraEnvironment ? { environment: auraEnvironment } : {}),
         }),
@@ -304,8 +311,16 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'AURA could not generate suggestions')
       setResults(data.results ?? [])
+      track('layering_suggestions_received', {
+        use_case: useCase ?? '',
+        suggestion_count: data.results?.length ?? 0,
+      })
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Something went wrong')
+      track('layering_suggestion_error', {
+        use_case: useCase ?? '',
+        error_message: e instanceof Error ? e.message : 'Unknown error',
+      })
     } finally {
       setIsLoading(false)
     }
@@ -370,13 +385,25 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
 
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Save failed')
-      
+
+      track('layering_combo_saved', {
+        use_case: useCase ?? '',
+        base_fragrance_id: baseFragrance?.id ?? '',
+        top_fragrance_id: item.id,
+        harmony_score: item.similarity_score,
+        layering_role: item.layering_role,
+      })
+
       setSaveStatus('success')
       setUsedLayers(prev => new Set([...prev, item.id]))
       setTimeout(() => setSaveStatus('idle'), 2500)
     } catch (e) {
       setSaveStatus('error')
       setSaveError(e instanceof Error ? e.message : 'Could not save combination')
+      track('layering_save_error', {
+        use_case: useCase ?? '',
+        error_message: e instanceof Error ? e.message : 'Unknown error',
+      })
     } finally {
       setIsSaving(false)
     }

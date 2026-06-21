@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import Link from 'next/link'
 
 export type ViewMode = 'all' | 'byHouse' | 'bySeason' | 'wishlist'
 
@@ -195,6 +196,34 @@ export default function WardrobeSidebar({ viewMode, onViewModeChange, activeLens
             </span>
           </button>
         ))}
+
+        {/* Scan Barcode button */}
+        <Link
+          href="/scanner"
+          style={{
+            width: 56,
+            padding: '10px 0',
+            borderRadius: 8,
+            border: '1px solid rgba(196,154,60,0.3)',
+            background: 'rgba(196,154,60,0.1)',
+            color: 'rgba(220,180,80,0.85)',
+            fontSize: 18,
+            cursor: 'pointer',
+            transition: 'all var(--motion-fast) var(--ease)',
+            display: 'flex',
+            flexDirection: 'column' as const,
+            alignItems: 'center',
+            gap: 3,
+            textDecoration: 'none',
+            textAlign: 'center' as const,
+          }}
+          title="Scan Barcode"
+        >
+          <span style={{ fontSize: 16 }}>📱</span>
+          <span style={{ fontSize: 7, fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.06em', lineHeight: 1 }}>
+            Scan
+          </span>
+        </Link>
 
         {/* Sensory Lenses divider + buttons (desktop) */}
         <div style={{ width: 40, height: 1, background: 'rgba(196,154,60,0.2)', margin: '8px 0 4px' }} />
