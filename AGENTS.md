@@ -69,7 +69,7 @@ fictional features, lore like "Agent Luna / Hegemony / Shadow Branching", and ha
   - `as_xp` ← NEW — local XP cache (optimistic UI, mirrors `user_xp` in Supabase)
   - `as_streak` ← NEW — local streak cache
   - Note: `scentral_vibe` (legacy) still bridged via `VIBE_TO_FEEL` map in DiscoverClient — do not remove the bridge.
-- **Persona engine:** `lib/personas.ts` — single source of truth. 3 personas: `velvet_intellectual`, `solar_minimalist`, `dark_alchemist`. Import `getPersonaById` or `PERSONAS` from here; never duplicate persona data inline.
+- **Persona engine:** `lib/personas.ts` — single source of truth. 6 personas: `velvet_intellectual`, `solar_minimalist`, `dark_alchemist`, `ritual_keeper`, `rebel_experimentalist`, `comfort_seeker`. Import `getPersonaById` or `PERSONAS` from here; never duplicate persona data inline.
 - **DB projection column — VALID VALUES ONLY:** `Beast Mode`, `Strong`, `Moderate`, `Medium`, `Weak`. Values `Light`, `Soft`, `Whisper`, `Heavy`, `Massive` do NOT exist in the DB. Any filter using these will return 0 results.
 - **Living Wardrobe (Collection page):**
   - Shelf paradigm: **Apothecary Grid** — 3-column grid, 2:3 aspect ratio, drag physics with `--motion-organic`.
@@ -331,7 +331,7 @@ as_streak — local streak cache  ← NEW
 (scentral_vibe is legacy — bridged via VIBE_TO_FEEL in DiscoverClient, do not remove)
 
 ## Persona engine
-lib/personas.ts — 3 personas: velvet_intellectual, solar_minimalist, dark_alchemist.
+lib/personas.ts — 6 personas: velvet_intellectual, solar_minimalist, dark_alchemist, ritual_keeper, rebel_experimentalist, comfort_seeker.
 Import getPersonaById or PERSONAS. Never inline persona data.
 
 ## DB projection values (VERIFIED — only these exist)
