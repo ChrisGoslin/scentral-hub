@@ -13,6 +13,9 @@ const SANCTUARIES = [
   { id: 'alley',       name: 'The Midnight Alley',     cue: 'Smoke, oud, rain on stone',          icon: '🌑' },
   { id: 'dune',        name: 'The Desert Dune',        cue: 'Warm amber, dry wood, sunset',       icon: '🏜️' },
   { id: 'harbour',     name: 'The Harbour Dawn',       cue: 'Salt, citrus, cool linen',           icon: '⚓' },
+  { id: 'temple',      name: 'The Sacred Temple',      cue: 'Incense, sandalwood, myrrh',         icon: '🕉️' },
+  { id: 'studio',      name: 'The Creative Studio',    cue: 'Leather, ginger, unexpected spice',  icon: '🎨' },
+  { id: 'home',        name: 'The Warm Home',          cue: 'Vanilla, almond, soft amber',        icon: '🏠' },
 ]
 
 // ─── Projection options ───────────────────────────────────────────────────────
