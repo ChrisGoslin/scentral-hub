@@ -460,13 +460,29 @@ export default function CollectionClient({ fragrances, totalCount }: { fragrance
       {/* Add Bottle Sheet */}
       <Sheet open={isAddSheetOpen} onClose={() => setIsAddSheetOpen(false)}>
         <div className="space-y-6">
-          <header>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--text)' }}>
-              Add a bottle
-            </h2>
-            <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>
-              Search the catalogue to add to your collection.
-            </p>
+          <header className="flex items-start justify-between gap-3">
+            <div>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--text)' }}>
+                Add a bottle
+              </h2>
+              <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>
+                Search the catalogue to add to your collection.
+              </p>
+            </div>
+            <Link
+              href="/scanner"
+              onClick={() => setIsAddSheetOpen(false)}
+              style={{
+                fontSize: 12,
+                color: 'var(--accent)',
+                textDecoration: 'none',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+                marginTop: 2,
+              }}
+            >
+              📷 Scan barcode
+            </Link>
           </header>
 
           {addSuccess ? (
