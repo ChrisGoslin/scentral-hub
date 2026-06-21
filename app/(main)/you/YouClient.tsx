@@ -15,6 +15,7 @@ import LoadingShimmer from '@/components/ui/LoadingShimmer'
 import AuthSheet from '@/components/auth/AuthSheet'
 import ThemeToggle from '@/components/ThemeToggle'
 import WardrobeIntelligence from './WardrobeIntelligence'
+import { track } from '@/lib/posthog'
 
 export type SavedCombination = {
   id: string
@@ -488,6 +489,10 @@ export default function YouClient(props: YouClientProps) {
     isAtRisk: false,
     streak: 0
   })
+
+  useEffect(() => {
+    track('profile_tab_viewed', { section: 'main_profile', signed_in: props.state === 'signed-in' })
+  }, [props.state])
 
   useEffect(() => {
     setVibe(localStorage.getItem('scentral_vibe'))

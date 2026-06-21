@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Script from 'next/script'
 import { createClient } from '@/utils/supabase/client'
+import { track } from '@/lib/posthog'
 
 interface TikTokVideo {
   handle: string
@@ -68,6 +69,10 @@ function TrailingSpacer() {
 }
 
 export default function SocialClient() {
+  useEffect(() => {
+    track('social_tab_viewed', { section: 'community_videos' })
+  }, [])
+
   return (
     <div
       style={{
