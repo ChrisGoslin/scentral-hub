@@ -1,9 +1,9 @@
 'use client'
 
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { useTemporalCurve, sliderToVector } from './hooks/useTemporalCurve'
-import { useWearLogForm, WEATHER_OPTIONS, OCCASION_OPTIONS } from './hooks/useWearLogForm'
+import { useWearLogForm } from './hooks/useWearLogForm'
 import { Stage1, Stage2, Stage3 } from './WearLogStages'
 import { StageDots, ChipGroup } from './WearLogDatePicker'
 
@@ -44,38 +44,19 @@ export default function WearLogModal({
   onClose,
   onSaved,
 }: WearLogModalProps) {
-  const [stage, setStage] = useState<Stage>(1)
-
-  // Alignment vectors (0–100 slider values)
-  const [s1, setS1] = useState(50)
-  const [s2, setS2] = useState(50)
-  const [s3, setS3] = useState(50)
-
-  // Final stage
-  const [overallRating, setOverallRating] = useState<'like' | 'dislike' | null>(null)
-  const [weather, setWeather] = useState<(typeof WEATHER_OPTIONS)[number] | ''>('')
-  const [occasion, setOccasion] = useState<(typeof OCCASION_OPTIONS)[number] | ''>('')
-
-  // UI state
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  const supabase = createClient()
+  const [stage, setStage] = React.useState<Stage>(1)
+  const temporal = useTemporalCurve()
+  const form = useWearLogForm()
   const overlayRef = useRef<HTMLDivElement>(null)
 
   // Reset on open
   useEffect(() => {
     if (isOpen) {
       setStage(1)
-      setS1(50)
-      setS2(50)
-      setS3(50)
-      setOverallRating(null)
-      setWeather('')
-      setOccasion('')
-      setError(null)
+      temporal.reset()
+      form.reset()
     }
-  }, [isOpen])
+  }, [isOpen, temporal, form])
 
   // Trap focus + close on Escape
   useEffect(() => {
@@ -100,30 +81,19 @@ export default function WearLogModal({
   }, [stage])
 
   const handleSave = useCallback(async () => {
-    if (!overallRating) {
-      setError('Please choose Like or Dislike before saving.')
+    if (!form.overallRating) {
+      form.setError('Please choose Like or Dislike before saving.')
       return
     }
 
-    setSaving(true)
-    setError(null)
+    form.setSaving(true)
+    form.setError(null)
 
     const effectiveUserId = userId ?? getOrCreateAnonId()
-
-    const temporalCurve: TemporalCurve = {
-      stage_1_first_spray: { alignment_vector: sliderToVector(s1) },
-      stage_2_the_heart: { alignment_vector: sliderToVector(s2) },
-      stage_3_dry_down: { alignment_vector: sliderToVector(s3) },
-    }
-
-    const contextTags: ContextTags = {
-      weather: weather || '',
-      occasion: occasion || '',
-    }
-
-    // Derive a 1–5 integer rating from overall + average alignment
-    const avgVector = (sliderToVector(s1) + sliderToVector(s2) + sliderToVector(s3)) / 3
-    const baseRating = overallRating === 'like' ? 3 : 1
+    const temporalCurve = temporal.toTemporalCurve()
+    const contextTags = form.toContextTags()
+    const avgVector = temporal.getAverageVector()
+    const baseRating = form.overallRating === 'like' ? 3 : 1
     const ratingInt = Math.min(5, Math.round(baseRating + avgVector * 2))
 
     try {
@@ -136,12 +106,12 @@ export default function WearLogModal({
           user_id: effectiveUserId,
           fragrance_id: fragranceId,
           worn_on: new Date().toISOString().slice(0, 10),
-          occasion: occasion || null,
-          weather: weather || null,
+          occasion: form.occasion || null,
+          weather: form.weather || null,
           rating: ratingInt,
           metadata: {
             temporal_curve: temporalCurve,
-            overall_rating: overallRating,
+            overall_rating: form.overallRating,
             context_tags: contextTags,
           },
         }),
@@ -162,23 +132,11 @@ export default function WearLogModal({
           : typeof err === 'object' && err !== null && 'message' in err
           ? String((err as { message: unknown }).message)
           : 'Something went wrong. Please try again.'
-      setError(msg)
+      form.setError(msg)
     } finally {
-      setSaving(false)
+      form.setSaving(false)
     }
-  }, [
-    overallRating,
-    userId,
-    fragranceId,
-    s1,
-    s2,
-    s3,
-    weather,
-    occasion,
-    supabase,
-    onSaved,
-    onClose,
-  ])
+  }, [form, userId, fragranceId, temporal, onSaved, onClose])
 
   if (!isOpen) return null
 
@@ -220,9 +178,6 @@ export default function WearLogModal({
             boxShadow: 'var(--shadow-lg)',
             position: 'relative',
           }}
-          // Override to centered card on wider viewports via inline media trick:
-          // we can't use @media inline, so we use CSS custom properties + a wrapper class.
-          // The wrapping overlay uses align-items: flex-end for mobile, overridden below.
           className="wear-log-card"
         >
           {/* Drag handle pill */}
@@ -256,45 +211,17 @@ export default function WearLogModal({
           <StageDots current={stage} />
 
           {/* ── Stage 1 / 2 / 3 ───────────────────────────────────────────────── */}
-          {(stage === 1 || stage === 2 || stage === 3) && (() => {
-            const meta = STAGE_META[stage]
-            const value = stage === 1 ? s1 : stage === 2 ? s2 : s3
-            const setter = stage === 1 ? setS1 : stage === 2 ? setS2 : setS3
+          {stage === 1 && (
+            <Stage1 value={temporal.s1} onChange={temporal.setS1} />
+          )}
 
-            return (
-              <>
-                <h2
-                  style={{
-                    fontFamily: 'var(--font-display)',
-                    fontSize: 26,
-                    fontWeight: 400,
-                    color: 'var(--color-text)',
-                    textAlign: 'center',
-                    marginBottom: 4,
-                  }}
-                >
-                  {meta.label}
-                </h2>
-                <p
-                  style={{
-                    color: 'var(--color-text-muted)',
-                    fontSize: 14,
-                    textAlign: 'center',
-                    marginBottom: 32,
-                    lineHeight: 1.4,
-                  }}
-                >
-                  {meta.sublabel}
-                </p>
+          {stage === 2 && (
+            <Stage2 value={temporal.s2} onChange={temporal.setS2} />
+          )}
 
-                <AlignmentSlider
-                  value={value}
-                  onChange={setter}
-                  label={`${meta.label} alignment`}
-                />
-              </>
-            )
-          })()}
+          {stage === 3 && (
+            <Stage3 value={temporal.s3} onChange={temporal.setS3} />
+          )}
 
           {/* ── Final stage ────────────────────────────────────────────────────── */}
           {stage === 'final' && (
@@ -333,12 +260,12 @@ export default function WearLogModal({
                 }}
               >
                 {(['like', 'dislike'] as const).map((opt) => {
-                  const active = overallRating === opt
+                  const active = form.overallRating === opt
                   return (
                     <button
                       key={opt}
                       type="button"
-                      onClick={() => setOverallRating(opt)}
+                      onClick={() => form.setOverallRating(opt)}
                       style={{
                         minHeight: 56,
                         borderRadius: 16,
@@ -374,19 +301,19 @@ export default function WearLogModal({
               {/* Context chips */}
               <ChipGroup
                 label="Weather"
-                options={WEATHER_OPTIONS}
-                selected={weather}
-                onToggle={(v) => setWeather((prev) => (prev === v ? '' : v))}
+                options={form.WEATHER_OPTIONS}
+                selected={form.weather}
+                onToggle={form.toggleWeather}
               />
               <ChipGroup
                 label="Occasion"
-                options={OCCASION_OPTIONS}
-                selected={occasion}
-                onToggle={(v) => setOccasion((prev) => (prev === v ? '' : v))}
+                options={form.OCCASION_OPTIONS}
+                selected={form.occasion}
+                onToggle={form.toggleOccasion}
               />
 
               {/* Inline error */}
-              {error && (
+              {form.error && (
                 <div
                   role="alert"
                   style={{
@@ -401,7 +328,7 @@ export default function WearLogModal({
                     lineHeight: 1.4,
                   }}
                 >
-                  {error}
+                  {form.error}
                 </div>
               )}
             </>
@@ -420,7 +347,7 @@ export default function WearLogModal({
               <button
                 type="button"
                 onClick={handleBack}
-                disabled={saving}
+                disabled={form.saving}
                 style={{
                   flex: '0 0 auto',
                   minHeight: 48,
@@ -430,7 +357,7 @@ export default function WearLogModal({
                   background: 'transparent',
                   color: 'var(--color-text-muted)',
                   fontWeight: 650,
-                  cursor: saving ? 'not-allowed' : 'pointer',
+                  cursor: form.saving ? 'not-allowed' : 'pointer',
                   fontSize: 15,
                 }}
               >
@@ -442,18 +369,18 @@ export default function WearLogModal({
             <button
               type="button"
               onClick={stage === 'final' ? handleSave : handleNext}
-              disabled={saving}
+              disabled={form.saving}
               style={{
                 flex: 1,
                 minHeight: 48,
                 borderRadius: 14,
                 border: 0,
-                background: saving ? 'var(--color-border)' : 'var(--color-primary)',
-                color: saving ? 'var(--color-text-muted)' : '#fffaf5',
+                background: form.saving ? 'var(--color-border)' : 'var(--color-primary)',
+                color: form.saving ? 'var(--color-text-muted)' : '#fffaf5',
                 fontWeight: 650,
                 fontSize: 15,
-                cursor: saving ? 'not-allowed' : 'pointer',
-                boxShadow: saving ? 'none' : '0 8px 22px rgb(160 98 42 / 24%)',
+                cursor: form.saving ? 'not-allowed' : 'pointer',
+                boxShadow: form.saving ? 'none' : '0 8px 22px rgb(160 98 42 / 24%)',
                 transition: 'background 0.15s ease, box-shadow 0.15s ease',
                 display: 'flex',
                 alignItems: 'center',
@@ -461,7 +388,7 @@ export default function WearLogModal({
                 gap: 6,
               }}
             >
-              {saving ? (
+              {form.saving ? (
                 'Saving…'
               ) : stage === 'final' ? (
                 'Save Log'
@@ -479,7 +406,7 @@ export default function WearLogModal({
             <button
               type="button"
               onClick={onClose}
-              disabled={saving}
+              disabled={form.saving}
               aria-label="Close"
               style={{
                 position: 'absolute',

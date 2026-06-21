@@ -3,7 +3,7 @@
 import React from 'react'
 import { AlignmentSlider } from './WearLogDatePicker'
 
-const STAGE_META: Record<1 | 2 | 3, { label: string; sublabel: string }> = {
+export const STAGE_META: Record<1 | 2 | 3, { label: string; sublabel: string }> = {
   1: { label: 'First Spray', sublabel: 'How does it smell right now?' },
   2: { label: 'The Heart', sublabel: '2–3 hours in — how is it evolving?' },
   3: { label: 'Dry Down', sublabel: '6+ hours later — how did it settle?' },
