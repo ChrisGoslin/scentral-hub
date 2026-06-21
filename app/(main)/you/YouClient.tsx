@@ -295,9 +295,13 @@ function SettingsSection({ email, onSignOut, signingOut, onReset }: { email: str
         <button
           onClick={async () => {
             try {
-              const { registerPush } = await import('@/lib/push')
-              await registerPush()
-              alert('Push notifications enabled!')
+              const { subscribeToPush } = await import('@/lib/push')
+              const subscription = await subscribeToPush()
+              if (subscription) {
+                alert('Push notifications enabled!')
+              } else {
+                alert('Permission denied or not supported')
+              }
             } catch (e: any) {
               alert('Failed to enable push: ' + e.message)
             }

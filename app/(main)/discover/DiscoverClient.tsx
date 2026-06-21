@@ -240,6 +240,15 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
     }
   }, [searchTerm])
 
+  // Track search usage
+  useEffect(() => {
+    if (debouncedSearch.trim().length > 0) {
+      track('search_used', {
+        query_length: debouncedSearch.length,
+      })
+    }
+  }, [debouncedSearch])
+
   // Local fuzzy search
   const fuse = useMemo(
     () => new Fuse(localFragrances, {
@@ -422,8 +431,24 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
       })
     }
   }
-  const toggleLongevity = (l: string) => setLongevity(longevity === l ? null : l)
-  const toggleBrand = (b: string) => setBrand(brand === b ? null : b)
+  const toggleLongevity = (l: string) => {
+    const isAdding = longevity !== l
+    setLongevity(longevity === l ? null : l)
+    track('filter_applied', {
+      type: 'longevity',
+      value: l,
+      action: isAdding ? 'add' : 'remove',
+    })
+  }
+  const toggleBrand = (b: string) => {
+    const isAdding = brand !== b
+    setBrand(brand === b ? null : b)
+    track('filter_applied', {
+      type: 'brand',
+      value: b,
+      action: isAdding ? 'add' : 'remove',
+    })
+  }
   const clearFilters = () => {
     setFeel(null)
     setActiveGlow('transparent')

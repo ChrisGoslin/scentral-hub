@@ -234,7 +234,7 @@ export default function CollectionClient({ fragrances, totalCount }: { fragrance
       setLocalPickerError(error.message)
       setIsAdding(false)
     } else {
-      track('bottle_added', { fragrance_id: selectedToConfirm.id, fragrance_name: `${selectedToConfirm.brand} ${selectedToConfirm.name}` })
+      track('bottle_added', { fragrance_id: selectedToConfirm.id, brand: selectedToConfirm.brand })
       setAddSuccess(true)
       setIsAdding(false)
       setTimeout(() => {
@@ -274,11 +274,8 @@ export default function CollectionClient({ fragrances, totalCount }: { fragrance
           affinity_score: 18 // Top Signatures tier
         })
 
-      track('bottle_added_with_demote', {
-        fragrance_id: pendingBottleForModal.id,
-        fragrance_name: `${pendingBottleForModal.brand} ${pendingBottleForModal.name}`,
-        demoted_id: bottleIdToDemote
-      })
+      track('bottle_added', { fragrance_id: pendingBottleForModal.id, brand: pendingBottleForModal.brand })
+        
 
       setIsShelfModalOpen(false)
       setPendingBottleForModal(null)

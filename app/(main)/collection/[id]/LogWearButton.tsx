@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import { track } from '@/lib/posthog'
 
 export default function LogWearButton({ collectionId, initialWears = 0, initialStreak = 0 }: { collectionId: string, initialWears?: number, initialStreak?: number }) {
   const [state, setState] = useState<'idle' | 'loading' | 'done'>('idle')
@@ -34,6 +35,10 @@ export default function LogWearButton({ collectionId, initialWears = 0, initialS
       if (data.total_wears !== undefined) setWears(data.total_wears)
       if (data.current_streak !== undefined) setStreak(data.current_streak)
 
+      track('wear_logged', {
+        fragrance_id: collectionId,
+        streak: data.current_streak ?? 0,
+      })
       setState('done')
       setTimeout(() => setState('idle'), 1500)
     } catch {

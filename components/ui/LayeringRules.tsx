@@ -8,14 +8,14 @@ export default function LayeringRules() {
   const [expanded, setExpanded] = useState(false)
 
   const rules = useMemo(() => {
-    const dos = LAYERING_DOS_AND_DONTS.filter(r => r.type === 'DO')
-    const donts = LAYERING_DOS_AND_DONTS.filter(r => r.type === 'DONT')
+    const dos = LAYERING_DOS_AND_DONTS.filter(r => r.type === 'do')
+    const donts = LAYERING_DOS_AND_DONTS.filter(r => r.type === 'dont')
     
     const shuffledDos = [...dos].sort(() => 0.5 - Math.random()).slice(0, 3)
     const shuffledDonts = [...donts].sort(() => 0.5 - Math.random()).slice(0, 3)
     
     return { shuffledDos, shuffledDonts }
-  }, [expanded]) // Re-shuffle when expanded
+  }, [expanded])
 
   return (
     <div style={{ marginTop: 24, border: '1px solid var(--line)', borderRadius: 'var(--r-card)', overflow: 'hidden' }}>
@@ -35,21 +35,35 @@ export default function LayeringRules() {
       {expanded && (
         <div style={{ padding: '16px', background: 'var(--bg)', borderTop: '1px solid var(--line)', display: 'grid', gap: 12 }}>
           <div>
-            <p style={{ fontSize: 10, fontWeight: 700, color: '#2A8264', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>Do</p>
-            <div style={{ display: 'grid', gap: 8 }}>
+            <p style={{ fontSize: 10, fontWeight: 700, color: '#2A8264', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>
+              Do
+            </p>
+            <div style={{ display: 'grid', gap: 12 }}>
               {rules.shuffledDos.map((r, i) => (
-                <div key={i} style={{ paddingLeft: 10, borderLeft: '2px solid #2A8264', fontSize: 13, color: 'var(--text)', lineHeight: '18px' }}>
-                  {r.text}
+                <div key={i} style={{ paddingLeft: 10, borderLeft: '2px solid #2A8264' }}>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', lineHeight: '18px', marginBottom: 4 }}>
+                    {r.title}
+                  </p>
+                  <p style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: '16px' }}>
+                    {r.body}
+                  </p>
                 </div>
               ))}
             </div>
           </div>
           <div>
-            <p style={{ fontSize: 10, fontWeight: 700, color: '#b45309', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>Don't</p>
-            <div style={{ display: 'grid', gap: 8 }}>
+            <p style={{ fontSize: 10, fontWeight: 700, color: '#b45309', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>
+              Don't
+            </p>
+            <div style={{ display: 'grid', gap: 12 }}>
               {rules.shuffledDonts.map((r, i) => (
-                <div key={i} style={{ paddingLeft: 10, borderLeft: '2px solid #b45309', fontSize: 13, color: 'var(--text)', lineHeight: '18px' }}>
-                  {r.text}
+                <div key={i} style={{ paddingLeft: 10, borderLeft: '2px solid #b45309' }}>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', lineHeight: '18px', marginBottom: 4 }}>
+                    {r.title}
+                  </p>
+                  <p style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: '16px' }}>
+                    {r.body}
+                  </p>
                 </div>
               ))}
             </div>

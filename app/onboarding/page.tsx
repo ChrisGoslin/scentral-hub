@@ -45,6 +45,8 @@ export default function OnboardingPage() {
     prefersReducedMotion.current = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (localStorage.getItem('scentral_onboarded') === 'true') {
       router.replace('/discover')
+    } else {
+      track('onboarding_started')
     }
   }, [router])
 
@@ -57,6 +59,7 @@ export default function OnboardingPage() {
   const handleReveal = () => {
     const p = getPersonaByInputs(sanctuary!, projection!)
     setPersona(p)
+    track('persona_revealed', { persona_id: p.id })
     setVisible(false)
     setTimeout(() => {
       setStep(4)
@@ -69,10 +72,7 @@ export default function OnboardingPage() {
     localStorage.setItem('scentral_onboarded', 'true')
     localStorage.setItem('scentral_persona', persona.id)
     localStorage.setItem('scentral_persona_name', persona.name)
-    track('persona_set', {
-      persona_id: persona.id,
-      step: 'reveal_confirmed',
-    })
+    track('persona_to_discover', { persona_id: persona.id })
     router.push(`/discover?persona=${persona.id}`)
   }
 
@@ -81,8 +81,13 @@ export default function OnboardingPage() {
     router.push('/discover')
   }
 
-  const toggleContext = (c: string) =>
-    setContexts(prev => prev.includes(c) ? prev.filter(x => x !== c) : [...prev, c])
+  const toggleContext = (c: string) => {
+    setContexts(prev => {
+      const newContexts = prev.includes(c) ? prev.filter(x => x !== c) : [...prev, c]
+      track('context_selected', { context: c, selected: !prev.includes(c) })
+      return newContexts
+    })
+  }
 
   const stepLabel = step === 1 ? '1/3' : step === 2 ? '2/3' : step === 3 ? '3/3' : ''
 
@@ -282,7 +287,7 @@ export default function OnboardingPage() {
                 {SANCTUARIES.map(s => {
                   const active = sanctuary === s.id
                   return (
-                    <button key={s.id} onClick={() => { setSanctuary(s.id); setTimeout(() => transitionTo(2), 220) }} style={{
+                    <button key={s.id} onClick={() => { setSanctuary(s.id); track('sanctuary_selected', { sanctuary: s.id }); setTimeout(() => transitionTo(2), 220) }} style={{
                       display: 'flex', flexDirection: 'column', alignItems: 'flex-start',
                       padding: '14px', minHeight: 90,
                       border: active ? '1.5px solid var(--accent, #A0622A)' : '1px solid var(--line, #D8D2CA)',
@@ -318,7 +323,7 @@ export default function OnboardingPage() {
                 {PROJECTIONS.map(p => {
                   const active = projection === p.id
                   return (
-                    <button key={p.id} onClick={() => { setProjection(p.id); setTimeout(() => transitionTo(3), 220) }} style={{
+                    <button key={p.id} onClick={() => { setProjection(p.id); track('projection_selected', { projection: p.id }); setTimeout(() => transitionTo(3), 220) }} style={{
                       display: 'flex', flexDirection: 'column', alignItems: 'flex-start',
                       padding: '18px 20px',
                       border: active ? '1.5px solid var(--accent, #A0622A)' : '1px solid var(--line, #D8D2CA)',
