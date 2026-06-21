@@ -25,7 +25,7 @@ export default async function DiscoverPage() {
 
   const ids = (data ?? []).map(f => f.id)
   const { data: ownerCounts } = ids.length
-    ? await supabase.rpc('fragrance_owner_counts', { fragrance_ids: ids })
+    ? await supabase.rpc('get_fragrance_social_proof', { fragrance_ids: ids })
     : { data: null }
   const ownerCountById = new Map<string, number>(
     (ownerCounts ?? []).map((row: { fragrance_id: string; owner_count: number }) => [row.fragrance_id, row.owner_count])

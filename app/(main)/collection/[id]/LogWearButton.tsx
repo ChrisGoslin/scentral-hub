@@ -1,14 +1,26 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 
 export default function LogWearButton({ collectionId, initialWears = 0, initialStreak = 0 }: { collectionId: string, initialWears?: number, initialStreak?: number }) {
   const [state, setState] = useState<'idle' | 'loading' | 'done'>('idle')
   const [wears, setWears] = useState(initialWears)
   const [streak, setStreak] = useState(initialStreak)
+  const buttonRef = useRef<HTMLButtonElement>(null)
 
   async function handleLog() {
     if (state !== 'idle') return
+
+    // Trigger press animation
+    if (buttonRef.current) {
+      buttonRef.current.style.animation = 'button-press 300ms cubic-bezier(0.34, 1.56, 0.64, 1)'
+      setTimeout(() => {
+        if (buttonRef.current) {
+          buttonRef.current.style.animation = ''
+        }
+      }, 300)
+    }
+
     setState('loading')
     try {
       const res = await fetch('/api/wear', {
@@ -17,13 +29,13 @@ export default function LogWearButton({ collectionId, initialWears = 0, initialS
         body: JSON.stringify({ collection_id: collectionId }),
       })
       if (!res.ok) throw new Error('Failed to log')
-      
+
       const data = await res.json()
       if (data.total_wears !== undefined) setWears(data.total_wears)
       if (data.current_streak !== undefined) setStreak(data.current_streak)
-      
+
       setState('done')
-      setTimeout(() => setState('idle'), 2000)
+      setTimeout(() => setState('idle'), 1500)
     } catch {
       setState('idle')
     }
@@ -32,6 +44,7 @@ export default function LogWearButton({ collectionId, initialWears = 0, initialS
   return (
     <div className="flex flex-col gap-2 w-full">
       <button
+        ref={buttonRef}
         onClick={handleLog}
         disabled={state === 'loading'}
         style={{
@@ -46,15 +59,18 @@ export default function LogWearButton({ collectionId, initialWears = 0, initialS
           cursor: state === 'idle' ? 'pointer' : 'default',
           transition: 'background 0.2s, color 0.2s',
           textAlign: 'center',
+          willChange: 'transform',
         }}
       >
-        {state === 'done'
-          ? 'Logged ✓'
-          : wears > 0
-          ? streak >= 2
-            ? `🔥 ${streak}-day streak`
-            : `Worn ${wears} time${wears !== 1 ? 's' : ''}`
-          : 'Log a wear'}
+        <span style={state === 'done' ? { animation: 'text-flash 1.5s ease-in-out' } : undefined}>
+          {state === 'done'
+            ? 'Logged ✓'
+            : wears > 0
+            ? streak >= 2
+              ? `🔥 ${streak}-day streak`
+              : `Worn ${wears} time${wears !== 1 ? 's' : ''}`
+            : 'Log a wear'}
+        </span>
       </button>
     </div>
   )

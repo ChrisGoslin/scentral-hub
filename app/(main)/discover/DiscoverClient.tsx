@@ -14,6 +14,7 @@ import Fuse from 'fuse.js'
 import { track } from '@/lib/posthog'
 import ErrorInline from '@/components/ui/ErrorInline'
 import { getFamilyGradient } from '@/lib/familyGradients'
+import { Users } from 'lucide-react'
 
 export type DiscoverFragrance = {
   id: string
@@ -223,6 +224,12 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
       setActiveGlow(FEEL_AMBIENT[initialFeel]?.bgGlow ?? 'transparent')
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    document.title = activePersona
+      ? `Discover · For ${activePersona.name}`
+      : 'Discover | AnotherSense'
+  }, [activePersona])
 
   // Unified Hybrid Search: Local (Fuse.js) + Semantic (Vector)
   useEffect(() => {
@@ -449,7 +456,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
 
       const ids = data.map(f => f.id)
       const { data: ownerCounts } = ids.length
-        ? await supabase.rpc('fragrance_owner_counts', { fragrance_ids: ids })
+        ? await supabase.rpc('get_fragrance_social_proof', { fragrance_ids: ids })
         : { data: null }
       const ownerCountById = new Map<string, number>(
         (ownerCounts ?? []).map((row: { fragrance_id: string; owner_count: number }) => [row.fragrance_id, row.owner_count])
@@ -503,7 +510,8 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
           zIndex: 0,
           pointerEvents: 'none',
           background: activeGlow,
-          transition: 'background 0.5s ease',
+          transition: 'background 300ms ease',
+          willChange: 'background',
         }}
       />
     <div style={{
@@ -556,16 +564,18 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
             {Object.keys(FEEL_FAMILIES).map(v => {
               const isActive = feel === v
               return (
-                <Chip 
-                  key={v} 
-                  selected={isActive} 
-                  onClick={() => toggleFeel(v)} 
+                <Chip
+                  key={v}
+                  selected={isActive}
+                  onClick={() => toggleFeel(v)}
                   style={{
                     flexShrink: 0,
+                    borderColor: isActive ? FEEL_AMBIENT[v]?.chipActive ?? 'var(--accent)' : 'var(--line)',
+                    backgroundColor: isActive ? `${FEEL_AMBIENT[v]?.chipActive ?? 'var(--accent)'}15` : 'transparent',
                     boxShadow: isActive
-                      ? `0 0 0 1px ${FEEL_AMBIENT[v]?.chipActive ?? 'var(--accent)'}, 0 2px 12px ${FEEL_AMBIENT[v]?.bgGlow ?? 'transparent'}`
+                      ? `0 0 0 1px ${FEEL_AMBIENT[v]?.chipActive ?? 'var(--accent)'}`
                       : 'none',
-                    transition: 'box-shadow 0.3s ease, background 0.3s ease, color 0.15s',
+                    transition: 'border-color 200ms cubic-bezier(0.16, 1, 0.3, 1), background-color 200ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 200ms cubic-bezier(0.16, 1, 0.3, 1)',
                   }}
                 >
                   {v}
@@ -792,10 +802,19 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
                   display: 'flex',
                   flexDirection: 'column',
                   gap: 8,
-                  transition: 'border-color var(--motion-fast)',
+                  transition: 'border-color var(--motion-fast), transform 180ms ease, box-shadow 180ms ease',
+                  transform: 'scale(1)',
                 }}
-                onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--accent)')}
-                onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--line)')}
+                onMouseEnter={e => {
+                  e.currentTarget.style.borderColor = 'var(--accent)'
+                  e.currentTarget.style.transform = 'scale(1.02)'
+                  e.currentTarget.style.boxShadow = 'var(--shadow-md)'
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.borderColor = 'var(--line)'
+                  e.currentTarget.style.transform = 'scale(1)'
+                  e.currentTarget.style.boxShadow = 'none'
+                }}
               >
                 {/* Image + wishlist toggle */}
                 <div style={{ position: 'relative' }}>
@@ -830,9 +849,10 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
                 <div style={{ padding: '0 12px 12px', display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {/* Owner count */}
                   {f.owner_count > 0 && (
-                    <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                      {f.owner_count} {f.owner_count === 1 ? 'person owns' : 'own'} this
-                    </p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--text-muted)' }}>
+                      <Users size={11} />
+                      <span>{f.owner_count} {f.owner_count === 1 ? 'person owns' : 'people own'} this</span>
+                    </div>
                   )}
 
                   {/* Rating */}
