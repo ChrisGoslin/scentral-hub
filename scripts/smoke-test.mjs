@@ -8,7 +8,7 @@
  *   BASE_URL=https://your-preview.vercel.app node scripts/smoke-test.mjs
  */
 
-const BASE_URL = process.env.BASE_URL || 'https://scentral-seven.vercel.app'
+const BASE_URL = process.env.BASE_URL || 'https://scentral-hub.vercel.app'
 
 const ROUTES = [
   // [path, expected status, description]

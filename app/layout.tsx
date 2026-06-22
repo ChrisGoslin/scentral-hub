@@ -24,7 +24,7 @@ const unbounded = Unbounded({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://scentral-seven.vercel.app"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://scentral-hub.vercel.app"),
   title: "AnotherSense",
   description: "Your daily scent ritual. Remember how you smell.",
   manifest: "/manifest.json",

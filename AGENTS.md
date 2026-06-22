@@ -166,7 +166,7 @@ When multiple prompts are delegated in one session, order them by dependency —
 cd ~/Projects/scentral-hub && npx vercel --prod
 ```
 
-This takes ~60s and aliases directly to `scentral-seven.vercel.app`. Confirm READY state before declaring a task done.
+This takes ~60s and aliases directly to `scentral-hub.vercel.app`. Confirm READY state before declaring a task done.
 
 ## 8. Script execution rules (critical — read before running any script)
 
@@ -267,9 +267,16 @@ non-`[a-z0-9]` character to a hyphen, turning `è`/`é`/etc. into a stray `-` in
 (`Bibliothèque` → `biblioth-que` instead of `bibliotheque`). Fix: `.normalize('NFD').replace(/[̀-ͯ]/g, '')`
 before lowercasing, to fold accented letters to their base ASCII form first.
 
+**L14 — `scentral-seven.vercel.app` is STALE, do not trust on faith.** Verified 2026-06-22: it 404s on
+routes that have shipped since (`/spritz`), while the deploy's actual `▲ Aliased` output pointed at
+`scentral-hub.vercel.app`, which served the route fine. All hardcoded references (`scripts/smoke-test.mjs`,
+`package.json` `test:smoke:prod`, `app/layout.tsx` `metadataBase`, §1, §7) were repointed to
+`scentral-hub.vercel.app`. Aliases can silently drift — after any `npx vercel --prod`, check the `▲ Aliased`
+line in the deploy output rather than assuming the URL in this doc is still current.
+
 ## 10. LLM briefing block (copy-paste into Claude Code / Cursor / other agents)
 
-Use this block at the start of every new CLI agent session. Summary of §1 — update both when §1 changes. Last verified: 2026-06-21.
+Use this block at the start of every new CLI agent session. Summary of §1 — update both when §1 changes. Last verified: 2026-06-22.
 
 ```
 # AnotherSense — Project Briefing
@@ -284,7 +291,7 @@ Use this block at the start of every new CLI agent session. Summary of §1 — u
 - Next.js 16.2.9 (App Router, route groups like `(main)`)
 - React 19.2.4
 - Supabase JS 2.x — project scentral-mvp (lrkdwobnemczvhpixpky)
-- Deployed on Vercel → scentral-seven.vercel.app
+- Deployed on Vercel → scentral-hub.vercel.app
 - Tailwind CSS + CSS variables for all colours (NO hardcoded hex — ever)
 - @dnd-kit/core + @dnd-kit/sortable for Living Wardrobe drag-and-drop
 
