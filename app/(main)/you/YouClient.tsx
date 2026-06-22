@@ -40,6 +40,7 @@ export default function YouClient(props: YouClientProps) {
   // Stats
   const [weekWear, setWeekWear] = useState<WeekWearEntry[]>(props.state === 'signed-in' ? props.weekWear : [])
   const [ownedCount, setOwnedCount] = useState(props.state === 'signed-in' ? props.ownedCount : 0)
+  const [auraStreak, setAuraStreak] = useState(0)
 
   // Fetch saved combinations
   const userId = props.state === 'signed-in' ? (props.email ? 'user-id' : null) : null
@@ -50,6 +51,23 @@ export default function YouClient(props: YouClientProps) {
     setVibe(localStorage.getItem('scentral_vibe'))
     setEngagement(calculateEngagement())
     setMounted(true)
+
+    // Aura Spritz Schedule streak — anon_id-keyed, independent of auth state.
+    const anonId = localStorage.getItem('scentral_anon_id')
+    if (anonId) {
+      ;(async () => {
+        try {
+          const { data } = await createClient()
+            .from('user_streaks')
+            .select('current_streak')
+            .eq('anon_id', anonId)
+            .maybeSingle()
+          setAuraStreak(data?.current_streak ?? 0)
+        } catch {
+          // best-effort — badge just won't show
+        }
+      })()
+    }
   }, [])
 
   // Fetch stats when signed in
@@ -151,8 +169,13 @@ export default function YouClient(props: YouClientProps) {
   if (props.state === 'signed-out') {
     return (
       <div style={{ background: 'var(--bg)', minHeight: '100dvh' }}>
-        <div className="px-4 pt-8 pb-4" style={{ borderBottom: '1px solid var(--line)' }}>
+        <div className="px-4 pt-8 pb-4 flex items-center justify-between" style={{ borderBottom: '1px solid var(--line)' }}>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--text)', lineHeight: '34px' }}>You</h1>
+          {auraStreak > 0 && (
+            <Link href="/spritz" style={{ fontSize: 13, fontWeight: 700, color: 'var(--xp-color)' }}>
+              🔥 {auraStreak}-day streak
+            </Link>
+          )}
         </div>
 
         <div className="px-6 py-8 animate-up">
@@ -219,8 +242,13 @@ export default function YouClient(props: YouClientProps) {
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100dvh', color: 'var(--text)', overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}>
       {/* Header */}
-      <div className="px-4 pt-8 pb-4" style={{ borderBottom: '1px solid var(--line)' }}>
+      <div className="px-4 pt-8 pb-4 flex items-center justify-between" style={{ borderBottom: '1px solid var(--line)' }}>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--text)', lineHeight: '34px' }}>You</h1>
+        {auraStreak > 0 && (
+          <Link href="/spritz" style={{ fontSize: 13, fontWeight: 700, color: 'var(--xp-color)' }}>
+            🔥 {auraStreak}-day streak
+          </Link>
+        )}
       </div>
 
       <div className="px-4 py-6 flex flex-col gap-6">

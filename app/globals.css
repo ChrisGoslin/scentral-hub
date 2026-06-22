@@ -25,6 +25,17 @@
   --font-display: var(--font-instrument-serif), Georgia, serif;
   --font-body: var(--font-unbounded), 'Unbounded', sans-serif;
 
+  /* M3 type scale — fluid clamp() roles (Sprint 1-A) */
+  --text-display: clamp(2rem, 1.5rem + 2.5vw, 3.5rem);
+  --text-headline: clamp(1.5rem, 1.25rem + 1.25vw, 2rem);
+  --text-title: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
+  --text-body: clamp(0.875rem, 0.8rem + 0.25vw, 1rem);
+
+  /* Glassmorphism — frosted surface composite (light default, overridden in dark) */
+  --glass-bg: rgba(255, 255, 255, 0.5);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-blur: blur(16px) saturate(1.4);
+
   /* Legacy Bridge — maps old tokens to new system */
   --accent: var(--color-primary);
   --bg: var(--color-bg);
@@ -44,23 +55,49 @@
   --color-primary-dark: #a07e32;
   --color-muted: var(--color-text-muted);
   --color-faint: var(--color-text-faint);
+
+  /* Ambient body gradient stops */
+  --bg-gradient-start: #fffaf3;
+  --bg-gradient-end: #ece3d7;
+
+  /* Aura AI — amber-gold glow (Epic 4: Spritz Schedule) */
+  --aura: oklch(0.72 0.08 60);
+  --aura-surface: oklch(0.18 0.04 60 / 0.6);
+  --aura-border: oklch(0.45 0.06 60 / 0.3);
+  --xp-color: oklch(0.78 0.14 85);
+
+  /* Motion scale */
+  --motion-instant: 80ms cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-responsive: 200ms cubic-bezier(0.2, 0.6, 0.2, 1);
+  --motion-ceremonial: 480ms cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-organic: 800ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 [data-theme="dark"] {
-  --color-bg: #161310;
-  --color-surface: #1D1916;
-  --color-surface-2: #231F1B;
-  --color-surface-offset: #2A2520;
+  /* Dark Ambient Material (Sprint 1-A) — cool slate base, frosted glass surfaces */
+  --color-bg: #0F172A;
+  --color-surface: rgba(255, 255, 255, 0.03);
+  --color-surface-2: rgba(255, 255, 255, 0.05);
+  --color-surface-offset: rgba(255, 255, 255, 0.07);
   --color-primary: #D4884A;
-  --color-text: #E8E0D5;
-  --color-text-muted: #9E9589;
-  --color-text-faint: #6B6360;
+  --color-text: #F1F5F9;
+  --color-text-muted: #94A3B8;
+  --color-text-faint: #64748B;
   --color-gold: #E8C060;
-  --color-border: #3A3530;
+  --color-border: rgba(255, 255, 255, 0.10);
   --color-success: #66B36F;
-  --color-error: #E85C7A;
+  --color-error: #F87171;
 
-  /* Dark mode shadows (higher opacity, warmer tone) */
+  /* Glassmorphism — frosted surface composite over the slate-blue ambient bg */
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.10);
+  --glass-blur: blur(16px) saturate(1.4);
+
+  /* Ambient body gradient stops — cool slate, no warm undertone */
+  --bg-gradient-start: #16213a;
+  --bg-gradient-end: #060a14;
+
+  /* Dark mode shadows (higher opacity, cool ambient tone) */
   --shadow-sm: 0 1px 3px oklch(0 0 0 / 0.24);
   --shadow-md: 0 4px 16px oklch(0 0 0 / 0.32);
   --shadow-lg: 0 12px 40px oklch(0 0 0 / 0.42);
@@ -114,15 +151,19 @@ html {
 
 body {
   margin: 0;
-  background: radial-gradient(circle at top left, #fffaf3 0, var(--color-bg) 38%, #ece3d7 100%);
+  background: radial-gradient(circle at top left, var(--bg-gradient-start) 0, var(--color-bg) 38%, var(--bg-gradient-end) 100%);
   color: var(--color-text);
   font-family: Arial, Helvetica, sans-serif;
   letter-spacing: 0;
   overscroll-behavior-y: contain;
 }
 
-[data-theme="dark"] body {
-  background: radial-gradient(circle at top left, #201914 0, var(--color-bg) 38%, #0f0d0a 100%);
+/* Glassmorphism — frosted surface utility (Sprint 1-A) */
+.glass {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 
 button,
@@ -1145,4 +1186,14 @@ blockquote {
 /* Optional: slightly lighter image filter for dark mode */
 .image-dark-mode {
   filter: brightness(1.08) contrast(1.1);
+}
+
+/* Hide scrollbar for edge-to-edge filter carousels (Epic 2) */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
 }
