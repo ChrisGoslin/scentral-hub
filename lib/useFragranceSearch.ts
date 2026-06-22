@@ -10,6 +10,7 @@ export type DiscoverFragrance = {
   family: string
   projection: string
   optimal_season: string | null
+  use_case: string | null
   plain_description: string | null
   inspired_by: string | null
   image_url: string | null

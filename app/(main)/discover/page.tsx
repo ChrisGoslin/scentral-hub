@@ -15,7 +15,7 @@ export default async function DiscoverPage() {
   const [{ data, error }, { count: totalCount }] = await Promise.all([
     supabase
       .from('fragrances')
-      .select('id, brand, name, full_name, family, projection, optimal_season, plain_description, inspired_by, image_url, rating, created_at')
+      .select('id, brand, name, full_name, family, projection, optimal_season, use_case, plain_description, inspired_by, image_url, rating, created_at')
       .order('brand', { ascending: true })
       .range(0, 99),
     supabase
@@ -39,6 +39,7 @@ export default async function DiscoverPage() {
     family: f.family ?? '',
     projection: f.projection ?? '',
     optimal_season: f.optimal_season ?? null,
+    use_case: f.use_case ?? null,
     plain_description: f.plain_description ?? null,
     inspired_by: f.inspired_by ?? null,
     image_url: f.image_url ?? null,

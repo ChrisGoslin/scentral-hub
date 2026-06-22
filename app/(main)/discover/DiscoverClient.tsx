@@ -11,15 +11,17 @@ import { track } from '@/lib/posthog'
 import { DiscoverFilters } from './DiscoverFilters'
 import { DiscoverGrid } from './DiscoverGrid'
 import { useFragranceSearch, type DiscoverFragrance } from '@/lib/useFragranceSearch'
+import { SmellsLikeResults, type SmellsLikeResult } from '@/components/discover/SmellsLikeResults'
 
 export type { DiscoverFragrance }
 import {
   SORT_OPTIONS,
-  FEEL_FAMILIES,
-  FEEL_AMBIENT,
+  VIBE_TAGS,
   LONGEVITY_PROJECTIONS,
+  OCCASION_TAGS,
   KNOWN_BRANDS,
-  familyToFeel,
+  matchesAnyTag,
+  familyToVibeTags,
   type SortOption,
 } from '@/lib/filterConstants'
 import { FragranceCardMedia } from '@/components/discover/FragranceCardMedia'
@@ -40,15 +42,11 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
   const [wishlist, setWishlist] = useState<string[]>([])
   const [showSaved, setShowSaved] = useState(false)
 
-  const [feel, setFeel] = useState<string | null>(null)
+  const [vibe, setVibe] = useState<string[]>([])
   const [longevity, setLongevity] = useState<string | null>(null)
-  const [brand, setBrand] = useState<string | null>(null)
+  const [occasion, setOccasion] = useState<string[]>([])
+  const [house, setHouse] = useState<string[]>([])
   const [sort, setSort] = useState<SortOption>('A–Z')
-
-  const [isMobile, setIsMobile] = useState(false)
-
-  // Ambient glow state (driven by active feel chip)
-  const [activeGlow, setActiveGlow] = useState<string>('transparent')
 
   // Persona theme state
   const [activePersona, setActivePersona] = useState<ReturnType<typeof getPersonaById> | null>(null)
@@ -70,13 +68,37 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
     setSemanticError,
   } = useFragranceSearch(localFragrances)
 
-  // Mobile check
+  // "Smells Like" proximity search
+  const [smellsLikeMode, setSmellsLikeMode] = useState(false)
+  const [smellsLikeResults, setSmellsLikeResults] = useState<SmellsLikeResult[]>([])
+  const [smellsLikeLoading, setSmellsLikeLoading] = useState(false)
+
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 400)
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
+    if (!smellsLikeMode || debouncedSearch.trim().length < 2) {
+      setSmellsLikeResults([])
+      return
+    }
+
+    let cancelled = false
+    setSmellsLikeLoading(true)
+
+    fetch(`/api/search?q=${encodeURIComponent(debouncedSearch.trim())}&mode=smells_like`)
+      .then(res => res.json())
+      .then(data => {
+        if (!cancelled) setSmellsLikeResults(data.results ?? [])
+      })
+      .catch(e => {
+        console.error('Smells Like search error', e)
+        if (!cancelled) setSmellsLikeResults([])
+      })
+      .finally(() => {
+        if (!cancelled) setSmellsLikeLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [smellsLikeMode, debouncedSearch])
 
   // Persona & localStorage mount effect
   useEffect(() => {
@@ -88,24 +110,23 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
     const params = new URLSearchParams(window.location.search)
     const urlPersona = params.get('persona')
     const personaId = urlPersona ?? localStorage.getItem('scentral_persona')
-    let defaultPersonaFeel = null
+    let defaultPersonaVibes: string[] = []
 
     if (personaId) {
       const persona = getPersonaById(personaId)
       if (persona) {
         setActivePersonaId(personaId)
         setActivePersona(persona)
-        defaultPersonaFeel = familyToFeel(persona.discover_filters.families)
+        defaultPersonaVibes = familyToVibeTags(persona.discover_filters.families)
         setTimeout(() => setPersonaVisible(true), 80)
       }
     }
 
-    const storedFeel = localStorage.getItem('scentral_discover_feel')
-    const initialFeel = storedFeel !== null ? (storedFeel || null) : defaultPersonaFeel
+    const storedVibe = localStorage.getItem('scentral_discover_vibe')
+    const initialVibe = storedVibe !== null ? JSON.parse(storedVibe) : defaultPersonaVibes
 
-    if (initialFeel) {
-      setFeel(initialFeel)
-      setActiveGlow(FEEL_AMBIENT[initialFeel]?.bgGlow ?? 'transparent')
+    if (initialVibe.length > 0) {
+      setVibe(initialVibe)
     }
   }, [])
 
@@ -146,7 +167,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
   }
 
   // Filtering logic
-  const anyFilter = !!(feel || longevity || brand)
+  const anyFilter = !!(vibe.length || longevity || occasion.length || house.length)
   const anySearch = searchTerm.trim().length > 0
 
   const filtered = useMemo(() => {
@@ -159,30 +180,27 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
       results = [...results, ...sements]
     }
 
-    // Feel filter
-    if (feel) {
-      const families = [feel]
-      results = results.filter(f => {
-        const matchFam = families.length === 0 || (f.family && families.some(fam => FEEL_FAMILIES[fam]?.includes(f.family)))
-        const matchProj =
-          f.projection && [feel].some(proj => LONGEVITY_PROJECTIONS[proj]?.includes(f.projection))
-        return matchFam || matchProj
-      })
+    // Vibe filter (multi-select, OR logic)
+    if (vibe.length > 0) {
+      results = results.filter(f => vibe.some(v => matchesAnyTag(f.family, VIBE_TAGS[v] ?? [])))
     }
 
-    // Longevity filter
+    // Longevity filter (single-select)
     if (longevity) {
       const projections = LONGEVITY_PROJECTIONS[longevity] || []
       results = results.filter(f => projections.includes(f.projection))
     }
 
-    // Brand filter
-    if (brand) {
-      if (brand === 'Other') {
-        results = results.filter(f => !KNOWN_BRANDS.includes(f.brand))
-      } else {
-        results = results.filter(f => f.brand === brand)
-      }
+    // Occasion filter (multi-select, OR logic)
+    if (occasion.length > 0) {
+      results = results.filter(f => occasion.some(o => matchesAnyTag(f.use_case, OCCASION_TAGS[o] ?? [])))
+    }
+
+    // House filter (multi-select, OR logic)
+    if (house.length > 0) {
+      results = results.filter(f =>
+        house.some(h => (h === 'Niche' ? !KNOWN_BRANDS.includes(f.brand) : f.brand === h))
+      )
     }
 
     // Wishlist filter
@@ -207,38 +225,44 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
     }
 
     return sorted
-  }, [localFragrances, semanticResults, feel, longevity, brand, showSaved, wishlist, sort, anySearch, searchResults, debouncedSearch])
+  }, [localFragrances, semanticResults, vibe, longevity, occasion, house, showSaved, wishlist, sort, anySearch, searchResults, debouncedSearch])
 
   const countLabel = (() => {
     const base = `${filtered.length} fragrance${filtered.length !== 1 ? 's' : ''}`
-    if (feel) return `${base} • ${feel}`
+    if (vibe.length) return `${base} • ${vibe.join(', ')}`
     if (longevity) return `${base} • ${longevity}`
-    if (brand) return `${base} • ${brand}`
+    if (occasion.length) return `${base} • ${occasion.join(', ')}`
+    if (house.length) return `${base} • ${house.join(', ')}`
     if (showSaved) return `${base} • Saved`
     return base
   })()
 
-  const toggleFeel = (f: string) => {
-    const next = feel === f ? null : f
-    setFeel(next)
-    setActiveGlow(next ? (FEEL_AMBIENT[next]?.bgGlow ?? 'transparent') : 'transparent')
-    localStorage.setItem('scentral_discover_feel', next || '')
+  const toggleVibe = (v: string) => {
+    setVibe(prev => {
+      const next = prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v]
+      localStorage.setItem('scentral_discover_vibe', JSON.stringify(next))
+      return next
+    })
   }
 
   const toggleLongevity = (l: string) => {
     setLongevity(longevity === l ? null : l)
   }
 
-  const toggleBrand = (b: string) => {
-    setBrand(brand === b ? null : b)
+  const toggleOccasion = (o: string) => {
+    setOccasion(prev => (prev.includes(o) ? prev.filter(x => x !== o) : [...prev, o]))
+  }
+
+  const toggleHouse = (h: string) => {
+    setHouse(prev => (prev.includes(h) ? prev.filter(x => x !== h) : [...prev, h]))
   }
 
   const clearFilters = () => {
-    setFeel(null)
-    setActiveGlow('transparent')
-    localStorage.setItem('scentral_discover_feel', '')
+    setVibe([])
+    localStorage.setItem('scentral_discover_vibe', JSON.stringify([]))
     setLongevity(null)
-    setBrand(null)
+    setOccasion([])
+    setHouse([])
     setShowSaved(false)
     setSearchTerm('')
   }
@@ -253,7 +277,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
       const { data, error: err } = await supabase
         .from('fragrances')
         .select(
-          'id, brand, name, full_name, family, projection, optimal_season, plain_description, inspired_by, image_url, rating, created_at'
+          'id, brand, name, full_name, family, projection, optimal_season, use_case, plain_description, inspired_by, image_url, rating, created_at'
         )
         .order('brand', { ascending: true })
         .range(offset, offset + 99)
@@ -284,6 +308,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
         family: f.family ?? '',
         projection: f.projection ?? '',
         optimal_season: f.optimal_season ?? null,
+        use_case: f.use_case ?? null,
         plain_description: f.plain_description ?? null,
         inspired_by: f.inspired_by ?? null,
         image_url: f.image_url ?? null,
@@ -320,19 +345,6 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
 
   return (
     <div style={{ position: 'relative' }}>
-      {/* Ambient feel-filter colour wash */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'fixed',
-          inset: 0,
-          zIndex: 0,
-          pointerEvents: 'none',
-          background: activeGlow,
-          transition: 'background 300ms ease',
-          willChange: 'background',
-        }}
-      />
       <div
         style={{
           position: 'relative',
@@ -346,24 +358,29 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
           WebkitOverflowScrolling: 'touch',
         }}
       >
-        {/* Filters */}
-        <DiscoverFilters
-          feel={feel}
-          longevity={longevity}
-          brand={brand}
-          sort={sort}
-          showSaved={showSaved}
-          searchTerm={searchTerm}
-          searchFocused={searchFocused}
-          activeGlow={activeGlow}
-          onSearchTermChange={setSearchTerm}
-          onSearchFocus={setSearchFocused}
-          onFeelToggle={toggleFeel}
-          onLongevityToggle={toggleLongevity}
-          onBrandToggle={toggleBrand}
-          onSortChange={setSort}
-          onShowSavedToggle={setShowSaved}
-        />
+        {/* Filters — sticky edge-to-edge carousels */}
+        <div style={{ position: 'sticky', top: 0, zIndex: 40, background: 'var(--bg)' }}>
+          <DiscoverFilters
+            vibe={vibe}
+            longevity={longevity}
+            occasion={occasion}
+            house={house}
+            sort={sort}
+            showSaved={showSaved}
+            searchTerm={searchTerm}
+            searchFocused={searchFocused}
+            smellsLikeMode={smellsLikeMode}
+            onSearchTermChange={setSearchTerm}
+            onSearchFocus={setSearchFocused}
+            onSmellsLikeToggle={() => setSmellsLikeMode(v => !v)}
+            onVibeToggle={toggleVibe}
+            onLongevityToggle={toggleLongevity}
+            onOccasionToggle={toggleOccasion}
+            onHouseToggle={toggleHouse}
+            onSortChange={setSort}
+            onShowSavedToggle={setShowSaved}
+          />
+        </div>
 
         {/* New to me strip */}
         {!anyFilter && !anySearch && (() => {
@@ -468,9 +485,8 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
             <button
               onClick={() => {
                 setShowPersonaBanner(false)
-                setFeel(null)
-                setActiveGlow('transparent')
-                localStorage.setItem('scentral_discover_feel', '')
+                setVibe([])
+                localStorage.setItem('scentral_discover_vibe', JSON.stringify([]))
               }}
               aria-label="Show all fragrances"
               style={{
@@ -492,24 +508,27 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
 
         {/* Grid */}
         <PersonaTipTicker personaId={activePersonaId} />
-        <DiscoverGrid
-          filtered={filtered}
-          countLabel={countLabel}
-          semanticResults={semanticResults}
-          debouncedSearch={debouncedSearch}
-          wishlist={wishlist}
-          isMobile={isMobile}
-          isSemanticSearching={isSemanticSearching}
-          semanticError={semanticError}
-          loadingMore={loadingMore}
-          loadMoreError={loadMoreError}
-          hasMore={hasMore}
-          totalCount={localFragrances.length}
-          onWishlistToggle={toggleWishlist}
-          onLoadMore={loadMore}
-          onClearFilters={clearFilters}
-          onRetrySearch={() => setSemanticError(null)}
-        />
+        {smellsLikeMode && anySearch ? (
+          <SmellsLikeResults results={smellsLikeResults} loading={smellsLikeLoading} />
+        ) : (
+          <DiscoverGrid
+            filtered={filtered}
+            countLabel={countLabel}
+            semanticResults={semanticResults}
+            debouncedSearch={debouncedSearch}
+            wishlist={wishlist}
+            isSemanticSearching={isSemanticSearching}
+            semanticError={semanticError}
+            loadingMore={loadingMore}
+            loadMoreError={loadMoreError}
+            hasMore={hasMore}
+            totalCount={localFragrances.length}
+            onWishlistToggle={toggleWishlist}
+            onLoadMore={loadMore}
+            onClearFilters={clearFilters}
+            onRetrySearch={() => setSemanticError(null)}
+          />
+        )}
       </div>
     </div>
   )
