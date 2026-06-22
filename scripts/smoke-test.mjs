@@ -18,7 +18,11 @@ const ROUTES = [
   ['/layering',        200, 'Layering page'],
   ['/you',             200, 'You tab'],
   ['/onboarding',      200, 'Onboarding flow'],
+  ['/spritz',          200, 'Spritz Schedule page'],
+  ['/privacy',         200, 'Privacy Policy page'],
+  ['/terms',           200, 'Terms of Service page'],
   ['/api/fragrances?q=lattafa', 200, 'Search API'],
+  ['/api/search?q=rose', 200, 'Smells Like Search API'],
   ['/api/waitlist',    405, 'Waitlist API (GET should 405)'],
   ['/api/wear',        405, 'Wear API (GET should 405)'],
 ]
