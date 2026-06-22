@@ -1,10 +1,11 @@
 import Link from 'next/link'
 import { Metadata } from 'next'
-import { PERSONAS } from '@/lib/personas'
+import HeroSection from '@/components/landing/HeroSection'
+import PersonaTeasers from '@/components/landing/PersonaTeasers'
 
-const TITLE = 'AnotherSense — Your Daily Scent Ritual'
+const TITLE = 'AnotherSense — Your Scent Fingerprint'
 const DESCRIPTION =
-  'Discover, collect and understand the fragrances that define you — guided by your personal scent identity.'
+  'Discover fragrances that match your unique sensory identity — guided by your personal scent profile.'
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -21,24 +22,6 @@ export const metadata: Metadata = {
   },
 }
 
-const HOW_IT_WORKS = [
-  {
-    icon: '🧪',
-    heading: 'Take the Sanctuary Profiler',
-    body: '3 questions. Your scent persona revealed.',
-  },
-  {
-    icon: '🗂',
-    heading: 'Build your wardrobe',
-    body: 'Rate, collect and organise every fragrance you own.',
-  },
-  {
-    icon: '✨',
-    heading: 'Discover inspired-by gems',
-    body: '500+ affordable alternatives to designer and niche.',
-  },
-]
-
 export default function Home() {
   return (
     <div
@@ -52,265 +35,72 @@ export default function Home() {
         alignItems: 'center',
       }}
     >
-      {/* ── Hero ── */}
-      <section
-        style={{
-          width: '100%',
-          minHeight: '100dvh',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          textAlign: 'center',
-          padding: '64px 24px',
-          boxSizing: 'border-box',
-        }}
-      >
-        {/* Eyebrow rule */}
+      <HeroSection />
+      <PersonaTeasers />
+
+      {/* ── Christopher Moment ── */}
+      <section style={{ width: '100%', maxWidth: 960, padding: '0 24px 80px', boxSizing: 'border-box' }}>
         <div
+          className="surface-glass"
           style={{
-            width: 40,
-            height: 1,
-            background: 'var(--accent)',
-            marginBottom: 24,
-          }}
-        />
-
-        <h1
-          style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(2.2rem, 7vw, 5rem)',
-            fontStyle: 'italic',
-            fontWeight: 400,
-            lineHeight: 1.1,
-            letterSpacing: '-0.02em',
-            color: 'var(--text)',
-            margin: '0 0 20px',
-            maxWidth: 700,
-          }}
-        >
-          Your scent wardrobe.
-          <br />
-          <span style={{ color: 'var(--text-muted)' }}>Finally organised.</span>
-        </h1>
-
-        <p
-          style={{
-            fontSize: 14,
-            color: 'var(--text-muted)',
-            maxWidth: 280,
-            lineHeight: 1.6,
-            margin: '0 0 40px',
-            fontWeight: 400,
-          }}
-        >
-          Discover, collect and understand the fragrances that define you —
-          guided by your personal scent identity.
-        </p>
-
-        <Link
-          href="/onboarding"
-          style={{
-            display: 'inline-block',
-            background: 'var(--accent)',
-            color: '#fff',
-            fontSize: 11,
-            fontWeight: 700,
-            letterSpacing: '0.15em',
-            textTransform: 'uppercase',
-            padding: '14px 32px',
-            borderRadius: 'var(--r-btn)',
-            textDecoration: 'none',
-            marginBottom: 16,
-            transition: 'opacity 0.2s',
-          }}
-        >
-          Find my scent identity →
-        </Link>
-
-        <Link
-          href="/discover"
-          style={{
-            fontSize: 12,
-            color: 'var(--text-muted)',
-            textDecoration: 'none',
-            borderBottom: '1px solid var(--line)',
-            paddingBottom: 2,
-            transition: 'color 0.2s',
-          }}
-        >
-          Browse the collection
-        </Link>
-      </section>
-
-      {/* ── How it works ── */}
-      <section
-        style={{
-          width: '100%',
-          maxWidth: 960,
-          padding: '64px 24px',
-          boxSizing: 'border-box',
-        }}
-      >
-        <p
-          style={{
-            fontSize: 10,
-            fontWeight: 700,
-            letterSpacing: '0.35em',
-            textTransform: 'uppercase',
-            color: 'var(--text-muted)',
-            textAlign: 'center',
-            marginBottom: 40,
-          }}
-        >
-          How it works
-        </p>
-
-        {/* 3-column on desktop, stacked on mobile */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            display: 'flex',
+            flexDirection: 'column',
             gap: 24,
+            borderRadius: 'var(--r-card)',
+            padding: '32px 28px',
+            background: 'rgba(255,255,255,0.05)',
+            backdropFilter: 'blur(12px)',
+            border: '1px solid rgba(255,255,255,0.10)',
           }}
         >
-          {HOW_IT_WORKS.map(({ icon, heading, body }) => (
+          <div className="flex flex-col md:flex-row md:items-center" style={{ gap: 28 }}>
             <div
-              key={heading}
+              aria-hidden="true"
               style={{
-                background: 'var(--surface)',
-                border: '1px solid var(--line)',
+                flex: '0 0 auto',
+                width: '100%',
+                maxWidth: 220,
+                height: 160,
                 borderRadius: 'var(--r-card)',
-                padding: '28px 24px',
-                textAlign: 'center',
+                background:
+                  'linear-gradient(135deg, rgba(6,182,212,0.35) 0%, rgba(15,23,42,0.6) 100%)',
+                margin: '0 auto',
               }}
-            >
-              <span
-                style={{
-                  fontSize: 28,
-                  display: 'block',
-                  marginBottom: 16,
-                  lineHeight: 1,
-                }}
-                role="img"
-                aria-hidden="true"
-              >
-                {icon}
-              </span>
+            />
+            <div style={{ flex: 1 }}>
               <p
                 style={{
                   fontFamily: 'var(--font-display)',
                   fontStyle: 'italic',
-                  fontSize: 16,
+                  fontSize: 'clamp(1.4rem, 3vw, 1.9rem)',
                   color: 'var(--text)',
-                  marginBottom: 8,
-                  lineHeight: 1.3,
+                  margin: '0 0 12px',
+                  lineHeight: 1.25,
                 }}
               >
-                {heading}
+                Your £140 bottle has an £18 clone.
               </p>
-              <p
-                style={{
-                  fontSize: 13,
-                  color: 'var(--text-muted)',
-                  lineHeight: 1.5,
-                }}
-              >
-                {body}
+              <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.6, margin: '0 0 20px' }}>
+                We map designer and niche fragrances to their closest affordable
+                alternatives — same DNA, a fraction of the price.
               </p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── Persona teasers ── */}
-      <section
-        style={{
-          width: '100%',
-          maxWidth: 960,
-          padding: '0 24px 80px',
-          boxSizing: 'border-box',
-        }}
-      >
-        <h2
-          style={{
-            fontFamily: 'var(--font-display)',
-            fontStyle: 'italic',
-            fontSize: 'clamp(1.6rem, 4vw, 2.4rem)',
-            fontWeight: 400,
-            textAlign: 'center',
-            color: 'var(--text)',
-            marginBottom: 32,
-            letterSpacing: '-0.01em',
-          }}
-        >
-          Which identity are you?
-        </h2>
-
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-            gap: 16,
-          }}
-        >
-          {PERSONAS.map((persona) => (
-            <Link
-              key={persona.id}
-              href="/onboarding"
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                background: persona.ui_theme.cardBg,
-                backgroundImage: persona.ui_theme.bgGradient,
-                border: '1px solid var(--line)',
-                borderLeft: `3px solid ${persona.ui_theme.accentColor}`,
-                borderRadius: 'var(--r-card)',
-                padding: '28px 24px',
-                textDecoration: 'none',
-                minHeight: 160,
-                transition: 'box-shadow 0.2s, border-color 0.2s',
-              }}
-            >
-              <div>
-                <p
-                  style={{
-                    fontFamily: 'var(--font-display)',
-                    fontStyle: 'italic',
-                    fontSize: 18,
-                    fontWeight: 400,
-                    color: persona.ui_theme.accentColor,
-                    marginBottom: 8,
-                    lineHeight: 1.25,
-                  }}
-                >
-                  {persona.name}
-                </p>
-                <p
-                  style={{
-                    fontSize: 12,
-                    color: 'var(--text-muted)',
-                    lineHeight: 1.5,
-                  }}
-                >
-                  {persona.narrative.tagline}
-                </p>
-              </div>
-
-              <p
+              <Link
+                href="/discover?query=clones"
                 style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  minHeight: 48,
                   fontSize: 12,
-                  fontWeight: 600,
-                  color: persona.ui_theme.accentColor,
-                  marginTop: 20,
-                  letterSpacing: '0.05em',
+                  fontWeight: 700,
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  color: 'var(--aura)',
                 }}
               >
-                Explore →
-              </p>
-            </Link>
-          ))}
+                Discover Clones →
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -322,19 +112,17 @@ export default function Home() {
           padding: '24px',
           textAlign: 'center',
           boxSizing: 'border-box',
+          background: 'var(--bg)',
         }}
       >
-        <p
-          style={{
-            fontSize: 11,
-            color: 'var(--text-muted)',
-          }}
-        >
+        <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>
           AnotherSense · Your daily scent ritual
           <br /><br />
           <Link href="/privacy" style={{ textDecoration: 'none', color: 'inherit' }}>Privacy</Link>
           {' · '}
           <Link href="/terms" style={{ textDecoration: 'none', color: 'inherit' }}>Terms</Link>
+          {' · '}
+          <Link href="/social" style={{ textDecoration: 'none', color: 'inherit' }}>Community</Link>
         </p>
       </footer>
     </div>
