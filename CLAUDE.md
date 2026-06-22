@@ -1,5 +1,31 @@
 @AGENTS.md
 
+# SENSUS UI/UX OVERHAUL — In Progress (10 Weeks)
+
+Focus group feedback: "novice and vibe-coded" → Target: **"Premium, like Spotify + Glossier"**
+
+**Status:** Production sprint active  
+**Phase 1:** Weeks 2–4 (Dark Ambient Material tokens + 12-column grid)  
+**Documentation:** See `/docs/SENSUS_COMPLETE_PLAYBOOK.md` for master strategy + all Epics
+
+**Key Changes:**
+- Color system: Warm browns → Deep Slate #0F172A + Electric Cyan #06B6D4 (M3 compliant)
+- Grid: 2-col stretched → 12-col responsive Collector's Wall
+- Filters: Vertical stacks → Edge-to-edge horizontal carousels
+- Search: Simple match → "Smells Like" proximity engine (70%+ note matching)
+- New: Aura AI Spritz Schedule (gamified daily guidance)
+- Landing: Scent Identity above fold + value prop hero
+
+**Executable Briefs:**
+- `docs/claude-code-briefs/epic-1-collectors-wall.md` (Weeks 2–4)
+- `docs/claude-code-briefs/epic-2-carousel-filters.md` (Week 5)
+- `docs/claude-code-briefs/epic-3-smells-like-search.md` (Weeks 6–8)
+- Epic 4–5 in SENSUS_COMPLETE_PLAYBOOK.md
+
+**Principal UI/UX Architect Gem:** Copy system prompt from `docs/principal-uiux-architect-gem.md` into new Claude chat for design guidance.
+
+---
+
 ## Living Wardrobe — Collection Page
 
 New shelf UI being built in `app/(main)/collection/`. See `AGENTS.md §1` for full ground truth.

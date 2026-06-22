@@ -1,16 +1,17 @@
 :root {
-  /* Backgrounds */
-  --bg: #fafaf9; /* Stone-50 */
-  --surface: #f5f5f4; /* Stone-100 */
-  --surface-light: #f8f7f5; /* Warmer off-white — shelf highlights */
-  --surface-2: #e7e5e4; /* Stone-200 */
+  /* Backgrounds — bridged to the --color-* system in globals.css so this
+     file no longer shadows it (it loads after globals.css in app/layout.tsx) */
+  --bg: var(--color-bg);
+  --surface: var(--color-surface);
+  --surface-light: var(--color-surface-2);
+  --surface-2: var(--color-surface-2);
 
   /* Text */
-  --text: #1c1917; /* Stone-900 */
-  --text-muted: #78716c; /* Stone-500 */
+  --text: var(--color-text);
+  --text-muted: var(--color-text-muted);
 
   /* Accent — champagne gold */
-  --accent: #c49a3c; /* Fragrance Gold */
+  --accent: var(--color-primary);
   --accent-press: #a07d30;
 
   /* Secondary accent — deep burgundy (editorial depth) */
@@ -21,11 +22,22 @@
   --surface-deep: #2a1418;
 
   /* Semantic */
-  --line: #e7e5e4; /* Stone-200 */
+  --line: var(--color-border);
   --line-light: #f0eeec; /* Stone-200 @ ~40% — hairline dividers */
-  --positive: #15803d;
+  --positive: var(--color-success);
   --warning: #d97706;
-  --danger: #b91c1c;
+  --danger: var(--color-error);
+
+  /* M3 typography scale — fluid clamp() roles */
+  --text-display: clamp(2rem, 1.5rem + 2.5vw, 3.5rem);
+  --text-headline: clamp(1.5rem, 1.25rem + 1.25vw, 2rem);
+  --text-title: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
+  --text-body: clamp(0.875rem, 0.8rem + 0.25vw, 1rem);
+
+  /* Glassmorphism — frosted surface composite (light default, overridden in dark) */
+  --glass-bg: rgba(255, 255, 255, 0.5);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-blur: blur(16px) saturate(1.4);
 
   /* Border radius */
   --r-card: 0px; /* Sharp editorial edges */
@@ -76,20 +88,11 @@
     0 0 0 1px var(--aura-border);
 }
 
-/* Dark mode theme */
+/* Dark mode theme — Dark Ambient Material (Sprint 1-A)
+   Backgrounds/text/line/positive/danger inherit live from the :root bridge above,
+   which tracks --color-* (redefined for dark in globals.css). Only the values with
+   no --color-* equivalent are overridden here. */
 [data-theme="dark"] {
-  /* Backgrounds */
-  --bg: #1a1917;
-  --surface: #2a2a27;
-  --surface-light: #3a3a36;
-  --surface-2: #3a3a36;
-
-  /* Text */
-  --text: #f5f5f4;
-  --text-muted: #999;
-
-  /* Accent — warmer gold for dark mode */
-  --accent: #d4a070;
   --accent-press: #c49a3c;
 
   /* Secondary accent */
@@ -99,10 +102,11 @@
   /* Deep editorial surface */
   --surface-deep: #f5f5f4;
 
-  /* Semantic */
-  --line: #3a3a36;
-  --line-light: #2a2a27;
-  --positive: #4ade80;
+  --line-light: rgba(255, 255, 255, 0.06);
   --warning: #fb923c;
-  --danger: #f87171;
+
+  /* Glassmorphism — frosted surface composite over the slate-blue ambient bg */
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.10);
+  --glass-blur: blur(16px) saturate(1.4);
 }

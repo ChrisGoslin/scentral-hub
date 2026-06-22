@@ -17,6 +17,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { ShoppingBag } from 'lucide-react';
 import { getFamilyGradient } from '@/lib/familyGradients';
+import { FragranceBottleIcon } from '@/components/FragranceBottleIcon';
 import { type CollectionFragrance } from '@/app/(main)/collection/CollectionClient';
 import WearLogModal from '@/app/(main)/collection/WearLogModal';
 import BuyLinks from '@/app/components/BuyLinks';
@@ -60,6 +61,7 @@ export default function OptimizedBottleCard({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isBuyOpen, setIsBuyOpen] = useState(false);
   const [isAnchorUnlocked, setIsAnchorUnlocked] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
   const touchStartTimeRef = useRef<number | null>(null);
   const frameIdRef = useRef<number | null>(null);
@@ -115,6 +117,7 @@ export default function OptimizedBottleCard({
   }, []);
 
   const progress = maceProgress(f);
+  const showImage = !!f.image_url && !imgError;
   // isDragging/locked are functional D&D states and take priority over the
   // cosmetic hover/press opacity from the card-interaction spec (0.8/0.9).
   const opacity = isDragging ? 0.4 : locked ? 0.6 : pressed ? 0.9 : hovered ? 0.8 : 1;
@@ -152,21 +155,35 @@ export default function OptimizedBottleCard({
             aspectRatio: '3 / 4',
             borderRadius: 10,
             overflow: 'hidden',
-            backgroundImage: f.image_url ? undefined : getFamilyGradient(f.family),
+            backgroundImage: showImage ? undefined : getFamilyGradient(f.family),
             backgroundSize: 'cover',
             boxShadow: isActive
               ? '0 0 0 2px rgba(196,154,60,0.65), 0 4px 12px rgba(0,0,0,0.3)'
               : '0 2px 8px rgba(0,0,0,0.25)',
           }}
         >
-          {f.image_url && (
+          {showImage ? (
             <Image
-              src={f.image_url}
+              src={f.image_url!}
               alt={`${f.brand} ${f.name}`}
               fill
               sizes="(max-width: 768px) 45vw, 200px"
               style={{ objectFit: 'cover' }}
+              onError={() => setImgError(true)}
             />
+          ) : (
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'rgba(255,255,255,0.9)',
+              }}
+            >
+              <FragranceBottleIcon />
+            </div>
           )}
 
           {/* Ombre overlay for text readability */}
