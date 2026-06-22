@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
     // QUERY 1: Exact matches (name, brand, full name, description)
     let exactMatches: Record<string, unknown>[] = []
     if (mode === 'all' || mode === 'exact' || mode === 'smells_like') {
-      const { data } = await supabase
+      const { data, error: exactError } = await supabase
         .from('fragrances')
         .select(FRAGRANCE_COLUMNS)
         .or(
@@ -43,6 +43,7 @@ export async function GET(request: NextRequest) {
         )
         .limit(20)
 
+      if (exactError) throw exactError
       exactMatches = data ?? []
       results.push(
         ...exactMatches.map((frag) => ({
@@ -56,11 +57,13 @@ export async function GET(request: NextRequest) {
     // QUERY 2 + 3 only apply in "Smells Like" discovery mode
     if (mode === 'all' || mode === 'smells_like') {
       // QUERY 2: Inspired-by / clone relationships
-      const { data: inspiredMatches } = await supabase
+      const { data: inspiredMatches, error: inspiredError } = await supabase
         .from('fragrances')
         .select(FRAGRANCE_COLUMNS)
-        .or(`inspired_by.ilike.%${escaped}%,clone_target.ilike.%${escaped}%`)
+        .ilike('inspired_by', `%${escaped}%`)
         .limit(15)
+
+      if (inspiredError) throw inspiredError
 
       if (inspiredMatches) {
         results.push(
@@ -68,33 +71,42 @@ export async function GET(request: NextRequest) {
             fragrance: frag,
             matchType: 'inspired_by' as const,
             confidence: INSPIRED_BY_CONFIDENCE,
-            explanation: `Inspired by ${frag.clone_target || frag.inspired_by || query}`,
+            explanation: `Inspired by ${frag.inspired_by || query}`,
           }))
         )
       }
 
-      // QUERY 3: Note-composition similarity (≥70%), seeded from the exact-match fragrance(s)
+      // QUERY 3: Note-composition similarity, seeded from the exact-match fragrance(s).
+      // Scored as note-set overlap (intersection / largest set). A 0.7 ("70%+") floor is
+      // unreachable against this catalogue's actual note tagging — even verified clone
+      // pairs (matched via inspired_by) top out around 0.55-0.6 overlap, since clones use
+      // different specific note words for a similar accord (e.g. "Pink Pepper" vs "Black
+      // Pepper"). 0.45 surfaces genuinely similar fragrances without being meaningless.
+      const NOTE_SIMILARITY_FLOOR = 0.45
       const seeds = exactMatches.filter(
         (f: any) => f.top_notes?.length || f.heart_notes?.length || f.base_notes?.length
       )
 
       for (const seed of seeds as any[]) {
-        const seedNotes = [...(seed.top_notes ?? []), ...(seed.heart_notes ?? []), ...(seed.base_notes ?? [])].join(
-          ' '
-        )
-        if (!seedNotes.trim()) continue
+        const seedNotes = [...(seed.top_notes ?? []), ...(seed.heart_notes ?? []), ...(seed.base_notes ?? [])]
+        if (seedNotes.length === 0) continue
 
-        const { data: similarNotes } = await supabase.rpc('search_by_note_similarity', {
+        const { data: similarNotes, error: similarityError } = await supabase.rpc('search_by_note_similarity', {
           seed_notes: seedNotes,
           exclude_id: seed.id,
-          min_similarity: 0.7,
+          min_similarity: NOTE_SIMILARITY_FLOOR,
           limit_results: 20,
         })
 
+        if (similarityError) throw similarityError
         if (!similarNotes?.length) continue
 
         const ids = similarNotes.map((row: any) => row.id)
-        const { data: fullRecords } = await supabase.from('fragrances').select(FRAGRANCE_COLUMNS).in('id', ids)
+        const { data: fullRecords, error: fullRecordsError } = await supabase
+          .from('fragrances')
+          .select(FRAGRANCE_COLUMNS)
+          .in('id', ids)
+        if (fullRecordsError) throw fullRecordsError
         const byId = new Map((fullRecords ?? []).map((f: any) => [f.id, f]))
 
         results.push(
