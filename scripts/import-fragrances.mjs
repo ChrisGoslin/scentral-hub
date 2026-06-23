@@ -2,7 +2,7 @@
 // Bulk import fragrances from FragDB Kaggle dataset
 // Usage: node scripts/import-fragrances.mjs [--dry-run]
 // CSV path: scripts/data/fragrances.csv
-// Requires: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY in .env.local
+// Requires: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_KEY in .env.local
 
 import { createClient } from '@supabase/supabase-js'
 import { readFileSync } from 'fs'
@@ -32,6 +32,56 @@ const GENDER_TO_USECASE = {
   'Masculine': 'Daily, office',
   'Feminine': 'Date night',
   'Unisex': 'Daily, versatile',
+}
+
+function normalizeGender(raw) {
+  const trimmed = (raw || '').trim()
+  if (trimmed.toLowerCase() === 'unisex') return 'Unisex'
+  return trimmed
+}
+
+function toTitleCase(str) {
+  return str
+    .split(' ')
+    .map(w => {
+      if (!w) return w
+      if (/^[A-Z0-9]+$/.test(w) && w.length <= 4) return w // keep short all-caps as-is (CK, EDP, YSL)
+      return w[0].toUpperCase() + w.slice(1).toLowerCase()
+    })
+    .join(' ')
+}
+
+function splitCamelCase(str) {
+  // Skip if it looks intentional: all-caps abbreviations, known patterns
+  if (/^[A-Z0-9]+$/.test(str)) return str // all caps = abbreviation
+  return str
+    .replace(/([a-z])([A-Z])/g, '$1 $2') // camelCase → camel Case
+    .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2') // HTMLParser → HTML Parser
+    .trim()
+}
+
+function isJunkName(name) {
+  if (!name || name.length < 2) return true
+  if (/[?%@]/.test(name)) return true
+  if (/^\d+$/.test(name)) return true
+  if (/ com$/i.test(name)) return true
+  return false
+}
+
+function parseNotes(notes) {
+  if (!notes) return null
+  // Format A: Python list string ("['woody', 'rose']")
+  if (notes.startsWith("['") || notes.startsWith('["')) {
+    const matches = notes.match(/['"]([^'"]+)['"]/g)
+    if (matches) {
+      return matches
+        .map(m => m.replace(/['"]/g, '').trim())
+        .filter(Boolean)
+        .join(', ')
+    }
+  }
+  // Format B: plain text ("Fresh Scent", "Woody Spicy") — use as-is
+  return notes.trim()
 }
 
 // Keyword-based family derivation
@@ -104,13 +154,13 @@ if (!env.NEXT_PUBLIC_SUPABASE_URL) {
   console.error('Missing NEXT_PUBLIC_SUPABASE_URL in .env.local')
   process.exit(1)
 }
-if (!env.SUPABASE_SERVICE_ROLE_KEY) {
-  console.error('Missing SUPABASE_SERVICE_ROLE_KEY in .env.local')
+if (!env.SUPABASE_SERVICE_KEY) {
+  console.error('Missing SUPABASE_SERVICE_KEY in .env.local')
   process.exit(1)
 }
 
 // ── Supabase ──────────────────────────────────────────────────────────────────
-const supabase = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY)
+const supabase = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_KEY)
 
 // ── Load CSV ──────────────────────────────────────────────────────────────────
 let records
@@ -141,12 +191,19 @@ let skipped = 0
 
 for (const row of records) {
   const brand = (row.brand || '').trim()
-  const name = (row.name || '').trim()
+  let name = (row.name || '').trim()
 
   if (!brand || !name) {
     skipped++
     continue
   }
+
+  if (isJunkName(name)) {
+    skipped++
+    continue
+  }
+
+  name = splitCamelCase(toTitleCase(name))
 
   const key = `${brand.toLowerCase()}|${name.toLowerCase()}`
   if (existingKeys.has(key)) {
@@ -154,22 +211,28 @@ for (const row of records) {
     continue
   }
 
-  let family = (row.family || '').trim()
-  if (!family) {
-    family = deriveFamily(row.notes || '')
+  const rawFamily = (row.family || '').trim()
+  const parsedNotes = parseNotes(row.notes)
+  const notesWordCount = parsedNotes ? parsedNotes.split(/[,\s]+/).filter(Boolean).length : 0
+
+  // Truly empty signal: no family given AND fewer than 2 words of notes — nothing to offer users.
+  if (!rawFamily && notesWordCount < 2) {
+    skipped++
+    continue
   }
+
+  const family = rawFamily || deriveFamily(row.notes || '')
   const normalizedFamily = AXIS_MAP[family] || family
 
-  const useCase = GENDER_TO_USECASE[row.gender?.trim()] || null
+  const useCase = GENDER_TO_USECASE[normalizeGender(row.gender)] || null
 
   rowsToInsert.push({
     brand,
     name,
-    full_name: `${brand} ${name}`,
     family: normalizedFamily,
     projection: 'Moderate',
     use_case: useCase,
-    plain_description: null,
+    plain_description: parsedNotes,
     image_url: null,
   })
 }

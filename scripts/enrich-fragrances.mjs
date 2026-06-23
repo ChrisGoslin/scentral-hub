@@ -3,7 +3,7 @@
 // Usage: node scripts/enrich-fragrances.mjs [--dry-run]
 // Queries fragrances WHERE plain_description IS NULL LIMIT 100
 // Rate limit: 2 requests/second max
-// Requires: ANTHROPIC_API_KEY, NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY in .env.local
+// Requires: ANTHROPIC_API_KEY, NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_KEY in .env.local
 
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@supabase/supabase-js'
@@ -37,14 +37,14 @@ if (!env.NEXT_PUBLIC_SUPABASE_URL) {
   console.error('Missing NEXT_PUBLIC_SUPABASE_URL in .env.local')
   process.exit(1)
 }
-if (!env.SUPABASE_SERVICE_ROLE_KEY) {
-  console.error('Missing SUPABASE_SERVICE_ROLE_KEY in .env.local')
+if (!env.SUPABASE_SERVICE_KEY) {
+  console.error('Missing SUPABASE_SERVICE_KEY in .env.local')
   process.exit(1)
 }
 
 // ── Clients ───────────────────────────────────────────────────────────────────
 const anthropic = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY })
-const supabase = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY)
+const supabase = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_KEY)
 
 function sleep(ms) {
   return new Promise(r => setTimeout(r, ms))
