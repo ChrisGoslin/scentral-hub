@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sensus — Collector's Wall Grid</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --color-bg: #0F172A;
+            --color-surface-low: rgba(255, 255, 255, 0.03);
+            --color-surface: rgba(255, 255, 255, 0.05);
+            --color-text: #E2E8F0;
+            --color-text-secondary: #94A3B8;
+            --color-border: rgba(255, 255, 255, 0.10);
+            --color-border-active: rgba(255, 255, 255, 0.20);
+            --color-accent: #06B6D4;
+        }
+
+        body {
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: clamp(2.25rem, 5vw, 3.5rem);
+            font-weight: 400;
+            letter-spacing: -0.015em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: var(--color-text-secondary);
+        }
+
+        .viewport-label {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            margin-top: 30px;
+            padding: 12px;
+            background: var(--color-surface-low);
+            border-left: 2px solid var(--color-accent);
+            margin-bottom: 20px;
+        }
+
+        /* GRID LAYOUTS */
+        .grid-container {
+            margin-bottom: 80px;
+        }
+
+        .grid {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .grid.mobile {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .grid.tablet {
+            grid-template-columns: repeat(6, 1fr);
+        }
+
+        .grid.desktop {
+            grid-template-columns: repeat(10, 1fr);
+        }
+
+        /* BOTTLE CARD */
+        .bottle-card {
+            aspect-ratio: 1;
+            background: var(--color-surface-low);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 300ms ease;
+            position: relative;
+            group: hover;
+        }
+
+        .bottle-card:hover {
+            background: var(--color-surface);
+            border-color: var(--color-border-active);
+            transform: scale(1.03);
+            box-shadow: 0 10px 30px rgba(6, 182, 212, 0.15);
+        }
+
+        .bottle-image {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: var(--color-text-secondary);
+            position: relative;
+        }
+
+        /* Fallback gradient examples */
+        .gradient-woody {
+            background: linear-gradient(135deg, #b45309 0%, #1e293b 50%, #0f172a 100%);
+        }
+
+        .gradient-fresh {
+            background: linear-gradient(135deg, #06b6d4 0%, #334155 50%, #0f172a 100%);
+        }
+
+        .gradient-oudy {
+            background: linear-gradient(135deg, #ca8a04 0%, #1e293b 50%, #000000 100%);
+        }
+
+        .gradient-floral {
+            background: linear-gradient(135deg, #ec4899 0%, #1e293b 50%, #0f172a 100%);
+        }
+
+        .gradient-amber {
+            background: linear-gradient(135deg, #f97316 0%, #1e293b 50%, #0f172a 100%);
+        }
+
+        /* Hover overlay */
+        .hover-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(15, 23, 42, 0.95), transparent);
+            padding: 12px;
+            opacity: 0;
+            transition: opacity 200ms ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            height: 100%;
+        }
+
+        .bottle-card:hover .hover-overlay {
+            opacity: 1;
+        }
+
+        .bottle-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--color-text);
+            margin-bottom: 4px;
+        }
+
+        .bottle-brand {
+            font-size: 11px;
+            color: var(--color-text-secondary);
+        }
+
+        /* RESPONSIVE LEGEND */
+        .legend {
+            background: var(--color-surface-low);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 40px;
+            font-size: 13px;
+            color: var(--color-text-secondary);
+        }
+
+        .legend strong {
+            color: var(--color-text);
+        }
+
+        footer {
+            text-align: center;
+            padding: 60px 0 20px;
+            color: var(--color-text-secondary);
+            font-size: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .desktop {
+                display: none;
+            }
+        }
+
+        @media (min-width: 769px) and (max-width: 1200px) {
+            .mobile {
+                display: none;
+            }
+            .desktop {
+                display: none;
+            }
+        }
+
+        @media (min-width: 1201px) {
+            .mobile {
+                display: none;
+            }
+            .tablet {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Collector's Wall</h1>
+            <p class="subtitle">Premium 12-column responsive grid — Dark Ambient Material</p>
+        </header>
+
+        <!-- MOBILE VIEW -->
+        <div class="grid-container">
+            <div class="viewport-label">📱 Mobile (390px) — 4 columns, tight spacing</div>
+            <div class="grid mobile">
+                <div class="bottle-card gradient-woody">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Sauvage</div>
+                        <div class="bottle-brand">Dior</div>
+                    </div>
+                </div>
+                <div class="bottle-card gradient-fresh">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Acqua di Gio</div>
+                        <div class="bottle-brand">Armani</div>
+                    </div>
+                </div>
+                <div class="bottle-card gradient-oudy">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Creed Oud</div>
+                        <div class="bottle-brand">Creed</div>
+                    </div>
+                </div>
+                <div class="bottle-card gradient-floral">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Rose Absolute</div>
+                        <div class="bottle-brand">Niche</div>
+                    </div>
+                </div>
+                <div class="bottle-card gradient-amber">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Amber Oud</div>
+                        <div class="bottle-brand">Lattafa</div>
+                    </div>
+                </div>
+                <div class="bottle-card gradient-woody">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Tobacco Leaf</div>
+                        <div class="bottle-brand">Tom Ford</div>
+                    </div>
+                </div>
+                <div class="bottle-card gradient-fresh">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Cool Water</div>
+                        <div class="bottle-brand">Davidoff</div>
+                    </div>
+                </div>
+                <div class="bottle-card gradient-oudy">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Oud Wood</div>
+                        <div class="bottle-brand">Tom Ford</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TABLET VIEW -->
+        <div class="grid-container">
+            <div class="viewport-label">📱 Tablet (768px) — 6 columns, breathing room</div>
+            <div class="grid tablet">
+                <div class="bottle-card gradient-woody">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Sauvage</div>
+                        <div class="bottle-brand">Dior</div>
+                    </div>
+                </div>
+                <div class="bottle-card gradient-fresh">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Acqua di Gio</div>
+                        <div class="bottle-brand">Armani</div>
+                    </div>
+                </div>
+                <div class="bottle-card gradient-oudy">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Creed Oud</div>
+                        <div class="bottle-brand">Creed</div>
+                    </div>
+                </div>
+                <div class="bottle-card gradient-floral">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Rose Absolute</div>
+                        <div class="bottle-brand">Niche</div>
+                    </div>
+                </div>
+                <div class="bottle-card gradient-amber">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Amber Oud</div>
+                        <div class="bottle-brand">Lattafa</div>
+                    </div>
+                </div>
+                <div class="bottle-card gradient-woody">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Tobacco Leaf</div>
+                        <div class="bottle-brand">Tom Ford</div>
+                    </div>
+                </div>
+                <div class="bottle-card gradient-fresh">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Cool Water</div>
+                        <div class="bottle-brand">Davidoff</div>
+                    </div>
+                </div>
+                <div class="bottle-card gradient-oudy">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Oud Wood</div>
+                        <div class="bottle-brand">Tom Ford</div>
+                    </div>
+                </div>
+                <div class="bottle-card gradient-floral">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Jasmine Dream</div>
+                        <div class="bottle-brand">Afnan</div>
+                    </div>
+                </div>
+                <div class="bottle-card gradient-amber">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Warm Gold</div>
+                        <div class="bottle-brand">Khadlaj</div>
+                    </div>
+                </div>
+                <div class="bottle-card gradient-woody">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Cedar Wood</div>
+                        <div class="bottle-brand">Creed</div>
+                    </div>
+                </div>
+                <div class="bottle-card gradient-fresh">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Marine Fresh</div>
+                        <div class="bottle-brand">YSL</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DESKTOP VIEW -->
+        <div class="grid-container">
+            <div class="viewport-label">💻 Desktop (1280px) — 10 columns, premium density</div>
+            <div class="grid desktop">
+                <div class="bottle-card gradient-woody">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Sauvage</div>
+                        <div class="bottle-brand">Dior</div>
+                    </div>
+                </div>
+                <div class="bottle-card gradient-fresh">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Acqua di Gio</div>
+                        <div class="bottle-brand">Armani</div>
+                    </div>
+                </div>
+                <div class="bottle-card gradient-oudy">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Creed Oud</div>
+                        <div class="bottle-brand">Creed</div>
+                    </div>
+                </div>
+                <div class="bottle-card gradient-floral">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Rose Absolute</div>
+                        <div class="bottle-brand">Niche</div>
+                    </div>
+                </div>
+                <div class="bottle-card gradient-amber">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Amber Oud</div>
+                        <div class="bottle-brand">Lattafa</div>
+                    </div>
+                </div>
+                <div class="bottle-card gradient-woody">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Tobacco Leaf</div>
+                        <div class="bottle-brand">Tom Ford</div>
+                    </div>
+                </div>
+                <div class="bottle-card gradient-fresh">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Cool Water</div>
+                        <div class="bottle-brand">Davidoff</div>
+                    </div>
+                </div>
+                <div class="bottle-card gradient-oudy">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Oud Wood</div>
+                        <div class="bottle-brand">Tom Ford</div>
+                    </div>
+                </div>
+                <div class="bottle-card gradient-floral">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Jasmine Dream</div>
+                        <div class="bottle-brand">Afnan</div>
+                    </div>
+                </div>
+                <div class="bottle-card gradient-amber">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Warm Gold</div>
+                        <div class="bottle-brand">Khadlaj</div>
+                    </div>
+                </div>
+                <div class="bottle-card gradient-woody">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Cedar Wood</div>
+                        <div class="bottle-brand">Creed</div>
+                    </div>
+                </div>
+                <div class="bottle-card gradient-fresh">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Marine Fresh</div>
+                        <div class="bottle-brand">YSL</div>
+                    </div>
+                </div>
+                <div class="bottle-card gradient-oudy">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Dark Oud</div>
+                        <div class="bottle-brand">Miu Miu</div>
+                    </div>
+                </div>
+                <div class="bottle-card gradient-floral">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Peony Pink</div>
+                        <div class="bottle-brand">Dior</div>
+                    </div>
+                </div>
+                <div class="bottle-card gradient-amber">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Golden Hour</div>
+                        <div class="bottle-brand">Prada</div>
+                    </div>
+                </div>
+                <div class="bottle-card gradient-woody">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Forest Pine</div>
+                        <div class="bottle-brand">Niche</div>
+                    </div>
+                </div>
+                <div class="bottle-card gradient-fresh">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Ocean Breeze</div>
+                        <div class="bottle-brand">Heeley</div>
+                    </div>
+                </div>
+                <div class="bottle-card gradient-oudy">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Royal Oud</div>
+                        <div class="bottle-brand">Lattafa</div>
+                    </div>
+                </div>
+                <div class="bottle-card gradient-floral">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Iris Garden</div>
+                        <div class="bottle-brand">Chloe</div>
+                    </div>
+                </div>
+                <div class="bottle-card gradient-amber">
+                    <div class="hover-overlay">
+                        <div class="bottle-name">Resin Blend</div>
+                        <div class="bottle-brand">Xerjoff</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="legend">
+            <strong>How it works:</strong> Hover (or tap on mobile) to see fragrance name and brand. Each card is a borderless glass square with dynamic fallback gradient based on scent family. Scales smoothly from 4 columns (mobile) → 6 (tablet) → 10 (desktop).
+        </div>
+
+        <footer>
+            <p>Sensus Collector's Wall — 12-Column Responsive Grid</p>
+            <p>Press F11 or resize window to preview different breakpoints</p>
+        </footer>
+    </div>
+</body>
+</html>

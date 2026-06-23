@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sensus — Landing Page Hero</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --color-bg: #0F172A;
+            --color-surface-low: rgba(255, 255, 255, 0.03);
+            --color-surface: rgba(255, 255, 255, 0.05);
+            --color-text: #E2E8F0;
+            --color-text-secondary: #94A3B8;
+            --color-border: rgba(255, 255, 255, 0.10);
+            --color-accent: #06B6D4;
+            --color-accent-2: #A855F7;
+        }
+
+        body {
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* VIEWPORT INDICATOR */
+        .viewport-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--color-surface-low);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--color-border);
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            z-index: 999;
+        }
+
+        /* HERO SECTION */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 20px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(6, 182, 212, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -5%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(168, 85, 247, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 700px;
+        }
+
+        .hero-headline {
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 300;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #E2E8F0, #06B6D4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subheadline {
+            font-size: clamp(1rem, 2.5vw, 1.25rem);
+            font-weight: 400;
+            color: var(--color-text-secondary);
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+
+        .hero-cta-group {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 60px;
+        }
+
+        .btn {
+            padding: 12px 32px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: all 300ms ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--color-accent), #0891B2);
+            color: white;
+            box-shadow: 0 8px 16px rgba(6, 182, 212, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(6, 182, 212, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--color-border);
+            color: var(--color-text);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--color-accent);
+            background: rgba(6, 182, 212, 0.05);
+        }
+
+        .scent-identity-teaser {
+            background: var(--color-surface-low);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 20px 16px;
+            font-size: 13px;
+            color: var(--color-text-secondary);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .scent-identity-teaser strong {
+            color: var(--color-accent);
+        }
+
+        .scroll-hint {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateX(-50%) translateY(0);
+            }
+            50% {
+                transform: translateX(-50%) translateY(8px);
+            }
+        }
+
+        /* PERSONA TEASERS SECTION */
+        .personas-section {
+            padding: 80px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-label {
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--color-accent);
+            margin-bottom: 16px;
+        }
+
+        .section-heading {
+            text-align: center;
+            font-size: clamp(1.75rem, 4vw, 2.75rem);
+            font-weight: 400;
+            letter-spacing: -0.01em;
+            margin-bottom: 60px;
+        }
+
+        .personas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 60px;
+        }
+
+        .persona-card {
+            background: var(--color-surface-low);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 32px 24px;
+            text-align: center;
+            transition: all 300ms ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .persona-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, var(--color-accent) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 300ms ease;
+            pointer-events: none;
+        }
+
+        .persona-card:hover {
+            border-color: var(--color-accent);
+            background: var(--color-surface);
+            transform: translateY(-4px);
+        }
+
+        .persona-card:hover::before {
+            opacity: 0.05;
+        }
+
+        .persona-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .persona-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .persona-archetype {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--color-accent);
+            margin-bottom: 16px;
+        }
+
+        .persona-description {
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--color-text-secondary);
+        }
+
+        /* CHRISTOPHER MOMENT CARD */
+        .christopher-moment {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(168, 85, 247, 0.1));
+            border: 1px solid var(--color-border);
+            border-radius: 16px;
+            padding: 48px 32px;
+            text-align: center;
+            max-width: 600px;
+            margin: 80px auto;
+        }
+
+        .christopher-headline {
+            font-size: clamp(1.5rem, 3vw, 2.25rem);
+            font-weight: 400;
+            margin-bottom: 16px;
+        }
+
+        .christopher-subtext {
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--color-text-secondary);
+            margin-bottom: 24px;
+        }
+
+        .value-highlight {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #10B981;
+            display: inline-block;
+        }
+
+        /* FOOTER */
+        .footer {
+            background: var(--color-surface-low);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid var(--color-border);
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-section h4 {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--color-accent);
+            margin-bottom: 16px;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 8px;
+        }
+
+        .footer-links a {
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            font-size: 13px;
+            transition: color 200ms ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--color-text);
+        }
+
+        .footer-bottom {
+            padding-top: 40px;
+            border-top: 1px solid var(--color-border);
+            font-size: 12px;
+            color: var(--color-text-secondary);
+        }
+
+        .footer-social {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-top: 20px;
+        }
+
+        .social-link {
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            transition: color 200ms ease;
+        }
+
+        .social-link:hover {
+            color: var(--color-accent);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .personas-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero {
+                padding: 40px 20px;
+            }
+
+            .christopher-moment {
+                padding: 32px 20px;
+                margin: 60px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- VIEWPORT INDICATOR -->
+    <div class="viewport-indicator">
+        <span id="viewport-label">Desktop</span>
+    </div>
+
+    <!-- HERO SECTION -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="hero-headline">Your Scent Fingerprint</h1>
+            <p class="hero-subheadline">
+                Discover fragrances that match your mood, mood, and lifestyle.
+                Curated by AI, validated by your nose.
+            </p>
+            <div class="hero-cta-group">
+                <button class="btn btn-primary">Start Profiling</button>
+                <button class="btn btn-secondary">Explore Collection</button>
+            </div>
+            <div class="scent-identity-teaser">
+                <strong>New:</strong> Complete your Scent Identity profile in 2 minutes.
+                Get personalized recommendations from our fragrance AI.
+            </div>
+        </div>
+        <div class="scroll-hint">↓ Scroll to explore</div>
+    </section>
+
+    <!-- PERSONAS SECTION -->
+    <section class="personas-section">
+        <div class="section-label">Discover Your Archetype</div>
+        <h2 class="section-heading">Which Persona Resonates?</h2>
+
+        <div class="personas-grid">
+            <!-- Persona 1 -->
+            <div class="persona-card">
+                <span class="persona-icon">🎓</span>
+                <h3 class="persona-name">Velvet Intellectual</h3>
+                <p class="persona-archetype">The Thoughtful Connoisseur</p>
+                <p class="persona-description">
+                    You appreciate complexity and depth. Your collection reflects layers of meaning—
+                    each fragrance tells a story of discovery and introspection.
+                </p>
+            </div>
+
+            <!-- Persona 2 -->
+            <div class="persona-card">
+                <span class="persona-icon">☀️</span>
+                <h3 class="persona-name">Solar Minimalist</h3>
+                <p class="persona-archetype">The Effortless Optimist</p>
+                <p class="persona-description">
+                    You favor clarity and ease. Your go-to fragrances are timeless,
+                    versatile, and make you feel instantly confident.
+                </p>
+            </div>
+
+            <!-- Persona 3 -->
+            <div class="persona-card">
+                <span class="persona-icon">🌙</span>
+                <h3 class="persona-name">Dark Alchemist</h3>
+                <p class="persona-archetype">The Daring Explorer</p>
+                <p class="persona-description">
+                    You embrace risk and mystery. Your collection is avant-garde—
+                    bold, experimental, and unapologetically unconventional.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CHRISTOPHER MOMENT -->
+    <section class="christopher-moment">
+        <h2 class="christopher-headline">
+            Your £140 Bottle Has an £18 Clone
+        </h2>
+        <p class="christopher-subtext">
+            Sensus helps you navigate the fragrance market with confidence.
+            Discover inspired-by relationships, exact note matches, and smart alternatives
+            that fit your budget and taste.
+        </p>
+        <div class="value-highlight">
+            Save £100s • Never Compromise on Quality
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>Product</h4>
+                <ul class="footer-links">
+                    <li><a href="#">Explore Fragrances</a></li>
+                    <li><a href="#">My Collection</a></li>
+                    <li><a href="#">Aura Schedule</a></li>
+                    <li><a href="#">Layering Lab</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Community</h4>
+                <ul class="footer-links">
+                    <li><a href="#">Creator Directory</a></li>
+                    <li><a href="#">Wear & Share</a></li>
+                    <li><a href="#">Guides</a></li>
+                    <li><a href="#">Forum</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Company</h4>
+                <ul class="footer-links">
+                    <li><a href="#">About</a></li>
+                    <li><a href="#">Blog</a></li>
+                    <li><a href="#">Privacy</a></li>
+                    <li><a href="#">Terms</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2026 Sensus. Celebrating subjective fragrance taste.</p>
+            <div class="footer-social">
+                <a href="#" class="social-link">Instagram</a>
+                <a href="#" class="social-link">TikTok</a>
+                <a href="#" class="social-link">Twitter</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Update viewport indicator on resize
+        function updateViewportLabel() {
+            const width = window.innerWidth;
+            const label = document.getElementById('viewport-label');
+            if (width < 768) {
+                label.textContent = `📱 Mobile (${width}px)`;
+            } else if (width < 1200) {
+                label.textContent = `📱 Tablet (${width}px)`;
+            } else {
+                label.textContent = `💻 Desktop (${width}px)`;
+            }
+        }
+
+        window.addEventListener('resize', updateViewportLabel);
+        updateViewportLabel();
+    </script>
+</body>
+</html>

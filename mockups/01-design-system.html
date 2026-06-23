@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sensus — Dark Ambient Material Design System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --color-bg: #0F172A;
+            --color-surface-low: rgba(255, 255, 255, 0.03);
+            --color-surface: rgba(255, 255, 255, 0.05);
+            --color-surface-high: rgba(255, 255, 255, 0.08);
+            --color-text: #E2E8F0;
+            --color-text-secondary: #94A3B8;
+            --color-text-tertiary: #64748B;
+            --color-accent-primary: #06B6D4;
+            --color-accent-secondary: #A855F7;
+            --color-accent-warm: #FBBF24;
+            --color-border: rgba(255, 255, 255, 0.10);
+            --color-border-active: rgba(255, 255, 255, 0.20);
+        }
+
+        body {
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: clamp(2.25rem, 5vw, 3.5rem);
+            font-weight: 400;
+            letter-spacing: -0.015em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: clamp(1rem, 1.5vw, 1.125rem);
+            color: var(--color-text-secondary);
+            margin-bottom: 60px;
+        }
+
+        section {
+            margin-bottom: 80px;
+        }
+
+        h2 {
+            font-size: clamp(1.75rem, 3.5vw, 2.25rem);
+            font-weight: 500;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        /* COLOR PALETTE */
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .color-card {
+            background: var(--color-surface-low);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 200ms ease;
+        }
+
+        .color-card:hover {
+            background: var(--color-surface);
+            border-color: var(--color-border-active);
+        }
+
+        .color-swatch {
+            width: 100%;
+            height: 120px;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .color-info {
+            padding: 16px;
+        }
+
+        .color-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        .color-value {
+            font-size: 12px;
+            color: var(--color-text-tertiary);
+            font-family: 'Monaco', monospace;
+        }
+
+        /* TYPOGRAPHY */
+        .typo-grid {
+            display: grid;
+            gap: 30px;
+        }
+
+        .typo-sample {
+            background: var(--color-surface-low);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .typo-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--color-text-tertiary);
+            margin-bottom: 12px;
+        }
+
+        .display-large {
+            font-size: clamp(2.25rem, 5vw, 3.5rem);
+            font-weight: 400;
+            letter-spacing: -0.015em;
+        }
+
+        .headline-large {
+            font-size: clamp(1.75rem, 3.5vw, 2.25rem);
+            font-weight: 500;
+            letter-spacing: 0em;
+        }
+
+        .title-large {
+            font-size: clamp(1.375rem, 2.5vw, 1.75rem);
+            font-weight: 600;
+            letter-spacing: 0em;
+        }
+
+        .body-large {
+            font-size: clamp(1rem, 1.5vw, 1.125rem);
+            font-weight: 400;
+            letter-spacing: 0.03em;
+        }
+
+        .body-medium {
+            font-size: clamp(0.875rem, 1.2vw, 1rem);
+            font-weight: 400;
+            letter-spacing: 0.025em;
+        }
+
+        .label-small {
+            font-size: clamp(0.75rem, 1vw, 0.875rem);
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        /* COMPONENT SHOWCASE */
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .component {
+            background: var(--color-surface-low);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .component h3 {
+            font-size: clamp(1rem, 1.5vw, 1.125rem);
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        /* BUTTONS */
+        .button {
+            display: inline-block;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 200ms ease;
+            margin-bottom: 12px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .button-primary {
+            background: var(--color-accent-primary);
+            color: var(--color-bg);
+        }
+
+        .button-primary:hover {
+            background: #0ea5e9;
+            transform: translateY(-2px);
+        }
+
+        .button-secondary {
+            background: var(--color-surface-high);
+            border: 1px solid var(--color-border-active);
+            color: var(--color-text);
+        }
+
+        .button-secondary:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: var(--color-accent-primary);
+        }
+
+        /* CHIPS */
+        .chip-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .chip {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 999px;
+            background: var(--color-surface-low);
+            border: 1px solid var(--color-border);
+            color: var(--color-text);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 200ms ease;
+        }
+
+        .chip:hover {
+            background: var(--color-surface-high);
+            border-color: var(--color-border-active);
+        }
+
+        .chip.active {
+            background: var(--color-surface-high);
+            border-color: var(--color-accent-primary);
+            box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.3);
+        }
+
+        /* CARDS */
+        .card {
+            background: var(--color-surface-low);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 16px;
+            transition: all 300ms ease;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            background: var(--color-surface);
+            border-color: var(--color-border-active);
+            transform: scale(1.02);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 180px;
+            background: linear-gradient(135deg, #b45309 0%, #1e293b 50%, #0f172a 100%);
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .card-subtitle {
+            font-size: 12px;
+            color: var(--color-text-tertiary);
+        }
+
+        /* GRADIENT FALLBACKS */
+        .gradient-showcase {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+        }
+
+        .gradient-box {
+            height: 150px;
+            border-radius: 12px;
+            border: 1px solid var(--color-border);
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 12px;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .gradient-woody {
+            background: linear-gradient(135deg, #b45309 0%, #1e293b 50%, #0f172a 100%);
+        }
+
+        .gradient-fresh {
+            background: linear-gradient(135deg, #06b6d4 0%, #334155 50%, #0f172a 100%);
+        }
+
+        .gradient-floral {
+            background: linear-gradient(135deg, #ec4899 0%, #1e293b 50%, #0f172a 100%);
+        }
+
+        .gradient-oudy {
+            background: linear-gradient(135deg, #ca8a04 0%, #1e293b 50%, #000000 100%);
+        }
+
+        /* GRID SHOWCASE */
+        .grid-demo {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .grid-item {
+            aspect-ratio: 1;
+            background: var(--color-surface-low);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: var(--color-text-tertiary);
+            transition: all 200ms ease;
+        }
+
+        .grid-item:hover {
+            background: var(--color-surface);
+            transform: scale(1.05);
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            border-top: 1px solid var(--color-border);
+            color: var(--color-text-tertiary);
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sensus Design System</h1>
+        <p class="subtitle">Dark Ambient Material 3 — Premium Fragrance PWA</p>
+
+        <!-- COLOR PALETTE -->
+        <section>
+            <h2>Color Palette</h2>
+            <div class="color-grid">
+                <div class="color-card">
+                    <div class="color-swatch" style="background: #0F172A;"></div>
+                    <div class="color-info">
+                        <div class="color-name">Deep Slate</div>
+                        <div class="color-value">#0F172A</div>
+                    </div>
+                </div>
+                <div class="color-card">
+                    <div class="color-swatch" style="background: #06B6D4;"></div>
+                    <div class="color-info">
+                        <div class="color-name">Electric Cyan</div>
+                        <div class="color-value">#06B6D4</div>
+                    </div>
+                </div>
+                <div class="color-card">
+                    <div class="color-swatch" style="background: #A855F7;"></div>
+                    <div class="color-info">
+                        <div class="color-name">Moody Orchid</div>
+                        <div class="color-value">#A855F7</div>
+                    </div>
+                </div>
+                <div class="color-card">
+                    <div class="color-swatch" style="background: #FBBF24;"></div>
+                    <div class="color-info">
+                        <div class="color-name">Warm Amber</div>
+                        <div class="color-value">#FBBF24</div>
+                    </div>
+                </div>
+                <div class="color-card">
+                    <div class="color-swatch" style="background: #E2E8F0;"></div>
+                    <div class="color-info">
+                        <div class="color-name">Crisp Silver</div>
+                        <div class="color-value">#E2E8F0</div>
+                    </div>
+                </div>
+                <div class="color-card">
+                    <div class="color-swatch" style="background: #94A3B8;"></div>
+                    <div class="color-info">
+                        <div class="color-name">Muted Gray</div>
+                        <div class="color-value">#94A3B8</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TYPOGRAPHY -->
+        <section>
+            <h2>Typography Scale (M3 Tokens + Fluid Clamp)</h2>
+            <div class="typo-grid">
+                <div class="typo-sample">
+                    <div class="typo-label">Display Large</div>
+                    <div class="display-large">Your Scent Fingerprint</div>
+                    <div class="color-value" style="margin-top: 8px;">clamp(2.25rem, 5vw, 3.5rem) • font-weight: 400 • letter-spacing: -0.015em</div>
+                </div>
+                <div class="typo-sample">
+                    <div class="typo-label">Headline Large</div>
+                    <div class="headline-large">Discover Your Identity</div>
+                    <div class="color-value" style="margin-top: 8px;">clamp(1.75rem, 3.5vw, 2.25rem) • font-weight: 500</div>
+                </div>
+                <div class="typo-sample">
+                    <div class="typo-label">Title Large</div>
+                    <div class="title-large">Collector's Wall</div>
+                    <div class="color-value" style="margin-top: 8px;">clamp(1.375rem, 2.5vw, 1.75rem) • font-weight: 600</div>
+                </div>
+                <div class="typo-sample">
+                    <div class="typo-label">Body Large</div>
+                    <div class="body-large">Build your fragrance wardrobe with our AI-guided discovery engine.</div>
+                    <div class="color-value" style="margin-top: 8px;">clamp(1rem, 1.5vw, 1.125rem) • font-weight: 400</div>
+                </div>
+                <div class="typo-sample">
+                    <div class="typo-label">Body Medium</div>
+                    <div class="body-medium">Every fragrance tells a story. Discover what yours is.</div>
+                    <div class="color-value" style="margin-top: 8px;">clamp(0.875rem, 1.2vw, 1rem) • font-weight: 400</div>
+                </div>
+                <div class="typo-sample">
+                    <div class="typo-label">Label Small</div>
+                    <div class="label-small">Vibe • Family • Longevity • House</div>
+                    <div class="color-value" style="margin-top: 8px;">clamp(0.75rem, 1vw, 0.875rem) • font-weight: 500 • text-transform: uppercase</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- COMPONENTS -->
+        <section>
+            <h2>Components</h2>
+
+            <h3 style="font-size: 1.25rem; margin: 30px 0 20px 0;">Buttons</h3>
+            <div class="component">
+                <button class="button button-primary">Find Your Identity</button>
+                <button class="button button-secondary">Explore Collection</button>
+            </div>
+
+            <h3 style="font-size: 1.25rem; margin: 30px 0 20px 0;">Filter Chips (Carousel)</h3>
+            <div class="component">
+                <div class="chip-group">
+                    <div class="chip">Woody</div>
+                    <div class="chip active">Fresh ✓</div>
+                    <div class="chip">Oudy</div>
+                    <div class="chip">Floral</div>
+                    <div class="chip">Amber</div>
+                    <div class="chip">Aromatic</div>
+                </div>
+            </div>
+
+            <h3 style="font-size: 1.25rem; margin: 30px 0 20px 0;">Bottle Cards (Hover to see interaction)</h3>
+            <div class="component">
+                <div class="grid-demo">
+                    <div class="card">
+                        <div class="card-image"></div>
+                        <div class="card-title">Sauvage</div>
+                        <div class="card-subtitle">Dior</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-image" style="background: linear-gradient(135deg, #06b6d4 0%, #334155 50%, #0f172a 100%);"></div>
+                        <div class="card-title">Acqua di Gio</div>
+                        <div class="card-subtitle">Giorgio Armani</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-image" style="background: linear-gradient(135deg, #ca8a04 0%, #1e293b 50%, #000000 100%);"></div>
+                        <div class="card-title">Creed Oud</div>
+                        <div class="card-subtitle">Creed</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FALLBACK GRADIENTS -->
+        <section>
+            <h2>Fallback Image Gradients by Scent Family</h2>
+            <div class="gradient-showcase">
+                <div class="gradient-box gradient-woody">Woody</div>
+                <div class="gradient-box gradient-fresh">Fresh</div>
+                <div class="gradient-box gradient-floral">Floral</div>
+                <div class="gradient-box gradient-oudy">Oudy</div>
+            </div>
+        </section>
+
+        <!-- RESPONSIVE GRID -->
+        <section>
+            <h2>Responsive Grid (12-Column)</h2>
+            <p style="margin-bottom: 20px; color: var(--color-text-secondary); font-size: 14px;">Mobile: 4 cols • Tablet: 6 cols • Desktop: 10 cols • Ultra-wide: 12 cols</p>
+            <div class="component">
+                <div class="grid-demo" style="grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px;">
+                    <div class="grid-item">1</div>
+                    <div class="grid-item">2</div>
+                    <div class="grid-item">3</div>
+                    <div class="grid-item">4</div>
+                    <div class="grid-item">5</div>
+                    <div class="grid-item">6</div>
+                    <div class="grid-item">7</div>
+                    <div class="grid-item">8</div>
+                    <div class="grid-item">9</div>
+                    <div class="grid-item">10</div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>Sensus Design System — Dark Ambient Material 3</p>
+            <p>Ready for Figma design comps and production implementation</p>
+        </footer>
+    </div>
+</body>
+</html>

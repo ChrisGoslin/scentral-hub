@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sensus — Aura Spritz Schedule</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --color-bg: #0F172A;
+            --color-surface-low: rgba(255, 255, 255, 0.03);
+            --color-surface: rgba(255, 255, 255, 0.05);
+            --color-text: #E2E8F0;
+            --color-text-secondary: #94A3B8;
+            --color-border: rgba(255, 255, 255, 0.10);
+            --color-accent: #06B6D4;
+            --color-success: #10B981;
+            --color-warning: #F59E0B;
+        }
+
+        body {
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: clamp(2.25rem, 5vw, 3.5rem);
+            font-weight: 400;
+            letter-spacing: -0.015em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: var(--color-text-secondary);
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--color-accent);
+            margin-top: 60px;
+            margin-bottom: 24px;
+        }
+
+        /* SPRITZ CARD DECK */
+        .deck-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            height: 500px;
+            margin: 0 auto 60px;
+        }
+
+        .card-stack {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .spritz-card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: var(--color-surface-low);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--color-border);
+            border-radius: 16px;
+            padding: 32px 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            cursor: grab;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            overflow: hidden;
+        }
+
+        .spritz-card.active {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+            z-index: 3;
+        }
+
+        .spritz-card.next {
+            transform: translateY(12px) scale(0.95);
+            opacity: 0.6;
+            z-index: 2;
+        }
+
+        .spritz-card.far {
+            transform: translateY(24px) scale(0.90);
+            opacity: 0.3;
+            z-index: 1;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .time-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--color-accent);
+            letter-spacing: 0.05em;
+        }
+
+        .xp-badge {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.2));
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--color-success);
+        }
+
+        .silhouette-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex: 1;
+            margin: 24px 0;
+        }
+
+        svg.silhouette {
+            width: 120px;
+            height: 200px;
+            filter: drop-shadow(0 8px 16px rgba(6, 182, 212, 0.1));
+        }
+
+        .pulse-point {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .pulse-point:nth-child(2) {
+            animation-delay: 0.3s;
+        }
+
+        .pulse-point:nth-child(3) {
+            animation-delay: 0.6s;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                r: 6;
+                opacity: 0.6;
+            }
+            50% {
+                r: 10;
+                opacity: 1;
+            }
+        }
+
+        .fragrance-name {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .fragrance-brand {
+            font-size: 14px;
+            color: var(--color-text-secondary);
+            margin-bottom: 12px;
+        }
+
+        .fragrance-notes {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            line-height: 1.4;
+        }
+
+        .card-footer {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .action-button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 200ms ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .btn-wear {
+            background: linear-gradient(135deg, #06B6D4, #0891B2);
+            color: white;
+            border: none;
+        }
+
+        .btn-wear:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 16px rgba(6, 182, 212, 0.3);
+        }
+
+        .btn-defer {
+            background: transparent;
+            border: 1px solid var(--color-border);
+            color: var(--color-text-secondary);
+        }
+
+        .btn-defer:hover {
+            border-color: var(--color-accent);
+            color: var(--color-text);
+        }
+
+        .swipe-hint {
+            text-align: center;
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            margin-top: 20px;
+        }
+
+        /* STREAK TRACKER */
+        .streak-container {
+            background: var(--color-surface-low);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .streak-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: var(--color-text-secondary);
+            letter-spacing: 0.1em;
+            margin-bottom: 8px;
+        }
+
+        .streak-value {
+            font-size: 48px;
+            font-weight: 300;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+
+        .streak-fire {
+            display: inline-block;
+            font-size: 32px;
+            margin-right: 8px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-4px);
+            }
+        }
+
+        .streak-message {
+            font-size: 14px;
+            color: var(--color-text-secondary);
+        }
+
+        /* EXPANDED MODAL VIEW */
+        .modal-container {
+            background: var(--color-surface-low);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--color-border);
+            border-radius: 16px;
+            padding: 32px 24px;
+            margin-bottom: 40px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            transition: color 200ms ease;
+        }
+
+        .close-btn:hover {
+            color: var(--color-text);
+        }
+
+        .modal-section {
+            margin-bottom: 24px;
+        }
+
+        .modal-section-title {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--color-accent);
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+        }
+
+        .modal-section-content {
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--color-text-secondary);
+        }
+
+        .note-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .note-tag {
+            background: rgba(6, 182, 212, 0.1);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            color: var(--color-accent);
+        }
+
+        .tip-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .tip-list li {
+            padding: 8px 0;
+            padding-left: 24px;
+            position: relative;
+        }
+
+        .tip-list li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--color-accent);
+            font-weight: 600;
+        }
+
+        .youtube-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--color-accent);
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 12px;
+        }
+
+        .youtube-link:hover {
+            text-decoration: underline;
+        }
+
+        footer {
+            text-align: center;
+            padding: 60px 0 20px;
+            color: var(--color-text-secondary);
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Aura AI Spritz Schedule</h1>
+            <p class="subtitle">Gamified daily fragrance guidance with swipeable cards</p>
+        </header>
+
+        <!-- STREAK TRACKER -->
+        <div class="section-title">Your Active Streak</div>
+        <div class="streak-container">
+            <div class="streak-label">Current Streak</div>
+            <div>
+                <span class="streak-fire">🔥</span>
+                <span class="streak-value">5</span>
+            </div>
+            <div class="streak-message">Days in a row — Keep it going!</div>
+        </div>
+
+        <!-- CARD DECK -->
+        <div class="section-title">Today's Schedule (Swipe Right to Log)</div>
+        <div class="deck-container">
+            <div class="card-stack">
+                <!-- Card 1: Active -->
+                <div class="spritz-card active">
+                    <div class="card-header">
+                        <div class="time-label">🌅 Morning — 7:30 AM</div>
+                        <div class="xp-badge">+5 XP</div>
+                    </div>
+                    <div class="silhouette-container">
+                        <svg class="silhouette" viewBox="0 0 80 140" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Head -->
+                            <circle cx="40" cy="20" r="12" fill="#06B6D4" opacity="0.8"/>
+                            <!-- Body -->
+                            <path d="M 35 35 L 30 80 M 45 35 L 50 80" stroke="#06B6D4" stroke-width="3" stroke-linecap="round" opacity="0.6"/>
+                            <!-- Pulse Points -->
+                            <circle class="pulse-point" cx="40" cy="15" r="6" fill="#10B981" opacity="0.6"/>
+                            <circle class="pulse-point" cx="37" cy="45" r="6" fill="#10B981" opacity="0.6"/>
+                            <circle class="pulse-point" cx="43" cy="45" r="6" fill="#10B981" opacity="0.6"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="fragrance-name">Sauvage Elixir</div>
+                        <div class="fragrance-brand">Dior</div>
+                        <div class="fragrance-notes">Spicy, Fresh, Peppery • Neck + Wrists</div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="action-button btn-wear">Wear (→)</button>
+                        <button class="action-button btn-defer">Defer (←)</button>
+                    </div>
+                </div>
+
+                <!-- Card 2: Next -->
+                <div class="spritz-card next">
+                    <div class="card-header">
+                        <div class="time-label">☀️ Midday — 1:00 PM</div>
+                        <div class="xp-badge">+8 XP</div>
+                    </div>
+                    <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
+                        <div style="opacity: 0.5;">Acqua di Gio</div>
+                    </div>
+                    <div>
+                        <div class="fragrance-name">Acqua di Gio</div>
+                        <div class="fragrance-brand">Armani</div>
+                    </div>
+                </div>
+
+                <!-- Card 3: Far -->
+                <div class="spritz-card far">
+                    <div class="card-header">
+                        <div class="time-label">🌙 Evening — 6:00 PM</div>
+                        <div class="xp-badge">+10 XP</div>
+                    </div>
+                    <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
+                        <div style="opacity: 0.3;">Oud Wood</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="swipe-hint">
+            💡 Swipe right to log wear • Swipe left to defer • Tap for more details
+        </div>
+
+        <!-- EXPANDED DETAIL VIEW -->
+        <div class="section-title">Card Detail Expansion</div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <div>
+                    <div class="modal-title">Sauvage Elixir</div>
+                    <div style="font-size: 13px; color: var(--color-text-secondary); margin-top: 4px;">Dior • Fresh/Spicy</div>
+                </div>
+                <button class="close-btn">×</button>
+            </div>
+
+            <div class="modal-section">
+                <div class="modal-section-title">Why This Fragrance?</div>
+                <div class="modal-section-content">
+                    Based on your collection profile, Sauvage pairs well with your morning coffee routine.
+                    Fresh spicy notes energize and project well in bright morning light.
+                </div>
+            </div>
+
+            <div class="modal-section">
+                <div class="modal-section-title">Key Notes</div>
+                <div class="note-tags">
+                    <div class="note-tag">Ambroxan</div>
+                    <div class="note-tag">Pepper</div>
+                    <div class="note-tag">Bergamot</div>
+                    <div class="note-tag">Ambrette Seed</div>
+                </div>
+            </div>
+
+            <div class="modal-section">
+                <div class="modal-section-title">Application Tips</div>
+                <ul class="tip-list">
+                    <li>Spray 2–3 pumps on inner wrists</li>
+                    <li>Dab once on neck (pulse point)</li>
+                    <li>Optional: Light spray in air, walk through</li>
+                    <li>Reapply mid-afternoon if desired</li>
+                </ul>
+            </div>
+
+            <div class="modal-section">
+                <div class="modal-section-title">Learn More</div>
+                <a href="#" class="youtube-link">▶ Sauvage Elixir Deep Dive on YouTube</a>
+            </div>
+        </div>
+
+        <footer>
+            <p>Sensus Aura AI Spritz Schedule — Gamified Daily Fragrance Routine</p>
+            <p>Epic 4: Weeks 9–10 | Q3 2026</p>
+        </footer>
+    </div>
+</body>
+</html>
