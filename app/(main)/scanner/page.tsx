@@ -6,6 +6,7 @@ import Button from '@/components/ui/Button'
 import { startBarcodeScanner, parseBarcodeFromVideo, isValidBarcode } from '@/lib/barcode'
 import { lookupFragranceByBarcode } from '@/lib/barcode-db'
 import Link from 'next/link'
+import AddFragranceForm from './AddFragranceForm'
 
 interface ScannedFragrance {
   fragrance_id: string
@@ -14,14 +15,29 @@ interface ScannedFragrance {
   image_url?: string
 }
 
+function getOrCreateAnonId(): string {
+  try {
+    const existing = localStorage.getItem('scentral_anon_id')
+    if (existing) return existing
+    const id = crypto.randomUUID()
+    localStorage.setItem('scentral_anon_id', id)
+    return id
+  } catch {
+    return crypto.randomUUID()
+  }
+}
+
 export default function ScannerPage() {
   const router = useRouter()
   const videoRef = useRef<HTMLVideoElement>(null)
   const [cameraState, setCameraState] = useState<'idle' | 'requesting' | 'active' | 'error'>('idle')
   const [cameraError, setCameraError] = useState<string>('')
   const [scannedFragrance, setScannedFragrance] = useState<ScannedFragrance | null>(null)
+  const [noMatchBarcode, setNoMatchBarcode] = useState<string | null>(null)
   const [isScanning, setIsScanning] = useState(false)
   const [scanMessage, setScanMessage] = useState('Point at barcode to scan')
+  const [xpToast, setXpToast] = useState<number | null>(null)
+  const [formLoading, setFormLoading] = useState(false)
   const scanIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const scannerStopRef = useRef<(() => void) | null>(null)
 
@@ -60,18 +76,32 @@ export default function ScannerPage() {
     if (scanIntervalRef.current) clearInterval(scanIntervalRef.current)
 
     let frameCount = 0
+    let lastBarcodeAttempt = ''
+    let noMatchCount = 0
+
     scanIntervalRef.current = setInterval(async () => {
       if (!videoRef.current || cameraState !== 'active') return
-      if (scannedFragrance) return // Stop if already scanned
+      if (scannedFragrance || noMatchBarcode) return // Stop if already scanned or showing no-match form
 
       frameCount++
       try {
         const barcode = await parseBarcodeFromVideo(videoRef.current)
 
         if (barcode && isValidBarcode(barcode)) {
+          if (barcode !== lastBarcodeAttempt) {
+            lastBarcodeAttempt = barcode
+            noMatchCount = 0
+          }
+
           const entry = lookupFragranceByBarcode(barcode)
           if (entry) {
             handleBarcodeDetected(barcode, entry)
+          } else {
+            noMatchCount++
+            // After 5 consecutive frames of no match, show form
+            if (noMatchCount >= 5) {
+              handleNoMatch(barcode)
+            }
           }
         }
       } catch (error) {
@@ -104,6 +134,67 @@ export default function ScannerPage() {
     // Haptic feedback if available
     if ('vibrate' in navigator) {
       navigator.vibrate([100, 50, 100])
+    }
+  }
+
+  /**
+   * Handle barcode with no match in DB
+   */
+  function handleNoMatch(barcode: string) {
+    setIsScanning(false)
+    if (scanIntervalRef.current) clearInterval(scanIntervalRef.current)
+    setNoMatchBarcode(barcode)
+    setScanMessage(`Not in catalogue: ${barcode}`)
+
+    // Haptic feedback if available
+    if ('vibrate' in navigator) {
+      navigator.vibrate([100, 50, 100, 50, 100])
+    }
+  }
+
+  /**
+   * Handle adding new fragrance via form
+   */
+  async function handleAddFragrance(data: { brand: string; name: string; family: string; notes?: string }) {
+    setFormLoading(true)
+    try {
+      const anonId = getOrCreateAnonId()
+      const response = await fetch('/api/contribute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          anonId,
+          type: 'new_fragrance',
+          payload: {
+            brand: data.brand,
+            name: data.name,
+            family: data.family,
+            notes: data.notes,
+            barcode: noMatchBarcode,
+          },
+        }),
+      })
+
+      if (!response.ok) {
+        const err = await response.json()
+        throw new Error(err.error || 'Failed to add fragrance')
+      }
+
+      const result = await response.json()
+      setXpToast(result.xp_awarded)
+      setTimeout(() => setXpToast(null), 1600)
+
+      // Reset form and continue scanning
+      setNoMatchBarcode(null)
+      setScanMessage('Point at barcode to scan')
+      setFormLoading(false)
+
+      if (cameraState === 'active') {
+        startContinuousScanning()
+      }
+    } catch (error) {
+      setFormLoading(false)
+      throw error
     }
   }
 
@@ -335,6 +426,26 @@ export default function ScannerPage() {
         )}
       </div>
 
+      {/* XP Toast */}
+      {xpToast && (
+        <div style={{
+          position: 'fixed',
+          bottom: '100px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          padding: '12px 24px',
+          borderRadius: '8px',
+          background: 'var(--aura-surface)',
+          border: '1px solid var(--aura-border)',
+          color: 'var(--xp-color)',
+          fontSize: '14px',
+          fontWeight: 600,
+          zIndex: 50,
+        }}>
+          +{xpToast} XP
+        </div>
+      )}
+
       {/* Result or Instructions */}
       {scannedFragrance ? (
         <div style={{
@@ -378,6 +489,49 @@ export default function ScannerPage() {
               Scan Another
             </Button>
           </div>
+        </div>
+      ) : noMatchBarcode ? (
+        <div style={{
+          width: '100%',
+          maxWidth: '400px',
+          padding: '24px',
+          borderRadius: '12px',
+          background: 'var(--surface)',
+          border: '1px solid var(--line)',
+          marginBottom: '24px',
+        }}>
+          <h2 style={{
+            fontSize: '16px',
+            fontWeight: 700,
+            marginBottom: '16px',
+            color: 'var(--text)',
+          }}>
+            ✨ Not in our catalogue yet
+          </h2>
+          <p style={{
+            fontSize: '13px',
+            color: 'var(--text-muted)',
+            marginBottom: '20px',
+          }}>
+            Help us grow! Add this fragrance and earn 50 XP.
+          </p>
+
+          <AddFragranceForm
+            onSubmit={handleAddFragrance}
+            loading={formLoading}
+          />
+
+          <Button
+            onClick={() => {
+              setNoMatchBarcode(null)
+              setScanMessage('Point at barcode to scan')
+              if (cameraState === 'active') startContinuousScanning()
+            }}
+            variant="secondary"
+            style={{ width: '100%', marginTop: '12px' }}
+          >
+            Skip
+          </Button>
         </div>
       ) : (
         <div style={{

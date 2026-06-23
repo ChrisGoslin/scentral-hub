@@ -9,6 +9,7 @@ import SimilarFragrances from './SimilarFragrances'
 import InspiredByClones from './InspiredByClones'
 import LogWearButton from './LogWearButton'
 import AffinityRater from './AffinityRater'
+import RateProjection from './RateProjection'
 import { NotesPyramid, WearLogButton } from './FragranceDetailClient'
 import { getBrandEmoji } from '@/lib/brandEmoji'
 import { cookies } from 'next/headers'
@@ -328,6 +329,9 @@ export default async function FragranceDetailPage({
             collectionId={collectionRow.id}
           />
         )}
+
+        {/* Rate Projection */}
+        <RateProjection fragranceId={f.id} currentProjection={f.projection} />
 
         {/* Sensory Anatomy */}
         {f.application_zone && (
