@@ -37,15 +37,34 @@ export default function BottomNav() {
             borderBottom: '1px solid var(--line)',
           }}
         >
-          <h1 style={{ 
-            fontSize: 11, 
-            fontWeight: 800, 
-            textTransform: 'uppercase', 
+          <h1 style={{
+            fontSize: 11,
+            fontWeight: 800,
+            textTransform: 'uppercase',
             letterSpacing: '0.2em',
-            color: 'var(--text)' 
+            color: 'var(--text)'
           }}>
             {pageTitle}
           </h1>
+          {process.env.NEXT_PUBLIC_BETA_MODE === 'true' && (
+            <span
+              style={{
+                position: 'absolute',
+                right: 12,
+                fontSize: 9,
+                fontWeight: 700,
+                letterSpacing: '0.05em',
+                color: 'var(--text-muted)',
+                background: 'var(--color-surface)',
+                border: '1px solid var(--color-gold)',
+                borderRadius: 999,
+                padding: '3px 8px',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              Beta — Free for early users
+            </span>
+          )}
         </header>
       )}
 

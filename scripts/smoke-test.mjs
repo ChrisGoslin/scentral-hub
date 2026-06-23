@@ -21,6 +21,8 @@ const ROUTES = [
   ['/spritz',          200, 'Spritz Schedule page'],
   ['/privacy',         200, 'Privacy Policy page'],
   ['/terms',           200, 'Terms of Service page'],
+  ['/intelligence',    200, 'Deep Dive (beta-open Pro route)'],
+  ['/dna-match',       200, 'Compare Scents (beta-open Pro route)'],
   ['/api/fragrances?q=lattafa', 200, 'Search API'],
   ['/api/search?q=rose', 200, 'Smells Like Search API'],
   ['/api/waitlist',    405, 'Waitlist API (GET should 405)'],

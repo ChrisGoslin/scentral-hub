@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { Lock } from 'lucide-react'
+import { getIsPro } from '@/lib/subscription'
 
 interface ProGateProps {
   featureName: string
@@ -10,15 +11,13 @@ interface ProGateProps {
 }
 
 /**
- * ProGate — wraps Pro-tier features.
- * Free users see a locked teaser. No payment logic yet — just the visual gate.
- * Replace `isPro` logic here when billing is ready.
+ * ProGate — locked teaser shown to non-Pro users.
+ * Callers decide whether to render this or the real feature, based on getIsPro().
  */
 export default function ProGate({ featureName, description, preview }: ProGateProps) {
-  // TODO: replace with real subscription check when billing is wired
-  const isPro = false
+  const isPro = getIsPro()
 
-  if (isPro) return null // render nothing — parent renders children
+  if (isPro) return null // defensive no-op if ever rendered while Pro is true
 
   return (
     <div
