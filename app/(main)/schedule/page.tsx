@@ -3,6 +3,7 @@ import { createClient } from '@/utils/supabase/server'
 import { createClient as createPublicClient } from '@supabase/supabase-js'
 import ScheduleClient from './ScheduleClient'
 import ProGate from '@/components/ui/ProGate'
+import { getIsPro } from '@/lib/subscription'
 import type { ScheduleFragrance, SavedSchedule } from './types'
 
 export const dynamic = 'force-dynamic'
@@ -15,25 +16,25 @@ function getPublicSupabase() {
 }
 
 export default async function SchedulePage() {
-  // Pro gate — remove this block when billing is ready
-  return (
-    <ProGate
-      featureName="My Schedule"
-      description="Plan which scent to wear morning, midday, and evening — and save your routines for the week. Especially useful once you have 5+ bottles and want to stop reaching for the same one."
-      preview={
-        <div className="px-4 pt-8 pb-4 space-y-4 pointer-events-none">
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28 }}>My Schedule</h1>
-          <div className="grid grid-cols-3 gap-3">
-            {['Morning', 'Midday', 'Evening'].map(t => (
-              <div key={t} className="h-28 bg-[var(--surface)] border border-[var(--line)] rounded-xl" />
-            ))}
+  if (!getIsPro()) {
+    return (
+      <ProGate
+        featureName="My Schedule"
+        description="Plan which scent to wear morning, midday, and evening — and save your routines for the week. Especially useful once you have 5+ bottles and want to stop reaching for the same one."
+        preview={
+          <div className="px-4 pt-8 pb-4 space-y-4 pointer-events-none">
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28 }}>My Schedule</h1>
+            <div className="grid grid-cols-3 gap-3">
+              {['Morning', 'Midday', 'Evening'].map(t => (
+                <div key={t} className="h-28 bg-[var(--surface)] border border-[var(--line)] rounded-xl" />
+              ))}
+            </div>
           </div>
-        </div>
-      }
-    />
-  )
+        }
+      />
+    )
+  }
 
-  /* ── Unreachable until ProGate isPro = true ─────────────────────────────
   // Load fragrances (public)
   const { data: fragrances } = await getPublicSupabase()
     .from('fragrances')
@@ -82,5 +83,4 @@ export default async function SchedulePage() {
       isSignedIn={!!user}
     />
   )
-  // ── end unreachable ─────────────────────────────────────────────────── */
 }
