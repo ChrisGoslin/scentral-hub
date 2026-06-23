@@ -1,19 +1,16 @@
 #!/usr/bin/env node
-// Enrich fragrances with AI-generated descriptions using Claude Haiku
-// Usage: node scripts/enrich-fragrances.mjs [--dry-run] [--limit=N]
-// Queries for rows WHERE plain_description IS NULL
-// Rate limit: 1 request per second (configurable)
-// Requires: ANTHROPIC_API_KEY, NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_KEY in .env.local
+// Enrich fragrances with Claude-generated descriptions
+// Usage: node scripts/enrich-fragrances.mjs [--dry-run]
+// Queries fragrances WHERE plain_description IS NULL LIMIT 100
+// Rate limit: 2 requests/second max
+// Requires: ANTHROPIC_API_KEY, NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY in .env.local
 
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@supabase/supabase-js'
 import { readFileSync } from 'fs'
 
-// ── Config ──────────────────────────────────────────────────────────────────
 const isDryRun = process.argv.includes('--dry-run')
-const limitArg = process.argv.find(a => a.startsWith('--limit='))
-const limit = limitArg ? parseInt(limitArg.split('=')[1]) : 50
-const delayMs = 1000 // Rate limit: 1 request per second
+const delayMs = 500 // Rate limit: 2 requests per second (1000ms / 2)
 
 // ── Env ──────────────────────────────────────────────────────────────────────
 const envFile = readFileSync('.env.local', 'utf8')
@@ -40,16 +37,15 @@ if (!env.NEXT_PUBLIC_SUPABASE_URL) {
   console.error('Missing NEXT_PUBLIC_SUPABASE_URL in .env.local')
   process.exit(1)
 }
-if (!env.SUPABASE_SERVICE_KEY) {
-  console.error('Missing SUPABASE_SERVICE_KEY in .env.local')
+if (!env.SUPABASE_SERVICE_ROLE_KEY) {
+  console.error('Missing SUPABASE_SERVICE_ROLE_KEY in .env.local')
   process.exit(1)
 }
 
 // ── Clients ───────────────────────────────────────────────────────────────────
 const anthropic = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY })
-const supabase = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_KEY)
+const supabase = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY)
 
-// ── Sleep helper ──────────────────────────────────────────────────────────────
 function sleep(ms) {
   return new Promise(r => setTimeout(r, ms))
 }
@@ -59,7 +55,7 @@ const { data: fragrances, error: fetchErr } = await supabase
   .from('fragrances')
   .select('id, brand, name, family, notes')
   .is('plain_description', null)
-  .limit(limit)
+  .limit(100)
 
 if (fetchErr) {
   console.error('Failed to fetch fragrances:', fetchErr.message)
@@ -69,7 +65,7 @@ if (fetchErr) {
 console.log(`✓ Found ${fragrances?.length || 0} fragrances with NULL plain_description\n`)
 
 if (!fragrances || fragrances.length === 0) {
-  console.log('✅ No fragrances to enrich.')
+  console.log('✅ All fragrances enriched.')
   process.exit(0)
 }
 
@@ -81,97 +77,70 @@ let failed = 0
 for (let i = 0; i < fragrances.length; i++) {
   const frag = fragrances[i]
 
-  // Build prompt
-  const notes = frag.notes ? `Notes: ${frag.notes}` : 'Notes: [Not provided]'
-  const prompt = `Given this fragrance:
-Brand: ${frag.brand}
-Name: ${frag.name}
-Family: ${frag.family}
-${notes}
-
-Write JSON with exactly these two fields:
-{
-  "plain_description": "<1-2 sentence plain English description of how it smells, max 20 words>",
-  "use_case": "<3-word context, e.g. 'Date night, winter' or 'Office, fresh'>"
-}
-
-Return ONLY valid JSON, no markdown or explanation.`
+  const prompt = `Fragrance: ${frag.brand} ${frag.name}. Family: ${frag.family}. In max 20 words, describe how it smells in plain English for a newcomer. Return JSON only: {"plain_description": "..."}`
 
   if (isDryRun) {
-    console.log(`[DRY RUN] Would enrich: ${frag.brand} ${frag.name}`)
-    console.log(`Prompt: ${prompt}\n`)
+    console.log(`[DRY RUN] ${frag.brand} ${frag.name}`)
     continue
   }
 
   try {
     const message = await anthropic.messages.create({
-      model: 'claude-3-5-haiku-20241022',
-      max_tokens: 256,
-      messages: [
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 128,
+      messages: [{ role: 'user', content: prompt }],
     })
 
     const content = message.content[0].type === 'text' ? message.content[0].text : ''
-    let parsed
 
+    let parsed
     try {
       parsed = JSON.parse(content)
     } catch {
-      console.error(`❌ Parse error for ${frag.brand} ${frag.name}:`, content)
+      console.error(`❌ Parse error: ${frag.brand} ${frag.name}`)
       failed++
       await sleep(delayMs)
       continue
     }
 
-    updates.push({
-      id: frag.id,
-      plain_description: parsed.plain_description || null,
-      use_case: parsed.use_case || null,
-    })
+    if (parsed.plain_description) {
+      updates.push({
+        id: frag.id,
+        plain_description: parsed.plain_description,
+      })
+      successful++
+      console.log(`✓ ${frag.brand} ${frag.name}`)
+    } else {
+      failed++
+    }
 
-    successful++
-    console.log(`✓ ${frag.brand} ${frag.name}: "${parsed.plain_description}" (${parsed.use_case})`)
-
-    // Rate limit
     await sleep(delayMs)
   } catch (err) {
-    console.error(`❌ API error for ${frag.brand} ${frag.name}:`, err.message)
+    console.error(`❌ API error: ${frag.brand} ${frag.name}`)
     failed++
     await sleep(delayMs)
   }
 }
 
-console.log(`\n📊 Enrichment complete: ${successful} successful, ${failed} failed\n`)
+console.log(`\n📊 ${successful} successful, ${failed} failed\n`)
 
 if (isDryRun) {
-  console.log('🏜️ Dry run enabled. No updates written to DB.')
+  console.log('🏜️ Dry run — no DB updates.')
   process.exit(0)
 }
 
-// ── Write updates ─────────────────────────────────────────────────────────────
 if (updates.length === 0) {
-  console.log('⚠️ No updates to write.')
+  console.log('✓ No updates to write.')
   process.exit(0)
 }
 
-console.log(`⏳ Writing ${updates.length} updates to Supabase...`)
+console.log(`⏳ Updating Supabase with ${updates.length} descriptions...`)
 
 for (const update of updates) {
-  const { error } = await supabase
+  await supabase
     .from('fragrances')
-    .update({
-      plain_description: update.plain_description,
-      use_case: update.use_case,
-    })
+    .update({ plain_description: update.plain_description })
     .eq('id', update.id)
-
-  if (error) {
-    console.error(`❌ Update error for id ${update.id}:`, error.message)
-  }
 }
 
 console.log(`✅ Updated ${updates.length} fragrances`)

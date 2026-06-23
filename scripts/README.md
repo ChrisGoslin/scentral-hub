@@ -1,174 +1,136 @@
-# Fragrance Data Import & Enrichment
+# Bulk Import: FragDB Kaggle Dataset
 
-Two Node.js scripts for bulk importing fragrances from a Kaggle CSV and enriching them with AI-generated descriptions.
+One-time pipeline to import fragrances from the [FragDB Kaggle dataset](https://www.kaggle.com/datasets/eriklindqvist/fragdb-fragrance-database) and enrich with AI-generated descriptions.
 
-## Prerequisites
+## Quick Start
 
-Both scripts require `.env.local` with:
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `SUPABASE_SERVICE_KEY`
-- `ANTHROPIC_API_KEY` (enrichment script only)
-
-All three are already set up in this project.
+1. **Download CSV** from Kaggle
+2. **Place at** `scripts/data/fragrances.csv`
+3. **Run import**: `node scripts/import-fragrances.mjs --dry-run`
+4. **Run import** (for real): `node scripts/import-fragrances.mjs`
+5. **Enrich** (repeatedly): `node scripts/enrich-fragrances.mjs`
 
 ## import-fragrances.mjs
 
-Bulk import fragrances from a Kaggle CSV, with automatic deduplication and family normalization.
+Reads CSV, deduplicates on `(brand, name)`, normalizes family, upserts 100 rows at a time.
 
 ### Setup
 
-1. Place your CSV at `scripts/data/fragrances.csv`
-2. Expected columns: `brand`, `name`, `notes` (or `top_notes`/`heart_notes`/`base_notes`), `gender`, `year`, `family`
-3. The `family` column is optional — if missing, it will be derived from the notes using simple keyword matching
-
-### Family Normalization
-
-The script normalizes multi-word family values (e.g., "Fresh Aromatic", "Woody Spicy") to single-word axes:
-
-```
-Fresh, Aquatic, Woody, Oud, Oriental, Spicy, Floral, Fruity, Gourmand, Aromatic
+```bash
+mkdir -p scripts/data
+# Download FragDB CSV from Kaggle, save to scripts/data/fragrances.csv
 ```
 
-See the `AXIS_MAP` constant in `app/(main)/wheel/page.tsx` for the full mapping. Unknown families are stored as-is.
+Expected columns: `brand`, `name`, `gender`, `notes`, `family` (optional).
 
 ### Usage
 
-**Dry run** (preview without writing):
-
 ```bash
-cd ~/Projects/scentral-hub
+# Preview without writing to DB
 node scripts/import-fragrances.mjs --dry-run
-```
 
-**Import first 100 rows** (test run):
-
-```bash
-node scripts/import-fragrances.mjs --limit=100
-```
-
-**Full import**:
-
-```bash
+# Full import (batched 100 rows at a time)
 node scripts/import-fragrances.mjs
 ```
+
+### What Gets Written
+
+| Field | Source | Value |
+|-------|--------|-------|
+| `brand` | CSV | `brand` |
+| `name` | CSV | `name` |
+| `full_name` | Derived | `brand + " " + name` |
+| `family` | CSV or derived | Normalized to single-word axis (Fresh, Woody, etc.) |
+| `projection` | Default | `"Moderate"` |
+| `use_case` | CSV gender | `"Daily, office"` / `"Date night"` / `"Daily, versatile"` |
+| `plain_description` | — | `NULL` (enrichment script fills) |
+| `image_url` | — | `NULL` |
+
+**Family Normalization**: Multi-word families like "Fresh Aromatic" → "Fresh". Unknown families stored as-is. Keyword-based fallback if `family` column missing.
 
 ### Output
 
 ```
 ✓ Loaded 500 records from scripts/data/fragrances.csv
+
 ✓ Found 282 existing fragrances
-📊 Deduplication: 215 new + 285 skipped = 500 total
-📝 Ready to insert 215 rows
-⏳ Inserting 215 rows...
-✅ Successfully inserted 215 fragrances
+
+📊 215 new + 285 skipped = 500 total
+📝 Ready to insert 215 rows in batches of 100
+
+⏳ Inserting batch 1...
+⏳ Inserting batch 3...
+✅ Inserted 215 / Skipped 285 (duplicates) / Errors 0
 ```
-
-### What Gets Set
-
-- `brand`, `name` — from CSV
-- `family` — normalized to axis (Fresh, Woody, etc.)
-- `projection` — defaults to "Moderate" (can be enriched later)
-- `notes` — concatenated from top/heart/base if available
-- `lean` — "masculine" / "feminine" / null based on gender
-- `optimal_season`, `use_case`, `plain_description`, `inspired_by`, `image_url` — all null (to be filled later)
 
 ## enrich-fragrances.mjs
 
-Query fragrances with `NULL plain_description` and generate descriptions + use cases using Claude Haiku.
+Queries 100 rows with `plain_description IS NULL`, calls Claude Haiku, updates descriptions. Run repeatedly until all enriched.
 
 ### Usage
 
-**Dry run** (preview prompts without calling API):
-
 ```bash
+# Dry run (preview prompts)
 node scripts/enrich-fragrances.mjs --dry-run
-```
 
-**Enrich next 50 fragrances** (default limit):
-
-```bash
+# Enrich next 100 rows (1–2 seconds per row at 2 req/sec)
 node scripts/enrich-fragrances.mjs
 ```
 
-**Enrich next 10 fragrances**:
+### Model & Rate Limit
 
-```bash
-node scripts/enrich-fragrances.mjs --limit=10
-```
-
-### Rate Limiting
-
-Calls Claude API with 1-second delay between requests to stay under rate limits. Adjust `delayMs` in the script if needed.
+- **Model**: `claude-haiku-4-5-20251001` (cheapest, ~1ms per request)
+- **Rate**: 2 requests/second (500ms delay between calls)
+- **Prompt**: Simple JSON request, max 20 words per description
 
 ### Output
 
 ```
-✓ Found 147 fragrances with NULL plain_description
+✓ Found 100 fragrances with NULL plain_description
 
-✓ Carolina Herrera - Bad Boy: "Dark, spicy, and leather-forward, with warm amber undertones." (Evening, winter)
-✓ Marc Jacobs - Daisy: "Light floral with a playful, fruity heart and musky base." (Day, spring)
+✓ Chanel - No. 5
+✓ Dior - Sauvage
 [...]
 
-📊 Enrichment complete: 10 successful, 0 failed
+📊 98 successful, 2 failed
 
-⏳ Writing 10 updates to Supabase...
-✅ Updated 10 fragrances
+⏳ Updating Supabase with 98 descriptions...
+✅ Updated 98 fragrances
 ```
 
-### What Gets Updated
-
-For each fragrance:
-- `plain_description` — 1–2 sentence description (max 20 words)
-- `use_case` — 3-word context (e.g., "Date night, winter" or "Office, fresh")
+Rerun until "Found 0 fragrances" = all enriched.
 
 ## Running Locally
 
-⚠️ **Important**: These scripts call external APIs (Supabase, Claude). They MUST be run from your local machine, not in the Cowork/sandbox environment.
+⚠️ **Must run on your machine** — scripts call Supabase and Claude APIs (sandbox has no network).
 
 ```bash
-# From your local terminal, in the scentral-hub repo:
 cd ~/Projects/scentral-hub
 
-# Test the import
-node scripts/import-fragrances.mjs --dry-run --limit=5
+# Test import
+node scripts/import-fragrances.mjs --dry-run
 
-# Test enrichment
-node scripts/enrich-fragrances.mjs --dry-run --limit=3
+# Import (takes ~30s for 500 rows, batched)
+node scripts/import-fragrances.mjs
 
-# Run for real when ready
-node scripts/import-fragrances.mjs --limit=100
-node scripts/enrich-fragrances.mjs --limit=50
+# Enrich first batch (~1–2 minutes for 100 rows)
+node scripts/enrich-fragrances.mjs
+
+# Enrich remaining batches (rerun until all done)
+node scripts/enrich-fragrances.mjs
 ```
 
 ## Troubleshooting
 
-### "Missing SUPABASE_SERVICE_KEY"
-
-Ensure `.env.local` exists in the repo root and has all required keys.
-
-### "CSV not found: scripts/data/fragrances.csv"
-
-Create the `scripts/data/` directory and place your Kaggle CSV there:
-
-```bash
-mkdir -p scripts/data
-# Copy or download your CSV to scripts/data/fragrances.csv
-```
-
-### "Parse error" in enrichment
-
-The Claude response was not valid JSON. Check the console error message. The script will skip that row and continue.
-
-### Rate limit errors from Claude
-
-Increase `delayMs` in the enrichment script (currently 1000ms). Try 2000ms or 3000ms.
+| Issue | Fix |
+|-------|-----|
+| `ENOENT: no such file or directory, open 'scripts/data/fragrances.csv'` | Create `scripts/data/` and place CSV there: `mkdir -p scripts/data` |
+| `Missing NEXT_PUBLIC_SUPABASE_URL` | Ensure `.env.local` has all required keys (already set up) |
+| `Parse error` in enrichment | Claude returned invalid JSON. Script skips that row and continues. |
+| Enrichment is slow | Normal. 2 req/sec = ~50 rows/minute. Each batch takes 1–2 minutes. |
 
 ## Next Steps
 
-After enrichment completes:
-
-1. Manually verify a few enriched descriptions in the `/discover` or `/collection` pages
-2. If needed, manually edit outliers in Supabase directly (SQL editor)
-3. Backfill remaining columns as needed (optimal_season, inspired_by, image_url)
-
-See `scripts/backfill-parfumo-images.mjs` for image backfilling from Parfumo/Fragrantica.
+- Verify descriptions in `/discover` UI
+- Manually fix outliers in Supabase SQL editor if needed
+- Backfill images: `node scripts/backfill-parfumo-images.mjs`
