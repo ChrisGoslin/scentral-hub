@@ -62,7 +62,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#A0622A",
+  themeColor: "#0F172A",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -76,11 +76,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`h-[100dvh] antialiased ${instrumentSerif.variable} ${unbounded.variable}`}>
+    <html lang="en" data-theme="dark" className={`h-[100dvh] antialiased ${instrumentSerif.variable} ${unbounded.variable}`}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <DeferredFontLink />
+        {process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID && (
+          <script
+            async
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID}`}
+            crossOrigin="anonymous"
+          />
+        )}
       </head>
       <body className="min-h-[100dvh] flex flex-col" style={{ background: "var(--bg)", color: "var(--text)", fontFamily: "var(--font-ui)" }}>
         <Providers>

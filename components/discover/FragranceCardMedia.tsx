@@ -71,7 +71,7 @@ export function FragranceCardMedia({ imageUrl, brand, name, family, compact = fa
             bottom: 0,
             padding: '6px 8px',
             background: 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 100%)',
-            opacity: hovered ? 1 : 0,
+            opacity: hovered ? 1 : 0.7,
             transition: 'opacity 150ms ease-out',
           }}
         >

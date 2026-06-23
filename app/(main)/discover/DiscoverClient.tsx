@@ -353,9 +353,6 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
           background: 'var(--bg)',
           backgroundImage: activePersona && personaVisible ? activePersona.ui_theme.bgGradient : undefined,
           transition: 'background-image 0.4s ease',
-          overflowY: 'auto',
-          overscrollBehavior: 'contain',
-          WebkitOverflowScrolling: 'touch',
         }}
       >
         {/* Filters — sticky edge-to-edge carousels */}

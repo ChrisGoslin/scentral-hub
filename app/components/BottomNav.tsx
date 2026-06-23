@@ -3,13 +3,13 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Archive, FlaskConical, Compass, Calendar, User } from 'lucide-react'
+import { Archive, FlaskConical, Compass, Droplets, User } from 'lucide-react'
 
 const NAV_ITEMS = [
   { label: 'Wardrobe', href: '/collection', Icon: Archive },
   { label: 'Lab',      href: '/layering',   Icon: FlaskConical },
   { label: 'Discover', href: '/discover',   Icon: Compass },
-  { label: 'Ritual',   href: '/schedule',   Icon: Calendar },
+  { label: 'Spritz',   href: '/spritz',     Icon: Droplets },
   { label: 'You',      href: '/you',        Icon: User },
 ]
 

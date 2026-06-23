@@ -85,7 +85,7 @@ export default function Home() {
                 alternatives — same DNA, a fraction of the price.
               </p>
               <Link
-                href="/discover?query=clones"
+                href="/clones"
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
