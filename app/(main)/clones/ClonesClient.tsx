@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { FragranceCardMedia } from '@/components/discover/FragranceCardMedia'
 import EmptyState from '@/components/ui/EmptyState'
+import AffiliateButton from '@/components/ads/AffiliateButton'
 import type { CloneFragrance } from './page'
 
 type Props = {
@@ -235,29 +236,41 @@ export default function ClonesClient({ clones, topOriginals, error }: Props) {
                 scrollbarWidth: 'none',
               }}>
                 {items.map(f => (
-                  <Link
-                    key={f.id}
-                    href={`/collection/${f.id}?from=clones`}
-                    style={{ textDecoration: 'none', flexShrink: 0, width: 120 }}
-                  >
-                    <div style={{
-                      border: '1px solid var(--line)',
-                      borderRadius: 'var(--r-card)',
-                      overflow: 'hidden',
-                    }}>
-                      <FragranceCardMedia
-                        imageUrl={f.image_url}
-                        brand={f.brand}
-                        name={f.name}
-                        family={f.family}
-                        compact
-                      />
-                    </div>
-                    <div style={{ padding: '6px 2px 0' }}>
-                      <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{f.brand}</p>
-                      <p style={{ fontSize: 11, color: 'var(--text)', fontFamily: 'var(--font-display)', fontStyle: 'italic', lineHeight: 1.3 }}>{f.name}</p>
-                    </div>
-                  </Link>
+                  <div key={f.id} style={{ flexShrink: 0, width: 120 }}>
+                    <Link
+                      href={`/collection/${f.id}?from=clones`}
+                      style={{ textDecoration: 'none' }}
+                    >
+                      <div style={{
+                        border: '1px solid var(--line)',
+                        borderRadius: 'var(--r-card)',
+                        overflow: 'hidden',
+                      }}>
+                        <FragranceCardMedia
+                          imageUrl={f.image_url}
+                          brand={f.brand}
+                          name={f.name}
+                          family={f.family}
+                          compact
+                        />
+                      </div>
+                      <div style={{ padding: '6px 2px 0' }}>
+                        <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{f.brand}</p>
+                        <p style={{ fontSize: 11, color: 'var(--text)', fontFamily: 'var(--font-display)', fontStyle: 'italic', lineHeight: 1.3 }}>{f.name}</p>
+                      </div>
+                    </Link>
+                    {f.buy_url && (
+                      <div style={{ padding: '4px 2px 0' }}>
+                        <AffiliateButton
+                          buyUrl={f.buy_url}
+                          buyLabel={f.buy_label ?? undefined}
+                          fragranceName={f.name}
+                          fragranceId={f.id}
+                          compact
+                        />
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
             </div>

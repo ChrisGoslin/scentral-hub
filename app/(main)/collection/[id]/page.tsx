@@ -16,6 +16,7 @@ import { cookies } from 'next/headers'
 import { Users } from 'lucide-react'
 import { getSimilarityExplanation } from '@/lib/similarity'
 import BuyLinks from '@/app/components/BuyLinks'
+import AffiliateButton from '@/components/ads/AffiliateButton'
 
 const PHASE_LABEL: Record<number, string> = {
   1: 'Anchor',
@@ -53,7 +54,7 @@ export default async function FragranceDetailPage({
   const [{ data, error }, { data: collectionRow }, { data: proofData }] = await Promise.all([
     supabase
       .from('fragrances')
-      .select('id, brand, name, phase, phase_label, family, projection, anosmia_risk, lean, rating, image_url, use_case, spritz_count, application_zone, maturation, inspired_by, is_user_created, optimal_season, clone_target, plain_description, pyramid')
+      .select('id, brand, name, phase, phase_label, family, projection, anosmia_risk, lean, rating, image_url, use_case, spritz_count, application_zone, maturation, inspired_by, is_user_created, optimal_season, clone_target, plain_description, pyramid, buy_url, buy_label')
       .eq('id', id)
       .single(),
     supabase
@@ -410,6 +411,16 @@ export default async function FragranceDetailPage({
           <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--text-muted)', marginBottom: 10 }}>
             Find this fragrance
           </p>
+          {f.buy_url && (
+            <div style={{ marginBottom: 10 }}>
+              <AffiliateButton
+                buyUrl={f.buy_url}
+                buyLabel={f.buy_label ?? undefined}
+                fragranceName={f.name}
+                fragranceId={f.id}
+              />
+            </div>
+          )}
           <BuyLinks fragranceName={f.name} brand={f.brand} />
         </div>
 

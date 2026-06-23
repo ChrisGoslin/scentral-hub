@@ -19,6 +19,8 @@ export type CloneFragrance = {
   inspired_by: string
   image_url: string | null
   rating: number | null
+  buy_url: string | null
+  buy_label: string | null
 }
 
 export default async function ClonesPage() {
@@ -26,7 +28,7 @@ export default async function ClonesPage() {
 
   const { data, error } = await supabase
     .from('fragrances')
-    .select('id, brand, name, full_name, family, projection, inspired_by, image_url, rating')
+    .select('id, brand, name, full_name, family, projection, inspired_by, image_url, rating, buy_url, buy_label')
     .not('inspired_by', 'is', null)
     .neq('inspired_by', '')
     .order('inspired_by', { ascending: true })
@@ -41,6 +43,8 @@ export default async function ClonesPage() {
     inspired_by: f.inspired_by ?? '',
     image_url: f.image_url ?? null,
     rating: f.rating ? Number(f.rating) : null,
+    buy_url: f.buy_url ?? null,
+    buy_label: f.buy_label ?? null,
   }))
 
   // Top cloned originals (excluding generic labels)
