@@ -149,6 +149,7 @@ export default function OptimizedBottleCard({
         {...(locked || !isAnchorUnlocked ? {} : listeners)}
       >
         <div
+          className="card-hover"
           style={{
             position: 'relative',
             width: '100%',

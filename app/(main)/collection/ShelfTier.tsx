@@ -56,14 +56,18 @@ export default function ShelfTier({ tierId, label, sublabel, items, locked, acti
       <div
         style={{
           position: 'relative',
-          background: 'linear-gradient(180deg, rgba(139,90,43,0.15) 0%, rgba(101,64,28,0.25) 40%, rgba(80,50,20,0.35) 100%)',
-          borderBottom: '3px solid rgba(60,35,10,0.4)',
-          boxShadow: '0 4px 12px rgba(40,20,5,0.2), inset 0 1px 0 rgba(255,200,120,0.15)',
+          background: isOver && !locked
+            ? 'linear-gradient(180deg, rgba(196,154,60,0.3) 0%, rgba(139,90,43,0.35) 40%, rgba(101,64,28,0.45) 100%)'
+            : 'linear-gradient(180deg, rgba(139,90,43,0.15) 0%, rgba(101,64,28,0.25) 40%, rgba(80,50,20,0.35) 100%)',
+          borderBottom: isOver && !locked ? '3px solid rgba(196,154,60,0.6)' : '3px solid rgba(60,35,10,0.4)',
+          boxShadow: isOver && !locked
+            ? '0 4px 12px rgba(196,154,60,0.25), inset 0 1px 0 rgba(255,200,120,0.25)'
+            : '0 4px 12px rgba(40,20,5,0.2), inset 0 1px 0 rgba(255,200,120,0.15)',
           borderRadius: 2,
           minHeight: 140,
           padding: '16px 12px 8px',
-          transition: 'background var(--motion-fast) var(--ease)',
-          outline: isOver && !locked ? '1px solid rgba(196,154,60,0.4)' : 'none',
+          transition: 'background var(--motion-responsive), border-color var(--motion-responsive), box-shadow var(--motion-responsive)',
+          outline: isOver && !locked ? '2px solid rgba(196,154,60,0.5)' : 'none',
         }}
       >
         {/* Warm down-lighting strip */}
