@@ -1,0 +1,45 @@
+#!/bin/sh
+# Pre-push hook: type-check + module-scope-client guard before pushing to main
+#
+# Catches: missing imports, bad types (tsc --noEmit).
+# tsc --noEmit alone does NOT catch module-level createClient() calls that
+# throw "supabaseKey is required" at build time - verified empirically
+# 2026-06-25 (a module-scope `const supabase = createClient(...)` type-checks
+# fine; the throw only happens when Next.js actually evaluates the module,
+# which tsc never does). That pattern broke 2 of the 3 commits that caused
+# 19+ failed Vercel builds today, so it gets its own grep-based check below.
+#
+# Fast path: ~15-20s instead of full `npm run build` (~60s).
+# For full build verification, run: npm run build manually before major releases.
+
+current_branch=$(git symbolic-ref HEAD 2>/dev/null | sed 's|refs/heads/||')
+
+if [ "$current_branch" != "main" ]; then
+  exit 0
+fi
+
+echo "🔍 Type-checking before push to main..."
+npx tsc --noEmit
+TSC_STATUS=$?
+
+echo "🔍 Checking for module-level createClient() in app/api routes..."
+# Column-0 match only - a createClient() call indented inside any function (helper
+# or handler) is fine; true module scope in this codebase is always unindented.
+# (An earlier line-number-relative-to-first-export heuristic false-positived on
+# app/api/generate-image/route.ts, where createClient() is correctly scoped inside
+# a helper function defined before the exported handler - verified 2026-06-25.)
+BAD_FILES=$(grep -rl "^const [A-Za-z_][A-Za-z0-9_]* = \(await \)\?createClient(" app/api --include="*.ts" 2>/dev/null)
+
+if [ -n "$BAD_FILES" ]; then
+  echo "❌ Module-level createClient() found (throws if env vars are missing at build time):"
+  for f in $BAD_FILES; do echo "   - $f"; done
+  echo "   Move createClient() inside the handler function instead."
+fi
+
+if [ $TSC_STATUS -ne 0 ] || [ -n "$BAD_FILES" ]; then
+  echo "❌ Pre-push checks failed — push blocked. Fix errors above before pushing."
+  exit 1
+fi
+
+echo "✅ Pre-push checks passed — pushing."
+exit 0

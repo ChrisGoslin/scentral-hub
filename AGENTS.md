@@ -16,6 +16,24 @@ This is the SINGLE canonical instructions file. `CLAUDE.md` and `GEMINI.md` poin
 **Supplementary reading:** `.claude/skills/grounded-agent-guardrails/SKILL.md` — expands the five safeguards with verification commands, known fabrications list, and a session-start checklist. See also `.claude/skills/safe-commit-shared-repo/SKILL.md` (git hygiene given concurrent sessions) and `.claude/skills/diagnose-prod-slowdown/SKILL.md` (perf-incident runbook).
 **Critical operating rules:** §8 (script execution + network constraint), §9 (lessons learned), §10 (self-check).
 
+## Local Dev Setup (run once after clone or new session)
+```
+git config core.hooksPath .husky
+cp scripts/hooks/pre-push .husky/pre-push && chmod +x .husky/pre-push
+```
+Installs a pre-push hook that blocks pushes to `main` if `tsc --noEmit` fails or a module-level
+`createClient()` is found in `app/api` — the exact bug class that broke 19+ consecutive Vercel
+builds on 2026-06-25 (see §9, L15). **Must go in `.husky/`, not `.git/hooks/`**, AND
+`core.hooksPath` must be set — both are local-only `.git/config`/working-tree state, never
+committed, so every fresh clone needs both commands (confirmed the hard way: an install at
+`.git/hooks/` silently never fired because this repo's local config already pointed elsewhere).
+
+## Session start checklist
+Before doing anything:
+1. `npm run test:smoke:prod`
+2. `cat AGENTS.md`
+3. If `git config --get core.hooksPath` doesn't print `.husky`, or `.husky/pre-push` doesn't exist: run the two commands under "Local Dev Setup" above.
+
 ## 0. Why this file exists
 Prior agent runs produced confident "breakthrough" output full of fabricated detail (fake repo paths,
 fictional features, lore like "Agent Luna / Hegemony / Shadow Branching", and hardcoded keys). Root cause =
@@ -118,7 +136,7 @@ If a "fact" is not in these docs, the repo, or the database, it is NOT a fact ye
 - **S5 — Flag confidence honestly.** Label every material claim Verified / Assumption / Unknown. No hype framing.
 
 ## 3. Required behaviours
-- **Start of session:** read this file + `SCENTRAL_PERSONAS.md` + run the branch hygiene checklist at `.claude/skills/branch-hygiene/SKILL.md`. State what you grounded on in your first reply.
+- **Start of session:** read this file + `SCENTRAL_PERSONAS.md` + run the branch hygiene checklist at `.claude/skills/branch-hygiene/SKILL.md`. If `.husky/pre-push` doesn't exist, install it (see "Local Dev Setup" above). State what you grounded on in your first reply.
 - **Before writing any code:** check if the feature already exists on main (`git log`, `find app -name "page.tsx"`).
 - Before DB/auth changes: inspect first; SHOW the migration/SQL and wait for explicit "approved" before applying.
 - Before claiming a third-party tool does X: web-search and cite, or say it's unverified.
@@ -277,6 +295,26 @@ routes that have shipped since (`/spritz`), while the deploy's actual `▲ Alias
 `package.json` `test:smoke:prod`, `app/layout.tsx` `metadataBase`, §1, §7) were repointed to
 `scentral-hub.vercel.app`. Aliases can silently drift — after any `npx vercel --prod`, check the `▲ Aliased`
 line in the deploy output rather than assuming the URL in this doc is still current.
+
+**L15 — 19+ consecutive Vercel build failures, 2026-06-25, from 3 separate commits, none caught locally.**
+`scripts/extend-library.ts` imported `cheerio` (never added to `package.json`) and wasn't excluded from
+`tsconfig.json`. `app/api/debug/image-audit/route.ts` and `app/api/reels/route.ts` both called
+`createClient()` at module scope, which throws `supabaseKey is required` if env vars aren't present during
+Next.js's build-time module evaluation. Root cause wasn't the bugs themselves — it's that nothing ran
+`npm run build` (or any check) locally before pushing to `main`, so Vercel was the first thing to ever catch
+each one. Fixed two ways: (1) `branch-hygiene` skill now has a mandatory `npm run build` step before
+`git push origin main`; (2) a git pre-push hook (`scripts/hooks/pre-push`, installed via "Local Dev Setup"
+above, **must go in `.husky/pre-push` — this repo uses `core.hooksPath=.husky`, not `.git/hooks/`**) blocks
+pushes to `main` on `tsc --noEmit` failure OR a column-0 `const x = createClient(...)` match in `app/api`
+(an early line-number-relative-to-export heuristic false-positived on a helper function in
+`app/api/generate-image/route.ts` — column-0 indentation is the reliable signal for true module scope in
+this codebase's style). Note `tsc --noEmit` alone does NOT catch the `createClient()` class — verified
+empirically, it type-checks fine since the throw only happens at actual module evaluation.
+**Second lesson from building this fix itself:** while testing the hook, `git reset --hard HEAD~1` was used
+to drop a local-only test commit — `--hard` also wiped unrelated uncommitted edits to this very file that
+hadn't been committed yet. Use `git reset HEAD~1` (mixed, the default) to drop an unwanted commit without
+touching the working tree, never `--hard`, unless you've confirmed via `git status` there's nothing
+uncommitted you want to keep.
 
 ## 10. LLM briefing block (copy-paste into Claude Code / Cursor / other agents)
 
