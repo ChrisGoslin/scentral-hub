@@ -13,7 +13,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 **Owner:** Christopher. **Purpose:** prevent invented facts, paths, keys, and scope.
 This is the SINGLE canonical instructions file. `CLAUDE.md` and `GEMINI.md` point here. Read this FIRST, every session, before acting. Begin your first reply by stating in one line what you grounded yourself in.
-**Supplementary reading:** `skills/grounded-agent-guardrails/SKILL.md` — expands the five safeguards with verification commands, known fabrications list, and a session-start checklist.
+**Supplementary reading:** `.claude/skills/grounded-agent-guardrails/SKILL.md` — expands the five safeguards with verification commands, known fabrications list, and a session-start checklist. See also `.claude/skills/safe-commit-shared-repo/SKILL.md` (git hygiene given concurrent sessions) and `.claude/skills/diagnose-prod-slowdown/SKILL.md` (perf-incident runbook).
 **Critical operating rules:** §8 (script execution + network constraint), §9 (lessons learned), §10 (self-check).
 
 ## 0. Why this file exists
@@ -118,7 +118,7 @@ If a "fact" is not in these docs, the repo, or the database, it is NOT a fact ye
 - **S5 — Flag confidence honestly.** Label every material claim Verified / Assumption / Unknown. No hype framing.
 
 ## 3. Required behaviours
-- **Start of session:** read this file + `SCENTRAL_PERSONAS.md` + run the branch hygiene checklist at `skills/branch-hygiene/SKILL.md`. State what you grounded on in your first reply.
+- **Start of session:** read this file + `SCENTRAL_PERSONAS.md` + run the branch hygiene checklist at `.claude/skills/branch-hygiene/SKILL.md`. State what you grounded on in your first reply.
 - **Before writing any code:** check if the feature already exists on main (`git log`, `find app -name "page.tsx"`).
 - Before DB/auth changes: inspect first; SHOW the migration/SQL and wait for explicit "approved" before applying.
 - Before claiming a third-party tool does X: web-search and cite, or say it's unverified.

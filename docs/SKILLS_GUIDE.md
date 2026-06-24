@@ -20,9 +20,10 @@ Think of skills as specialized "how-to guides" that Claude knows about and can r
 
 ```
 scentral-hub/
-└── skills/
-    ├── README.md                          ← Master skill catalog
-    └── testing-framework/
+└── .claude/skills/
+    ├── README.md                          ← Master skill catalog (full list lives here,
+    │                                          not duplicated in this guide — read it first)
+    └── testing-framework/                 ← one of several skills; see README.md for the rest
         ├── SKILL.md                       ← Core documentation
         ├── README.md                      ← Skill overview
         ├── references/                    ← Detailed topics
@@ -37,13 +38,22 @@ scentral-hub/
             └── validate-test-setup.sh
 ```
 
+**This guide focuses on the `testing-framework` skill as a worked example** of how to use
+any skill in this repo — the mechanics (SKILL.md → references/ → examples/) generalize to all
+of them. For the current full list of skills and what each covers, read
+`.claude/skills/README.md` rather than this section.
+
 ---
 
 ## How to Use Skills with Claude Code
 
 ### Method 1: Ask Claude Code Directly (Automatic)
 
-Claude Code automatically detects and uses skills when you ask related questions.
+Claude Code automatically detects and uses skills when you ask related questions — **as long
+as they live at `.claude/skills/<name>/SKILL.md`**. Before 2026-06-24 these lived at a
+top-level `skills/` directory, which is not Claude Code's actual discovery path; auto-matching
+silently never worked. If a skill you expect to trigger doesn't, check it's actually under
+`.claude/skills/` with valid frontmatter before assuming you described the task wrong.
 
 **Example:**
 ```
@@ -80,16 +90,16 @@ View skill contents directly:
 
 ```bash
 # View master catalog
-cat skills/README.md
+cat .claude/skills/README.md
 
 # View testing-framework skill
-cat skills/testing-framework/SKILL.md
+cat .claude/skills/testing-framework/SKILL.md
 
 # View specific references
-cat skills/testing-framework/references/e2e-patterns.md
+cat .claude/skills/testing-framework/references/e2e-patterns.md
 
 # Copy an example to adapt
-cp skills/testing-framework/examples/smoke-test.example.mjs scripts/smoke-test.mjs
+cp .claude/skills/testing-framework/examples/smoke-test.example.mjs scripts/smoke-test.mjs
 ```
 
 ---
@@ -115,13 +125,13 @@ cp skills/testing-framework/examples/smoke-test.example.mjs scripts/smoke-test.m
 **Quick start:**
 ```bash
 # Copy smoke test example
-cp skills/testing-framework/examples/smoke-test.example.mjs scripts/smoke-test.mjs
+cp .claude/skills/testing-framework/examples/smoke-test.example.mjs scripts/smoke-test.mjs
 
 # Copy E2E test example
-cp skills/testing-framework/examples/e2e-test.example.ts e2e/example.spec.ts
+cp .claude/skills/testing-framework/examples/e2e-test.example.ts e2e/example.spec.ts
 
 # Copy Playwright config
-cp skills/testing-framework/examples/playwright.config.example.ts .
+cp .claude/skills/testing-framework/examples/playwright.config.example.ts .
 ```
 
 ---
@@ -144,7 +154,7 @@ cp skills/testing-framework/examples/playwright.config.example.ts .
 
 **Example:**
 ```bash
-cat skills/testing-framework/SKILL.md
+cat .claude/skills/testing-framework/SKILL.md
 ```
 
 ### references/ (Deep Dives)
@@ -165,10 +175,10 @@ cat skills/testing-framework/SKILL.md
 **Example:**
 ```bash
 # For Playwright patterns
-cat skills/testing-framework/references/e2e-patterns.md
+cat .claude/skills/testing-framework/references/e2e-patterns.md
 
 # For debugging tests
-cat skills/testing-framework/references/troubleshooting.md
+cat .claude/skills/testing-framework/references/troubleshooting.md
 ```
 
 ### examples/ (Copy-Paste Ready)
@@ -186,7 +196,7 @@ cat skills/testing-framework/references/troubleshooting.md
 **Example:**
 ```bash
 # Copy smoke test script
-cp skills/testing-framework/examples/smoke-test.example.mjs scripts/smoke-test.mjs
+cp .claude/skills/testing-framework/examples/smoke-test.example.mjs scripts/smoke-test.mjs
 
 # Modify for your routes
 vim scripts/smoke-test.mjs
@@ -207,7 +217,7 @@ vim scripts/smoke-test.mjs
 **Example:**
 ```bash
 # Run validation script
-bash skills/testing-framework/scripts/validate-test-setup.sh
+bash .claude/skills/testing-framework/scripts/validate-test-setup.sh
 ```
 
 ---
@@ -243,7 +253,7 @@ Skills use a 3-level loading system to manage context efficiently:
 
 ### Q: How do I know which skill to use?
 
-**A:** Look at the trigger phrases in `skills/README.md`. When your task matches a trigger phrase, that skill applies.
+**A:** Look at the trigger phrases in `.claude/skills/README.md`. When your task matches a trigger phrase, that skill applies.
 
 **Example:**
 - Task: "Set up E2E tests" → testing-framework skill
@@ -262,7 +272,7 @@ Skills use a 3-level loading system to manage context efficiently:
 
 **Example:**
 ```bash
-cp skills/testing-framework/examples/e2e-test.example.ts e2e/auth.spec.ts
+cp .claude/skills/testing-framework/examples/e2e-test.example.ts e2e/auth.spec.ts
 # Then edit e2e/auth.spec.ts to test your auth flow
 ```
 
@@ -289,13 +299,13 @@ cp skills/testing-framework/examples/e2e-test.example.ts e2e/auth.spec.ts
 
 ### Q: Can I create my own skills?
 
-**A:** Yes! Follow the structure in `skills/testing-framework/`:
+**A:** Yes! Follow the structure in `.claude/skills/testing-framework/`:
 
-1. Create skill directory: `mkdir -p skills/my-skill/{references,examples,scripts}`
+1. Create skill directory: `mkdir -p .claude/skills/my-skill/{references,examples,scripts}`
 2. Write `SKILL.md` with frontmatter (name, description, triggers)
 3. Add `references/` for detailed topics
 4. Add `examples/` for working code
-5. Update `skills/README.md` to catalog your skill
+5. Update `.claude/skills/README.md` to catalog your skill
 
 ---
 
@@ -308,23 +318,23 @@ Task: "I need to set up testing"
 
 **Step 2: Find Matching Skill**
 ```
-Read skills/README.md → Find testing-framework skill
+Read .claude/skills/README.md → Find testing-framework skill
 ```
 
 **Step 3: Read SKILL.md**
 ```
-cat skills/testing-framework/SKILL.md
+cat .claude/skills/testing-framework/SKILL.md
 ```
 
 **Step 4: Explore Examples**
 ```
-ls skills/testing-framework/examples/
-cp skills/testing-framework/examples/smoke-test.example.mjs scripts/
+ls .claude/skills/testing-framework/examples/
+cp .claude/skills/testing-framework/examples/smoke-test.example.mjs scripts/
 ```
 
 **Step 5: Deep Dive (If Needed)**
 ```
-cat skills/testing-framework/references/troubleshooting.md
+cat .claude/skills/testing-framework/references/troubleshooting.md
 ```
 
 **Step 6: Ask Claude for Help**
@@ -355,8 +365,8 @@ cat skills/testing-framework/references/troubleshooting.md
 
 ### Day 1: Discovery
 1. Read this guide (you're here!)
-2. Read `skills/README.md`
-3. Skim `skills/testing-framework/SKILL.md`
+2. Read `.claude/skills/README.md`
+3. Skim `.claude/skills/testing-framework/SKILL.md`
 
 ### Day 2: Learning
 1. Pick a task (e.g., "set up smoke tests")
@@ -385,9 +395,9 @@ cat skills/testing-framework/references/troubleshooting.md
 
 ## Next Steps
 
-1. **Explore Skills:** `cd skills/` and browse available skills
-2. **Read a Skill:** Start with `skills/testing-framework/SKILL.md`
-3. **Copy an Example:** `cp skills/testing-framework/examples/smoke-test.example.mjs scripts/`
+1. **Explore Skills:** `cd .claude/skills/` and browse available skills
+2. **Read a Skill:** Start with `.claude/skills/testing-framework/SKILL.md`
+3. **Copy an Example:** `cp .claude/skills/testing-framework/examples/smoke-test.example.mjs scripts/`
 4. **Ask Claude:** Reference the skill when asking related questions
 5. **Improve Skills:** Report issues or suggest additions
 
@@ -395,8 +405,8 @@ cat skills/testing-framework/references/troubleshooting.md
 
 ## More Information
 
-- **Skills Directory:** `skills/README.md` — Master catalog
-- **Testing Skill:** `skills/testing-framework/SKILL.md` — Core documentation
+- **Skills Directory:** `.claude/skills/README.md` — Master catalog
+- **Testing Skill:** `.claude/skills/testing-framework/SKILL.md` — Core documentation
 - **Project Instructions:** `AGENTS.md` — Operating rules & constraints
 - **Cleanup Audit:** `docs/CLEANUP_AUDIT.md` — Recent cleanup results
 

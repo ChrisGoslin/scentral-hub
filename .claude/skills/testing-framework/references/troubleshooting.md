@@ -6,7 +6,7 @@
 
 **Symptom:**
 ```
-Error: getaddrinfo EAI_AGAIN scentral-seven.vercel.app
+Error: getaddrinfo EAI_AGAIN scentral-hub.vercel.app
 Error: connect ECONNREFUSED 127.0.0.1:3000
 ```
 
@@ -15,7 +15,7 @@ Error: connect ECONNREFUSED 127.0.0.1:3000
 **Solution:**
 1. Check internet connection: `ping google.com`
 2. Verify dev server running: `npm run dev` (in separate terminal)
-3. Verify URL is correct: `curl https://scentral-seven.vercel.app`
+3. Verify URL is correct: `curl https://scentral-hub.vercel.app`
 4. If CI/CD: Check if deployment succeeded before running smoke tests
 
 ### Problem: "Response status 404 on homepage"
@@ -424,7 +424,7 @@ npx playwright install chromium
 
 3. **Check if Vercel deployment is stalled**
    ```bash
-   vercel logs scentral-seven
+   vercel logs scentral-hub
    ```
 
 ### Problem: "E2E tests take 3+ minutes"

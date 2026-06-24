@@ -123,7 +123,7 @@ Add these to `package.json`:
 {
   "scripts": {
     "test:smoke": "node scripts/smoke-test.mjs",
-    "test:smoke:prod": "BASE_URL=https://scentral-seven.vercel.app node scripts/smoke-test.mjs",
+    "test:smoke:prod": "BASE_URL=https://scentral-hub.vercel.app node scripts/smoke-test.mjs",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed"
   }

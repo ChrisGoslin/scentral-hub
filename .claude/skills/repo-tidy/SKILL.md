@@ -99,24 +99,23 @@ npm run lint 2>&1 | tail -20
 
 ## Phase 5: Invented Feature Purge
 
-Cross-reference every component and API route against AGENTS.md locked scope.
+Cross-reference every component and API route against **AGENTS.md §1 "Routes" as it reads
+today** — do not use a hardcoded in/out-of-scope list here. Scope has expanded materially over
+the project's life (e.g. commerce/affiliate was out of MVP scope, then shipped for real as
+`/boxes` + `scripts/populate-buy-urls.mjs` — a hardcoded "remove if found: affiliate" rule
+would have deleted real, shipped, intentional work). Re-read AGENTS.md §1 every time you run
+this phase; never reuse a scope snapshot from a previous repo-tidy run.
 
-Scope that is **in** MVP:
-- Collection (fragrance browsing)
-- Lab (accord creation)
-- You (profile/preferences)
-- Scheduler "Today" tab (only if real implementation shipped)
-
-Scope that is **out** of MVP (remove if found):
-- Commerce / affiliate / payout UI (backend tracking seam only, no UI)
-- Social feed
-- Pro tier / subscription gating
-- pgvector / Resonance Engine
-- Any "Agent Luna / Hegemony / Shadow" named component
+What stays a hard purge regardless of how scope evolves — these are fabricated lore, not
+product features, and have never legitimately shipped:
+- Any "Agent Luna / Hegemony / Shadow Branching / autopilot-shadow" named component
+- "Olfactory NFTs / Invisible Commerce"
+- "Morocco Marketplace Demo" / "Alchemist Knowledge Base"
 
 ```bash
-# Search for out-of-scope patterns
-grep -rn "affiliate\|payout\|resonance\|pgvector\|shadow.*branch\|hegemony" app/ --include="*.tsx" --include="*.ts" -l
+# Search for the lore-fabrication patterns above (NOT a general scope check —
+# cross-reference AGENTS.md §1 manually for anything else)
+grep -rn "agent.luna\|shadow.*branch\|autopilot-shadow\|hegemony\|olfactory.*nft\|invisible.commerce" app/ --include="*.tsx" --include="*.ts" -l
 ```
 
 ---

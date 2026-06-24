@@ -1,3 +1,8 @@
+---
+name: branch-hygiene
+description: "Session-start checklist to prevent duplicate features and stale branches in scentral-hub. Run before writing any code: sync state, check what already exists, decide branch-vs-main, and commit safely at the end."
+---
+
 # Skill: Branch Hygiene — Scentral
 
 Run this checklist at the START of every session before writing any code.
@@ -57,15 +62,27 @@ Ask: "Is this work risky enough to need a branch?"
 
 ## Step 4 — After completing the task
 
-```bash
-# Confirm only your files changed
-git diff main --stat
+A separate Claude/Gemini/Antigravity session may be concurrently editing this same repo
+(confirmed recurring pattern — see AGENTS.md and project memory). **Never `git add -A` or
+plain `git commit` blindly** — it sweeps in whatever that other session has staged, mixing
+unrelated work into your commit message and attribution.
 
-# Commit with a clear message
-git add -A
-git commit -m "feat: [what you built]"
+```bash
+# Check for changes you didn't make before touching the index
+git status --short
+
+# If anything is staged/modified that you didn't author, leave it alone — do not git add -A.
+# Commit ONLY the files you actually changed, by explicit path:
+git add path/to/your/file1.tsx path/to/your/file2.ts
+git commit -m "feat: [what you built]" -- path/to/your/file1.tsx path/to/your/file2.ts
+
+# Verify exactly what landed before pushing
+git show --stat HEAD
+
 git push origin main
 ```
+
+See `.claude/skills/safe-commit-shared-repo/SKILL.md` for the full checklist.
 
 If you created a branch:
 ```bash
