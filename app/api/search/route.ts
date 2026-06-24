@@ -83,9 +83,14 @@ export async function GET(request: NextRequest) {
     // QUERY 3: Note-composition similarity — only if we have exact matches with notes
     if ((mode === 'all' || mode === 'smells_like') && exactMatches.length > 0) {
       const NOTE_SIMILARITY_FLOOR = 0.45
-      const seeds = exactMatches.filter(
-        (f: any) => f.top_notes?.length || f.heart_notes?.length || f.base_notes?.length
-      )
+      const MAX_SIMILARITY_SEEDS = 3
+      // search_by_note_similarity does a full-table scan per call (no index can help an
+      // array-overlap computation) — capping seeds keeps worst-case concurrent scans bounded
+      // regardless of how many exact matches a query returns. See DB migration follow-up
+      // for the indexed version that removes this cap's need entirely.
+      const seeds = exactMatches
+        .filter((f: any) => f.top_notes?.length || f.heart_notes?.length || f.base_notes?.length)
+        .slice(0, MAX_SIMILARITY_SEEDS)
 
       // OPTIMIZED: Parallel RPC calls instead of sequential for loop
       if (seeds.length > 0) {
