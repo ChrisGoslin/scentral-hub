@@ -32,19 +32,34 @@ export async function GET(request: NextRequest) {
     const results: SearchResult[] = []
     const escaped = query.replace(/[%,]/g, '')
 
-    // QUERY 1: Exact matches (name, brand, full name, description)
     let exactMatches: Record<string, unknown>[] = []
-    if (mode === 'all' || mode === 'exact' || mode === 'smells_like') {
-      const { data, error: exactError } = await supabase
-        .from('fragrances')
-        .select(FRAGRANCE_COLUMNS)
-        .or(
-          `name.ilike.%${escaped}%,brand.ilike.%${escaped}%,full_name.ilike.%${escaped}%,plain_description.ilike.%${escaped}%`
-        )
-        .limit(20)
+    let inspiredMatches: Record<string, unknown>[] = []
 
-      if (exactError) throw exactError
-      exactMatches = data ?? []
+    // QUERY 1 & 2: Run in parallel
+    if (mode === 'all' || mode === 'exact' || mode === 'smells_like') {
+      const [exactRes, inspiredRes] = await Promise.all([
+        supabase
+          .from('fragrances')
+          .select(FRAGRANCE_COLUMNS)
+          .or(
+            `name.ilike.%${escaped}%,brand.ilike.%${escaped}%,full_name.ilike.%${escaped}%,plain_description.ilike.%${escaped}%`
+          )
+          .limit(20),
+        mode === 'all' || mode === 'smells_like'
+          ? supabase
+              .from('fragrances')
+              .select(FRAGRANCE_COLUMNS)
+              .ilike('inspired_by', `%${escaped}%`)
+              .limit(15)
+          : Promise.resolve({ data: [], error: null }),
+      ])
+
+      if (exactRes.error) throw exactRes.error
+      if (inspiredRes.error) throw inspiredRes.error
+
+      exactMatches = exactRes.data ?? []
+      inspiredMatches = inspiredRes.data ?? []
+
       results.push(
         ...exactMatches.map((frag) => ({
           fragrance: frag,
@@ -52,18 +67,6 @@ export async function GET(request: NextRequest) {
           confidence: 100,
         }))
       )
-    }
-
-    // QUERY 2 + 3 only apply in "Smells Like" discovery mode
-    if (mode === 'all' || mode === 'smells_like') {
-      // QUERY 2: Inspired-by / clone relationships
-      const { data: inspiredMatches, error: inspiredError } = await supabase
-        .from('fragrances')
-        .select(FRAGRANCE_COLUMNS)
-        .ilike('inspired_by', `%${escaped}%`)
-        .limit(15)
-
-      if (inspiredError) throw inspiredError
 
       if (inspiredMatches) {
         results.push(
@@ -75,13 +78,10 @@ export async function GET(request: NextRequest) {
           }))
         )
       }
+    }
 
-      // QUERY 3: Note-composition similarity, seeded from the exact-match fragrance(s).
-      // Scored as note-set overlap (intersection / largest set). A 0.7 ("70%+") floor is
-      // unreachable against this catalogue's actual note tagging — even verified clone
-      // pairs (matched via inspired_by) top out around 0.55-0.6 overlap, since clones use
-      // different specific note words for a similar accord (e.g. "Pink Pepper" vs "Black
-      // Pepper"). 0.45 surfaces genuinely similar fragrances without being meaningless.
+    // QUERY 3: Note-composition similarity — only if we have exact matches with notes
+    if ((mode === 'all' || mode === 'smells_like') && exactMatches.length > 0) {
       const NOTE_SIMILARITY_FLOOR = 0.45
       const seeds = exactMatches.filter(
         (f: any) => f.top_notes?.length || f.heart_notes?.length || f.base_notes?.length
