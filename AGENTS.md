@@ -24,7 +24,7 @@ fictional features, lore like "Agent Luna / Hegemony / Shadow Branching", and ha
 
 ## 1. Ground truth (the ONLY accepted facts unless re-verified)
 - **Display name:** AnotherSense. **Repo:** `scentral-hub` (GitHub: `ChrisGoslin/scentral`). **DB:** `scentral-mvp` (`lrkdwobnemczvhpixpky`). Display-layer rebrand only — do NOT rename repo, DB, or tables.
-- **Data:** 282 fragrances. Key columns: `plain_description`, `inspired_by`, `family`, `projection`, `optimal_season`, `use_case`, `lean`, `image_url` (populated by backfill scripts — may be null for some rows).
+- **Data:** 127,195 fragrances (bulk-imported from 3 Kaggle datasets — 2026-06-24). Key columns: `plain_description`, `inspired_by`, `family`, `projection`, `optimal_season`, `use_case`, `lean`, `image_url` (populated by backfill scripts — may be null for some rows).
 - **Stack:** Next.js 16.2.9 (App Router, route groups like `(main)`), React 19.2.4, Supabase JS 2.x, Vercel, Tailwind CSS, `@dnd-kit/core` + `@dnd-kit/sortable` + `@dnd-kit/utilities` (Living Wardrobe). Always re-verify version from `package.json` if in doubt — do NOT assert from memory.
 - **Architecture:** Single product. No auth for MVP — identity via `scentral_anon_id` (localStorage UUID, generated on first load).
 - **Routes:**
@@ -46,14 +46,15 @@ fictional features, lore like "Agent Luna / Hegemony / Shadow Branching", and ha
   - `/profile` (User settings)
   - `/disclaimer` (Legal)
   - `/waitlist` (Lead gen)
-- **API Routes:** `/api/affinity`, `/api/aura`, `/api/chemist`, `/api/demo`, `/api/dna-match`, `/api/formulate`, `/api/fragrances`, `/api/generate-image`, `/api/layering`, `/api/scan`, `/api/schedule`, `/api/sommelier`, `/api/waitlist`.
+- **API Routes:** `/api/affinity`, `/api/aura`, `/api/chemist`, `/api/demo`, `/api/dna-match`, `/api/formulate`, `/api/fragrances`, `/api/generate-image`, `/api/layering`, `/api/scan`, `/api/schedule`, `/api/search`, `/api/sommelier`, `/api/waitlist`.
+  - `/api/search` (app/api/search/route.ts) — parallel ILIKE queries + conditional note-similarity RPC for clone detection
   - Future: `/api/aura-copy` (Supabase Edge Function — Claude Haiku copy for Spritz Schedule)
 - **UI Component Library:** `Button`, `Disclosure`, `LoadingShimmer`, `Sheet`, `Card`, `EmptyState`, `ProGate`, `Chip`, `ErrorInline`, `SensoryAnatomy`.
   - Incoming (Epic 12): `ToastProvider`, `useToast`, `Toast`, `ButtonAsync`, `AuraBubble`
   - Incoming (Epics 9–10): `AnatomyIndicator`, `SpritzCard`, `FragranceWheel`
 - **Collection / Living Wardrobe components** (all in `app/(main)/collection/`, except `OptimizedBottleCard`): `WardrobeShelf` (walnut-cabinet shelf container), `ShelfTier` (individual 3D shelf row — items laid out in a CSS grid, dnd-kit `rectSortingStrategy`), `OptimizedBottleCard` (`components/collection/OptimizedBottleCard.tsx` — full-bleed image/family-gradient card with ombre overlay, dnd-kit sortable; `BottleCard.tsx` is dead code, no longer imported anywhere), `WardrobeSidebar` (view-mode toggle: All / By House / By Season / Wishlist).
 - **Tables (ALL LIVE — verified 2026-06-21):**
-  - `fragrances` (282 rows)
+  - `fragrances` (127,195 rows) — GIN trigram indexes: idx_fragrances_name_trgm, idx_fragrances_brand_trgm, idx_fragrances_plain_description_trgm, idx_fragrances_inspired_by_trgm (created 2026-06-24 for /api/search optimization)
   - `collections` + `scent_memory text` column ← NEW (added 2026-06-20)
   - `wear_logs`
   - `layering_combinations`, `layer_recipes`
@@ -100,7 +101,7 @@ If a "fact" is not in these docs, the repo, or the database, it is NOT a fact ye
 
 ### Known fabrications — never reintroduce
 "Morocco Marketplace Demo", "Resonance Engine / pgvector" (unless referring to the `/dna-match` route), "Alchemist Knowledge Base / dossiers",
-"300+ fragrances" (canonical count is 282), "Agent Luna / Sovereign Focus Group",
+"300+ fragrances" (canonical count is now 127,195 after Kaggle bulk import), "Agent Luna / Sovereign Focus Group",
 "Hegemony / Sovereignty", "Shadow Branching / autopilot-shadow", "Olfactory NFTs", "Invisible Commerce",
 "Shadow Inventory", "Black Market API", and any "Elite Council breakthrough" framing.
 
@@ -320,8 +321,8 @@ NEW this sprint: /spritz (Spritz Schedule + XP), /wheel (Fragrance Wheel)
 Pro (gated, do not touch): /intelligence, /dna-match
 Legacy (do not remove): /schedule, /onboarding, /ritual/[id], /waitlist
 
-## Database tables (ALL LIVE — verified 2026-06-21)
-fragrances (282 rows) — plain_description, inspired_by, family, projection, optimal_season, use_case, lean, image_url
+## Database tables (ALL LIVE — verified 2026-06-24)
+fragrances (127,195 rows) — plain_description, inspired_by, family, projection, optimal_season, use_case, lean, image_url. GIN trigram indexes on name, brand, plain_description, inspired_by for /api/search.
 collections — fragrance_id, affinity_score (int 1-20), maceration_started_at, status, scent_memory text (NEW)
 wear_logs — streak calculation is timezone-aware, do not break
 user_xp — anon_id (PK), total_xp int, level int 1-6  ← NEW, keyed on scentral_anon_id
