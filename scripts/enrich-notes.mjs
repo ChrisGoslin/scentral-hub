@@ -83,6 +83,7 @@ const NOTE_COMPOUNDS = {
   jasmine: ['benzyl acetate', 'linalool', 'indole'],
   oud: ['guaiacol', 'eugenol'],
   cedar: ['cedrol', 'cedrene'],
+  cedarwood: ['cedrol', 'cedrene'], // alias - fragrances.notes uses "cedarwood", not "cedar"
   sandalwood: ['santalol', 'alpha-santalol'],
   vanilla: ['vanillin', 'coumarin'],
   musk: ['galaxolide', 'iso e super'],
