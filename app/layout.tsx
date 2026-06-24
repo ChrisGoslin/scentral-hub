@@ -105,3 +105,4 @@ export default function RootLayout({
     </html>
   );
 }
+const x: string = 123
