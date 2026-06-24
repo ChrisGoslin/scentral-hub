@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { motion, useMotionValue, useTransform, type PanInfo } from 'framer-motion'
 import type { SpritzEvent } from '@/lib/aura'
+import DryDownTimeline from './DryDownTimeline'
 
 const SWIPE_THRESHOLD = 120
 
@@ -114,9 +115,11 @@ export default function SpritzCard({ event, isTop, onSwipeRight, onSwipeLeft }: 
         <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>· {zones.join(', ')}</span>
       </div>
 
+      {event.fragrance.id && <DryDownTimeline fragranceId={event.fragrance.id} />}
+
       <button
         onClick={() => setInfoOpen(true)}
-        style={{ fontSize: 13, color: 'var(--aura)', fontWeight: 600, background: 'none', padding: 0 }}
+        style={{ fontSize: 13, color: 'var(--aura)', fontWeight: 600, background: 'none', padding: 0, marginTop: 8 }}
       >
         More info
       </button>

@@ -50,6 +50,18 @@ function splitLine(line, delimiter) {
   return values
 }
 
+function titleCaseWord(w) {
+  if (/^[A-Z0-9]+$/.test(w) && w.length <= 4) return w // keep short all-caps as-is (CK, EDP, YSL)
+  return w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : w
+}
+
+// fra_cleaned.csv stores brand/perfume as lowercase hyphenated slugs (e.g. "jean-paul-gaultier").
+// Convert to spaced Title Case, matching the cleanup already applied to fra_perfumes.csv's
+// URL-extracted brand/name below.
+function slugToTitle(str) {
+  return (str || '').replace(/[-_]+/g, ' ').trim().split(' ').map(titleCaseWord).join(' ')
+}
+
 const GENDER_MAP = {
   male: 'Masculine', men: 'Masculine', 'for men': 'Masculine',
   female: 'Feminine', women: 'Feminine', 'for women': 'Feminine',
@@ -94,7 +106,7 @@ function addRow(brand, name, family, notes, gender) {
   for (const r of rows) {
     const notes = [r.top, r.middle, r.base, r.mainaccord1, r.mainaccord2, r.mainaccord3, r.mainaccord4, r.mainaccord5]
       .filter(Boolean).join(', ')
-    addRow(r.brand, r.perfume, '', notes, normalizeGender(r.gender))
+    addRow(slugToTitle(r.brand), slugToTitle(r.perfume), '', notes, normalizeGender(r.gender))
   }
   console.log(`✓ fra_cleaned: ${rows.length} rows read`)
 }

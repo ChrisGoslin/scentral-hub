@@ -51,11 +51,15 @@ function sleep(ms) {
 }
 
 // ── Fetch fragrances needing enrichment ────────────────────────────────────────
+// Test batch: top Middle Eastern brands from the 2026-06-23 bulk import, whose
+// plain_description is currently just the raw comma-joined notes/accords text.
 const { data: fragrances, error: fetchErr } = await supabase
   .from('fragrances')
   .select('id, brand, name, family, notes')
-  .is('plain_description', null)
-  .limit(100)
+  .like('plain_description', '%,%')
+  .gt('created_at', '2026-06-23')
+  .or('brand.ilike.lattafa,brand.ilike.afnan,brand.ilike.armaf,brand.ilike.rasasi,brand.ilike.al haramain')
+  .limit(50)
 
 if (fetchErr) {
   console.error('Failed to fetch fragrances:', fetchErr.message)
@@ -91,7 +95,8 @@ for (let i = 0; i < fragrances.length; i++) {
       messages: [{ role: 'user', content: prompt }],
     })
 
-    const content = message.content[0].type === 'text' ? message.content[0].text : ''
+    const rawContent = message.content[0].type === 'text' ? message.content[0].text : ''
+    const content = rawContent.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim()
 
     let parsed
     try {

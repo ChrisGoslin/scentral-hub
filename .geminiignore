@@ -1,0 +1,7 @@
+# Block heavy static directories from leaking into instruction context
+.next/
+node_modules/
+out/
+build/
+*.log
+supabase/.branches/
