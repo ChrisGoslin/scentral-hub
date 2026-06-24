@@ -70,6 +70,35 @@ class Semaphore {
 const semaphore = new Semaphore(5) // Max 5 concurrent requests
 
 /**
+ * Perfumery note name -> real PubChem compound names. PubChem only resolves actual
+ * chemical names (see diagnose-prod-slowdown-style finding in commit 3efe78c) - these
+ * are the molecules behind common marketing/category terms. Order matters: the first
+ * compound that resolves becomes the note's primary_cid.
+ */
+const NOTE_COMPOUNDS = {
+  amber: ['ambroxan', 'iso e super'],
+  ambergris: ['ambroxan', 'ambrein'],
+  bergamot: ['linalool', 'linalyl acetate', 'limonene'],
+  rose: ['geraniol', 'citronellol', 'phenylethyl alcohol'],
+  jasmine: ['benzyl acetate', 'linalool', 'indole'],
+  oud: ['guaiacol', 'eugenol'],
+  cedar: ['cedrol', 'cedrene'],
+  sandalwood: ['santalol', 'alpha-santalol'],
+  vanilla: ['vanillin', 'coumarin'],
+  musk: ['galaxolide', 'iso e super'],
+  lavender: ['linalool', 'linalyl acetate'],
+  citrus: ['limonene', 'citral'],
+  patchouli: ['patchouli alcohol', 'norpatchoulenol'],
+  vetiver: ['khusimol', 'vetiverol'],
+  frankincense: ['alpha-pinene', 'incensole'],
+  'black pepper': ['piperine', 'beta-caryophyllene'],
+  tobacco: ['nicotine', 'coumarin', 'furfural'],
+  leather: ['isobutyl quinoline', 'birch tar'],
+  iris: ['irone', 'isone'],
+  cinnamon: ['cinnamaldehyde', 'eugenol'],
+}
+
+/**
  * Fetch note properties from PubChem with retry logic
  */
 async function fetchFromPubChem(note) {
@@ -118,6 +147,7 @@ async function fetchFromPubChem(note) {
       }
 
       return {
+        cid: props.CID ?? null,
         molecular_weight: props.MolecularWeight ?? null,
         xlogp: props.XLogP ?? null,
         boiling_point: props.BoilingPoint ?? null,
@@ -151,6 +181,66 @@ function getVolatilityClass(mw, isFallback) {
   if (mw < 154) return 'top'
   if (mw <= 220) return 'heart'
   return 'base'
+}
+
+/**
+ * Resolve a single note to PubChem data via, in order:
+ *   1. the NOTE_COMPOUNDS map (average MW across whichever mapped compounds resolve,
+ *      primary_cid = first compound in the list that resolves)
+ *   2. a direct PubChem name lookup (note text itself happens to be a real compound name)
+ *   3. fallback placeholder
+ * Returns { molecular_weight, xlogp, boiling_point, primary_cid, source, detail } - detail
+ * is a short human-readable string for console logging.
+ */
+async function resolveNote(note) {
+  const mapped = NOTE_COMPOUNDS[note]
+
+  if (mapped) {
+    const results = []
+    for (const compound of mapped) {
+      const props = await fetchFromPubChem(compound)
+      results.push({ compound, props })
+    }
+
+    const resolved = results.filter(r => r.props)
+    if (resolved.length > 0) {
+      const weights = resolved.map(r => parseFloat(r.props.molecular_weight)).filter(n => !Number.isNaN(n))
+      const avgMw = weights.reduce((a, b) => a + b, 0) / weights.length
+      const primary = resolved[0]
+
+      return {
+        molecular_weight: avgMw,
+        xlogp: primary.props.xlogp,
+        boiling_point: null,
+        primary_cid: primary.props.cid,
+        source: 'pubchem_mapped',
+        detail: `mapped ${resolved.length}/${mapped.length} (${resolved.map(r => r.compound).join(', ')}), primary CID=${primary.props.cid}, avg MW=${avgMw.toFixed(2)}`,
+      }
+    }
+    // Mapped, but none of the mapped compounds resolved - fall through to a direct
+    // lookup of the note text itself as a last resort before giving up.
+  }
+
+  const direct = await fetchFromPubChem(note)
+  if (direct) {
+    return {
+      molecular_weight: direct.molecular_weight,
+      xlogp: direct.xlogp,
+      boiling_point: direct.boiling_point,
+      primary_cid: direct.cid,
+      source: 'pubchem',
+      detail: `direct hit, CID=${direct.cid}, MW=${direct.molecular_weight}`,
+    }
+  }
+
+  return {
+    molecular_weight: null,
+    xlogp: null,
+    boiling_point: null,
+    primary_cid: null,
+    source: 'fallback',
+    detail: mapped ? `mapped compounds (${mapped.join(', ')}) all 404'd` : `no mapping, no direct hit`,
+  }
 }
 
 /**
@@ -222,31 +312,25 @@ async function main() {
       continue
     }
 
-    const props = await fetchFromPubChem(note)
+    const resolved = await resolveNote(note)
 
-    if (props) {
-      console.log(`✓ MW=${props.molecular_weight}`)
+    if (resolved.source !== 'fallback') {
+      console.log(`✓ ${resolved.detail}`)
       pubchemHits++
-      toUpsert.push({
-        name: note,
-        volatility_class: getVolatilityClass(props.molecular_weight, false),
-        molecular_weight: props.molecular_weight,
-        xlogp: props.xlogp,
-        boiling_point: props.boiling_point,
-        source: 'pubchem',
-      })
     } else {
-      console.log(`⚠ Fallback (descriptor or not found)`)
+      console.log(`⚠ Fallback (${resolved.detail})`)
       fallbacks.push(note)
-      toUpsert.push({
-        name: note,
-        volatility_class: 'heart',
-        molecular_weight: 150.0,
-        xlogp: 2.0,
-        boiling_point: null,
-        source: 'fallback',
-      })
     }
+
+    toUpsert.push({
+      name: note,
+      volatility_class: resolved.source === 'fallback' ? null : getVolatilityClass(resolved.molecular_weight, false),
+      molecular_weight: resolved.molecular_weight,
+      xlogp: resolved.xlogp,
+      boiling_point: resolved.boiling_point,
+      primary_cid: resolved.primary_cid,
+      source: resolved.source,
+    })
   }
 
   // 4. Log fallbacks to file
