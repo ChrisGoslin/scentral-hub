@@ -7,6 +7,7 @@ import AnalyticsProvider from "./components/AnalyticsProvider";
 import { Providers } from "./providers";
 import PageTracker from "./components/PageTracker";
 import DeferredFontLink from "./components/DeferredFontLink";
+import FeedbackWidget from "@/components/feedback/FeedbackWidget";
 
 const instrumentSerif = Instrument_Serif({
   subsets: ["latin"],
@@ -97,6 +98,7 @@ export default function RootLayout({
             <main className="flex-1">
               {children}
             </main>
+            <FeedbackWidget />
           </AnalyticsProvider>
         </Providers>
       </body>

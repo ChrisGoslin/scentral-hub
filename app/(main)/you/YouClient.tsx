@@ -12,6 +12,7 @@ import LoadingShimmer from '@/components/ui/LoadingShimmer'
 import AuthSheet from '@/components/auth/AuthSheet'
 import ProfileCard from './ProfileCard'
 import InsightsPanel, { type WeekWearEntry, type SavedCombination } from './InsightsPanel'
+import YourContributions from '@/components/feedback/YourContributions'
 
 export type { WeekWearEntry, SavedCombination }
 import { track } from '@/lib/posthog'
@@ -228,6 +229,10 @@ export default function YouClient(props: YouClientProps) {
           </div>
         </div>
 
+        <div className="px-6 pb-8">
+          <YourContributions />
+        </div>
+
         <AuthSheet
           open={authSheetOpen}
           onClose={() => setAuthSheetOpen(false)}
@@ -282,6 +287,8 @@ export default function YouClient(props: YouClientProps) {
           isAtRisk={engagement.isAtRisk}
           streak={engagement.streak}
         />
+
+        <YourContributions />
       </div>
 
       {/* Bottom spacer */}
