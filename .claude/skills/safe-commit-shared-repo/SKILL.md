@@ -66,6 +66,34 @@ explicit file path, for both the `git add` step and the `git commit` step.
 - `git reset --hard` / `git clean -fd` to "clean up" before starting — this can destroy a
   concurrent session's uncommitted work. If the tree looks messy, investigate with
   `git status` first; don't assume it's safe to discard.
+- **`git reset --hard` to undo your OWN test/throwaway commit** — on 2026-06-25, while removing
+  a local-only deliberate-error test commit, `git reset --hard HEAD~1` wiped *unrelated,
+  not-yet-committed edits to `AGENTS.md` made earlier in the same task* — `--hard` resets the
+  entire working tree to match the target commit, not just the file(s) the unwanted commit
+  touched. **Use `git reset HEAD~1` (mixed, the default — no `--hard`)** to drop a commit while
+  leaving the working tree untouched, and run `git status` first regardless to see what's
+  actually at stake. This applies even when you're "just cleaning up after yourself" — the
+  blast radius of `--hard` is the whole tree, not your one bad commit.
+
+## Testing a new git hook before relying on it
+On 2026-06-25, a new pre-push hook was installed at `.git/hooks/pre-push` exactly as specified,
+then "verified" by committing a deliberate type error and pushing — but the push **succeeded**
+and the broken commit landed on `origin/main`. Root cause: this repo's local git config sets
+`core.hooksPath=.husky`, so git never looks at `.git/hooks/` at all. The hook's internal logic
+was never the problem; it simply never ran.
+
+**Before trusting any git hook for the first time:**
+1. Check where git actually looks: `git config --get core.hooksPath` (empty/unset means the
+   default `.git/hooks/`; anything else means hooks must live there instead).
+2. Verify the hook fires via **direct invocation first** — `sh <hooks-dir>/<hook-name>` — and
+   confirm both the pass case (clean tree, exit 0) and at least one deliberate failure case
+   (exit 1), with zero risk to any remote.
+3. Only after direct invocation proves the logic is right, do one real `git push` test of the
+   failure case **on a throwaway/local-only commit you're prepared to have reach the remote if
+   the hook turns out not to be wired correctly** — i.e. accept that this specific test still
+   carries risk, and have the revert command ready before you push, not after.
+4. If a bad commit does reach the remote despite this, fix it forward immediately with
+   `git revert HEAD --no-edit` (not `git push --force`) and re-push before doing anything else.
 
 ## When you find foreign changes mid-task
 Don't silently ignore them and don't silently commit them either. Briefly investigate what
