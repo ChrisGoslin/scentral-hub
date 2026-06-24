@@ -79,8 +79,21 @@ git commit -m "feat: [what you built]" -- path/to/your/file1.tsx path/to/your/fi
 # Verify exactly what landed before pushing
 git show --stat HEAD
 
+# MANDATORY build gate - never skip this. On 2026-06-25, three separate commits
+# (a stale scripts/ file importing an uninstalled dep, two API routes with
+# module-scope createClient() that throws if env vars aren't present at build
+# time) reached origin/main with no local build check, and Vercel caught each
+# one reactively in production - 19+ failed deploys before being root-caused.
+# `npm run build` would have caught every one of them locally, before push.
+npm run build
+
 git push origin main
 ```
+
+If `npm run build` fails, fix it before pushing — do not push broken commits and let Vercel
+be the test suite. This applies even to changes that "shouldn't" affect the build (e.g. a
+script in `scripts/`, a debug-only route, a doc change) — that assumption is exactly what
+failed here three times in a row.
 
 See `.claude/skills/safe-commit-shared-repo/SKILL.md` for the full checklist.
 
