@@ -40,6 +40,8 @@ fictional features, lore like "Agent Luna / Hegemony / Shadow Branching", and ha
   - `/schedule` (Legacy daily ritual planner)
   - `/spritz` ← NEW — Spritz Schedule (Aura swipe card, XP engine, AnatomyIndicator)
   - `/wheel` ← NEW — Fragrance Wheel (9-axis polar SVG, gap analysis, share as PNG)
+  - `/boxes` ← NEW — Discovery Box Storefront (curated sample sets → Shopify checkout)
+  - `/boxes/[slug]` ← NEW — Box detail view (contents, "Add to Cart" CTA)
   - `/ritual/[id]` (Public shareable ritual page)
   - `/onboarding` (3-step new user guide with ceremony arc animation)
   - `/learning` (Guides and tips)
@@ -62,6 +64,7 @@ fictional features, lore like "Agent Luna / Hegemony / Shadow Branching", and ha
   - `profiles`, `waitlist`
   - `user_xp` ← NEW: `anon_id text PK`, `total_xp int DEFAULT 0`, `level int DEFAULT 1`
   - `user_streaks` ← NEW: `anon_id text PK`, `current_streak int DEFAULT 0`, `longest_streak int DEFAULT 0`, `last_worn_date date`
+  - `discovery_boxes` ← NEW: `id uuid PK`, `name text`, `slug text UNIQUE`, `description text`, `fragrance_ids text[]`, `shopify_product_id text`, `theme text`, `tier text`
 - **Free/Pro split:** Free = Discover, My Bottles, Layering, You, Spritz, Wheel. Pro = gated behind `components/ui/ProGate.tsx` (`isPro = false`). Do NOT remove gates.
 - **localStorage keys:**
   - `scentral_anon_id` — UUID identity key (PK for all Supabase user tables)

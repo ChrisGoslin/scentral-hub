@@ -87,38 +87,56 @@ export async function GET(request: NextRequest) {
         (f: any) => f.top_notes?.length || f.heart_notes?.length || f.base_notes?.length
       )
 
-      for (const seed of seeds as any[]) {
-        const seedNotes = [...(seed.top_notes ?? []), ...(seed.heart_notes ?? []), ...(seed.base_notes ?? [])]
-        if (seedNotes.length === 0) continue
+      // OPTIMIZED: Parallel RPC calls instead of sequential for loop
+      if (seeds.length > 0) {
+        const similarityPromises = (seeds as any[]).map((seed) => {
+          const seedNotes = [...(seed.top_notes ?? []), ...(seed.heart_notes ?? []), ...(seed.base_notes ?? [])]
+          if (seedNotes.length === 0) return Promise.resolve({ seed, similarNotes: [] })
 
-        const { data: similarNotes, error: similarityError } = await supabase.rpc('search_by_note_similarity', {
-          seed_notes: seedNotes,
-          exclude_id: seed.id,
-          min_similarity: NOTE_SIMILARITY_FLOOR,
-          limit_results: 20,
+          return supabase
+            .rpc('search_by_note_similarity', {
+              seed_notes: seedNotes,
+              exclude_id: seed.id,
+              min_similarity: NOTE_SIMILARITY_FLOOR,
+              limit_results: 20,
+            })
+            .then(({ data, error }) => {
+              if (error) throw error
+              return { seed, similarNotes: data ?? [] }
+            })
         })
 
-        if (similarityError) throw similarityError
-        if (!similarNotes?.length) continue
+        const similarityResults = await Promise.all(similarityPromises)
 
-        const ids = similarNotes.map((row: any) => row.id)
-        const { data: fullRecords, error: fullRecordsError } = await supabase
-          .from('fragrances')
-          .select(FRAGRANCE_COLUMNS)
-          .in('id', ids)
-        if (fullRecordsError) throw fullRecordsError
-        const byId = new Map((fullRecords ?? []).map((f: any) => [f.id, f]))
+        // Collect all unique IDs to fetch in one query
+        const allIds = new Set<string>()
+        similarityResults.forEach((result: any) => {
+          result.similarNotes.forEach((row: any) => allIds.add(row.id))
+        })
 
-        results.push(
-          ...similarNotes
-            .filter((row: any) => byId.has(row.id))
-            .map((row: any) => ({
-              fragrance: byId.get(row.id),
-              matchType: 'note_similarity' as const,
-              confidence: row.similarity_score * 100,
-              explanation: `Similar notes & structure (~${Math.round(row.similarity_score * 100)}% match)`,
-            }))
-        )
+        if (allIds.size > 0) {
+          const { data: fullRecords, error: fullRecordsError } = await supabase
+            .from('fragrances')
+            .select(FRAGRANCE_COLUMNS)
+            .in('id', Array.from(allIds))
+
+          if (fullRecordsError) throw fullRecordsError
+          const byId = new Map((fullRecords ?? []).map((f: any) => [f.id, f]))
+
+          // Map all similarity results back to fragrances
+          similarityResults.forEach((result: any) => {
+            results.push(
+              ...result.similarNotes
+                .filter((row: any) => byId.has(row.id))
+                .map((row: any) => ({
+                  fragrance: byId.get(row.id),
+                  matchType: 'note_similarity' as const,
+                  confidence: row.similarity_score * 100,
+                  explanation: `Similar notes & structure (~${Math.round(row.similarity_score * 100)}% match)`,
+                }))
+            )
+          })
+        }
       }
     }
 

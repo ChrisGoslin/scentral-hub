@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { FragranceCardMedia } from '@/components/discover/FragranceCardMedia'
+import AdSlot from '@/components/ads/AdSlot'
 import EmptyState from '@/components/ui/EmptyState'
 import AffiliateButton from '@/components/ads/AffiliateButton'
 import type { CloneFragrance } from './page'
@@ -184,97 +185,114 @@ export default function ClonesClient({ clones, topOriginals, error }: Props) {
         </div>
       ) : (
         <div style={{ paddingBottom: 16 }}>
-          {grouped.map(([original, items]) => (
-            <div key={original} style={{ marginBottom: 32 }}>
-              {/* Section header */}
-              <div style={{
-                padding: '12px 16px 10px',
-                display: 'flex',
-                alignItems: 'baseline',
-                gap: 10,
-              }}>
-                <p style={{
-                  fontSize: 10,
-                  color: 'var(--text-muted)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.1em',
-                  flexShrink: 0,
-                }}>
-                  Inspired by
-                </p>
-                <p style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: 16,
-                  color: 'var(--text)',
-                  fontStyle: 'italic',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}>
-                  {original}
-                </p>
-                <span style={{
-                  flexShrink: 0,
-                  fontSize: 10,
-                  color: 'var(--text-muted)',
-                  background: 'var(--color-surface)',
-                  border: '1px solid var(--line)',
-                  borderRadius: 999,
-                  padding: '1px 7px',
-                }}>
-                  {items.length}
-                </span>
-              </div>
+          {(() => {
+            let itemCount = 0
+            return grouped.map(([original, items]) => {
+              const startCount = itemCount
+              itemCount += items.length
+              const showAdAfter = Math.floor(startCount / 12) !== Math.floor((itemCount - 1) / 12)
 
-              {/* Card row — horizontal scroll */}
-              <div style={{
-                display: 'flex',
-                gap: 10,
-                overflowX: 'auto',
-                paddingLeft: 16,
-                paddingRight: 16,
-                scrollbarWidth: 'none',
-              }}>
-                {items.map(f => (
-                  <div key={f.id} style={{ flexShrink: 0, width: 120 }}>
-                    <Link
-                      href={`/collection/${f.id}?from=clones`}
-                      style={{ textDecoration: 'none' }}
-                    >
-                      <div style={{
-                        border: '1px solid var(--line)',
-                        borderRadius: 'var(--r-card)',
-                        overflow: 'hidden',
+              return (
+                <div key={original}>
+                  <div style={{ marginBottom: 32 }}>
+                    {/* Section header */}
+                    <div style={{
+                      padding: '12px 16px 10px',
+                      display: 'flex',
+                      alignItems: 'baseline',
+                      gap: 10,
+                    }}>
+                      <p style={{
+                        fontSize: 10,
+                        color: 'var(--text-muted)',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.1em',
+                        flexShrink: 0,
                       }}>
-                        <FragranceCardMedia
-                          imageUrl={f.image_url}
-                          brand={f.brand}
-                          name={f.name}
-                          family={f.family}
-                          compact
-                        />
-                      </div>
-                      <div style={{ padding: '6px 2px 0' }}>
-                        <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{f.brand}</p>
-                        <p style={{ fontSize: 11, color: 'var(--text)', fontFamily: 'var(--font-display)', fontStyle: 'italic', lineHeight: 1.3 }}>{f.name}</p>
-                      </div>
-                    </Link>
-                    {f.buy_url && (
-                      <div style={{ padding: '4px 2px 0' }}>
-                        <AffiliateButton
-                          buyUrl={f.buy_url}
-                          buyLabel={f.buy_label ?? undefined}
-                          fragranceName={f.name}
-                          fragranceId={f.id}
-                          compact
-                        />
-                      </div>
-                    )}
+                        Inspired by
+                      </p>
+                      <p style={{
+                        fontFamily: 'var(--font-display)',
+                        fontSize: 16,
+                        color: 'var(--text)',
+                        fontStyle: 'italic',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}>
+                        {original}
+                      </p>
+                      <span style={{
+                        flexShrink: 0,
+                        fontSize: 10,
+                        color: 'var(--text-muted)',
+                        background: 'var(--color-surface)',
+                        border: '1px solid var(--line)',
+                        borderRadius: 999,
+                        padding: '1px 7px',
+                      }}>
+                        {items.length}
+                      </span>
+                    </div>
+
+                    {/* Card row — horizontal scroll */}
+                    <div style={{
+                      display: 'flex',
+                      gap: 10,
+                      overflowX: 'auto',
+                      paddingLeft: 16,
+                      paddingRight: 16,
+                      scrollbarWidth: 'none',
+                    }}>
+                      {items.map(f => (
+                        <div key={f.id} style={{ flexShrink: 0, width: 120 }}>
+                          <Link
+                            href={`/collection/${f.id}?from=clones`}
+                            style={{ textDecoration: 'none' }}
+                          >
+                            <div style={{
+                              border: '1px solid var(--line)',
+                              borderRadius: 'var(--r-card)',
+                              overflow: 'hidden',
+                            }}>
+                              <FragranceCardMedia
+                                imageUrl={f.image_url}
+                                brand={f.brand}
+                                name={f.name}
+                                family={f.family}
+                                compact
+                              />
+                            </div>
+                            <div style={{ padding: '6px 2px 0' }}>
+                              <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{f.brand}</p>
+                              <p style={{ fontSize: 11, color: 'var(--text)', fontFamily: 'var(--font-display)', fontStyle: 'italic', lineHeight: 1.3 }}>{f.name}</p>
+                            </div>
+                          </Link>
+                          {f.buy_url && (
+                            <div style={{ padding: '4px 2px 0' }}>
+                              <AffiliateButton
+                                buyUrl={f.buy_url}
+                                buyLabel={f.buy_label ?? undefined}
+                                fragranceName={f.name}
+                                fragranceId={f.id}
+                                compact
+                              />
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                ))}
-              </div>
-            </div>
-          ))}
+
+                  {showAdAfter && (
+                    <div style={{ padding: '24px 16px 32px', textAlign: 'center' }}>
+                      <AdSlot slot="clones-grid" />
+                    </div>
+                  )}
+                </div>
+              )
+            })
+          })()}
         </div>
       )}
     </div>

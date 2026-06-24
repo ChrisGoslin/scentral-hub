@@ -5,6 +5,7 @@ import EmptyState from '@/components/ui/EmptyState'
 import ErrorInline from '@/components/ui/ErrorInline'
 import Button from '@/components/ui/Button'
 import { FragranceCardMedia } from '@/components/discover/FragranceCardMedia'
+import AdSlot from '@/components/ads/AdSlot'
 import { track } from '@/lib/posthog'
 import type { DiscoverFragrance } from '@/lib/useFragranceSearch'
 
@@ -97,67 +98,74 @@ export function DiscoverGrid({
         </div>
       ) : (
         <div className="grid grid-cols-4 md:grid-cols-6 xl:grid-cols-10 gap-2 px-2">
-          {filtered.map(f => (
-            <Link
-              key={f.id}
-              href={`/collection/${f.id}?from=discover`}
-              style={{ textDecoration: 'none', display: 'block', position: 'relative' }}
-            >
-              <FragranceCardMedia imageUrl={f.image_url} brand={f.brand} name={f.name} family={f.family} wall />
-              <button
-                onClick={e => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  onWishlistToggle(f.id)
-                }}
-                aria-label={wishlist.includes(f.id) ? 'Remove from wishlist' : 'Add to wishlist'}
-                style={{
-                  position: 'absolute',
-                  top: 4,
-                  right: 4,
-                  width: 20,
-                  height: 20,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: 'color-mix(in srgb, var(--bg) 70%, transparent)',
-                  border: 'none',
-                  borderRadius: '50%',
-                  cursor: 'pointer',
-                  padding: 0,
-                  color: wishlist.includes(f.id) ? 'var(--accent)' : 'var(--text-muted)',
-                  zIndex: 2,
-                }}
+          {filtered.map((f, idx) => (
+            <>
+              <Link
+                key={f.id}
+                href={`/collection/${f.id}?from=discover`}
+                style={{ textDecoration: 'none', display: 'block', position: 'relative' }}
               >
-                <svg
-                  width={12}
-                  height={12}
-                  viewBox="0 0 24 24"
-                  fill={wishlist.includes(f.id) ? 'var(--accent)' : 'none'}
-                  stroke={wishlist.includes(f.id) ? 'var(--accent)' : 'currentColor'}
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                </svg>
-              </button>
-              {debouncedSearch && semanticResults.some(sr => sr.id === f.id) && (
-                <div
-                  aria-label="Resonance match"
+                <FragranceCardMedia imageUrl={f.image_url} brand={f.brand} name={f.name} family={f.family} wall />
+                <button
+                  onClick={e => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    onWishlistToggle(f.id)
+                  }}
+                  aria-label={wishlist.includes(f.id) ? 'Remove from wishlist' : 'Add to wishlist'}
                   style={{
                     position: 'absolute',
                     top: 4,
-                    left: 4,
-                    width: 6,
-                    height: 6,
-                    background: 'var(--accent)',
+                    right: 4,
+                    width: 20,
+                    height: 20,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'color-mix(in srgb, var(--bg) 70%, transparent)',
+                    border: 'none',
                     borderRadius: '50%',
+                    cursor: 'pointer',
+                    padding: 0,
+                    color: wishlist.includes(f.id) ? 'var(--accent)' : 'var(--text-muted)',
                     zIndex: 2,
                   }}
-                />
+                >
+                  <svg
+                    width={12}
+                    height={12}
+                    viewBox="0 0 24 24"
+                    fill={wishlist.includes(f.id) ? 'var(--accent)' : 'none'}
+                    stroke={wishlist.includes(f.id) ? 'var(--accent)' : 'currentColor'}
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                  </svg>
+                </button>
+                {debouncedSearch && semanticResults.some(sr => sr.id === f.id) && (
+                  <div
+                    aria-label="Resonance match"
+                    style={{
+                      position: 'absolute',
+                      top: 4,
+                      left: 4,
+                      width: 6,
+                      height: 6,
+                      background: 'var(--accent)',
+                      borderRadius: '50%',
+                      zIndex: 2,
+                    }}
+                  />
+                )}
+              </Link>
+              {(idx + 1) % 12 === 0 && (
+                <div key={`ad-${idx}`} style={{ gridColumn: '1 / -1', padding: '16px 0' }}>
+                  <AdSlot slot="discover-grid" />
+                </div>
               )}
-            </Link>
+            </>
           ))}
         </div>
       )}
