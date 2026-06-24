@@ -81,7 +81,12 @@ async function fetchFromPubChem(note) {
       await semaphore.acquire()
 
       const encodedNote = encodeURIComponent(note)
-      const url = `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/${encodedNote}/property/MolecularWeight,XLogP,BoilingPoint/JSON`
+      // NOTE: BoilingPoint is not a valid PUG REST "fast" property (confirmed via direct
+      // API test: including it returns 400 PUGREST.BadRequest even for compounds that
+      // exist, e.g. linalool) - it was silently killing every lookup via the generic
+      // catch-block retry/fallback path. boiling_point stays null until a PUG View-based
+      // experimental-properties lookup is added (separate, larger feature).
+      const url = `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/${encodedNote}/property/MolecularWeight,XLogP/JSON`
 
       const response = await fetch(url)
 
@@ -170,7 +175,7 @@ async function main() {
   const noteSet = new Set()
   for (const row of fragrances) {
     if (row.notes) {
-      const notes = row.notes.split(',').map(n => n.trim().toLowerCase())
+      const notes = row.notes.replace(/(Top|Middle|Base|Heart):\s*/gi, "").split(",").map(n => n.trim().toLowerCase())
       notes.forEach(n => {
         if (n.length > 0) noteSet.add(n)
       })
