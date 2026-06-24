@@ -24,7 +24,7 @@ fictional features, lore like "Agent Luna / Hegemony / Shadow Branching", and ha
 
 ## 1. Ground truth (the ONLY accepted facts unless re-verified)
 - **Display name:** AnotherSense. **Repo:** `scentral-hub` (GitHub: `ChrisGoslin/scentral`). **DB:** `scentral-mvp` (`lrkdwobnemczvhpixpky`). Display-layer rebrand only — do NOT rename repo, DB, or tables.
-- **Data:** 127,195 fragrances (bulk-imported from 3 Kaggle datasets — 2026-06-24). Key columns: `plain_description`, `inspired_by`, `family`, `projection`, `optimal_season`, `use_case`, `lean`, `image_url` (populated by backfill scripts — may be null for some rows).
+- **Data:** 127,195 fragrances (bulk-imported from 3 Kaggle datasets — 2026-06-24, IMPORT COMPLETE). Key columns: `plain_description`, `inspired_by`, `family`, `projection`, `optimal_season`, `use_case`, `lean`, `image_url` (populated by backfill scripts — may be null for some rows).
 - **Stack:** Next.js 16.2.9 (App Router, route groups like `(main)`), React 19.2.4, Supabase JS 2.x, Vercel, Tailwind CSS, `@dnd-kit/core` + `@dnd-kit/sortable` + `@dnd-kit/utilities` (Living Wardrobe). Always re-verify version from `package.json` if in doubt — do NOT assert from memory.
 - **Architecture:** Single product. No auth for MVP — identity via `scentral_anon_id` (localStorage UUID, generated on first load).
 - **Routes:**
@@ -47,13 +47,13 @@ fictional features, lore like "Agent Luna / Hegemony / Shadow Branching", and ha
   - `/disclaimer` (Legal)
   - `/waitlist` (Lead gen)
 - **API Routes:** `/api/affinity`, `/api/aura`, `/api/chemist`, `/api/demo`, `/api/dna-match`, `/api/formulate`, `/api/fragrances`, `/api/generate-image`, `/api/layering`, `/api/scan`, `/api/schedule`, `/api/search`, `/api/sommelier`, `/api/waitlist`.
-  - `/api/search` (app/api/search/route.ts) — parallel ILIKE queries + conditional note-similarity RPC for clone detection
+  - `/api/search` (app/api/search/route.ts) — parallel Promise.all ILIKE queries + conditional note-similarity RPC for clone detection (optimized 2026-06-24)
   - Future: `/api/aura-copy` (Supabase Edge Function — Claude Haiku copy for Spritz Schedule)
 - **UI Component Library:** `Button`, `Disclosure`, `LoadingShimmer`, `Sheet`, `Card`, `EmptyState`, `ProGate`, `Chip`, `ErrorInline`, `SensoryAnatomy`.
   - Incoming (Epic 12): `ToastProvider`, `useToast`, `Toast`, `ButtonAsync`, `AuraBubble`
   - Incoming (Epics 9–10): `AnatomyIndicator`, `SpritzCard`, `FragranceWheel`
 - **Collection / Living Wardrobe components** (all in `app/(main)/collection/`, except `OptimizedBottleCard`): `WardrobeShelf` (walnut-cabinet shelf container), `ShelfTier` (individual 3D shelf row — items laid out in a CSS grid, dnd-kit `rectSortingStrategy`), `OptimizedBottleCard` (`components/collection/OptimizedBottleCard.tsx` — full-bleed image/family-gradient card with ombre overlay, dnd-kit sortable; `BottleCard.tsx` is dead code, no longer imported anywhere), `WardrobeSidebar` (view-mode toggle: All / By House / By Season / Wishlist).
-- **Tables (ALL LIVE — verified 2026-06-21):**
+- **Tables (ALL LIVE — verified 2026-06-24):**
   - `fragrances` (127,195 rows) — GIN trigram indexes: idx_fragrances_name_trgm, idx_fragrances_brand_trgm, idx_fragrances_plain_description_trgm, idx_fragrances_inspired_by_trgm (created 2026-06-24 for /api/search optimization)
   - `collections` + `scent_memory text` column ← NEW (added 2026-06-20)
   - `wear_logs`

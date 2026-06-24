@@ -251,6 +251,16 @@ export default function YouClient(props: YouClientProps) {
         )}
       </div>
 
+      {/* Nav Links */}
+      <div className="px-4 py-3 flex gap-4" style={{ borderBottom: '1px solid var(--line)' }}>
+        <Link href="/wear-and-share" style={{ fontSize: 13, color: 'var(--accent)', fontWeight: 600 }} className="hover:opacity-75 transition-opacity">
+          Wear & Share
+        </Link>
+        <Link href="/creator" style={{ fontSize: 13, color: 'var(--accent)', fontWeight: 600 }} className="hover:opacity-75 transition-opacity">
+          Creator Studio
+        </Link>
+      </div>
+
       <div className="px-4 py-6 flex flex-col gap-6">
         {/* Profile Section — Persona, Vibe, Settings */}
         <ProfileCard

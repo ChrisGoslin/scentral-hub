@@ -1,146 +1,183 @@
 import { NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
 import { createClient } from '@/utils/supabase/server'
-import Anthropic from '@anthropic-ai/sdk'
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-})
-
-// Helper to find note overlaps
-function getOverlap(arr1: string[] = [], arr2: string[] = []) {
-  const set1 = new Set(arr1.map(n => n.toLowerCase().trim()))
-  const overlaps = arr2.filter(n => set1.has(n.toLowerCase().trim()))
-  return overlaps
-}
+/**
+ * POST /api/chemist
+ * Analytical output for fragrance layering and dry-down profiling.
+ *
+ * Request:
+ *   { fragranceId: string, layerId?: string }
+ *
+ * Response:
+ *   { similarity?, phaseCancellation?, dryDown }
+ */
 
 export async function POST(req: Request) {
   try {
-    const { fragrance_a_id, fragrance_b_id, use_case = 'casual' } = await req.json()
+    const { fragranceId, layerId } = await req.json()
 
-    if (!fragrance_a_id || !fragrance_b_id) {
-      return NextResponse.json({ error: 'Two fragrances are required' }, { status: 400 })
+    if (!fragranceId) {
+      return NextResponse.json({ error: 'fragranceId is required' }, { status: 400 })
     }
 
-    const cookieStore = await cookies()
-    const supabase = await createClient(cookieStore)
+    const supabase = await createClient()
 
-    // Check cache first (order independent)
-    const { data: cached } = await supabase
-      .from('chemist_cache')
-      .select('result')
-      .or(`and(fragrance_a_id.eq.${fragrance_a_id},fragrance_b_id.eq.${fragrance_b_id}),and(fragrance_a_id.eq.${fragrance_b_id},fragrance_b_id.eq.${fragrance_a_id})`)
+    // Fetch primary fragrance
+    const { data: frag, error: fragError } = await supabase
+      .from('fragrances')
+      .select('id, brand, name, notes')
+      .eq('id', fragranceId)
       .single()
 
-    if (cached) {
-      return NextResponse.json({ success: true, ...cached.result, cached: true })
+    if (fragError || !frag) {
+      return NextResponse.json({ error: 'Fragrance not found' }, { status: 404 })
     }
 
-    // Fetch fragrance details
-    const { data: frags, error: fetchError } = await supabase
-      .from('fragrances')
-      .select('id, brand, name, family, top_notes, heart_notes, base_notes, projection, anosmia_risk, phase, lean, rating')
-      .in('id', [fragrance_a_id, fragrance_b_id])
+    const result: any = {}
 
-    if (fetchError || !frags || frags.length < 2) {
-      return NextResponse.json({ error: 'Fragrances not found' }, { status: 404 })
+    // 1. SIMILARITY (if layerId provided)
+    if (layerId) {
+      const { data: layerFrag, error: layerError } = await supabase
+        .from('fragrances')
+        .select('id, brand, name, notes')
+        .eq('id', layerId)
+        .single()
+
+      if (layerError || !layerFrag) {
+        return NextResponse.json({ error: 'Layer fragrance not found' }, { status: 404 })
+      }
+
+      // Parse note strings into sets (comma-separated)
+      const notesA = new Set(
+        (frag.notes ?? '')
+          .split(',')
+          .map((n: string) => n.trim().toLowerCase())
+          .filter((n: string) => n.length > 0)
+      )
+      const notesB = new Set(
+        (layerFrag.notes ?? '')
+          .split(',')
+          .map((n: string) => n.trim().toLowerCase())
+          .filter((n: string) => n.length > 0)
+      )
+
+      // Jaccard similarity: |intersection| / |union|
+      const intersection = new Set([...notesA].filter(n => notesB.has(n)))
+      const union = new Set([...notesA, ...notesB])
+      const jaccardScore = union.size > 0 ? intersection.size / union.size : 0
+
+      // Map score to label
+      let label: 'Clone' | 'Close' | 'Complementary' | 'Contrasting'
+      if (jaccardScore >= 0.82) {
+        label = 'Clone'
+      } else if (jaccardScore >= 0.6) {
+        label = 'Close'
+      } else if (jaccardScore >= 0.35) {
+        label = 'Complementary'
+      } else {
+        label = 'Contrasting'
+      }
+
+      result.similarity = {
+        score: parseFloat(jaccardScore.toFixed(2)),
+        label,
+        explanation: `${frag.brand} ${frag.name} and ${layerFrag.brand} ${layerFrag.name} share ${Math.round(jaccardScore * 100)}% of their note profiles.`,
+      }
     }
 
-    const [fragA, fragB] = frags[0].id === fragrance_a_id ? [frags[0], frags[1]] : [frags[1], frags[0]]
+    // 2. PHASE CANCELLATION (if layerId provided)
+    if (layerId) {
+      const { data: layerFrag, error: layerError } = await supabase
+        .from('fragrances')
+        .select('id, brand, name, notes')
+        .eq('id', layerId)
+        .single()
 
-    // 1. NOTE CONFLICT SCORE (0-100)
-    const topOverlap = getOverlap(fragA.top_notes, fragB.top_notes)
-    const heartOverlap = getOverlap(fragA.heart_notes, fragB.heart_notes)
-    const baseOverlap = getOverlap(fragA.base_notes, fragB.base_notes)
+      if (!layerError && layerFrag) {
+        // Parse notes and fetch volatility data
+        const notesA = (frag.notes ?? '')
+          .split(',')
+          .map((n: string) => n.trim().toLowerCase())
+          .filter((n: string) => n.length > 0)
+        const notesB = (layerFrag.notes ?? '')
+          .split(',')
+          .map((n: string) => n.trim().toLowerCase())
+          .filter((n: string) => n.length > 0)
 
-    // Penalty: Base overlap is worst (heavy molecules), Top is redundant but okay
-    let conflictScore = 100
-    conflictScore -= (baseOverlap.length * 15)
-    conflictScore -= (heartOverlap.length * 10)
-    conflictScore -= (topOverlap.length * 5)
-    conflictScore = Math.max(0, conflictScore)
+        // Fetch note properties from fragrance_notes
+        const { data: notePropsA } = await supabase
+          .from('fragrance_notes')
+          .select('name, volatility_class, molecular_weight')
+          .in('name', notesA)
 
-    // 2. VOLATILITY STACK SCORE
-    let volatilityScore = 50
-    const p1 = fragA.phase
-    const p2 = fragB.phase
+        const { data: notePropsB } = await supabase
+          .from('fragrance_notes')
+          .select('name, volatility_class, molecular_weight')
+          .in('name', notesB)
 
-    if ((p1 === 1 && p2 === 1)) volatilityScore -= 20 // two anchors clash
-    if ((p1 === 1 && p2 === 3) || (p1 === 3 && p2 === 1)) volatilityScore += 30 // perfect stack
-    if (p1 === 2 && p2 === 2) volatilityScore -= 10 // mid-heavy
-    if ((p1 === 1 && p2 === 2) || (p1 === 2 && p2 === 1)) volatilityScore += 15 // good transition
-    volatilityScore = Math.max(0, Math.min(100, volatilityScore))
+        // Check for phase cancellation:
+        // If A has top notes (MW < 150) AND B has base notes (MW > 220)
+        const topNotesA = notePropsA?.filter(n => n.volatility_class === 'top') ?? []
+        const baseNotesB = notePropsB?.filter(n => n.volatility_class === 'base') ?? []
 
-    // 3. PROJECTION BALANCE SCORE
-    let projectionScore = 60
-    const projA = fragA.projection
-    const projB = fragB.projection
+        const hasConflict = topNotesA.length > 0 && baseNotesB.length > 0
 
-    if (projA === 'Beast Mode' && projB === 'Beast Mode') projectionScore -= 30 // anosmia city
-    if ((projA === 'Beast Mode' && ['Medium', 'Moderate'].includes(projB)) || 
-        (projB === 'Beast Mode' && ['Medium', 'Moderate'].includes(projA))) {
-      projectionScore += 25 // ideal contrast
-    }
-    projectionScore = Math.max(0, Math.min(100, projectionScore))
-
-    const totalChemistScore = Math.round((conflictScore * 0.4) + (volatilityScore * 0.3) + (projectionScore * 0.3))
-
-    // Call Claude for synthesis
-    const prompt = `You are the Scentral Olfactory Chemist. Analyze the following two fragrances for molecular compatibility.
-    
-    FRAGRANCE A: ${fragA.brand} ${fragA.name} (${fragA.family})
-    Phase: ${fragA.phase}, Projection: ${fragA.projection}, Risk: ${fragA.anosmia_risk}
-    Notes: Top: ${fragA.top_notes?.join(', ')}, Heart: ${fragA.heart_notes?.join(', ')}, Base: ${fragA.base_notes?.join(', ')}
-
-    FRAGRANCE B: ${fragB.brand} ${fragB.name} (${fragB.family})
-    Phase: ${fragB.phase}, Projection: ${fragB.projection}, Risk: ${fragB.anosmia_risk}
-    Notes: Top: ${fragB.top_notes?.join(', ')}, Heart: ${fragB.heart_notes?.join(', ')}, Base: ${fragB.base_notes?.join(', ')}
-
-    COMPUTED SCORES:
-    Note Conflict: ${conflictScore}/100
-    Volatility Stack: ${volatilityScore}/100
-    Projection Balance: ${projectionScore}/100
-    Total Chemist Score: ${totalChemistScore}/100
-    Use Case: ${use_case}
-
-    Return a scientific JSON response only:
-    {
-      "verdict": "Harmonious | Complementary | Neutral | Risky | Clash",
-      "chemist_note": "2-3 sentence scientific explanation of why these molecules work or conflict",
-      "application_protocol": ["step 1", "step 2", "step 3"],
-      "synergy_accords": ["accord 1", "accord 2"],
-      "caution": "string or null"
-    }`
-
-    const response = await anthropic.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 600,
-      messages: [{ role: 'user', content: prompt }],
-    })
-
-    const contentBlock = response.content[0]
-    if (contentBlock.type !== 'text') {
-      throw new Error('Unexpected response type from Claude')
-    }
-    const claudeResult = JSON.parse(contentBlock.text)
-
-    const finalResult = {
-      chemist_score: totalChemistScore,
-      conflict_score: conflictScore,
-      volatility_score: volatilityScore,
-      projection_score: projectionScore,
-      claude_result: claudeResult
+        if (hasConflict) {
+          result.phaseCancellation = {
+            warning: true,
+            message: `These scents fight for attention at different stages. Apply ${frag.brand} ${frag.name} to pulse points and ${layerFrag.brand} ${layerFrag.name} to fabric for the best result.`,
+          }
+        }
+      }
     }
 
-    // Cache the result
-    await supabase.from('chemist_cache').insert({
-      fragrance_a_id,
-      fragrance_b_id,
-      result: finalResult
-    })
+    // 3. DRY-DOWN TIMELINE
+    const noteNames = (frag.notes ?? '')
+      .split(',')
+      .map((n: string) => n.trim().toLowerCase())
+      .filter((n: string) => n.length > 0)
 
-    return NextResponse.json({ success: true, ...finalResult })
+    const { data: noteProps } = await supabase
+      .from('fragrance_notes')
+      .select('volatility_class, molecular_weight')
+      .in('name', noteNames)
 
+    // Categorize notes by volatility
+    const topNotes = noteProps?.filter(n => n.volatility_class === 'top') ?? []
+    const heartNotes = noteProps?.filter(n => n.volatility_class === 'heart') ?? []
+    const baseNotes = noteProps?.filter(n => n.volatility_class === 'base') ?? []
+
+    // Build timeline based on evaporation rates
+    // Top: peak 0-30 mins, fades by 60 mins
+    // Heart: peak 30-90 mins, fades by 180 mins
+    // Base: settles 90+ mins, lasts 4-8 hours
+    const timeline: Array<{ minute: number; dominantClass: string }> = []
+
+    if (topNotes.length > 0) {
+      timeline.push({ minute: 0, dominantClass: 'top' })
+    }
+    if (heartNotes.length > 0) {
+      timeline.push({ minute: 30, dominantClass: 'heart' })
+    }
+    if (baseNotes.length > 0) {
+      timeline.push({ minute: 120, dominantClass: 'base' })
+    }
+
+    // If no notes found in fragrance_notes, still return basic timeline
+    if (timeline.length === 0) {
+      timeline.push({ minute: 0, dominantClass: 'top' })
+      timeline.push({ minute: 30, dominantClass: 'heart' })
+      timeline.push({ minute: 120, dominantClass: 'base' })
+    }
+
+    result.dryDown = {
+      topPeakMins: topNotes.length > 0 ? 30 : 0,
+      heartPeakMins: heartNotes.length > 0 ? 90 : 0,
+      baseSettleMins: baseNotes.length > 0 ? 120 : 0,
+      timeline,
+    }
+
+    return NextResponse.json(result)
   } catch (error: any) {
     console.error('Chemist API Error:', error)
     return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 })
