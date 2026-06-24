@@ -5,6 +5,7 @@ import DiscoverClient, { type DiscoverFragrance } from './DiscoverClient'
 export const metadata: Metadata = {
   title: 'Discover | AnotherSense',
   description: 'Search and explore the AnotherSense fragrance catalogue. Find your next signature scent from hundreds of designer and niche fragrances.',
+  alternates: { canonical: '/discover' },
 }
 
 export const dynamic = 'force-dynamic'

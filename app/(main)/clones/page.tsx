@@ -5,6 +5,7 @@ import ClonesClient from './ClonesClient'
 export const metadata: Metadata = {
   title: 'Clone Finder | AnotherSense',
   description: 'Find affordable alternatives to your favourite designer and niche fragrances. 100+ Middle Eastern clones mapped to their inspirations.',
+  alternates: { canonical: '/clones' },
 }
 
 export const dynamic = 'force-dynamic'

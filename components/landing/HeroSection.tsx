@@ -91,6 +91,19 @@ export default function HeroSection() {
           Explore Collection →
         </Link>
       </div>
+
+      <Link
+        href="/waitlist"
+        style={{
+          marginTop: 28,
+          fontSize: 12,
+          letterSpacing: '0.06em',
+          color: 'var(--text-muted)',
+          textDecoration: 'underline',
+        }}
+      >
+        Request early access to the private beta →
+      </Link>
     </section>
   )
 }

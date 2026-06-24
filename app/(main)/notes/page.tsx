@@ -4,7 +4,8 @@ import { createClient } from '@/utils/supabase/server'
 
 export const metadata: Metadata = {
   title: 'Scent Encyclopedia | AnotherSense',
-  description: 'Explore our encyclopedia of scent families. Discover fragrances by olfactive family and axis.',
+  description: 'Explore our encyclopedia of scent families. Discover fragrances by olfactive family and axis, from fresh aromatic to dark oud.',
+  alternates: { canonical: '/notes' },
 }
 
 export const dynamic = 'force-dynamic'
@@ -68,12 +69,34 @@ const AXIS_EMOJIS: Record<string, string> = {
   'Aromatic': '🫧',
 }
 
+// Common individual notes (distinct from the family/axis taxonomy above) — matched
+// against the freeform fragrances.notes text, e.g. "Top: Oud, saffron, Base: Amber, musk"
+const FEATURED_NOTES = [
+  'Oud', 'Rose', 'Vanilla', 'Amber', 'Musk', 'Bergamot', 'Cedarwood',
+  'Lavender', 'Patchouli', 'Sandalwood', 'Jasmine', 'Saffron', 'Vetiver',
+  'Leather', 'Praline', 'Ambergris',
+]
+
+type NoteFragrance = { id: string; brand: string; name: string }
+
 export default async function NotesPage() {
   const supabase = await createClient()
 
-  const { data } = await supabase
-    .from('fragrances')
-    .select('family')
+  const [{ data }, noteResultsRaw] = await Promise.all([
+    supabase.from('fragrances').select('family'),
+    Promise.all(
+      FEATURED_NOTES.map(note =>
+        supabase
+          .from('fragrances')
+          .select('id, brand, name')
+          .ilike('notes', `%${note}%`)
+          .limit(6)
+          .then(({ data }) => [note, data ?? []] as [string, NoteFragrance[]])
+      )
+    ),
+  ])
+
+  const noteResults = new Map<string, NoteFragrance[]>(noteResultsRaw.filter(([, rows]) => rows.length > 0))
 
   // Count fragrances per family
   const familyCounts = new Map<string, number>()
@@ -207,6 +230,75 @@ export default async function NotesPage() {
           </section>
         )
       })}
+
+      {/* Browse by individual note — cross-links into Discover */}
+      {noteResults.size > 0 && (
+        <section style={{ padding: '8px 16px 0', borderTop: '1px solid var(--line)' }}>
+          <h2
+            style={{
+              fontSize: '18px',
+              fontWeight: 600,
+              color: 'var(--text)',
+              margin: '32px 0 24px',
+            }}
+          >
+            Browse by Note
+          </h2>
+
+          {FEATURED_NOTES.map(note => {
+            const fragrances = noteResults.get(note)
+            if (!fragrances) return null
+
+            return (
+              <div key={note} style={{ marginBottom: '32px' }}>
+                <h3
+                  style={{
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    color: 'var(--text-muted)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.06em',
+                    marginBottom: '12px',
+                  }}
+                >
+                  Fragrances featuring {note}
+                </h3>
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: '10px',
+                    overflowX: 'auto',
+                    paddingBottom: '4px',
+                  }}
+                >
+                  {fragrances.map(frag => (
+                    <Link
+                      key={frag.id}
+                      href={`/discover?q=${encodeURIComponent(frag.name)}`}
+                      style={{
+                        flex: '0 0 auto',
+                        minWidth: '160px',
+                        padding: '12px 14px',
+                        borderRadius: '12px',
+                        background: 'var(--surface-2)',
+                        border: '1px solid var(--line)',
+                        textDecoration: 'none',
+                      }}
+                    >
+                      <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text)', marginBottom: '2px' }}>
+                        {frag.name}
+                      </p>
+                      <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                        {frag.brand}
+                      </p>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
+        </section>
+      )}
     </main>
   )
 }
