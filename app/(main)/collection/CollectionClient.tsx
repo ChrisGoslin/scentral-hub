@@ -300,7 +300,7 @@ export default function CollectionClient({ fragrances, totalCount }: { fragrance
   })
 
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100dvh', overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}>
+    <div style={{ background: 'var(--bg)', minHeight: '100dvh', paddingTop: 'calc(44px + env(safe-area-inset-top, 0px))', overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}>
       {/* Header */}
       <div className="px-4 pt-8 pb-4" style={{ borderBottom: '1px solid var(--line)' }}>
         <div className="flex items-center justify-between">

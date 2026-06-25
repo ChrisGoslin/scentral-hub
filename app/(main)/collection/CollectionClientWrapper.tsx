@@ -5,8 +5,6 @@ import { createClient } from '@/utils/supabase/client'
 import WardrobeShelf from './WardrobeShelf'
 import { type CollectionFragrance } from './CollectionClient'
 import EmptyState from '@/components/ui/EmptyState'
-import Button from '@/components/ui/Button'
-import Link from 'next/link'
 
 export default function CollectionClientWrapper() {
   const [fragrances, setFragrances] = useState<CollectionFragrance[]>([])
@@ -34,7 +32,7 @@ export default function CollectionClientWrapper() {
              frag:fragrances!fragrance_id(id, brand, name, phase, phase_label, family, projection, anosmia_risk, lean, rating, image_url, optimal_season, maturation, use_case)`
           )
           .eq('anon_id', anonId)
-          .order('affinity_score', { ascending: false, foreignTable: 'frag' })
+          .order('created_at', { ascending: false })
 
         if (collectionError) {
           throw collectionError
@@ -80,7 +78,7 @@ export default function CollectionClientWrapper() {
 
   if (error) {
     return (
-      <div style={{ minHeight: '100dvh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ minHeight: '100dvh', paddingTop: 'calc(44px + env(safe-area-inset-top, 0px))', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <EmptyState
           headline="Couldn't load fragrances"
           caption={error}
@@ -91,8 +89,32 @@ export default function CollectionClientWrapper() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100dvh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ color: 'var(--text-muted)' }}>Loading your collection...</div>
+      <div style={{ minHeight: '100dvh', background: 'var(--bg)', paddingTop: 'calc(44px + env(safe-area-inset-top, 0px) + 24px)', paddingBottom: '120px' }}>
+        <style>{`
+          @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+          }
+          .skeleton-card {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+          }
+        `}</style>
+        <div style={{ padding: '16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '12px' }}>
+            {Array.from({ length: 12 }).map((_, i) => (
+              <div
+                key={i}
+                className="skeleton-card"
+                style={{
+                  aspectRatio: '2/3',
+                  borderRadius: 'var(--r-card)',
+                  background: `linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%)`,
+                  border: '1px solid var(--line)',
+                }}
+              />
+            ))}
+          </div>
+        </div>
       </div>
     )
   }

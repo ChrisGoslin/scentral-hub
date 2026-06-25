@@ -87,6 +87,7 @@ export default function SpritzClient() {
         flexDirection: 'column',
         alignItems: 'center',
         padding: '24px 16px 48px',
+        paddingTop: 'calc(44px + env(safe-area-inset-top, 0px) + 24px)',
         background: 'var(--bg)',
       }}
     >

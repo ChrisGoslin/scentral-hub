@@ -38,6 +38,28 @@ export default function Home() {
         alignItems: 'center',
       }}
     >
+      {process.env.NEXT_PUBLIC_BETA_MODE === 'true' && (
+        <span
+          style={{
+            position: 'fixed',
+            top: 12,
+            right: 12,
+            zIndex: 50,
+            fontSize: 9,
+            fontWeight: 700,
+            letterSpacing: '0.05em',
+            color: 'var(--text-muted)',
+            background: 'var(--color-surface)',
+            border: '1px solid var(--color-gold)',
+            borderRadius: 999,
+            padding: '3px 8px',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          Beta — Free for early users
+        </span>
+      )}
+
       <HeroSection />
       <PersonaTeasers />
 

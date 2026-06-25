@@ -124,7 +124,7 @@ export default async function NotesPage() {
   }
 
   return (
-    <main style={{ minHeight: '100vh', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 96px)' }}>
+    <main style={{ minHeight: '100vh', paddingTop: 'calc(44px + env(safe-area-inset-top, 0px))', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 96px)' }}>
       {/* Hero */}
       <section style={{ padding: '48px 16px 32px' }}>
         <h1

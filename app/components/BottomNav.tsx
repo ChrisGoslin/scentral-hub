@@ -46,25 +46,6 @@ export default function BottomNav() {
           }}>
             {pageTitle}
           </h1>
-          {process.env.NEXT_PUBLIC_BETA_MODE === 'true' && (
-            <span
-              style={{
-                position: 'absolute',
-                right: 12,
-                fontSize: 9,
-                fontWeight: 700,
-                letterSpacing: '0.05em',
-                color: 'var(--text-muted)',
-                background: 'var(--color-surface)',
-                border: '1px solid var(--color-gold)',
-                borderRadius: 999,
-                padding: '3px 8px',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              Beta — Free for early users
-            </span>
-          )}
         </header>
       )}
 

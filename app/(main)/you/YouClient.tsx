@@ -156,7 +156,7 @@ export default function YouClient(props: YouClientProps) {
 
   if (!mounted) {
     return (
-      <div style={{ background: 'var(--bg)', minHeight: '100dvh' }}>
+      <div style={{ background: 'var(--bg)', minHeight: '100dvh', paddingTop: 'calc(44px + env(safe-area-inset-top, 0px))' }}>
         <div className="px-4 pt-8 pb-4" style={{ borderBottom: '1px solid var(--line)' }}>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--text)', lineHeight: '34px' }}>You</h1>
         </div>
@@ -169,7 +169,7 @@ export default function YouClient(props: YouClientProps) {
 
   if (props.state === 'signed-out') {
     return (
-      <div style={{ background: 'var(--bg)', minHeight: '100dvh' }}>
+      <div style={{ background: 'var(--bg)', minHeight: '100dvh', paddingTop: 'calc(44px + env(safe-area-inset-top, 0px))' }}>
         <div className="px-4 pt-8 pb-4 flex items-center justify-between" style={{ borderBottom: '1px solid var(--line)' }}>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--text)', lineHeight: '34px' }}>You</h1>
           {auraStreak > 0 && (
@@ -245,7 +245,7 @@ export default function YouClient(props: YouClientProps) {
   const { email } = props
 
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100dvh', color: 'var(--text)', overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}>
+    <div style={{ background: 'var(--bg)', minHeight: '100dvh', paddingTop: 'calc(44px + env(safe-area-inset-top, 0px))', color: 'var(--text)', overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}>
       {/* Header */}
       <div className="px-4 pt-8 pb-4 flex items-center justify-between" style={{ borderBottom: '1px solid var(--line)' }}>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--text)', lineHeight: '34px' }}>You</h1>

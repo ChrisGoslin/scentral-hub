@@ -1,28 +1,36 @@
-import { createClient } from '@/utils/supabase/server';
-import { NextResponse } from 'next/server';
+import { createClient } from '@/utils/supabase/server'
+import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const q = searchParams.get('q');
+  const { searchParams } = new URL(request.url)
+  const search = searchParams.get('search') || searchParams.get('q')
 
   try {
-    const supabase = await createClient();
+    const supabase = await createClient()
     let query = supabase
       .from('fragrances')
-      .select('*')
-      .order('brand', { ascending: true });
+      .select('id, brand, name, full_name, family, projection, optimal_season, use_case, plain_description, inspired_by, image_url, rating, created_at, owner_count')
+      .order('brand', { ascending: true })
 
-    if (q) {
-      query = query.or(`brand.ilike.%${q}%,name.ilike.%${q}%`).limit(20);
+    if (search && search.trim().length > 0) {
+      // Search: brand, name, inspired_by (for "Smells Like" mode)
+      query = query
+        .or(
+          `brand.ilike.%${search}%,name.ilike.%${search}%,inspired_by.ilike.%${search}%,plain_description.ilike.%${search}%`
+        )
+        .limit(40)
+    } else {
+      query = query.limit(100)
     }
 
-    const { data, error } = await query;
+    const { data, error } = await query
 
-    if (error) throw error;
+    if (error) throw error
 
-    return NextResponse.json(data);
+    // Return in the shape the hook expects: { similar_fragrances: [...] }
+    return NextResponse.json({ similar_fragrances: data ?? [] })
   } catch (error) {
     const msg = error instanceof Error ? error.message : 'Unknown error'
-    return NextResponse.json({ error: msg }, { status: 500 });
+    return NextResponse.json({ error: msg, similar_fragrances: [] }, { status: 500 })
   }
 }

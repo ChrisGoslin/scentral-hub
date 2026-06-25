@@ -51,14 +51,14 @@ export default function ClonesClient({ clones, topOriginals, error }: Props) {
 
   if (error) {
     return (
-      <div style={{ minHeight: '100dvh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ minHeight: '100dvh', paddingTop: 'calc(44px + env(safe-area-inset-top, 0px))', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <EmptyState headline="Couldn't load clones" caption={error} />
       </div>
     )
   }
 
   return (
-    <div style={{ minHeight: '100dvh', background: 'var(--bg)', paddingBottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }}>
+    <div style={{ minHeight: '100dvh', paddingTop: 'calc(44px + env(safe-area-inset-top, 0px))', background: 'var(--bg)', paddingBottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }}>
 
       {/* Hero */}
       <div style={{

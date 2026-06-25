@@ -332,6 +332,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
       <div
         style={{
           minHeight: '100dvh',
+          paddingTop: 'calc(44px + env(safe-area-inset-top, 0px))',
           background: 'var(--bg)',
           display: 'flex',
           alignItems: 'center',
@@ -350,6 +351,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
           position: 'relative',
           zIndex: 1,
           minHeight: '100dvh',
+          paddingTop: 'calc(44px + env(safe-area-inset-top, 0px))',
           background: 'var(--bg)',
           backgroundImage: activePersona && personaVisible ? activePersona.ui_theme.bgGradient : undefined,
           transition: 'background-image 0.4s ease',

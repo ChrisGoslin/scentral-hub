@@ -405,7 +405,7 @@ export default function WheelClient() {
 
   if (state.loading) {
     return (
-      <div style={{ minHeight: '100dvh', background: 'var(--bg)', padding: '64px 20px' }}>
+      <div style={{ minHeight: '100dvh', background: 'var(--bg)', padding: '64px 20px', paddingTop: 'calc(44px + env(safe-area-inset-top, 0px) + 64px)' }}>
         <LoadingShimmer />
       </div>
     )
@@ -413,7 +413,7 @@ export default function WheelClient() {
 
   if (state.error) {
     return (
-      <div style={{ minHeight: '100dvh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+      <div style={{ minHeight: '100dvh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', paddingTop: 'calc(44px + env(safe-area-inset-top, 0px) + 20px)' }}>
         <div style={{ textAlign: 'center', maxWidth: 400 }}>
           <p style={{ color: 'var(--text-muted)', marginBottom: 16 }}>{state.error}</p>
           <button
@@ -438,7 +438,7 @@ export default function WheelClient() {
 
   if (state.total === 0) {
     return (
-      <div style={{ minHeight: '100dvh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+      <div style={{ minHeight: '100dvh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', paddingTop: 'calc(44px + env(safe-area-inset-top, 0px) + 20px)' }}>
         <EmptyState
           headline="Build your collection first"
           caption="Add fragrances to your collection to see your fragrance wheel."
@@ -457,7 +457,7 @@ export default function WheelClient() {
   const represented = state.wheelData.filter(d => d.count > 0).length
 
   return (
-    <div style={{ minHeight: '100dvh', background: 'var(--bg)', paddingBottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }}>
+    <div style={{ minHeight: '100dvh', paddingTop: 'calc(44px + env(safe-area-inset-top, 0px))', background: 'var(--bg)', paddingBottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }}>
       {/* Hero */}
       <div style={{ padding: '32px 20px 20px', borderBottom: '1px solid var(--line)' }}>
         <p style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: 6 }}>
