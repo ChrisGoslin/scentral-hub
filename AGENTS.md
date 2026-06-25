@@ -399,6 +399,43 @@ DO NOT use: Light, Soft, Whisper, Heavy, Massive — not in DB.
 .env.local only: NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SERVICE_KEY (server-side only).
 ANTHROPIC_API_KEY in Supabase Vault — never echoed, never committed.
 
+## 8.5. Script Security (Critical for data scripts)
+
+**All scripts that read/write data must follow these rules:**
+
+1. **Load credentials from .env.local only** — never accept secrets as CLI env vars or arguments
+   ```javascript
+   import dotenv from 'dotenv';
+   dotenv.config({ path: '.env.local' });
+   const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
+   ```
+
+2. **Exit with clear error if credentials missing** — do not proceed silently
+   ```javascript
+   if (!supabaseKey) {
+     console.error('❌ Missing SUPABASE_SERVICE_KEY in .env.local');
+     process.exit(1);
+   }
+   ```
+
+3. **Never log credential values** — not even masked or abbreviated
+   ```javascript
+   // ❌ BAD: console.log(`URL: ${supabaseUrl}`)
+   // ✅ GOOD: console.log('✅ Connected to Supabase')
+   ```
+
+4. **Validate external URLs beyond HTTP status** — check redirects and final URL
+   ```javascript
+   // HEAD requests don't catch soft-404s. Use GET with redirect: 'follow'
+   // and check final URL for /404 patterns.
+   ```
+
+5. **Always dry-run before full batch** — `--limit=5 --dry-run` is mandatory
+   - Validates credentials, network, and logic before touching production data
+   - Tests must pass before any DB writes
+
+6. **Commit the script (with .env.local.example) before first run** — never run untested code against prod
+
 ## Session end checklist
 npm run build must pass. Commit: feat: epic-N <description>. Deploy: npx vercel --prod
 ```
