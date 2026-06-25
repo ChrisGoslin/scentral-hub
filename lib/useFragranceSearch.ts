@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import Fuse from 'fuse.js'
 import { createClient } from '@/utils/supabase/client'
 
@@ -19,11 +19,17 @@ export type DiscoverFragrance = {
   owner_count: number
 }
 
+const DB_SEARCH_LIMIT = 50
+
 export function useFragranceSearch(localFragrances: DiscoverFragrance[]) {
   const [searchTerm, setSearchTerm] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [searchFocused, setSearchFocused] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Full-DB ilike results
+  const [dbResults, setDbResults] = useState<DiscoverFragrance[]>([])
+  const [isDbSearching, setIsDbSearching] = useState(false)
 
   const [semanticResults, setSemanticResults] = useState<DiscoverFragrance[]>([])
   const [isSemanticSearching, setIsSemanticSearching] = useState(false)
@@ -32,13 +38,13 @@ export function useFragranceSearch(localFragrances: DiscoverFragrance[]) {
   // Debounce search term
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(() => setDebouncedSearch(searchTerm), 250)
+    debounceRef.current = setTimeout(() => setDebouncedSearch(searchTerm), 300)
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current)
     }
   }, [searchTerm])
 
-  // Local fuzzy search with Fuse.js
+  // Local fuzzy search with Fuse.js — instant fallback while DB query is in-flight
   const fuse = useMemo(
     () =>
       new Fuse(localFragrances, {
@@ -55,12 +61,83 @@ export function useFragranceSearch(localFragrances: DiscoverFragrance[]) {
     [localFragrances]
   )
 
-  const searchResults = useMemo(() => {
+  const fuseResults = useMemo(() => {
     if (!debouncedSearch.trim()) return localFragrances
     return fuse.search(debouncedSearch).map(r => r.item)
   }, [debouncedSearch, fuse, localFragrances])
 
-  // Semantic vector search (if debouncedSearch)
+  // Full-DB ilike query — fires whenever debouncedSearch has 2+ chars
+  useEffect(() => {
+    const q = debouncedSearch.trim()
+    if (q.length < 2) {
+      setDbResults([])
+      return
+    }
+
+    let cancelled = false
+    setIsDbSearching(true)
+
+    ;(async () => {
+      try {
+        const supabase = createClient()
+        const pattern = `%${q}%`
+
+        // Search name + brand + inspired_by with ilike, union via or()
+        const { data, error } = await supabase
+          .from('fragrances')
+          .select(
+            'id, brand, name, full_name, family, projection, optimal_season, use_case, plain_description, inspired_by, image_url, rating, created_at'
+          )
+          .or(`name.ilike.${pattern},brand.ilike.${pattern},inspired_by.ilike.${pattern}`)
+          .order('brand', { ascending: true })
+          .limit(DB_SEARCH_LIMIT)
+
+        if (cancelled) return
+        if (error) {
+          console.error('DB search error', error)
+          setDbResults([])
+          return
+        }
+
+        setDbResults(
+          (data ?? []).map(f => ({
+            id: f.id,
+            brand: f.brand,
+            name: f.name,
+            full_name: f.full_name ?? `${f.brand} ${f.name}`,
+            family: f.family ?? '',
+            projection: f.projection ?? '',
+            optimal_season: f.optimal_season ?? null,
+            use_case: f.use_case ?? null,
+            plain_description: f.plain_description ?? null,
+            inspired_by: f.inspired_by ?? null,
+            image_url: f.image_url ?? null,
+            rating: f.rating ? Number(f.rating) : null,
+            created_at: f.created_at,
+            owner_count: 0,
+          }))
+        )
+      } catch (e) {
+        console.error('DB search exception', e)
+        if (!cancelled) setDbResults([])
+      } finally {
+        if (!cancelled) setIsDbSearching(false)
+      }
+    })()
+
+    return () => {
+      cancelled = true
+    }
+  }, [debouncedSearch])
+
+  // searchResults: DB results when available, fuse fallback while in-flight
+  const searchResults = useMemo(() => {
+    if (!debouncedSearch.trim()) return localFragrances
+    if (dbResults.length > 0) return dbResults
+    return fuseResults // instant result while DB query loads
+  }, [debouncedSearch, dbResults, fuseResults, localFragrances])
+
+  // Semantic vector search
   useEffect(() => {
     if (!debouncedSearch || debouncedSearch.trim().length === 0) {
       setSemanticResults([])
@@ -98,6 +175,7 @@ export function useFragranceSearch(localFragrances: DiscoverFragrance[]) {
               image_url: r.image_url,
               rating: r.rating,
               created_at: r.created_at,
+              owner_count: 0,
             }))
         )
         setSemanticError(null)
@@ -117,6 +195,7 @@ export function useFragranceSearch(localFragrances: DiscoverFragrance[]) {
     searchFocused,
     setSearchFocused,
     searchResults,
+    isDbSearching,
     semanticResults,
     isSemanticSearching,
     semanticError,

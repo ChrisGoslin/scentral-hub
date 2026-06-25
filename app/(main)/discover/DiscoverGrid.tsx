@@ -15,6 +15,7 @@ type Props = {
   semanticResults: DiscoverFragrance[]
   debouncedSearch: string
   wishlist: string[]
+  isDbSearching: boolean
   isSemanticSearching: boolean
   semanticError: string | null
   loadingMore: boolean
@@ -34,6 +35,7 @@ export function DiscoverGrid({
   semanticResults,
   debouncedSearch,
   wishlist,
+  isDbSearching,
   isSemanticSearching,
   semanticError,
   loadingMore,
@@ -52,11 +54,11 @@ export function DiscoverGrid({
         <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
           {countLabel}
         </p>
-        {isSemanticSearching && (
+        {(isDbSearching || isSemanticSearching) && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <div className="resonance-loader" />
             <span style={{ fontSize: 11, color: 'var(--accent)', fontWeight: 500, letterSpacing: '0.05em' }}>
-              RESONATING...
+              {isDbSearching ? 'SEARCHING...' : 'RESONATING...'}
             </span>
           </div>
         )}

@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useMemo } from 'react'
+import Link from 'next/link'
 import { Search, X, ArrowLeft } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Chip from '@/components/ui/Chip'
@@ -55,6 +56,21 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
     <div style={{ background: 'var(--bg)', minHeight: '100dvh', paddingTop: 'calc(44px + env(safe-area-inset-top, 0px))', color: 'var(--text)', overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}>
       {/* Header */}
       <div className="px-4 pt-8 pb-4" style={{ borderBottom: '1px solid var(--line)' }}>
+        <Link
+          href="/collection"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 4,
+            fontSize: 12,
+            color: 'var(--text-muted)',
+            textDecoration: 'none',
+            marginBottom: 10,
+          }}
+        >
+          <ArrowLeft size={12} />
+          Wardrobe
+        </Link>
         <h1
           style={{
             fontFamily: 'var(--font-display)',

@@ -15,8 +15,12 @@ import { createClient } from '@supabase/supabase-js'
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { config } from 'dotenv'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+// Load credentials from .env.local — NEVER pass keys as CLI env vars
+config({ path: path.join(__dirname, '../.env.local') })
 
 // Config
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL

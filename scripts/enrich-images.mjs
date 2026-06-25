@@ -29,7 +29,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 const isDryRun = process.argv.includes('--dry-run');
 const limitArg = process.argv.find(arg => arg.startsWith('--limit='));
-const limit = limitArg ? parseInt(limitArg.split('=')[1], 10) : 500;
+const limit = limitArg ? parseInt(limitArg.split('=')[1], 10) : 0; // 0 = no limit (process all null rows)
 
 // Normalize name to slug: lowercase, handle accents, replace non-alphanumeric with hyphen
 function toSlug(str) {
@@ -202,12 +202,15 @@ async function main() {
 
   while (true) {
     // Query fragrances WHERE image_url IS NULL, curated first
-    const { data: fragrances, error } = await supabase
+    let query = supabase
       .from('fragrances')
       .select('id, brand, name')
       .is('image_url', null)
-      .order('phase', { ascending: false, nullsLast: true })
-      .limit(limit);
+      .order('phase', { ascending: false, nullsLast: true });
+
+    if (limit > 0) query = query.limit(limit);
+
+    const { data: fragrances, error } = await query;
 
     if (error) {
       console.error('❌ Error querying Supabase:', error.message);
