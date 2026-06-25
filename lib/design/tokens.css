@@ -86,6 +86,29 @@
   --shadow-elevated:
     var(--shadow-object),
     0 0 0 1px var(--aura-border);
+
+  /* Family gradient tokens — fallback card backgrounds when a fragrance has
+     no image_url (consumed by lib/familyGradients.ts) */
+  --family-floral-start: #e8b4d4;
+  --family-floral-end: #c2185b;
+  --family-fresh-start: #4ecdc4;
+  --family-fresh-end: #0288a8;
+  --family-woody-start: #5c4033;
+  --family-woody-end: #8d7662;
+  --family-oriental-start: #c49a3c;
+  --family-oriental-end: #8a4b2e;
+  --family-fougere-start: #6b8f71;
+  --family-fougere-end: #3f5c44;
+  --family-musk-start: #d9c7c0;
+  --family-musk-end: #a98e9b;
+  --family-green-start: #7cb083;
+  --family-green-end: #3e6b4a;
+  --family-gourmand-start: #d4a373;
+  --family-gourmand-end: #8b5a2b;
+  --family-oud-start: #4a2c2a;
+  --family-oud-end: #1c0f0e;
+  --family-default-start: #5c4033;
+  --family-default-end: #8d7662;
 }
 
 /* Dark mode theme — Dark Ambient Material (Sprint 1-A)

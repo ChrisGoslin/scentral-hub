@@ -45,7 +45,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
   const [vibe, setVibe] = useState<string[]>([])
   const [longevity, setLongevity] = useState<string | null>(null)
   const [occasion, setOccasion] = useState<string[]>([])
-  const [house, setHouse] = useState<string[]>([])
+  const [brand, setBrand] = useState<string[]>([])
   const [sort, setSort] = useState<SortOption>('A–Z')
 
   // Persona theme state
@@ -167,7 +167,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
   }
 
   // Filtering logic
-  const anyFilter = !!(vibe.length || longevity || occasion.length || house.length)
+  const anyFilter = !!(vibe.length || longevity || occasion.length || brand.length)
   const anySearch = searchTerm.trim().length > 0
 
   const filtered = useMemo(() => {
@@ -196,10 +196,10 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
       results = results.filter(f => occasion.some(o => matchesAnyTag(f.use_case, OCCASION_TAGS[o] ?? [])))
     }
 
-    // House filter (multi-select, OR logic)
-    if (house.length > 0) {
+    // Brand filter (multi-select, OR logic)
+    if (brand.length > 0) {
       results = results.filter(f =>
-        house.some(h => (h === 'Niche' ? !KNOWN_BRANDS.includes(f.brand) : f.brand === h))
+        brand.some(h => (h === 'Niche' ? !KNOWN_BRANDS.includes(f.brand) : f.brand === h))
       )
     }
 
@@ -225,14 +225,14 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
     }
 
     return sorted
-  }, [localFragrances, semanticResults, vibe, longevity, occasion, house, showSaved, wishlist, sort, anySearch, searchResults, debouncedSearch])
+  }, [localFragrances, semanticResults, vibe, longevity, occasion, brand, showSaved, wishlist, sort, anySearch, searchResults, debouncedSearch])
 
   const countLabel = (() => {
     const base = `${filtered.length} fragrance${filtered.length !== 1 ? 's' : ''}`
     if (vibe.length) return `${base} • ${vibe.join(', ')}`
     if (longevity) return `${base} • ${longevity}`
     if (occasion.length) return `${base} • ${occasion.join(', ')}`
-    if (house.length) return `${base} • ${house.join(', ')}`
+    if (brand.length) return `${base} • ${brand.join(', ')}`
     if (showSaved) return `${base} • Saved`
     return base
   })()
@@ -253,8 +253,8 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
     setOccasion(prev => (prev.includes(o) ? prev.filter(x => x !== o) : [...prev, o]))
   }
 
-  const toggleHouse = (h: string) => {
-    setHouse(prev => (prev.includes(h) ? prev.filter(x => x !== h) : [...prev, h]))
+  const toggleBrand = (h: string) => {
+    setBrand(prev => (prev.includes(h) ? prev.filter(x => x !== h) : [...prev, h]))
   }
 
   const clearFilters = () => {
@@ -262,7 +262,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
     localStorage.setItem('scentral_discover_vibe', JSON.stringify([]))
     setLongevity(null)
     setOccasion([])
-    setHouse([])
+    setBrand([])
     setShowSaved(false)
     setSearchTerm('')
   }
@@ -363,7 +363,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
             vibe={vibe}
             longevity={longevity}
             occasion={occasion}
-            house={house}
+            brand={brand}
             sort={sort}
             showSaved={showSaved}
             searchTerm={searchTerm}
@@ -375,7 +375,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
             onVibeToggle={toggleVibe}
             onLongevityToggle={toggleLongevity}
             onOccasionToggle={toggleOccasion}
-            onHouseToggle={toggleHouse}
+            onBrandToggle={toggleBrand}
             onSortChange={setSort}
             onShowSavedToggle={setShowSaved}
           />

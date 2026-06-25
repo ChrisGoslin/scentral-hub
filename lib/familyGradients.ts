@@ -1,22 +1,57 @@
 // Olfactory family → fallback gradient, used wherever a fragrance card has no
-// image_url. Real `family` values are compound, space-separated strings
-// (e.g. "Fresh Aromatic", "Woody Spicy") — match on any word, not the whole
-// string, and fall back to woody if nothing hits.
-export const FAMILY_GRADIENTS: Record<string, string> = {
-  woody: 'linear-gradient(135deg, #5c4033 0%, #8d7662 100%)',
-  amber: 'linear-gradient(135deg, #c49a3c 0%, #a67c52 100%)',
-  oriental: 'linear-gradient(135deg, #c49a3c 0%, #a67c52 100%)',
-  fresh: 'linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%)',
-  gourmand: 'linear-gradient(135deg, #d4a373 0%, #8b6f47 100%)',
-  floral: 'linear-gradient(135deg, #e8b4d4 0%, #c67c98 100%)',
-  aquatic: 'linear-gradient(135deg, #87ceeb 0%, #4a90e2 100%)',
-  marine: 'linear-gradient(135deg, #87ceeb 0%, #4a90e2 100%)',
-}
+// image_url. Real `family` values are compound, free-text strings (e.g.
+// "Fresh Aromatic", "Woody Spicy") — match by substring against a category
+// list, and fall back to the default gradient if nothing hits.
+// Colours are CSS custom properties (lib/design/tokens.css) per AGENTS.md's
+// "no hardcoded hex" rule, not literal hex values.
+const FAMILY_CATEGORIES: { keywords: string[]; gradient: string }[] = [
+  {
+    keywords: ['floral'],
+    gradient: 'linear-gradient(135deg, var(--family-floral-start) 0%, var(--family-floral-end) 100%)',
+  },
+  {
+    keywords: ['fresh', 'aqua', 'marine', 'citrus'],
+    gradient: 'linear-gradient(135deg, var(--family-fresh-start) 0%, var(--family-fresh-end) 100%)',
+  },
+  {
+    keywords: ['woody'],
+    gradient: 'linear-gradient(135deg, var(--family-woody-start) 0%, var(--family-woody-end) 100%)',
+  },
+  {
+    keywords: ['oriental', 'amber', 'spicy'],
+    gradient: 'linear-gradient(135deg, var(--family-oriental-start) 0%, var(--family-oriental-end) 100%)',
+  },
+  {
+    keywords: ['fougere', 'aromatic'],
+    gradient: 'linear-gradient(135deg, var(--family-fougere-start) 0%, var(--family-fougere-end) 100%)',
+  },
+  {
+    keywords: ['musk', 'powder'],
+    gradient: 'linear-gradient(135deg, var(--family-musk-start) 0%, var(--family-musk-end) 100%)',
+  },
+  {
+    keywords: ['green', 'herbal'],
+    gradient: 'linear-gradient(135deg, var(--family-green-start) 0%, var(--family-green-end) 100%)',
+  },
+  {
+    keywords: ['gourmand', 'sweet'],
+    gradient: 'linear-gradient(135deg, var(--family-gourmand-start) 0%, var(--family-gourmand-end) 100%)',
+  },
+  {
+    keywords: ['oud'],
+    gradient: 'linear-gradient(135deg, var(--family-oud-start) 0%, var(--family-oud-end) 100%)',
+  },
+]
 
-export function getFamilyGradient(family: string): string {
-  const words = family.toLowerCase().split(/\s+/)
-  for (const word of words) {
-    if (FAMILY_GRADIENTS[word]) return FAMILY_GRADIENTS[word]
+const DEFAULT_GRADIENT = 'linear-gradient(135deg, var(--family-default-start) 0%, var(--family-default-end) 100%)'
+
+export function getFamilyGradient(family: string | null): string {
+  if (!family) return DEFAULT_GRADIENT
+  const lower = family.toLowerCase()
+  for (const category of FAMILY_CATEGORIES) {
+    if (category.keywords.some(keyword => lower.includes(keyword))) {
+      return category.gradient
+    }
   }
-  return FAMILY_GRADIENTS.woody
+  return DEFAULT_GRADIENT
 }

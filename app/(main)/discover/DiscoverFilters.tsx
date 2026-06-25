@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Chip from '@/components/ui/Chip'
 import {
   SORT_OPTIONS,
@@ -15,7 +16,7 @@ type Props = {
   vibe: string[]
   longevity: string | null
   occasion: string[]
-  house: string[]
+  brand: string[]
   sort: SortOption
   showSaved: boolean
   searchTerm: string
@@ -28,7 +29,7 @@ type Props = {
   onVibeToggle: (v: string) => void
   onLongevityToggle: (l: string) => void
   onOccasionToggle: (o: string) => void
-  onHouseToggle: (h: string) => void
+  onBrandToggle: (h: string) => void
   onSortChange: (s: SortOption) => void
   onShowSavedToggle: (v: boolean) => void
 }
@@ -38,26 +39,77 @@ function FilterCarousel({
   options,
   isActive,
   onToggle,
+  tooltip,
 }: {
   title: string
   options: string[]
   isActive: (v: string) => boolean
   onToggle: (v: string) => void
+  tooltip?: string
 }) {
+  const [showTooltip, setShowTooltip] = useState(false)
+
   return (
     <div>
-      <p
-        style={{
-          fontSize: 10,
-          color: 'var(--text-muted)',
-          textTransform: 'uppercase',
-          letterSpacing: '0.12em',
-          paddingLeft: 16,
-          marginBottom: 6,
-        }}
-      >
-        {title}
-      </p>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 4, paddingLeft: 16, marginBottom: 6, position: 'relative' }}>
+        <p
+          style={{
+            fontSize: 10,
+            color: 'var(--text-muted)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.12em',
+            margin: 0,
+          }}
+        >
+          {title}
+        </p>
+        {tooltip && (
+          <>
+            <button
+              type="button"
+              onClick={() => setShowTooltip(prev => !prev)}
+              aria-label={`What is ${title}?`}
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: 0,
+                cursor: 'pointer',
+                color: 'var(--text-muted)',
+                fontSize: 12,
+                lineHeight: 1,
+              }}
+            >
+              ⓘ
+            </button>
+            {showTooltip && (
+              <>
+                <div
+                  onClick={() => setShowTooltip(false)}
+                  style={{ position: 'fixed', inset: 0, zIndex: 45 }}
+                />
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: 0,
+                    marginTop: 4,
+                    zIndex: 46,
+                    background: 'var(--surface)',
+                    border: '1px solid var(--line)',
+                    color: 'var(--text-muted)',
+                    fontSize: 12,
+                    padding: '8px 12px',
+                    borderRadius: 'var(--r-card)',
+                    maxWidth: 240,
+                  }}
+                >
+                  {tooltip}
+                </div>
+              </>
+            )}
+          </>
+        )}
+      </div>
       <div className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar whitespace-nowrap gap-2 px-4">
         {options.map(v => {
           const active = isActive(v)
@@ -86,7 +138,7 @@ export function DiscoverFilters({
   vibe,
   longevity,
   occasion,
-  house,
+  brand,
   sort,
   showSaved,
   searchTerm,
@@ -98,7 +150,7 @@ export function DiscoverFilters({
   onVibeToggle,
   onLongevityToggle,
   onOccasionToggle,
-  onHouseToggle,
+  onBrandToggle,
   onSortChange,
   onShowSavedToggle,
 }: Props) {
@@ -120,10 +172,10 @@ export function DiscoverFilters({
     track('filter_applied', { type: 'occasion', value: o, action: isAdding ? 'add' : 'remove' })
   }
 
-  const toggleHouse = (h: string) => {
-    const isAdding = !house.includes(h)
-    onHouseToggle(h)
-    track('filter_applied', { type: 'house', value: h, action: isAdding ? 'add' : 'remove' })
+  const toggleBrand = (h: string) => {
+    const isAdding = !brand.includes(h)
+    onBrandToggle(h)
+    track('filter_applied', { type: 'brand', value: h, action: isAdding ? 'add' : 'remove' })
   }
 
   const handleSortChange = (s: SortOption) => {
@@ -202,6 +254,7 @@ export function DiscoverFilters({
         options={Object.keys(VIBE_TAGS)}
         isActive={v => vibe.includes(v)}
         onToggle={toggleVibe}
+        tooltip="The mood or character of the scent — woody, fresh, floral etc."
       />
 
       <FilterCarousel
@@ -209,6 +262,7 @@ export function DiscoverFilters({
         options={Object.keys(LONGEVITY_PROJECTIONS)}
         isActive={v => longevity === v}
         onToggle={toggleLongevity}
+        tooltip="How long the scent lasts on your skin after spraying."
       />
 
       <FilterCarousel
@@ -216,9 +270,10 @@ export function DiscoverFilters({
         options={Object.keys(OCCASION_TAGS)}
         isActive={v => occasion.includes(v)}
         onToggle={toggleOccasion}
+        tooltip="When and where this fragrance fits best."
       />
 
-      {/* House — multi-select, includes Saved alongside */}
+      {/* Brand — multi-select, includes Saved alongside */}
       <div>
         <p
           style={{
@@ -230,16 +285,16 @@ export function DiscoverFilters({
             marginBottom: 6,
           }}
         >
-          House
+          Brand
         </p>
         <div className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar whitespace-nowrap gap-2 px-4">
           {[...KNOWN_BRANDS, 'Niche'].map(v => {
-            const active = house.includes(v)
+            const active = brand.includes(v)
             return (
               <Chip
                 key={v}
                 selected={active}
-                onClick={() => toggleHouse(v)}
+                onClick={() => toggleBrand(v)}
                 style={{
                   flexShrink: 0,
                   minHeight: 44,

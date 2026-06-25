@@ -8,10 +8,12 @@ import DryDownTimeline from './DryDownTimeline'
 const SWIPE_THRESHOLD = 120
 
 const ZONE_POSITIONS: Record<string, { top: string; left: string }> = {
-  neck: { top: '22%', left: '50%' },
-  wrists: { top: '58%', left: '78%' },
-  wrist: { top: '58%', left: '78%' },
-  chest: { top: '40%', left: '50%' },
+  neck:   { top: '16%', left: '50%' },
+  wrists: { top: '52%', left: '82%' },
+  wrist:  { top: '52%', left: '82%' },
+  chest:  { top: '33%', left: '50%' },
+  behind_ears: { top: '10%', left: '68%' },
+  hair:   { top: '5%',  left: '50%' },
 }
 
 interface SpritzCardProps {
@@ -76,10 +78,22 @@ export default function SpritzCard({ event, isTop, onSwipeRight, onSwipeLeft }: 
       </div>
 
       {/* Silhouette with pulse points */}
-      <div style={{ position: 'relative', height: 200, margin: '16px 0' }}>
-        <svg viewBox="0 0 100 200" style={{ height: '100%', margin: '0 auto', display: 'block', opacity: 0.5 }}>
-          <ellipse cx="50" cy="20" rx="14" ry="16" fill="var(--text-muted)" />
-          <path d="M30 40 Q50 35 70 40 L75 140 Q50 150 25 140 Z" fill="var(--text-muted)" />
+      <div style={{ position: 'relative', height: 220, margin: '16px 0' }}>
+        <svg viewBox="0 0 100 220" style={{ height: '100%', margin: '0 auto', display: 'block', opacity: 0.35 }}>
+          {/* Head */}
+          <ellipse cx="50" cy="18" rx="11" ry="13" fill="var(--text-muted)" />
+          {/* Neck */}
+          <rect x="45" y="30" width="10" height="8" rx="2" fill="var(--text-muted)" />
+          {/* Shoulders + torso */}
+          <path d="M20 42 Q50 36 80 42 L76 110 Q50 116 24 110 Z" fill="var(--text-muted)" />
+          {/* Left arm */}
+          <path d="M24 46 Q14 70 16 100 Q20 104 24 100 Q24 72 28 50 Z" fill="var(--text-muted)" />
+          {/* Right arm */}
+          <path d="M76 46 Q86 70 84 100 Q80 104 76 100 Q76 72 72 50 Z" fill="var(--text-muted)" />
+          {/* Left leg */}
+          <path d="M32 110 Q28 155 26 190 Q32 194 36 190 Q38 155 42 110 Z" fill="var(--text-muted)" />
+          {/* Right leg */}
+          <path d="M58 110 Q62 155 64 190 Q70 194 74 190 Q72 155 68 110 Z" fill="var(--text-muted)" />
         </svg>
         {zones.map(zone => {
           const pos = ZONE_POSITIONS[zone] ?? ZONE_POSITIONS.chest
