@@ -1,8 +1,8 @@
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy | AnotherSense',
-  description: 'How we handle your data at AnotherSense. GDPR and UK GDPR compliant.',
+  title: 'Privacy Policy | BaseNote',
+  description: 'How we handle your data at BaseNote. GDPR and UK GDPR compliant.',
 }
 
 export default function PrivacyPage() {
@@ -17,7 +17,7 @@ export default function PrivacyPage() {
       <section style={{ marginBottom: 32 }}>
         <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>1. What We Collect</h2>
         <p style={{ marginBottom: 12 }}>
-          <strong>AnotherSense does not require an account.</strong> You can use the app without providing
+          <strong>BaseNote does not require an account.</strong> You can use the app without providing
           any personal information. We do not store your email address or name in our database.
         </p>
         <p>
@@ -30,7 +30,7 @@ export default function PrivacyPage() {
       <section style={{ marginBottom: 32 }}>
         <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>2. Anonymous Identity</h2>
         <p>
-          On first load, AnotherSense generates a unique UUID (<code style={{ background: 'var(--surface-2)', padding: '2px 4px', borderRadius: 2 }}>scentral_anon_id</code>)
+          On first load, BaseNote generates a unique UUID (<code style={{ background: 'var(--surface-2)', padding: '2px 4px', borderRadius: 2 }}>scentral_anon_id</code>)
           and stores it in your browser. This ID is used to:
         </p>
         <ul style={{ marginLeft: 20, marginTop: 8 }}>
@@ -103,7 +103,7 @@ export default function PrivacyPage() {
       <section style={{ marginBottom: 32 }}>
         <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>6. Third-Party Services</h2>
         <p>
-          AnotherSense uses the following third-party services:
+          BaseNote uses the following third-party services:
         </p>
         <ul style={{ marginLeft: 20, marginTop: 8 }}>
           <li style={{ marginBottom: 6 }}><strong>Supabase</strong> — database and authentication infrastructure</li>
@@ -121,8 +121,8 @@ export default function PrivacyPage() {
       <section style={{ marginBottom: 32 }}>
         <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>7. Affiliate Links</h2>
         <p style={{ marginBottom: 12 }}>
-          AnotherSense contains links to fragrance retailers. Some of these are affiliate links, which
-          earn AnotherSense a small commission if you purchase through them at no additional cost to you.
+          BaseNote contains links to fragrance retailers. Some of these are affiliate links, which
+          earn BaseNote a small commission if you purchase through them at no additional cost to you.
         </p>
         <p>
           We clearly disclose affiliate relationships wherever they appear. Your privacy is not affected
@@ -151,7 +151,7 @@ export default function PrivacyPage() {
       <section style={{ marginBottom: 32 }}>
         <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>9. Data Deletion</h2>
         <p style={{ marginBottom: 12 }}>
-          To delete your AnotherSense data:
+          To delete your BaseNote data:
         </p>
         <ul style={{ marginLeft: 20, marginTop: 8 }}>
           <li style={{ marginBottom: 6 }}>Clear your browser's localStorage and cookies</li>
@@ -177,14 +177,14 @@ export default function PrivacyPage() {
         <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>11. Changes to This Policy</h2>
         <p>
           We may update this Privacy Policy at any time. We will notify you of material changes via
-          an in-app notification or banner. Your continued use of AnotherSense after changes constitutes
+          an in-app notification or banner. Your continued use of BaseNote after changes constitutes
           acceptance of the updated policy.
         </p>
       </section>
 
       <div style={{ marginTop: 48, borderTop: '1px solid var(--line)', paddingTop: 24 }}>
         <p style={{ fontSize: 14, color: 'var(--text-muted)' }}>
-          By using AnotherSense, you acknowledge that you have read and understood this Privacy Policy.
+          By using BaseNote, you acknowledge that you have read and understood this Privacy Policy.
         </p>
       </div>
     </div>

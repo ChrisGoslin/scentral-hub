@@ -1,6 +1,6 @@
 {
-  "name": "AnotherSense",
-  "short_name": "AnotherSense",
+  "name": "BaseNote",
+  "short_name": "BaseNote",
   "description": "Your daily scent ritual",
   "start_url": "/?utm_source=pwa",
   "scope": "/",

@@ -6,7 +6,7 @@ import Link from 'next/link'
 import WearAndShareClient from './WearAndShareClient'
 
 export const metadata: Metadata = {
-  title: 'Wear & Share | AnotherSense',
+  title: 'Wear & Share | BaseNote',
   description: 'Discover fragrance posts from the community. Share your scent experiences with others.',
 }
 
@@ -26,7 +26,7 @@ export default async function WearAndSharePage() {
       <div style={{ minHeight: '100dvh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <EmptyState
           headline="Sign in to view the community"
-          caption="Join AnotherSense to share your fragrance experiences and connect with other enthusiasts."
+          caption="Join BaseNote to share your fragrance experiences and connect with other enthusiasts."
         />
       </div>
     )

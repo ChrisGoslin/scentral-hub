@@ -7,7 +7,7 @@ import Button from '@/components/ui/Button'
 import { cookies } from 'next/headers'
 
 export const metadata: Metadata = {
-  title: 'Layering Lab | AnotherSense',
+  title: 'Layering Lab | BaseNote',
   description: 'The Layering Lab. Experiment with fragrance combinations, find scents that work together, and create your own unique scent trails.',
 }
 

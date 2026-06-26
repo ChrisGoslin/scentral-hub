@@ -3,7 +3,7 @@ import { createClient } from '@/utils/supabase/server'
 import BoxesClient from './BoxesClient'
 
 export const metadata: Metadata = {
-  title: 'Discovery Boxes | AnotherSense',
+  title: 'Discovery Boxes | BaseNote',
   description: 'Curated fragrance sample sets. Explore, discover, and expand your scent wardrobe.',
 }
 

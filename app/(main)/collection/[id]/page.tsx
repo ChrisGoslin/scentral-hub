@@ -220,7 +220,7 @@ export default async function FragranceDetailPage({
           {ownerCount > 0 && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '13px', color: 'var(--text-muted)', marginTop: 6 }}>
               <Users size={14} style={{ color: 'var(--accent)' }} />
-              <span>{ownerCount} {ownerCount === 1 ? 'person in the AnotherSense community owns this' : 'people in the AnotherSense community own this'}</span>
+              <span>{ownerCount} {ownerCount === 1 ? 'person in the BaseNote community owns this' : 'people in the BaseNote community own this'}</span>
             </div>
           )}
           {f.plain_description && (

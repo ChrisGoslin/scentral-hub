@@ -6,7 +6,7 @@ import EmptyState from '@/components/ui/EmptyState'
 import CreatorDashboardClient from './CreatorDashboardClient'
 
 export const metadata: Metadata = {
-  title: 'Creator Dashboard | AnotherSense',
+  title: 'Creator Dashboard | BaseNote',
   description: 'Manage your creator profile and upload fragrance reels.',
 }
 

@@ -1,8 +1,8 @@
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Terms of Service | AnotherSense',
-  description: 'The AnotherSense User Agreement. Terms governing your use of the app.',
+  title: 'Terms of Service | BaseNote',
+  description: 'The BaseNote User Agreement. Terms governing your use of the app.',
 }
 
 export default function TermsPage() {
@@ -17,11 +17,11 @@ export default function TermsPage() {
       <section style={{ marginBottom: 32 }}>
         <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>1. Acceptance of Terms</h2>
         <p>
-          By accessing, downloading, or using AnotherSense (the "App"), you agree to be bound by these
+          By accessing, downloading, or using BaseNote (the "App"), you agree to be bound by these
           Terms of Service ("Terms"). If you do not agree to these Terms, do not use the App.
         </p>
         <p style={{ marginTop: 12 }}>
-          AnotherSense is provided "as is" and "as available" without warranty. We reserve the right to
+          BaseNote is provided "as is" and "as available" without warranty. We reserve the right to
           modify these Terms at any time. Your continued use of the App after changes constitutes acceptance
           of the updated Terms.
         </p>
@@ -38,7 +38,7 @@ export default function TermsPage() {
       <section style={{ marginBottom: 32 }}>
         <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>3. Age Requirement</h2>
         <p>
-          You must be at least 13 years old to use AnotherSense. If you are under 13, you must have
+          You must be at least 13 years old to use BaseNote. If you are under 13, you must have
           parental or guardian consent. We do not knowingly collect personal information from users
           under 13 without such consent.
         </p>
@@ -47,13 +47,13 @@ export default function TermsPage() {
       <section style={{ marginBottom: 32 }}>
         <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>4. Permitted Use</h2>
         <p style={{ marginBottom: 12 }}>
-          AnotherSense is licensed for your personal, non-commercial use only. You agree that you will not:
+          BaseNote is licensed for your personal, non-commercial use only. You agree that you will not:
         </p>
         <ul style={{ marginLeft: 20, marginTop: 8 }}>
           <li style={{ marginBottom: 6 }}>Scrape, crawl, or extract fragrance catalogue data for commercial purposes</li>
           <li style={{ marginBottom: 6 }}>Use the Aura layering intelligence or recommendations for resale or commercial distribution</li>
           <li style={{ marginBottom: 6 }}>Reverse-engineer, decompile, or attempt to derive the source code</li>
-          <li style={{ marginBottom: 6 }}>Use the App to compete with AnotherSense or build a derivative service</li>
+          <li style={{ marginBottom: 6 }}>Use the App to compete with BaseNote or build a derivative service</li>
           <li style={{ marginBottom: 6 }}>Modify, translate, or create derivative versions of the App</li>
           <li style={{ marginBottom: 6 }}>Remove or obscure any proprietary notices, labels, or marks</li>
           <li>Violate any applicable laws or regulations in your jurisdiction</li>
@@ -63,7 +63,7 @@ export default function TermsPage() {
       <section style={{ marginBottom: 32 }}>
         <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>5. Fragrance Content &amp; Disclaimer</h2>
         <p style={{ marginBottom: 12 }}>
-          AnotherSense contains fragrance descriptions, "inspired-by" mappings, and recommendations
+          BaseNote contains fragrance descriptions, "inspired-by" mappings, and recommendations
           based on community feedback and olfactory analysis. These are provided for informational
           purposes only and:
         </p>
@@ -82,11 +82,11 @@ export default function TermsPage() {
       <section style={{ marginBottom: 32 }}>
         <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>6. Affiliate Disclosure</h2>
         <p style={{ marginBottom: 12 }}>
-          AnotherSense may contain links to fragrance retailers and e-commerce sites. Some of these links
+          BaseNote may contain links to fragrance retailers and e-commerce sites. Some of these links
           are affiliate links, meaning:
         </p>
         <ul style={{ marginLeft: 20, marginTop: 8 }}>
-          <li style={{ marginBottom: 6 }}>AnotherSense earns a small commission if you purchase through these links</li>
+          <li style={{ marginBottom: 6 }}>BaseNote earns a small commission if you purchase through these links</li>
           <li style={{ marginBottom: 6 }}>There is no additional cost to you</li>
           <li>We clearly disclose affiliate relationships wherever they appear</li>
         </ul>
@@ -99,12 +99,12 @@ export default function TermsPage() {
       <section style={{ marginBottom: 32 }}>
         <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>7. User-Generated Content</h2>
         <p style={{ marginBottom: 12 }}>
-          Any content you contribute to AnotherSense (e.g., custom collection names, scent memories,
+          Any content you contribute to BaseNote (e.g., custom collection names, scent memories,
           layering notes) is subject to the following:
         </p>
         <ul style={{ marginLeft: 20, marginTop: 8 }}>
           <li style={{ marginBottom: 6 }}>You retain ownership of your content</li>
-          <li style={{ marginBottom: 6 }}>You grant AnotherSense a non-exclusive license to use, store, and display it</li>
+          <li style={{ marginBottom: 6 }}>You grant BaseNote a non-exclusive license to use, store, and display it</li>
           <li>You warrant that your content does not infringe third-party rights</li>
         </ul>
         <p style={{ marginTop: 12 }}>
@@ -115,7 +115,7 @@ export default function TermsPage() {
       <section style={{ marginBottom: 32 }}>
         <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>8. Limitation of Liability</h2>
         <p style={{ marginBottom: 12 }}>
-          <strong>TO THE MAXIMUM EXTENT PERMITTED BY LAW, ANOTHERSENSE IS NOT LIABLE FOR:</strong>
+          <strong>TO THE MAXIMUM EXTENT PERMITTED BY LAW, BASENOTE IS NOT LIABLE FOR:</strong>
         </p>
         <ul style={{ marginLeft: 20, marginTop: 8 }}>
           <li style={{ marginBottom: 6 }}>Allergic reactions or skin sensitivities from fragrances recommended by the App</li>
@@ -127,14 +127,14 @@ export default function TermsPage() {
         </ul>
         <p style={{ marginTop: 12 }}>
           <strong>Your sole remedy is to stop using the App.</strong> This limitation applies even if
-          AnotherSense has been advised of the possibility of such damages.
+          BaseNote has been advised of the possibility of such damages.
         </p>
       </section>
 
       <section style={{ marginBottom: 32 }}>
         <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>9. Indemnification</h2>
         <p>
-          You agree to indemnify, defend, and hold harmless AnotherSense and its creators from any claims,
+          You agree to indemnify, defend, and hold harmless BaseNote and its creators from any claims,
           damages, or costs (including legal fees) arising from your use of the App, violation of these Terms,
           or infringement of any third-party rights.
         </p>
@@ -143,7 +143,7 @@ export default function TermsPage() {
       <section style={{ marginBottom: 32 }}>
         <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>10. Termination</h2>
         <p style={{ marginBottom: 12 }}>
-          We may terminate or suspend your access to AnotherSense at any time, with or without cause, if:
+          We may terminate or suspend your access to BaseNote at any time, with or without cause, if:
         </p>
         <ul style={{ marginLeft: 20, marginTop: 8 }}>
           <li style={{ marginBottom: 6 }}>You violate these Terms</li>
@@ -169,7 +169,7 @@ export default function TermsPage() {
       <section style={{ marginBottom: 32 }}>
         <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>12. Modifications to the App</h2>
         <p>
-          AnotherSense reserves the right to modify, suspend, or discontinue any feature or the entire App
+          BaseNote reserves the right to modify, suspend, or discontinue any feature or the entire App
           at any time without notice. We are not liable for any loss or damage resulting from these changes.
         </p>
       </section>
@@ -178,7 +178,7 @@ export default function TermsPage() {
         <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>13. Entire Agreement</h2>
         <p>
           These Terms, together with our Privacy Policy, constitute the entire agreement between you and
-          AnotherSense regarding your use of the App. Any other terms or conditions are superseded by this agreement.
+          BaseNote regarding your use of the App. Any other terms or conditions are superseded by this agreement.
         </p>
       </section>
 

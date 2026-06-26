@@ -3,8 +3,8 @@ import { createClient } from '@/utils/supabase/server'
 import DiscoverClient, { type DiscoverFragrance } from './DiscoverClient'
 
 export const metadata: Metadata = {
-  title: 'Discover | AnotherSense',
-  description: 'Search and explore the AnotherSense fragrance catalogue. Find your next signature scent from hundreds of designer and niche fragrances.',
+  title: 'Discover | BaseNote',
+  description: 'Search and explore the BaseNote fragrance catalogue. Find your next signature scent from hundreds of designer and niche fragrances.',
   alternates: { canonical: '/discover' },
 }
 

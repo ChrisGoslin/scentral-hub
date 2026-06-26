@@ -193,7 +193,7 @@ export default function LexiconPage() {
       
       <footer className="py-20 text-center border-t border-stone-200 mt-20">
         <p className="text-stone-300 text-[10px] uppercase tracking-[0.4em] font-bold">
-          AnotherSense · Eternal Wisdom
+          BaseNote · Eternal Wisdom
         </p>
       </footer>
     </div>

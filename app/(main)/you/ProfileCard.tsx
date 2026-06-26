@@ -169,10 +169,10 @@ function SettingsSection({ email, onSignOut, signingOut, onReset }: ProfileCardP
         Reset my preferences
       </button>
 
-      {/* AnotherSense Pro */}
+      {/* BaseNote Pro */}
       <div className="flex flex-col">
         <Link href="/pro" className="text-left py-3 w-full border-b border-[var(--line)]" style={{ fontSize: 14, color: 'var(--accent)', textDecoration: 'none', fontWeight: 600 }}>
-          ✦ Unlock AnotherSense Pro
+          ✦ Unlock BaseNote Pro
         </Link>
       </div>
 

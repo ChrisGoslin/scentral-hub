@@ -272,7 +272,7 @@ export default function AuraShareCard({ data }: { data: AuraShareData }) {
         await navigator.share({
           files: [file],
           title: `AURA · ${data.harmony_pct}% Harmony`,
-          text: `${data.anchor.name} × ${data.top.name} — synthesised by AURA on AnotherSense`,
+          text: `${data.anchor.name} × ${data.top.name} — synthesised by AURA on BaseNote`,
         })
       } else {
         download()

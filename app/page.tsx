@@ -3,7 +3,7 @@ import { Metadata } from 'next'
 import HeroSection from '@/components/landing/HeroSection'
 import PersonaTeasers from '@/components/landing/PersonaTeasers'
 
-const TITLE = 'AnotherSense — Your Scent Fingerprint'
+const TITLE = 'BaseNote — Your Scent Fingerprint'
 const DESCRIPTION =
   'Discover fragrances that match your unique sensory identity — guided by your personal scent profile.'
 
@@ -141,7 +141,7 @@ export default function Home() {
         }}
       >
         <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-          AnotherSense · Your daily scent ritual
+          BaseNote · Your daily scent ritual
           <br /><br />
           <Link href="/privacy" style={{ textDecoration: 'none', color: 'inherit' }}>Privacy</Link>
           {' · '}

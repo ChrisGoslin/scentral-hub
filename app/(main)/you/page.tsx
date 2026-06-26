@@ -4,7 +4,7 @@ import { createClient } from '@/utils/supabase/server'
 import YouClient, { type SavedCombination, type WeekWearEntry } from './YouClient'
 
 export const metadata: Metadata = {
-  title: 'Your Profile | AnotherSense',
+  title: 'Your Profile | BaseNote',
   description: 'Track what you wear, save your favourite layering combinations, and see the patterns in your scent collection.',
   alternates: { canonical: '/you' },
 }

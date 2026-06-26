@@ -6,10 +6,10 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ---
 
-# AGENTS.md — Operating rules for ALL CLI agents on AnotherSense (Claude Code, Antigravity, Gemini, etc.)
-# ⚠️  REBRAND: Display name = "AnotherSense". Repo stays `scentral-hub`. DB stays `scentral-mvp`. All internal names unchanged.
-# 📋 ACTIVE SPRINT: docs/AnotherSense_Execution_Brief.md — 4-week App Store sprint, 12 Epics.
-# 🎯 FULL SPEC:   docs/specs/AnotherSense_Final_UX_Overhaul.md — design system + all Epic prompts.
+# AGENTS.md — Operating rules for ALL CLI agents on BaseNote (Claude Code, Antigravity, Gemini, etc.)
+# ⚠️  REBRAND: Display name = "BaseNote". Repo stays `scentral-hub`. DB stays `scentral-mvp`. All internal names unchanged.
+# 📋 ACTIVE SPRINT: docs/BaseNote_Execution_Brief.md — 4-week App Store sprint, 12 Epics.
+# 🎯 FULL SPEC:   docs/specs/BaseNote_Final_UX_Overhaul.md — design system + all Epic prompts.
 
 **Owner:** Christopher. **Purpose:** prevent invented facts, paths, keys, and scope.
 This is the SINGLE canonical instructions file. `CLAUDE.md` and `GEMINI.md` point here. Read this FIRST, every session, before acting. Begin your first reply by stating in one line what you grounded yourself in.
@@ -41,12 +41,12 @@ fictional features, lore like "Agent Luna / Hegemony / Shadow Branching", and ha
 "being wrong" — it's "sounding certain while being wrong."
 
 ## 1. Ground truth (the ONLY accepted facts unless re-verified)
-- **Display name:** AnotherSense. **Repo:** `scentral-hub` (GitHub: `ChrisGoslin/scentral`). **DB:** `scentral-mvp` (`lrkdwobnemczvhpixpky`). Display-layer rebrand only — do NOT rename repo, DB, or tables.
+- **Display name:** BaseNote. **Repo:** `scentral-hub` (GitHub: `ChrisGoslin/scentral`). **DB:** `scentral-mvp` (`lrkdwobnemczvhpixpky`). Display-layer rebrand only — do NOT rename repo, DB, or tables.
 - **Data:** 127,195 fragrances (bulk-imported from 3 Kaggle datasets — 2026-06-24, IMPORT COMPLETE). Key columns: `plain_description`, `inspired_by`, `family`, `projection`, `optimal_season`, `use_case`, `lean`, `image_url` (populated by backfill scripts — may be null for some rows).
 - **Stack:** Next.js 16.2.9 (App Router, route groups like `(main)`), React 19.2.4, Supabase JS 2.x, Vercel, Tailwind CSS, `@dnd-kit/core` + `@dnd-kit/sortable` + `@dnd-kit/utilities` (Living Wardrobe). Always re-verify version from `package.json` if in doubt — do NOT assert from memory.
 - **Architecture:** Single product. No auth for MVP — identity via `scentral_anon_id` (localStorage UUID, generated on first load).
 - **Routes:**
-  - `/` (Landing page — "AnotherSense" branding)
+  - `/` (Landing page — "BaseNote" branding)
   - `/discover` (Search and explore catalogue)
   - `/collection` (Apothecary Grid shelf — user inventory)
   - `/collection/[id]` (Fragrance detail view)
@@ -116,7 +116,7 @@ fictional features, lore like "Agent Luna / Hegemony / Shadow Branching", and ha
   - `--motion-organic: 800ms cubic-bezier(0.34, 1.56, 0.64, 1)`
 - **Typography:** Instrument Serif italic (emotional/narrative copy, Aura voice) + Unbounded (functional/navigational). Both font variables on the `html` element in `app/layout.tsx`.
 - **Personas:** See `SCENTRAL_PERSONAS.md`. Gavin (newcomer, plain language). Christopher (enthusiast, expert).
-- **Source-of-truth docs:** `AGENTS.md` (this file), `docs/specs/AnotherSense_Final_UX_Overhaul.md` (full spec + all Epic prompts), `docs/AnotherSense_Execution_Brief.md` (4-week sprint plan), `SCENTRAL_PERSONAS.md`.
+- **Source-of-truth docs:** `AGENTS.md` (this file), `docs/specs/BaseNote_Final_UX_Overhaul.md` (full spec + all Epic prompts), `docs/BaseNote_Execution_Brief.md` (4-week sprint plan), `SCENTRAL_PERSONAS.md`.
 
 If a "fact" is not in these docs, the repo, or the database, it is NOT a fact yet — verify it or label it unverified.
 
@@ -321,13 +321,13 @@ uncommitted you want to keep.
 Use this block at the start of every new CLI agent session. Summary of §1 — update both when §1 changes. Last verified: 2026-06-22.
 
 ```
-# AnotherSense — Project Briefing
-# Repo: scentral-hub | DB: scentral-mvp | Display name: AnotherSense (display-layer only, all internal names unchanged)
+# BaseNote — Project Briefing
+# Repo: scentral-hub | DB: scentral-mvp | Display name: BaseNote (display-layer only, all internal names unchanged)
 
 ## Must-read docs before writing any code
 - AGENTS.md — ground truth, safeguards, lessons learned (READ THIS FIRST)
-- docs/specs/AnotherSense_Final_UX_Overhaul.md — full design system + all 12 Epic prompts
-- docs/AnotherSense_Execution_Brief.md — 4-week sprint map, dependency tree, commit rules
+- docs/specs/BaseNote_Final_UX_Overhaul.md — full design system + all 12 Epic prompts
+- docs/BaseNote_Execution_Brief.md — 4-week sprint map, dependency tree, commit rules
 
 ## Stack (verified from package.json)
 - Next.js 16.2.9 (App Router, route groups like `(main)`)
@@ -337,7 +337,7 @@ Use this block at the start of every new CLI agent session. Summary of §1 — u
 - Tailwind CSS + CSS variables for all colours (NO hardcoded hex — ever)
 - @dnd-kit/core + @dnd-kit/sortable for Living Wardrobe drag-and-drop
 
-## Design system — AnotherSense Aura Design Language
+## Design system — BaseNote Aura Design Language
 CSS variables only (app/globals.css + lib/design/tokens.css):
 - Base: var(--bg), var(--surface), var(--surface-2), var(--text), var(--text-muted), var(--accent), var(--line)
 - Aura: --aura (oklch 0.72 0.08 60), --aura-surface, --aura-border, --xp-color (oklch 0.78 0.14 85)

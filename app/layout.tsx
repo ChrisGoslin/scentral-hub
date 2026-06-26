@@ -26,27 +26,27 @@ const unbounded = Unbounded({
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://scentral-hub.vercel.app"),
-  title: "AnotherSense",
+  title: "BaseNote",
   description: "Your daily scent ritual. Remember how you smell.",
   manifest: "/manifest.json",
   icons: {
     apple: "/icons/icon-192.png",
   },
   openGraph: {
-    siteName: "AnotherSense",
-    title: "AnotherSense — Your Daily Scent Ritual",
+    siteName: "BaseNote",
+    title: "BaseNote — Your Daily Scent Ritual",
     description: "Discover, collect and understand the fragrances that define you.",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "AnotherSense — Your Daily Scent Ritual",
+    title: "BaseNote — Your Daily Scent Ritual",
     description: "Discover, collect and understand the fragrances that define you.",
   },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "AnotherSense",
+    title: "BaseNote",
     startupImage: [
       { url: "/icons/splash/icon_750x1334.png", media: "screen and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" },
       { url: "/icons/splash/icon_828x1792.png", media: "screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" },
