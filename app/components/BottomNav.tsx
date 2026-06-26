@@ -6,9 +6,9 @@ import { usePathname } from 'next/navigation'
 import { Archive, FlaskConical, Compass, Droplets, User } from 'lucide-react'
 
 const NAV_ITEMS = [
+  { label: 'Discover', href: '/discover',   Icon: Compass },
   { label: 'Wardrobe', href: '/collection', Icon: Archive },
   { label: 'Lab',      href: '/layering',   Icon: FlaskConical },
-  { label: 'Discover', href: '/discover',   Icon: Compass },
   { label: 'Spritz',   href: '/spritz',     Icon: Droplets },
   { label: 'You',      href: '/you',        Icon: User },
 ]

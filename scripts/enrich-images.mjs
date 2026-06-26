@@ -90,63 +90,80 @@ async function findImageUrl(brand, name) {
   const brandSlug = toSlug(brand);
   const nameSlug = toSlug(name);
 
+  // Helper to validate that final URL matches the product
+  // Require BOTH brand AND (full name OR at least first word of name)
+  function isValidRedirect(finalUrl, brandSlug, nameSlug) {
+    const urlPath = finalUrl.toLowerCase();
+    const brandMatch = urlPath.includes(`/${brandSlug}`) || urlPath.includes(`/${brandSlug.split('-')[0]}`);
+
+    // Check for name match (full or first word)
+    const firstWord = nameSlug.split('-')[0];
+    const nameMatch = urlPath.includes(`/${nameSlug}`) || urlPath.includes(`-${nameSlug}`) ||
+                      urlPath.includes(`/${firstWord}`) || urlPath.includes(`-${firstWord}`);
+
+    // Require brand match AND name match
+    return brandMatch && nameMatch;
+  }
+
   // Try Parfumo
   const parfumoUrl = `https://www.parfumo.com/Perfumes/${brandSlug}/${nameSlug}`;
   const parfumoResult = await findValidUrl(parfumoUrl);
-  if (parfumoResult) {
-    return parfumoResult; // Return the final redirected URL
+  if (parfumoResult && isValidRedirect(parfumoResult, brandSlug, nameSlug)) {
+    return parfumoResult; // Valid: final URL contains brand or name
   }
 
   // Try Fragrantica
   const fragranticaUrl = `https://www.fragrantica.com/perfume/${brandSlug}/${nameSlug}.html`;
   const fragranticaResult = await findValidUrl(fragranticaUrl);
-  if (fragranticaResult) {
-    return fragranticaResult; // Return the final redirected URL
+  if (fragranticaResult && isValidRedirect(fragranticaResult, brandSlug, nameSlug)) {
+    return fragranticaResult; // Valid: final URL contains brand or name
   }
 
-  return null;
+  return null; // No valid URL found
 }
 
 async function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// Process fragrances in parallel with concurrency limit (2 workers)
+// Process fragrances with 6 concurrent workers for speed
 async function processBatch(fragrances, batchIndex) {
   let processed = 0;
   let hits = 0;
   let misses = 0;
+  const MAX_CONCURRENT = 6;
 
-  for (const frag of fragrances) {
-    try {
-      const imageUrl = await findImageUrl(frag.brand, frag.name);
+  // Process in concurrent groups
+  for (let i = 0; i < fragrances.length; i += MAX_CONCURRENT) {
+    const group = fragrances.slice(i, i + MAX_CONCURRENT);
 
-      if (imageUrl) {
-        hits++;
-        if (!isDryRun) {
-          await supabase.from('fragrances').update({ image_url: imageUrl }).eq('id', frag.id);
+    await Promise.all(
+      group.map(async (frag) => {
+        try {
+          const imageUrl = await findImageUrl(frag.brand, frag.name);
+          if (imageUrl) {
+            hits++;
+            if (!isDryRun) {
+              await supabase.from('fragrances').update({ image_url: imageUrl }).eq('id', frag.id);
+            }
+            console.log(`  ✓ ${frag.brand} - ${frag.name} → ${imageUrl}`);
+          } else {
+            misses++;
+            const missEntry = `${frag.id}\t${frag.brand}\t${frag.name}`;
+            fs.appendFileSync(missesFile, missEntry + '\n');
+          }
+          processed++;
+          if (processed % 50 === 0) {
+            console.log(`  [${processed}/${fragrances.length}] ${hits}H/${misses}M`);
+          }
+          await sleep(800);
+        } catch (err) {
+          console.error(`  ERROR processing ${frag.name}:`, err.message);
+          misses++;
+          processed++;
         }
-        console.log(`  ✓ ${frag.brand} - ${frag.name} → ${imageUrl}`);
-      } else {
-        misses++;
-        const missEntry = `${frag.id}\t${frag.brand}\t${frag.name}`;
-        fs.appendFileSync(missesFile, missEntry + '\n');
-        console.log(`  ✗ ${frag.brand} - ${frag.name}`);
-      }
-
-      processed++;
-      if (processed % 25 === 0) {
-        console.log(
-          `  [${processed}/${fragrances.length}] ${hits}H/${misses}M`
-        );
-      }
-
-      // Sleep between requests (1500ms)
-      await sleep(1500);
-    } catch (err) {
-      console.error(`  ERROR processing ${frag.name}:`, err.message);
-      misses++;
-    }
+      })
+    );
   }
 
   return { processed, hits, misses };
@@ -201,14 +218,15 @@ async function main() {
   let totalMisses = 0;
 
   while (true) {
-    // Query fragrances WHERE image_url IS NULL, curated first
+    // Query fragrances WHERE image_url IS NULL, curated first, 2000 at a time
     let query = supabase
       .from('fragrances')
       .select('id, brand, name')
       .is('image_url', null)
-      .order('phase', { ascending: false, nullsLast: true });
+      .order('phase', { ascending: false, nullsLast: true })
+      .limit(2000); // Batch size: 2000 (was unlimited)
 
-    if (limit > 0) query = query.limit(limit);
+    if (limit > 0 && limit < 2000) query = query.limit(limit); // Override for --limit=N
 
     const { data: fragrances, error } = await query;
 

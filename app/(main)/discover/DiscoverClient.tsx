@@ -46,7 +46,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
   const [longevity, setLongevity] = useState<string | null>(null)
   const [occasion, setOccasion] = useState<string[]>([])
   const [brand, setBrand] = useState<string[]>([])
-  const [sort, setSort] = useState<SortOption>('A–Z')
+  const [sort, setSort] = useState<SortOption>('Top Rated')
 
   // Persona theme state
   const [activePersona, setActivePersona] = useState<ReturnType<typeof getPersonaById> | null>(null)
@@ -106,6 +106,8 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
     const storedSort = localStorage.getItem('scentral_discover_sort') as SortOption | null
     if (storedSort && SORT_OPTIONS.includes(storedSort)) {
       setSort(storedSort)
+    } else {
+      localStorage.setItem('scentral_discover_sort', 'Top Rated')
     }
 
     const params = new URLSearchParams(window.location.search)
@@ -229,6 +231,12 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
   }, [localFragrances, semanticResults, vibe, longevity, occasion, brand, showSaved, wishlist, sort, anySearch, searchResults, debouncedSearch])
 
   const countLabel = (() => {
+    const hasFiltersOrSearch = anyFilter || anySearch
+
+    if (!hasFiltersOrSearch) {
+      return '127,000+ fragrances'
+    }
+
     const base = `${filtered.length} fragrance${filtered.length !== 1 ? 's' : ''}`
     if (vibe.length) return `${base} • ${vibe.join(', ')}`
     if (longevity) return `${base} • ${longevity}`

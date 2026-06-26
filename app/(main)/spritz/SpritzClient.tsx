@@ -92,7 +92,7 @@ export default function SpritzClient() {
       }}
     >
       <div style={{ width: '100%', maxWidth: 360, display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 24, color: 'var(--text)' }}>Aura</h1>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 24, color: 'var(--text)' }}>Spritz</h1>
         {streak > 0 && (
           <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--xp-color)' }}>🔥 {streak}-day streak</span>
         )}
@@ -100,7 +100,7 @@ export default function SpritzClient() {
 
       <div style={{ position: 'relative', width: '100%', maxWidth: 360, flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         {loading && (
-          <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Aura is reading your collection…</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Reading your collection…</p>
         )}
 
         {!loading && error && (
@@ -109,12 +109,25 @@ export default function SpritzClient() {
 
         {!loading && !error && !current && (
           <div style={{ textAlign: 'center' }}>
-            <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 20, color: 'var(--text)', marginBottom: 8 }}>
-              That's the day, taken care of.
-            </p>
-            <Link href="/collection" style={{ fontSize: 13, color: 'var(--aura)', fontWeight: 600 }}>
-              Back to your wardrobe →
-            </Link>
+            {schedule.length === 0 && currentCardIndex === 0 ? (
+              <>
+                <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 20, color: 'var(--text)', marginBottom: 8 }}>
+                  Add fragrances to your Wardrobe first, then Spritz will suggest your daily scent rotation.
+                </p>
+                <Link href="/discover" style={{ fontSize: 13, color: 'var(--aura)', fontWeight: 600 }}>
+                  Discover fragrances →
+                </Link>
+              </>
+            ) : (
+              <>
+                <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 20, color: 'var(--text)', marginBottom: 8 }}>
+                  That's the day, taken care of.
+                </p>
+                <Link href="/collection" style={{ fontSize: 13, color: 'var(--aura)', fontWeight: 600 }}>
+                  Back to your wardrobe →
+                </Link>
+              </>
+            )}
           </div>
         )}
 
