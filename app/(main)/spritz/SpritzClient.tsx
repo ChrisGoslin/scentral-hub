@@ -26,6 +26,7 @@ export default function SpritzClient() {
   const [error, setError] = useState<string | null>(null)
   const [streak, setStreak] = useState(0)
   const [xpToast, setXpToast] = useState<number | null>(null)
+  const [streakToast, setStreakToast] = useState<string | null>(null)
 
   useEffect(() => {
     const personaId = localStorage.getItem('scentral_persona') ?? undefined
@@ -63,9 +64,14 @@ export default function SpritzClient() {
       })
       if (!res.ok) return
       const data = await res.json()
-      setStreak(data.streak?.current ?? 0)
+      const currentStreak = data.streak?.current ?? 0
+      setStreak(currentStreak)
       setXpToast(data.xp?.gained ?? null)
       setTimeout(() => setXpToast(null), 1600)
+      if (currentStreak === 0 || currentStreak === 1) {
+        setStreakToast('🔥 Streak started!')
+        setTimeout(() => setStreakToast(null), 2000)
+      }
     } catch {
       // best-effort — swipe already advanced, XP/streak just won't update this time
     }
@@ -169,6 +175,28 @@ export default function SpritzClient() {
               }}
             >
               +{xpToast} XP
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {streakToast !== null && (
+            <motion.div
+              initial={{ opacity: 0, y: 0 }}
+              animate={{ opacity: 1, y: -40 }}
+              exit={{ opacity: 0 }}
+              style={{
+                position: 'absolute',
+                top: '35%',
+                fontFamily: 'var(--font-display)',
+                fontStyle: 'italic',
+                fontSize: 24,
+                fontWeight: 700,
+                color: 'var(--aura)',
+                pointerEvents: 'none',
+              }}
+            >
+              {streakToast}
             </motion.div>
           )}
         </AnimatePresence>

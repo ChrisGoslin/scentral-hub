@@ -11,7 +11,7 @@ export default function PrivacyPage() {
       <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 32, marginBottom: 24 }}>Privacy Policy</h1>
 
       <p style={{ marginBottom: 16, fontSize: 14, color: 'var(--text-muted)' }}>
-        Last updated: June 21, 2026
+        Last updated: June 26, 2026
       </p>
 
       <section style={{ marginBottom: 32 }}>

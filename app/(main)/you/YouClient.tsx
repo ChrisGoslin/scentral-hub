@@ -179,7 +179,7 @@ export default function YouClient(props: YouClientProps) {
           )}
         </div>
 
-        <div className="px-6 py-8 animate-up">
+        <div className="px-6 py-8 animate-up" style={{ overflowY: 'auto' }}>
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--text)', lineHeight: '28px' }}>
             See your scent profile.
           </h2>
@@ -187,7 +187,7 @@ export default function YouClient(props: YouClientProps) {
             Sign in to track what you wear, save combinations, and see patterns in your collection.
           </p>
 
-          <div className="mt-6 flex flex-col gap-3">
+          <div className="mt-6 flex flex-col gap-3" style={{ pointerEvents: 'none' }}>
             {[
               { label: 'THIS WEEK', value: 'Lattafa Asad', sub: 'Most reached for · 4 wears' },
               { label: 'STREAK', value: '7 days', sub: "You've worn something every day this week" },
@@ -198,7 +198,6 @@ export default function YouClient(props: YouClientProps) {
                 style={{
                   padding: '14px 16px',
                   opacity: 0.45,
-                  pointerEvents: 'none',
                   userSelect: 'none',
                   filter: 'blur(2px)'
                 }}
@@ -216,7 +215,10 @@ export default function YouClient(props: YouClientProps) {
             ))}
           </div>
 
-          <div className="mt-6">
+          <div className="mt-6" style={{ pointerEvents: 'auto' }}>
+            <p style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 600, marginBottom: 8 }}>
+              Sign in to unlock →
+            </p>
             <Button fullWidth onClick={() => setAuthSheetOpen(true)}>
               Sign in to see yours
             </Button>

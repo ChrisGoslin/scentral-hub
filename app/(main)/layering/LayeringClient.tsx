@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useMemo } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Search, X, ArrowLeft } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Chip from '@/components/ui/Chip'
@@ -42,7 +43,20 @@ function StepDots({ current }: { current: 1 | 2 | 3 }) {
 }
 
 export default function LayeringClient({ fragrances }: { fragrances: LayeringFragrance[] }) {
+  const router = useRouter()
   const wizard = useLayeringWizard(fragrances)
+  const [backLink, setBackLink] = useState<{ href: string; label: string } | null>(null)
+
+  useEffect(() => {
+    const referrer = document.referrer
+    if (referrer.includes('/collection')) {
+      setBackLink({ href: '/collection', label: 'Wardrobe' })
+    } else if (referrer.includes('/discover')) {
+      setBackLink({ href: '/discover', label: 'Discover' })
+    } else {
+      setBackLink(null)
+    }
+  }, [])
 
   const filteredFragrances = useMemo(() => {
     const q = wizard.pickerQuery.trim().toLowerCase()
@@ -56,21 +70,43 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
     <div style={{ background: 'var(--bg)', minHeight: '100dvh', paddingTop: 'calc(44px + env(safe-area-inset-top, 0px))', color: 'var(--text)', overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}>
       {/* Header */}
       <div className="px-4 pt-8 pb-4" style={{ borderBottom: '1px solid var(--line)' }}>
-        <Link
-          href="/collection"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 4,
-            fontSize: 12,
-            color: 'var(--text-muted)',
-            textDecoration: 'none',
-            marginBottom: 10,
-          }}
-        >
-          <ArrowLeft size={12} />
-          Wardrobe
-        </Link>
+        {backLink ? (
+          <Link
+            href={backLink.href}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+              fontSize: 12,
+              color: 'var(--text-muted)',
+              textDecoration: 'none',
+              marginBottom: 10,
+            }}
+          >
+            <ArrowLeft size={12} />
+            {backLink.label}
+          </Link>
+        ) : (
+          <button
+            onClick={() => router.back()}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+              fontSize: 12,
+              color: 'var(--text-muted)',
+              textDecoration: 'none',
+              marginBottom: 10,
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 0,
+            }}
+          >
+            <ArrowLeft size={12} />
+            Back
+          </button>
+        )}
         <h1
           style={{
             fontFamily: 'var(--font-display)',
@@ -524,9 +560,20 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
 
           <div className="flex flex-col" style={{ marginLeft: -16, marginRight: -16 }}>
             {filteredFragrances.length === 0 ? (
-              <p className="px-4 py-4" style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-                No fragrances match &quot;{wizard.pickerQuery}&quot;.
-              </p>
+              wizard.pickerQuery.trim() === '' ? (
+                <div className="px-4 py-4 flex flex-col gap-3">
+                  <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+                    Your wardrobe is empty. Add fragrances from Discover first.
+                  </p>
+                  <Link href="/discover" style={{ fontSize: 13, color: 'var(--accent)', fontWeight: 500 }}>
+                    Go to Discover →
+                  </Link>
+                </div>
+              ) : (
+                <p className="px-4 py-4" style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+                  No fragrances match &quot;{wizard.pickerQuery}&quot;.
+                </p>
+              )
             ) : (
               filteredFragrances.map(f => (
                 <button

@@ -220,11 +220,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
     } else if (sort === 'Newest') {
       sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     } else if (sort === 'Most Popular') {
-      sorted.sort((a, b) => {
-        const aWishes = wishlist.includes(a.id) ? 1 : 0
-        const bWishes = wishlist.includes(b.id) ? 1 : 0
-        return bWishes - aWishes || (b.rating ?? 0) - (a.rating ?? 0)
-      })
+      sorted.sort((a, b) => (b.owner_count ?? 0) - (a.owner_count ?? 0) || (b.rating ?? 0) - (a.rating ?? 0))
     }
 
     return sorted

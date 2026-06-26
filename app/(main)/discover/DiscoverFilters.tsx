@@ -273,7 +273,18 @@ export function DiscoverFilters({
         tooltip="When and where this fragrance fits best."
       />
 
-      {/* Brand — multi-select, includes Saved alongside */}
+      {/* Saved — toggle */}
+      <div style={{ paddingLeft: 16, paddingRight: 16, marginBottom: 16 }}>
+        <Chip
+          selected={showSaved}
+          onClick={() => onShowSavedToggle(!showSaved)}
+          style={{ minHeight: 44 }}
+        >
+          ❤ Saved
+        </Chip>
+      </div>
+
+      {/* Brand — multi-select */}
       <div>
         <p
           style={{
@@ -306,13 +317,6 @@ export function DiscoverFilters({
               </Chip>
             )
           })}
-          <Chip
-            selected={showSaved}
-            onClick={() => onShowSavedToggle(!showSaved)}
-            style={{ flexShrink: 0, minHeight: 44, scrollSnapAlign: 'start' }}
-          >
-            ❤ Saved
-          </Chip>
         </div>
       </div>
 
