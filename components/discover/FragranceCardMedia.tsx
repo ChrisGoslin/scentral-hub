@@ -32,6 +32,7 @@ export function FragranceCardMedia({ imageUrl, brand, name, family, compact = fa
         style={{
           width: '100%',
           aspectRatio: '1/1',
+          minHeight: 220,
           position: 'relative',
           overflow: 'hidden',
           borderRadius: 'var(--r-card)',
@@ -55,12 +56,55 @@ export function FragranceCardMedia({ imageUrl, brand, name, family, compact = fa
               position: 'absolute',
               inset: 0,
               display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'rgba(255,255,255,0.9)',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              padding: '16px 12px',
             }}
           >
-            <FragranceBottleIcon />
+            {/* Brand name — top quarter */}
+            <p
+              style={{
+                fontSize: 10,
+                color: '#6B635A',
+                textTransform: 'uppercase',
+                letterSpacing: '0.12em',
+                margin: 0,
+                fontWeight: 600,
+              }}
+            >
+              {brand}
+            </p>
+
+            {/* Fragrance name with score line — lower third */}
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 6,
+              }}
+            >
+              <div
+                style={{
+                  borderTop: '1px solid rgba(255,255,255,0.2)',
+                }}
+              />
+              <p
+                style={{
+                  fontFamily: 'var(--font-display)',
+                  fontSize: 16,
+                  color: '#fff',
+                  lineHeight: '1.2',
+                  margin: 0,
+                  fontStyle: 'italic',
+                  overflow: 'hidden',
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                }}
+              >
+                {name}
+              </p>
+            </div>
           </div>
         )}
         <div
