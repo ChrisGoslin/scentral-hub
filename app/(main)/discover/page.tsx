@@ -17,6 +17,8 @@ export default async function DiscoverPage() {
     supabase
       .from('fragrances')
       .select('id, brand, name, full_name, family, projection, optimal_season, use_case, plain_description, inspired_by, image_url, rating, created_at')
+      .order('image_url', { ascending: false, nullsFirst: false })
+      .order('rating', { ascending: false, nullsFirst: false })
       .order('brand', { ascending: true })
       .range(0, 99),
     supabase
