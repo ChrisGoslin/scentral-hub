@@ -18,6 +18,7 @@ import { track } from '@/lib/posthog'
 import { getAffinityTier } from '@/lib/affinity'
 import WardrobeShelf from './WardrobeShelf'
 import { CollectionShelfModal } from '@/components/collection/CollectionShelfModal'
+import { getPersonaCopy, type PersonaCopy } from '@/lib/personaCopy'
 
 export type CollectionFragrance = {
   id: string
@@ -182,6 +183,11 @@ export default function CollectionClient({ fragrances, totalCount }: { fragrance
   const [ownedOnly, setOwnedOnly] = useState(true)
   const [wardrobeMode, setWardrobeMode] = useState(false)
 
+  const [personaCopy, setPersonaCopy] = useState<PersonaCopy>(() => getPersonaCopy(null))
+  useEffect(() => {
+    setPersonaCopy(getPersonaCopy(localStorage.getItem('scentral_persona')))
+  }, [])
+
   // Add bottle sheet state
   const [isAddSheetOpen, setIsAddSheetOpen] = useState(false)
   const [pickerSearch, setPickerSearch] = useState('')
@@ -305,8 +311,8 @@ export default function CollectionClient({ fragrances, totalCount }: { fragrance
       <div className="px-4 pt-8 pb-4" style={{ borderBottom: '1px solid var(--line)' }}>
         <div className="flex items-center justify-between">
           <div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--text)', lineHeight: '34px' }}>
-              My Bottles
+            <h1 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 28, color: 'var(--text)', lineHeight: '34px' }}>
+              {personaCopy.collectionHeadline}
             </h1>
             <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
               {filtered.length} of {totalCount ?? fragrances.length} scents
@@ -331,7 +337,7 @@ export default function CollectionClient({ fragrances, totalCount }: { fragrance
               onClick={() => setWardrobeMode(m => !m)}
               className="flex items-center gap-2 px-3 py-1.5 rounded-full transition-all"
               style={{
-                background: wardrobeMode ? 'var(--burgundy)' : 'var(--surface)',
+                background: wardrobeMode ? 'var(--accent)' : 'var(--surface)',
                 border: '1px solid var(--line)',
                 color: wardrobeMode ? 'white' : 'var(--text-muted)',
                 fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em',
@@ -408,7 +414,7 @@ export default function CollectionClient({ fragrances, totalCount }: { fragrance
               <div className="max-w-[360px] mx-auto pt-12 flex flex-col items-center text-center animate-up">
                 <div className="w-8 h-[2px] mb-6" style={{ background: 'var(--accent)' }} />
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: 26, lineHeight: '32px', color: 'var(--text)', fontStyle: 'italic' }}>
-                  Your wardrobe begins here.
+                  {personaCopy.collectionEmpty}
                 </p>
                 <p style={{ fontSize: 14, lineHeight: '22px', color: 'var(--text-muted)', marginTop: 12, fontWeight: 300 }}>
                   Add your first bottle to unlock personalised layering combinations, inspired-by alternatives, and curation insights.
