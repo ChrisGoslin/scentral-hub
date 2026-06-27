@@ -31,6 +31,28 @@ export default function PersonaTeasers() {
         6 identities. Which is yours?
       </p>
 
+      <style>{`
+        .persona-card {
+          flex: 0 0 clamp(200px, 60vw, 280px);
+          scroll-snap-align: start;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          align-items: center;
+          border-radius: var(--r-card);
+          padding: 32px 24px;
+          text-decoration: none;
+          min-height: clamp(260px, 40vw, 340px);
+          transition: opacity var(--motion-responsive);
+          opacity: 0.85;
+          position: relative;
+          overflow: hidden;
+        }
+        .persona-card:hover {
+          opacity: 1;
+        }
+      `}</style>
+
       <div
         className="flex gap-4 overflow-x-auto sm:grid sm:overflow-visible"
         style={{
@@ -45,28 +67,9 @@ export default function PersonaTeasers() {
           <Link
             key={persona.id}
             href={`/onboarding?persona=${persona.id}`}
+            className="persona-card"
             style={{
-              flex: '0 0 clamp(200px, 60vw, 280px)',
-              scrollSnapAlign: 'start',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              alignItems: 'center',
               backgroundImage: persona.ui_theme.bgGradient,
-              borderRadius: 'var(--r-card)',
-              padding: '32px 24px',
-              textDecoration: 'none',
-              minHeight: 'clamp(260px, 40vw, 340px)',
-              transition: 'opacity var(--motion-responsive)',
-              opacity: 0.85,
-              position: 'relative',
-              overflow: 'hidden',
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.opacity = '1'
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.opacity = '0.85'
             }}
           >
             <p

@@ -88,31 +88,28 @@ export default function HeroSection() {
         </h1>
       </div>
 
-      <Link
-        href="/onboarding"
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: 56,
-          background: 'var(--accent)',
-          color: '#1A1208',
-          fontSize: 14,
-          fontWeight: 700,
-          letterSpacing: '0.06em',
-          textTransform: 'uppercase',
-          padding: '0 40px',
-          borderRadius: '999px',
-          textDecoration: 'none',
-          transition: 'all var(--motion-responsive)',
-        }}
-        onMouseEnter={e => {
-          e.currentTarget.style.transform = 'scale(1.05)'
-        }}
-        onMouseLeave={e => {
-          e.currentTarget.style.transform = 'scale(1)'
-        }}
-      >
+      <style>{`
+        .hero-cta {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 56px;
+          background: var(--accent);
+          color: #1A1208;
+          font-size: 14px;
+          font-weight: 700;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          padding: 0 40px;
+          border-radius: 999px;
+          text-decoration: none;
+          transition: all var(--motion-responsive);
+        }
+        .hero-cta:hover {
+          transform: scale(1.05);
+        }
+      `}</style>
+      <Link href="/onboarding" className="hero-cta">
         Begin
       </Link>
     </section>

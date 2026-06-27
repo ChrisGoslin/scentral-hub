@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
+import { getPersonaById } from '@/lib/personas'
 
 interface Post {
   id: string
@@ -91,153 +92,163 @@ export default function WearAndShareClient({
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      {posts.map((post) => (
-        <div
-          key={post.id}
-          style={{
-            background: 'var(--surface)',
-            border: '1px solid var(--line)',
-            borderRadius: '0.75rem',
-            overflow: 'hidden',
-          }}
-        >
-          {/* Header */}
-          <div style={{ padding: '1rem', borderBottom: '1px solid var(--line)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              {post.profiles?.[0]?.avatar_url ? (
-                <img
-                  src={post.profiles[0].avatar_url}
-                  alt={post.profiles.display_name || 'User'}
-                  style={{
-                    width: '2.5rem',
-                    height: '2.5rem',
-                    borderRadius: '50%',
-                    objectFit: 'cover',
-                  }}
-                />
-              ) : (
-                <div
-                  style={{
-                    width: '2.5rem',
-                    height: '2.5rem',
-                    borderRadius: '50%',
-                    background: 'var(--surface-2)',
-                  }}
-                />
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
+      {posts.map((post) => {
+        // Extract persona from user profile or default to empty
+        const personaId = post.profiles?.[0]?.persona || null
+        const personaName = personaId ? getPersonaById(personaId)?.name || '' : ''
+
+        // Truncate caption to 2 lines
+        const truncatedCaption = post.caption
+          ? post.caption.split('\n').slice(0, 2).join('\n').substring(0, 150)
+          : null
+
+        return (
+          <div
+            key={post.id}
+            style={{
+              borderTop: '1px solid var(--accent)',
+              paddingTop: '12px',
+              paddingBottom: '12px',
+              paddingLeft: '12px',
+              paddingRight: '12px',
+            }}
+          >
+            {/* Persona name · Brand (9px uppercase) */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '6px' }}>
+              {personaName && (
+                <>
+                  <span
+                    style={{
+                      fontSize: '9px',
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      color: 'var(--text)',
+                    }}
+                  >
+                    {personaName}
+                  </span>
+                  <span style={{ fontSize: '9px', color: 'var(--text-muted)' }}>·</span>
+                </>
               )}
-              <div>
-                <p style={{ fontWeight: '600', color: 'var(--text)' }}>
-                  {post.profiles?.[0]?.display_name || 'Anonymous'}
-                </p>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                  {new Date(post.created_at).toLocaleDateString()}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Photo */}
-          {post.wear_photo_url && (
-            <div
-              style={{
-                width: '100%',
-                background: 'var(--surface-2)',
-                aspectRatio: '1 / 1',
-                overflow: 'hidden',
-              }}
-            >
-              <img
-                src={post.wear_photo_url}
-                alt="Wear post"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                }}
-              />
-            </div>
-          )}
-
-          {/* Content */}
-          <div style={{ padding: '1rem', borderBottom: '1px solid var(--line)' }}>
-            {/* Fragrance reference */}
-            {post.fragrances?.[0] && (
-              <Link href={`/collection/${post.fragrance_id}`}>
-                <div
+              {post.fragrances?.[0]?.brand && (
+                <span
                   style={{
-                    display: 'flex',
-                    gap: '0.75rem',
-                    marginBottom: '1rem',
-                    cursor: 'pointer',
+                    fontSize: '9px',
+                    color: 'var(--text-muted)',
                   }}
                 >
-                  {post.fragrances[0].image_url && (
-                    <img
-                      src={post.fragrances[0].image_url}
-                      alt={`${post.fragrances[0].brand} ${post.fragrances[0].name}`}
-                      style={{
-                        width: '3rem',
-                        height: '3rem',
-                        borderRadius: '0.5rem',
-                        objectFit: 'cover',
-                      }}
-                    />
-                  )}
-                  <div>
-                    <p
-                      style={{
-                        fontSize: '0.9rem',
-                        color: 'var(--text-muted)',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.05em',
-                      }}
-                    >
-                      {post.fragrances[0].brand}
-                    </p>
-                    <p style={{ fontWeight: '600', color: 'var(--text)' }}>
-                      {post.fragrances[0].name}
-                    </p>
-                  </div>
-                </div>
+                  {post.fragrances[0].brand}
+                </span>
+              )}
+            </div>
+
+            {/* Fragrance name (Cormorant Garamond italic, 16px) */}
+            {post.fragrances?.[0] && (
+              <Link href={`/collection/${post.fragrance_id}`}>
+                <h3
+                  style={{
+                    fontSize: '16px',
+                    fontFamily: 'var(--font-display)',
+                    fontStyle: 'italic',
+                    color: 'var(--text)',
+                    marginBottom: '8px',
+                    cursor: 'pointer',
+                    textDecoration: 'none',
+                  }}
+                >
+                  {post.fragrances[0].name}
+                </h3>
               </Link>
             )}
 
-            {/* Caption */}
-            {post.caption && (
-              <p style={{ color: 'var(--text)', marginBottom: '1rem', lineHeight: '1.6' }}>
-                {post.caption}
+            {/* User's note in quotes (13px italic muted, max 2 lines) */}
+            {truncatedCaption && (
+              <p
+                style={{
+                  fontSize: '13px',
+                  fontStyle: 'italic',
+                  color: 'var(--text-muted)',
+                  marginBottom: '8px',
+                  lineHeight: '1.4',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                }}
+              >
+                "{truncatedCaption}"
               </p>
             )}
-          </div>
 
-          {/* Actions */}
-          <div style={{ padding: '0.75rem 1rem' }}>
-            <button
-              onClick={() => handleLikeToggle(post.id)}
-              disabled={loadingPostIds.has(post.id)}
+            {/* Bottom actions: heart, comment, share (12px muted) */}
+            <div
               style={{
                 display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                background: 'none',
-                border: 'none',
-                color: likedPostIds.has(post.id) ? 'var(--accent)' : 'var(--text-muted)',
-                cursor: loadingPostIds.has(post.id) ? 'not-allowed' : 'pointer',
-                fontSize: '0.95rem',
-                fontWeight: '500',
-                opacity: loadingPostIds.has(post.id) ? 0.5 : 1,
-                transition: 'color 0.2s',
+                gap: '16px',
+                fontSize: '12px',
+                color: 'var(--text-muted)',
               }}
             >
-              <span style={{ fontSize: '1.2rem' }}>
-                {likedPostIds.has(post.id) ? '♥' : '♡'}
-              </span>
-              {post.likes} {post.likes === 1 ? 'like' : 'likes'}
-            </button>
+              <button
+                onClick={() => handleLikeToggle(post.id)}
+                disabled={loadingPostIds.has(post.id)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  background: 'none',
+                  border: 'none',
+                  color: likedPostIds.has(post.id) ? 'var(--accent)' : 'var(--text-muted)',
+                  cursor: loadingPostIds.has(post.id) ? 'not-allowed' : 'pointer',
+                  fontSize: '12px',
+                  opacity: loadingPostIds.has(post.id) ? 0.5 : 1,
+                  transition: 'color 0.2s',
+                  padding: 0,
+                }}
+              >
+                <span>{likedPostIds.has(post.id) ? '❤' : '🤍'}</span>
+                {post.likes}
+              </button>
+
+              <button
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--text-muted)',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  padding: 0,
+                }}
+              >
+                <span>💬</span>
+                0
+              </button>
+
+              <button
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--text-muted)',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  padding: 0,
+                }}
+              >
+                <span>↗</span>
+              </button>
+            </div>
           </div>
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 }

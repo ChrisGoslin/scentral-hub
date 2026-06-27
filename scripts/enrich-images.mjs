@@ -85,38 +85,23 @@ async function findValidUrl(url, maxRetries = 2) {
   return null;
 }
 
-// Try Parfumo, then Fragrantica — returns final URL if found
+// Try Parfumo, then Fragrantica — returns final URL if found (no soft-404)
 async function findImageUrl(brand, name) {
   const brandSlug = toSlug(brand);
   const nameSlug = toSlug(name);
 
-  // Helper to validate that final URL matches the product
-  // Require BOTH brand AND (full name OR at least first word of name)
-  function isValidRedirect(finalUrl, brandSlug, nameSlug) {
-    const urlPath = finalUrl.toLowerCase();
-    const brandMatch = urlPath.includes(`/${brandSlug}`) || urlPath.includes(`/${brandSlug.split('-')[0]}`);
-
-    // Check for name match (full or first word)
-    const firstWord = nameSlug.split('-')[0];
-    const nameMatch = urlPath.includes(`/${nameSlug}`) || urlPath.includes(`-${nameSlug}`) ||
-                      urlPath.includes(`/${firstWord}`) || urlPath.includes(`-${firstWord}`);
-
-    // Require brand match AND name match
-    return brandMatch && nameMatch;
-  }
-
   // Try Parfumo
   const parfumoUrl = `https://www.parfumo.com/Perfumes/${brandSlug}/${nameSlug}`;
   const parfumoResult = await findValidUrl(parfumoUrl);
-  if (parfumoResult && isValidRedirect(parfumoResult, brandSlug, nameSlug)) {
-    return parfumoResult; // Valid: final URL contains brand or name
+  if (parfumoResult) {
+    return parfumoResult; // Valid: not a soft-404
   }
 
   // Try Fragrantica
   const fragranticaUrl = `https://www.fragrantica.com/perfume/${brandSlug}/${nameSlug}.html`;
   const fragranticaResult = await findValidUrl(fragranticaUrl);
-  if (fragranticaResult && isValidRedirect(fragranticaResult, brandSlug, nameSlug)) {
-    return fragranticaResult; // Valid: final URL contains brand or name
+  if (fragranticaResult) {
+    return fragranticaResult; // Valid: not a soft-404
   }
 
   return null; // No valid URL found

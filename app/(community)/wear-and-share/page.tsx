@@ -6,7 +6,7 @@ import Link from 'next/link'
 import WearAndShareClient from './WearAndShareClient'
 
 export const metadata: Metadata = {
-  title: 'Wear & Share | BaseNote',
+  title: 'The Strip | BaseNote',
   description: 'Discover fragrance posts from the community. Share your scent experiences with others.',
 }
 
@@ -73,7 +73,7 @@ export default async function WearAndSharePage() {
       <div style={{ maxWidth: '600px', margin: '0 auto', padding: '0 1rem' }}>
         <div style={{ marginBottom: '2rem' }}>
           <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '0.5rem', color: 'var(--text)' }}>
-            Wear & Share
+            The Strip
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>
             Discover fragrance experiences from the community
