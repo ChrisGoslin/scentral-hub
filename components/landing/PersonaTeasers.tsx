@@ -1,7 +1,14 @@
 import Link from 'next/link'
 import { getPersonaById } from '@/lib/personas'
 
-const FEATURED_PERSONA_IDS = ['velvet_intellectual', 'solar_minimalist', 'dark_alchemist']
+const FEATURED_PERSONA_IDS = [
+  'velvet_intellectual',
+  'solar_minimalist',
+  'dark_alchemist',
+  'ritual_keeper',
+  'rebel_experimentalist',
+  'comfort_seeker',
+]
 
 export default function PersonaTeasers() {
   const personas = FEATURED_PERSONA_IDS.map(getPersonaById).filter(Boolean) as NonNullable<
@@ -9,76 +16,90 @@ export default function PersonaTeasers() {
   >[]
 
   return (
-    <section style={{ width: '100%', maxWidth: 960, padding: '64px 24px', boxSizing: 'border-box' }}>
-      <h2
+    <section style={{ width: '100%', padding: '80px 24px', boxSizing: 'border-box', background: 'var(--bg)' }}>
+      <p
         style={{
-          fontFamily: 'var(--font-display)',
-          fontStyle: 'italic',
-          fontSize: 'clamp(1.6rem, 4vw, 2.4rem)',
-          fontWeight: 400,
+          fontSize: 10,
+          color: '#6B635A',
+          textTransform: 'uppercase',
+          letterSpacing: '0.12em',
           textAlign: 'center',
-          color: 'var(--text)',
-          marginBottom: 32,
-          letterSpacing: '-0.01em',
+          marginBottom: 48,
+          margin: '0 0 48px',
         }}
       >
-        Which one are you?
-      </h2>
+        6 identities. Which is yours?
+      </p>
 
-      <div className="flex gap-4 overflow-x-auto sm:grid sm:overflow-visible" style={{ gridTemplateColumns: 'repeat(3, 1fr)', scrollSnapType: 'x mandatory', paddingBottom: 8 }}>
+      <div
+        className="flex gap-4 overflow-x-auto sm:grid sm:overflow-visible"
+        style={{
+          gridTemplateColumns: 'repeat(auto-fit, minmax(clamp(200px, 60vw, 280px), 1fr))',
+          scrollSnapType: 'x mandatory',
+          paddingBottom: 12,
+          justifyContent: 'center',
+          maxWidth: '100%',
+        }}
+      >
         {personas.map(persona => (
           <Link
             key={persona.id}
             href={`/onboarding?persona=${persona.id}`}
-            className="hover:scale-105"
             style={{
-              flex: '0 0 240px',
-              width: 240,
+              flex: '0 0 clamp(200px, 60vw, 280px)',
               scrollSnapAlign: 'start',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
-              background: persona.ui_theme.cardBg,
+              alignItems: 'center',
               backgroundImage: persona.ui_theme.bgGradient,
-              border: '1px solid var(--line)',
-              borderLeft: `3px solid ${persona.ui_theme.accentColor}`,
               borderRadius: 'var(--r-card)',
-              padding: '28px 24px',
+              padding: '32px 24px',
               textDecoration: 'none',
-              minHeight: 180,
-              transition: 'transform var(--motion-responsive, 200ms), box-shadow var(--motion-responsive, 200ms)',
+              minHeight: 'clamp(260px, 40vw, 340px)',
+              transition: 'opacity var(--motion-responsive)',
+              opacity: 0.85,
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.opacity = '1'
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.opacity = '0.85'
             }}
           >
-            <div>
-              <p
-                style={{
-                  fontFamily: 'var(--font-display)',
-                  fontStyle: 'italic',
-                  fontSize: 18,
-                  fontWeight: 400,
-                  color: persona.ui_theme.accentColor,
-                  marginBottom: 8,
-                  lineHeight: 1.25,
-                }}
-              >
-                {persona.name}
-              </p>
-              <p style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5 }}>
-                {persona.narrative.tagline}
-              </p>
-            </div>
-
             <p
               style={{
-                fontSize: 12,
-                fontWeight: 600,
-                color: persona.ui_theme.accentColor,
-                marginTop: 20,
-                letterSpacing: '0.05em',
+                fontFamily: 'var(--font-display)',
+                fontStyle: 'italic',
+                fontSize: 'clamp(1.2rem, 4vw, 1.5rem)',
+                fontWeight: 400,
+                color: '#F5F0E8',
+                margin: 0,
+                lineHeight: 1.35,
+                textAlign: 'center',
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
             >
-              Explore →
+              {persona.narrative.tagline}
             </p>
+
+            <div
+              style={{
+                position: 'absolute',
+                bottom: 0,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: 1,
+                height: 40,
+                background: 'var(--accent)',
+                opacity: 0.6,
+              }}
+            />
           </Link>
         ))}
       </div>
