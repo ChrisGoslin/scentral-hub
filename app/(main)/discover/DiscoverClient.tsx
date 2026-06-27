@@ -226,14 +226,30 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
       sorted.sort((a, b) => (b.owner_count ?? 0) - (a.owner_count ?? 0) || (b.rating ?? 0) - (a.rating ?? 0))
     } else if (sort === '◆ Rare') {
       return sorted.filter(f => (f.owner_count ?? 0) < 10).sort((a, b) => (a.owner_count ?? 0) - (b.owner_count ?? 0))
+    } else if (sort === '⚗ Unusual') {
+      let unusual = sorted.filter(f => (f.owner_count ?? 0) < 150)
+      const preferredFamilies = activePersona?.recommendations?.preferred_families
+      if (preferredFamilies?.length) {
+        unusual = unusual.filter(f => preferredFamilies.includes(f.family))
+      }
+      return unusual.sort((a, b) => {
+        const scoreA = (a.rating ?? 0) * Math.min(a.owner_count ?? 0, 50)
+        const scoreB = (b.rating ?? 0) * Math.min(b.owner_count ?? 0, 50)
+        return scoreB - scoreA
+      })
     }
 
     return sorted
-  }, [localFragrances, semanticResults, vibe, longevity, occasion, brand, showSaved, wishlist, sort, anySearch, searchResults, debouncedSearch])
+  }, [localFragrances, semanticResults, vibe, longevity, occasion, brand, showSaved, wishlist, sort, anySearch, searchResults, debouncedSearch, activePersona])
 
   const countLabel = (() => {
     if (sort === '◆ Rare') {
       return `${filtered.length} fragrance${filtered.length !== 1 ? 's' : ''} most people haven't found`
+    }
+    if (sort === '⚗ Unusual') {
+      return activePersona
+        ? `${filtered.length} unusual picks for ${activePersona.name}`
+        : `${filtered.length} fragrance${filtered.length !== 1 ? 's' : ''} the crowd hasn't found yet`
     }
     const hasFiltersOrSearch = anyFilter || anySearch
     if (!hasFiltersOrSearch) return personaCopy.discoverSubtitle

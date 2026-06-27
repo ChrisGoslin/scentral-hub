@@ -1,6 +1,6 @@
 // Filter configuration constants for Discover page
 
-export const SORT_OPTIONS = ['A–Z', 'Top Rated', 'Newest', 'Most Popular', '◆ Rare'] as const
+export const SORT_OPTIONS = ['A–Z', 'Top Rated', 'Newest', 'Most Popular', '◆ Rare', '⚗ Unusual'] as const
 export type SortOption = typeof SORT_OPTIONS[number]
 
 export const LONGEVITY_PROJECTIONS: Record<string, string[]> = {
