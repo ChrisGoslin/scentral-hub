@@ -9,8 +9,8 @@ const NAV_ITEMS = [
   { label: 'Discover', href: '/discover',   Icon: Compass },
   { label: 'Wardrobe', href: '/collection', Icon: Archive },
   { label: 'Lab',      href: '/layering',   Icon: FlaskConical },
-  { label: 'Spritz',   href: '/spritz',     Icon: Droplets },
-  { label: 'You',      href: '/you',        Icon: User },
+  { label: 'Brief',    href: '/spritz',     Icon: Droplets },
+  { label: 'Identity', href: '/you',        Icon: User },
 ]
 
 export default function BottomNav() {
