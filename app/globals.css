@@ -2,7 +2,7 @@
 
 :root {
   /* Brand Design Tokens */
-  --color-primary: #A0622A;
+  --color-primary: #B8913A;
   --color-bg: #F7F3EE;
   --color-surface: #FAF7F2;
   --color-surface-2: #FDFCF9;
@@ -79,7 +79,7 @@
   --color-surface: rgba(255, 255, 255, 0.03);
   --color-surface-2: rgba(255, 255, 255, 0.05);
   --color-surface-offset: rgba(255, 255, 255, 0.07);
-  --color-primary: #D4884A;
+  --color-primary: #B8913A;
   --color-text: #F1F5F9;
   --color-text-muted: #94A3B8;
   --color-text-faint: #64748B;

@@ -10,16 +10,9 @@
   --text: var(--color-text);
   --text-muted: var(--color-text-muted);
 
-  /* Accent — champagne gold */
+  /* Accent — Parfumeur's Gold */
   --accent: var(--color-primary);
-  --accent-press: #a07d30;
-
-  /* Secondary accent — deep burgundy (editorial depth) */
-  --burgundy: #6e1f2e;
-  --burgundy-press: #561622;
-
-  /* Deep editorial surface (for rich, dark-on-light moments) */
-  --surface-deep: #2a1418;
+  --accent-press: #9A7A2E;
 
   /* Semantic */
   --line: var(--color-border);
@@ -110,15 +103,6 @@
    which tracks --color-* (redefined for dark in globals.css). Only the values with
    no --color-* equivalent are overridden here. */
 [data-theme="dark"] {
-  --accent-press: #c49a3c;
-
-  /* Secondary accent */
-  --burgundy: #e86383;
-  --burgundy-press: #d96380;
-
-  /* Deep editorial surface */
-  --surface-deep: #f5f5f4;
-
   --line-light: rgba(255, 255, 255, 0.06);
   --warning: #fb923c;
 
