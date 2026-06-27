@@ -26,6 +26,7 @@ import {
 } from '@/lib/filterConstants'
 import { FragranceCardMedia } from '@/components/discover/FragranceCardMedia'
 import { getPersonaCopy } from '@/lib/personaCopy'
+import SignatureFinder, { type SignatureAnswer } from './SignatureFinder'
 
 type Props = {
   fragrances: DiscoverFragrance[]
@@ -48,6 +49,12 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
   const [occasion, setOccasion] = useState<string[]>([])
   const [brand, setBrand] = useState<string[]>([])
   const [sort, setSort] = useState<SortOption>('Top Rated')
+
+  // Signature Finder quiz
+  const [signatureFinderOpen, setSignatureFinderOpen] = useState(false)
+  const [signatureProjections, setSignatureProjections] = useState<string[] | null>(null)
+  const [signatureActive, setSignatureActive] = useState(false)
+  const [showSignatureNudge, setShowSignatureNudge] = useState(false)
 
   // Persona theme state
   const [activePersona, setActivePersona] = useState<ReturnType<typeof getPersonaById> | null>(null)
@@ -202,6 +209,11 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
       results = results.filter(f => occasion.some(o => matchesAnyTag(f.use_case, OCCASION_TAGS[o] ?? [])))
     }
 
+    // Signature Finder projection filter
+    if (signatureProjections?.length) {
+      results = results.filter(f => signatureProjections.includes(f.projection))
+    }
+
     // Brand filter (multi-select, OR logic)
     if (brand.length > 0) {
       results = results.filter(f =>
@@ -240,9 +252,12 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
     }
 
     return sorted
-  }, [localFragrances, semanticResults, vibe, longevity, occasion, brand, showSaved, wishlist, sort, anySearch, searchResults, debouncedSearch, activePersona])
+  }, [localFragrances, semanticResults, vibe, longevity, occasion, brand, showSaved, wishlist, sort, anySearch, searchResults, debouncedSearch, activePersona, signatureProjections])
 
   const countLabel = (() => {
+    if (signatureActive) {
+      return `${filtered.length} fragrance${filtered.length !== 1 ? 's' : ''} that could be your signature`
+    }
     if (sort === '◆ Rare') {
       return `${filtered.length} fragrance${filtered.length !== 1 ? 's' : ''} most people haven't found`
     }
@@ -261,6 +276,16 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
     if (showSaved) return `${base} • Saved`
     return base
   })()
+
+  const handleSignatureFinderComplete = (answer: SignatureAnswer) => {
+    setVibe(answer.vibe)
+    setOccasion(answer.occasion)
+    setSignatureProjections(answer.projections.length ? answer.projections : null)
+    setSignatureActive(true)
+    setSignatureFinderOpen(false)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+    setTimeout(() => setShowSignatureNudge(true), 5000)
+  }
 
   const toggleVibe = (v: string) => {
     setVibe(prev => {
@@ -290,6 +315,9 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
     setBrand([])
     setShowSaved(false)
     setSearchTerm('')
+    setSignatureProjections(null)
+    setSignatureActive(false)
+    setShowSignatureNudge(false)
   }
 
   const loadMore = async () => {
@@ -388,6 +416,28 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
             <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 20, color: 'var(--text)', margin: 0 }}>
               {personaCopy.discoverHeadline}
             </p>
+          </div>
+        )}
+
+        {/* Signature Finder entry point — only when no filters/persona active */}
+        {!anyFilter && !anySearch && !activePersonaId && !signatureActive && (
+          <div style={{ padding: '0 16px 12px' }}>
+            <button
+              onClick={() => setSignatureFinderOpen(true)}
+              style={{
+                width: '100%',
+                fontSize: 13,
+                color: 'var(--accent)',
+                background: 'color-mix(in srgb, var(--accent) 10%, transparent)',
+                border: '1px solid color-mix(in srgb, var(--accent) 30%, transparent)',
+                borderRadius: 'var(--r-card)',
+                padding: '12px 16px',
+                textAlign: 'left',
+                cursor: 'pointer',
+              }}
+            >
+              ✦ Find your signature scent — 3 quick questions
+            </button>
           </div>
         )}
 
@@ -539,6 +589,28 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
           </div>
         )}
 
+        {/* Signature Finder retention nudge */}
+        {signatureActive && showSignatureNudge && (
+          <div style={{ padding: '0 16px 12px' }}>
+            <button
+              onClick={() => setShowSignatureNudge(false)}
+              style={{
+                width: '100%',
+                fontSize: 13,
+                color: 'var(--accent)',
+                background: 'color-mix(in srgb, var(--accent) 10%, transparent)',
+                border: '1px solid color-mix(in srgb, var(--accent) 30%, transparent)',
+                borderRadius: 'var(--r-card)',
+                padding: '12px 16px',
+                textAlign: 'left',
+                cursor: 'pointer',
+              }}
+            >
+              Save a fragrance to start building your identity →
+            </button>
+          </div>
+        )}
+
         {/* Grid */}
         <PersonaTipTicker personaId={activePersonaId} />
         {smellsLikeMode && anySearch ? (
@@ -564,6 +636,12 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
           />
         )}
       </div>
+
+      <SignatureFinder
+        open={signatureFinderOpen}
+        onClose={() => setSignatureFinderOpen(false)}
+        onComplete={handleSignatureFinderComplete}
+      />
     </div>
   )
 }
