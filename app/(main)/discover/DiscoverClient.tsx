@@ -25,6 +25,7 @@ import {
   type SortOption,
 } from '@/lib/filterConstants'
 import { FragranceCardMedia } from '@/components/discover/FragranceCardMedia'
+import { getPersonaCopy } from '@/lib/personaCopy'
 
 type Props = {
   fragrances: DiscoverFragrance[]
@@ -53,6 +54,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
   const [activePersonaId, setActivePersonaId] = useState<string | null>(null)
   const [personaVisible, setPersonaVisible] = useState(false)
   const [showPersonaBanner, setShowPersonaBanner] = useState(true)
+  const [personaCopy, setPersonaCopy] = useState(() => getPersonaCopy(null))
 
   // Use search hook
   const {
@@ -120,6 +122,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
       if (persona) {
         setActivePersonaId(personaId)
         setActivePersona(persona)
+        setPersonaCopy(getPersonaCopy(personaId))
         defaultPersonaVibes = familyToVibeTags(persona.discover_filters.families)
         setTimeout(() => setPersonaVisible(true), 80)
       }
@@ -221,18 +224,19 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
       sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     } else if (sort === 'Most Popular') {
       sorted.sort((a, b) => (b.owner_count ?? 0) - (a.owner_count ?? 0) || (b.rating ?? 0) - (a.rating ?? 0))
+    } else if (sort === '◆ Rare') {
+      return sorted.filter(f => (f.owner_count ?? 0) < 10).sort((a, b) => (a.owner_count ?? 0) - (b.owner_count ?? 0))
     }
 
     return sorted
   }, [localFragrances, semanticResults, vibe, longevity, occasion, brand, showSaved, wishlist, sort, anySearch, searchResults, debouncedSearch])
 
   const countLabel = (() => {
-    const hasFiltersOrSearch = anyFilter || anySearch
-
-    if (!hasFiltersOrSearch) {
-      return '127,000+ fragrances'
+    if (sort === '◆ Rare') {
+      return `${filtered.length} fragrance${filtered.length !== 1 ? 's' : ''} most people haven't found`
     }
-
+    const hasFiltersOrSearch = anyFilter || anySearch
+    if (!hasFiltersOrSearch) return personaCopy.discoverSubtitle
     const base = `${filtered.length} fragrance${filtered.length !== 1 ? 's' : ''}`
     if (vibe.length) return `${base} • ${vibe.join(', ')}`
     if (longevity) return `${base} • ${longevity}`
@@ -362,6 +366,15 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
           transition: 'background-image 0.4s ease',
         }}
       >
+        {/* Persona headline — shown when persona is set */}
+        {activePersonaId && personaVisible && (
+          <div style={{ padding: '16px 16px 0', opacity: personaVisible ? 1 : 0, transition: 'opacity 0.3s ease' }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 20, color: 'var(--text)', margin: 0 }}>
+              {personaCopy.discoverHeadline}
+            </p>
+          </div>
+        )}
+
         {/* Filters — sticky edge-to-edge carousels */}
         <div style={{ position: 'sticky', top: 0, zIndex: 40, background: 'var(--bg)' }}>
           <DiscoverFilters

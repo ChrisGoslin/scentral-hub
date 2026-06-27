@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import { getFamilyGradient } from '@/lib/familyGradients'
 import { FragranceBottleIcon } from '@/components/FragranceBottleIcon'
+import { getRarityBadge } from '@/lib/rarity'
 
 type Props = {
   imageUrl: string | null
@@ -11,13 +12,15 @@ type Props = {
   name: string
   family: string
   rating?: number | null
+  ownerCount?: number | null
   compact?: boolean
   /** Borderless glass square for the Collector's Wall grid: full-bleed image,
    * no permanent ombre/caption — brand+name reveal on hover instead. */
   wall?: boolean
 }
 
-export function FragranceCardMedia({ imageUrl, brand, name, family, rating, compact = false, wall = false }: Props) {
+export function FragranceCardMedia({ imageUrl, brand, name, family, rating, ownerCount, compact = false, wall = false }: Props) {
+  const rarity = getRarityBadge(ownerCount)
   const [hovered, setHovered] = useState(false)
   const [pressed, setPressed] = useState(false)
   const [imgError, setImgError] = useState(false)
@@ -62,19 +65,32 @@ export function FragranceCardMedia({ imageUrl, brand, name, family, rating, comp
               padding: '12px 10px',
             }}
           >
-            {/* Brand name — top-left */}
-            <p
-              style={{
-                fontSize: 9,
-                color: 'rgba(255,255,255,0.45)',
+            {/* Rarity badge — top-left (only when rare) */}
+            {rarity.level !== 'none' && rarity.level !== 'popular' ? (
+              <p style={{
+                fontSize: 8,
+                color: rarity.level === 'cult' ? 'rgba(184,145,58,0.7)' : 'var(--accent)',
                 textTransform: 'uppercase',
-                letterSpacing: '0.12em',
+                letterSpacing: '0.1em',
                 margin: 0,
-                fontWeight: 600,
-              }}
-            >
-              {brand}
-            </p>
+                fontWeight: 700,
+              }}>
+                {rarity.label}
+              </p>
+            ) : (
+              <p
+                style={{
+                  fontSize: 9,
+                  color: 'rgba(255,255,255,0.45)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.12em',
+                  margin: 0,
+                  fontWeight: 600,
+                }}
+              >
+                {brand}
+              </p>
+            )}
 
             {/* Score line + fragrance name — vertically centred lower third */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>

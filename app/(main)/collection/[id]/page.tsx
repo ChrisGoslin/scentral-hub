@@ -15,6 +15,7 @@ import { getBrandEmoji } from '@/lib/brandEmoji'
 import { cookies } from 'next/headers'
 import { Users } from 'lucide-react'
 import { getSimilarityExplanation } from '@/lib/similarity'
+import { getRarityBadge } from '@/lib/rarity'
 import BuyLinks from '@/app/components/BuyLinks'
 import AffiliateButton from '@/components/ads/AffiliateButton'
 
@@ -69,6 +70,7 @@ export default async function FragranceDetailPage({
 
   const proof = proofData as any
   const ownerCount = proof?.owner_count ? Number(proof.owner_count) : 0
+  const rarity = getRarityBadge(ownerCount)
 
   if (error || !data) {
     notFound()
