@@ -227,6 +227,17 @@ export function DiscoverFilters({
         </span>
       </div>
 
+      {/* Saved — toggle */}
+      <div style={{ padding: '0 16px' }}>
+        <Chip
+          selected={showSaved}
+          onClick={() => onShowSavedToggle(!showSaved)}
+          style={{ minHeight: 44 }}
+        >
+          ❤ Saved
+        </Chip>
+      </div>
+
       {/* Search */}
       <div style={{ padding: '0 16px' }}>
         <p
@@ -288,17 +299,6 @@ export function DiscoverFilters({
         onToggle={toggleOccasion}
         tooltip="When and where this fragrance fits best."
       />
-
-      {/* Saved — toggle */}
-      <div style={{ paddingLeft: 16, paddingRight: 16, marginBottom: 16 }}>
-        <Chip
-          selected={showSaved}
-          onClick={() => onShowSavedToggle(!showSaved)}
-          style={{ minHeight: 44 }}
-        >
-          ❤ Saved
-        </Chip>
-      </div>
 
       {/* Brand — multi-select */}
       <div>
