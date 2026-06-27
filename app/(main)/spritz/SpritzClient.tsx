@@ -176,16 +176,48 @@ export default function SpritzClient() {
 
         <AnimatePresence>
           {current && (
-            <motion.div
-              key={current.slot}
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1, rotate: cardRotation }}
-              exit={{ opacity: 0 }}
-              transition={{ rotate: { duration: 0.1 } }}
-              style={{ position: 'relative', width: '100%', maxWidth: 360 }}
-            >
-              <SpritzCard event={current} isTop onSwipeRight={handleSwipeRight} onSwipeLeft={handleSwipeLeft} />
-            </motion.div>
+            <div style={{ position: 'relative', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+              <button
+                onClick={handleSwipeLeft}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: 13,
+                  color: 'var(--text-muted)',
+                  cursor: 'pointer',
+                  padding: 0,
+                  whiteSpace: 'nowrap',
+                  minWidth: 40,
+                }}
+              >
+                ← Later
+              </button>
+              <motion.div
+                key={current.slot}
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1, rotate: cardRotation }}
+                exit={{ opacity: 0 }}
+                transition={{ rotate: { duration: 0.1 } }}
+                style={{ maxWidth: 360, flex: 1 }}
+              >
+                <SpritzCard event={current} isTop onSwipeRight={handleSwipeRight} onSwipeLeft={handleSwipeLeft} />
+              </motion.div>
+              <button
+                onClick={handleSwipeRight}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: 13,
+                  color: 'var(--aura)',
+                  cursor: 'pointer',
+                  padding: 0,
+                  whiteSpace: 'nowrap',
+                  minWidth: 40,
+                }}
+              >
+                Worn ✓
+              </button>
+            </div>
           )}
         </AnimatePresence>
 
@@ -236,34 +268,6 @@ export default function SpritzClient() {
 
       {current && (
         <div style={{ marginTop: 24, width: '100%', maxWidth: 360 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-            <button
-              onClick={handleSwipeLeft}
-              style={{
-                background: 'none',
-                border: 'none',
-                fontSize: 13,
-                color: '#9B8B76',
-                cursor: 'pointer',
-                padding: 0,
-              }}
-            >
-              ← Later
-            </button>
-            <button
-              onClick={handleSwipeRight}
-              style={{
-                background: 'none',
-                border: 'none',
-                fontSize: 13,
-                color: 'var(--aura)',
-                cursor: 'pointer',
-                padding: 0,
-              }}
-            >
-              Worn ✓
-            </button>
-          </div>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', textAlign: 'center', margin: 0 }}>
             Swipe right when worn · left to defer
           </p>
