@@ -19,6 +19,15 @@ function getOrCreateAnonId(): string {
   }
 }
 
+function getCollection(): string[] {
+  try {
+    const col = localStorage.getItem('scentral_collection')
+    return col ? JSON.parse(col) : []
+  } catch {
+    return []
+  }
+}
+
 export default function SpritzClient() {
   const [schedule, setSchedule] = useState<SpritzEvent[]>([])
   const [currentCardIndex, setCurrentCardIndex] = useState(0)
@@ -27,6 +36,8 @@ export default function SpritzClient() {
   const [streak, setStreak] = useState(0)
   const [xpToast, setXpToast] = useState<number | null>(null)
   const [streakToast, setStreakToast] = useState<string | null>(null)
+  const [cardRotation, setCardRotation] = useState(0)
+  const [collection] = useState(getCollection())
 
   useEffect(() => {
     const personaId = localStorage.getItem('scentral_persona') ?? undefined
@@ -44,6 +55,22 @@ export default function SpritzClient() {
       .finally(() => setLoading(false))
 
     track('spritz_schedule_viewed')
+
+    // Tutorial animation on first visit
+    if (!localStorage.getItem('scentral_brief_tutorialSeen') && collection.length > 0) {
+      const timings = [0, 80, 160, 240, 320, 400]
+      const rotations = [0, -3, 3, -2, 2, 0]
+      const timeouts = timings.map((t, i) =>
+        setTimeout(() => setCardRotation(rotations[i]), t)
+      )
+      const completeTimeout = setTimeout(() => {
+        localStorage.setItem('scentral_brief_tutorialSeen', '1')
+      }, 600)
+      return () => {
+        timeouts.forEach(clearTimeout)
+        clearTimeout(completeTimeout)
+      }
+    }
   }, [])
 
   const advance = useCallback(() => {
@@ -98,7 +125,7 @@ export default function SpritzClient() {
       }}
     >
       <div style={{ width: '100%', maxWidth: 360, display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 24, color: 'var(--text)' }}>Spritz</h1>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 24, color: 'var(--text)' }}>Today's Brief</h1>
         {streak > 0 && (
           <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--xp-color)' }}>🔥 {streak}-day streak</span>
         )}
@@ -115,13 +142,16 @@ export default function SpritzClient() {
 
         {!loading && !error && !current && (
           <div style={{ textAlign: 'center' }}>
-            {schedule.length === 0 && currentCardIndex === 0 ? (
+            {collection.length === 0 ? (
               <>
                 <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 20, color: 'var(--text)', marginBottom: 8 }}>
-                  Add fragrances to your Wardrobe first, then Spritz will suggest your daily scent rotation.
+                  Your brief is waiting.
+                </p>
+                <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 24 }}>
+                  Add fragrances to your collection to start your daily ritual.
                 </p>
                 <Link href="/discover" style={{ fontSize: 13, color: 'var(--aura)', fontWeight: 600 }}>
-                  Discover fragrances →
+                  Explore Fragrances →
                 </Link>
               </>
             ) : (
@@ -148,8 +178,9 @@ export default function SpritzClient() {
             <motion.div
               key={current.slot}
               initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
+              animate={{ opacity: 1, scale: 1, rotate: cardRotation }}
               exit={{ opacity: 0 }}
+              transition={{ rotate: { duration: 0.1 } }}
               style={{ position: 'relative', width: '100%', maxWidth: 360 }}
             >
               <SpritzCard event={current} isTop onSwipeRight={handleSwipeRight} onSwipeLeft={handleSwipeLeft} />
@@ -203,9 +234,39 @@ export default function SpritzClient() {
       </div>
 
       {current && (
-        <p style={{ marginTop: 24, fontSize: 12, color: 'var(--text-muted)' }}>
-          Swipe right when worn · left to defer
-        </p>
+        <div style={{ marginTop: 24, width: '100%', maxWidth: 360 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <button
+              onClick={handleSwipeLeft}
+              style={{
+                background: 'none',
+                border: 'none',
+                fontSize: 13,
+                color: '#9B8B76',
+                cursor: 'pointer',
+                padding: 0,
+              }}
+            >
+              ← Later
+            </button>
+            <button
+              onClick={handleSwipeRight}
+              style={{
+                background: 'none',
+                border: 'none',
+                fontSize: 13,
+                color: 'var(--aura)',
+                cursor: 'pointer',
+                padding: 0,
+              }}
+            >
+              Worn ✓
+            </button>
+          </div>
+          <p style={{ fontSize: 12, color: 'var(--text-muted)', textAlign: 'center', margin: 0 }}>
+            Swipe right when worn · left to defer
+          </p>
+        </div>
       )}
     </div>
   )
