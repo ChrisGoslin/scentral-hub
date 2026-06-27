@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import React, { Suspense, useEffect, useRef, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Button from '@/components/ui/Button'
 import { startBarcodeScanner, parseBarcodeFromVideo, isValidBarcode } from '@/lib/barcode'
 import { lookupFragranceByBarcode } from '@/lib/barcode-db'
@@ -28,7 +28,17 @@ function getOrCreateAnonId(): string {
 }
 
 export default function ScannerPage() {
+  return (
+    <Suspense fallback={null}>
+      <ScannerPageInner />
+    </Suspense>
+  )
+}
+
+function ScannerPageInner() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const fromDiscover = searchParams.get('from') === 'discover'
   const videoRef = useRef<HTMLVideoElement>(null)
   const [cameraState, setCameraState] = useState<'idle' | 'requesting' | 'active' | 'error'>('idle')
   const [cameraError, setCameraError] = useState<string>('')
@@ -217,8 +227,12 @@ export default function ScannerPage() {
         throw new Error('Failed to add to collection')
       }
 
-      // Navigate back to collection
-      router.push('/collection')
+      // Navigate back to collection — or to Discover with a scan-to-search prefill
+      if (fromDiscover) {
+        router.push(`/discover?scan=${encodeURIComponent(scannedFragrance.name)}`)
+      } else {
+        router.push('/collection')
+      }
     } catch (error) {
       setScanMessage('Error adding to collection. Please try again.')
       console.error('Add to collection error:', error)

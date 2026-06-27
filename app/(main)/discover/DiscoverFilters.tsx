@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import Chip from '@/components/ui/Chip'
 import {
   SORT_OPTIONS,
@@ -252,27 +253,44 @@ export function DiscoverFilters({
           Discover Fragrances
         </p>
         <div style={{ display: 'flex', gap: 8 }}>
-          <input
-            type="text"
-            placeholder={smellsLikeMode ? 'Describe your ideal scent — warm amber, fresh citrus, dry wood…' : 'Search by brand or scent…'}
-            value={searchTerm}
-            onChange={e => onSearchTermChange(e.target.value)}
-            onFocus={() => onSearchFocus(true)}
-            onBlur={() => onSearchFocus(false)}
-            style={{
-              flex: 1,
-              minWidth: 0,
-              padding: '10px 14px',
-              fontSize: 14,
-              background: 'var(--surface)',
-              border: searchFocused ? '1px solid var(--accent)' : '1px solid var(--line)',
-              borderRadius: 'var(--r-card)',
-              color: 'var(--text)',
-              fontFamily: 'var(--font-body)',
-              transition: 'border-color 0.15s',
-              boxSizing: 'border-box',
-            }}
-          />
+          <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
+            <input
+              type="text"
+              placeholder={smellsLikeMode ? 'Describe your ideal scent — warm amber, fresh citrus, dry wood…' : 'Search by brand or scent…'}
+              value={searchTerm}
+              onChange={e => onSearchTermChange(e.target.value)}
+              onFocus={() => onSearchFocus(true)}
+              onBlur={() => onSearchFocus(false)}
+              style={{
+                width: '100%',
+                padding: '10px 40px 10px 14px',
+                fontSize: 14,
+                background: 'var(--surface)',
+                border: searchFocused ? '1px solid var(--accent)' : '1px solid var(--line)',
+                borderRadius: 'var(--r-card)',
+                color: 'var(--text)',
+                fontFamily: 'var(--font-body)',
+                transition: 'border-color 0.15s',
+                boxSizing: 'border-box',
+              }}
+            />
+            <Link
+              href="/scanner?from=discover"
+              aria-label="Scan a bottle"
+              style={{
+                position: 'absolute',
+                right: 10,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: 'var(--accent)',
+                fontSize: 18,
+                lineHeight: 1,
+                textDecoration: 'none',
+              }}
+            >
+              ⊡
+            </Link>
+          </div>
         </div>
       </div>
 

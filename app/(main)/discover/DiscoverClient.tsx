@@ -50,6 +50,9 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
   const [brand, setBrand] = useState<string[]>([])
   const [sort, setSort] = useState<SortOption>('Top Rated')
 
+  // Scan-to-search (bottle scanner round trip)
+  const [isScanResult, setIsScanResult] = useState(false)
+
   // Signature Finder quiz
   const [signatureFinderOpen, setSignatureFinderOpen] = useState(false)
   const [signatureProjections, setSignatureProjections] = useState<string[] | null>(null)
@@ -120,6 +123,16 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
     }
 
     const params = new URLSearchParams(window.location.search)
+    const scanned = params.get('scan')
+    if (scanned) {
+      setSearchTerm(scanned)
+      setIsScanResult(true)
+      track('scan_to_search', { query: scanned })
+      const url = new URL(window.location.href)
+      url.searchParams.delete('scan')
+      window.history.replaceState({}, '', url.toString())
+    }
+
     const urlPersona = params.get('persona')
     const personaId = urlPersona ?? localStorage.getItem('scentral_persona')
     let defaultPersonaVibes: string[] = []
@@ -305,6 +318,11 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
 
   const toggleBrand = (h: string) => {
     setBrand(prev => (prev.includes(h) ? prev.filter(x => x !== h) : [...prev, h]))
+  }
+
+  const clearScan = () => {
+    setIsScanResult(false)
+    setSearchTerm('')
   }
 
   const clearFilters = () => {
@@ -607,6 +625,16 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
               }}
             >
               Save a fragrance to start building your identity →
+            </button>
+          </div>
+        )}
+
+        {/* Scan result context banner */}
+        {isScanResult && (
+          <div style={{ background: 'var(--surface)', padding: '10px 16px', borderBottom: '1px solid var(--line)', fontSize: 12, color: 'var(--text-muted)' }}>
+            ⊡ Scanned: "{searchTerm}" ·{' '}
+            <button onClick={clearScan} style={{ color: 'var(--accent)', background: 'none', border: 'none', fontSize: 12, cursor: 'pointer', padding: 0 }}>
+              Clear
             </button>
           </div>
         )}
