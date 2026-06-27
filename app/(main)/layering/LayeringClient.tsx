@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Search, X, ArrowLeft } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Chip from '@/components/ui/Chip'
@@ -44,19 +44,20 @@ function StepDots({ current }: { current: 1 | 2 | 3 }) {
 
 export default function LayeringClient({ fragrances }: { fragrances: LayeringFragrance[] }) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const wizard = useLayeringWizard(fragrances)
-  const [backLink, setBackLink] = useState<{ href: string; label: string } | null>(null)
+  const [backLink, setBackLink] = useState<{ href: string; label: string; useHistory: boolean } | null>(null)
 
   useEffect(() => {
-    const referrer = document.referrer
-    if (referrer.includes('/collection')) {
-      setBackLink({ href: '/collection', label: 'Wardrobe' })
-    } else if (referrer.includes('/discover')) {
-      setBackLink({ href: '/discover', label: 'Discover' })
+    const from = searchParams.get('from')
+    if (from === 'discover') {
+      setBackLink({ href: '/discover', label: 'Discover', useHistory: true })
+    } else if (from === 'collection') {
+      setBackLink({ href: '/collection', label: 'Collection', useHistory: true })
     } else {
-      setBackLink(null)
+      setBackLink({ href: '/collection', label: 'Wardrobe', useHistory: false })
     }
-  }, [])
+  }, [searchParams])
 
   const filteredFragrances = useMemo(() => {
     const q = wizard.pickerQuery.trim().toLowerCase()
@@ -70,42 +71,44 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
     <div style={{ background: 'var(--bg)', minHeight: '100dvh', paddingTop: 'calc(44px + env(safe-area-inset-top, 0px))', color: 'var(--text)', overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}>
       {/* Header */}
       <div className="px-4 pt-8 pb-4" style={{ borderBottom: '1px solid var(--line)' }}>
-        {backLink ? (
-          <Link
-            href={backLink.href}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 4,
-              fontSize: 12,
-              color: 'var(--text-muted)',
-              textDecoration: 'none',
-              marginBottom: 10,
-            }}
-          >
-            <ArrowLeft size={12} />
-            {backLink.label}
-          </Link>
-        ) : (
-          <button
-            onClick={() => router.back()}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 4,
-              fontSize: 12,
-              color: 'var(--text-muted)',
-              textDecoration: 'none',
-              marginBottom: 10,
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              padding: 0,
-            }}
-          >
-            <ArrowLeft size={12} />
-            Back
-          </button>
+        {backLink && (
+          backLink.useHistory ? (
+            <button
+              onClick={() => window.history.back()}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 4,
+                fontSize: 12,
+                color: 'var(--text-muted)',
+                textDecoration: 'none',
+                marginBottom: 10,
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                padding: 0,
+              }}
+            >
+              <ArrowLeft size={12} />
+              ← {backLink.label}
+            </button>
+          ) : (
+            <Link
+              href={backLink.href}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 4,
+                fontSize: 12,
+                color: 'var(--text-muted)',
+                textDecoration: 'none',
+                marginBottom: 10,
+              }}
+            >
+              <ArrowLeft size={12} />
+              ← {backLink.label}
+            </Link>
+          )
         )}
         <h1
           style={{
