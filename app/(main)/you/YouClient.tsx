@@ -179,56 +179,16 @@ export default function YouClient(props: YouClientProps) {
           )}
         </div>
 
-        <div className="px-6 py-8 animate-up" style={{ overflowY: 'auto' }}>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--text)', lineHeight: '28px' }}>
-            See your scent profile.
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', padding: 32, textAlign: 'center' }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--text)', lineHeight: '34px', fontStyle: 'italic', marginBottom: 16 }}>
+            Your identity is waiting.
           </h2>
-          <p style={{ fontSize: 14, color: 'var(--text-muted)', marginTop: 8, lineHeight: '20px' }}>
-            Sign in to track what you wear, save combinations, and see patterns in your collection.
+          <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: '20px', maxWidth: 320, marginBottom: 32 }}>
+            Take the 2-minute quiz to discover your scent identity.
           </p>
-
-          <div className="mt-6 flex flex-col gap-3" style={{ pointerEvents: 'none' }}>
-            {[
-              { label: 'THIS WEEK', value: 'Lattafa Asad', sub: 'Most reached for · 4 wears' },
-              { label: 'STREAK', value: '7 days', sub: "You've worn something every day this week" },
-              { label: 'SAVED', value: '3 combinations', sub: "Asad → Bade'e Al Oud · Office · 2 days ago" }
-            ].map((card, i) => (
-              <Card
-                key={i}
-                style={{
-                  padding: '14px 16px',
-                  opacity: 0.45,
-                  userSelect: 'none',
-                  filter: 'blur(2px)'
-                }}
-              >
-                <p style={{ fontSize: 10, color: 'var(--accent)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                  {card.label}
-                </p>
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--text)', marginTop: 2 }}>
-                  {card.value}
-                </p>
-                <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
-                  {card.sub}
-                </p>
-              </Card>
-            ))}
-          </div>
-
-          <div className="mt-6" style={{ pointerEvents: 'auto' }}>
-            <p style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 600, marginBottom: 8 }}>
-              Sign in to unlock →
-            </p>
-            <Button fullWidth onClick={() => setAuthSheetOpen(true)}>
-              Sign in to see yours
-            </Button>
-            <p className="mt-3 text-center" style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-              No account needed to browse —{' '}
-              <Link href="/discover" className="hover:underline transition-all" style={{ color: 'var(--accent)' }}>
-                Explore scents →
-              </Link>
-            </p>
-          </div>
+          <Button fullWidth onClick={() => setAuthSheetOpen(true)} style={{ maxWidth: 280 }}>
+            Find Your Base Note →
+          </Button>
         </div>
 
         <div className="px-6 pb-8">
@@ -261,7 +221,7 @@ export default function YouClient(props: YouClientProps) {
       {/* Nav Links */}
       <div className="px-4 py-3 flex gap-4" style={{ borderBottom: '1px solid var(--line)' }}>
         <Link href="/wear-and-share" style={{ fontSize: 13, color: 'var(--accent)', fontWeight: 600 }} className="hover:opacity-75 transition-opacity">
-          Wear & Share
+          The Strip
         </Link>
         <Link href="/creator" style={{ fontSize: 13, color: 'var(--accent)', fontWeight: 600 }} className="hover:opacity-75 transition-opacity">
           Creator Studio
