@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { getPersonaByInputs, type Persona } from '@/lib/personas'
 import { track } from '@/lib/posthog'
+import PersonaRevealOverlay from './PersonaRevealOverlay'
 
 // ─── Sanctuary options ────────────────────────────────────────────────────────
 const SANCTUARIES = [
@@ -107,6 +108,8 @@ export default function OnboardingPage() {
   // ════════════════════════════════════════════════════════════════════════════
   if (step === 4 && persona) {
     return (
+      <>
+        {!revealVisible && <PersonaRevealOverlay persona={persona} onComplete={() => setRevealVisible(true)} />}
       <div style={{
         minHeight: '100dvh',
         background: persona.ui_theme.bgGradient,
@@ -223,6 +226,7 @@ export default function OnboardingPage() {
           </div>
         </div>
       </div>
+      </>
     )
   }
 
