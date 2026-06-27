@@ -40,7 +40,7 @@
   --glass-blur: blur(16px) saturate(1.4);
 
   /* Border radius */
-  --r-card: 0px; /* Sharp editorial edges */
+  --r-card: 12px; /* Rounded card corners */
   --r-btn: 9999px; /* Pill buttons */
   --r-chip: 999px;
 
@@ -57,14 +57,8 @@
   --ease: cubic-bezier(0.2, 0.6, 0.2, 1);
 
   /* Fonts (set by next/font via CSS variables) */
-  --font-display: var(--font-fraunces, "Fraunces", Georgia, serif);
+  --font-display: var(--font-cormorant, "Cormorant Garamond", Georgia, serif);
   --font-ui: var(--font-inter, "Inter", -apple-system, "Segoe UI", Roboto, sans-serif);
-
-  /* AnotherSense — Aura Design Language tokens */
-  --aura: oklch(0.72 0.08 60);
-  --aura-surface: oklch(0.18 0.04 60 / 0.6);
-  --aura-border: oklch(0.45 0.06 60 / 0.3);
-  --xp-color: oklch(0.78 0.14 85);
 
   /* Motion system */
   --motion-instant:    80ms  cubic-bezier(0.4, 0.0, 0.2, 1);

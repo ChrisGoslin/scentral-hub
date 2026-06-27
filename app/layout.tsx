@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Instrument_Serif, Unbounded } from "next/font/google";
+import { Cormorant_Garamond, Unbounded } from "next/font/google";
 import "./globals.css";
 import "../lib/design/tokens.css";
 import PWARegistration from "./components/PWARegistration";
@@ -9,11 +9,11 @@ import PageTracker from "./components/PageTracker";
 import DeferredFontLink from "./components/DeferredFontLink";
 import FeedbackWidget from "@/components/feedback/FeedbackWidget";
 
-const instrumentSerif = Instrument_Serif({
+const cormorantGaramond = Cormorant_Garamond({
   subsets: ["latin"],
-  weight: "400",
+  weight: ["400", "600"],
   style: ["normal", "italic"],
-  variable: "--font-instrument-serif",
+  variable: "--font-cormorant",
   display: "swap",
 });
 
@@ -77,7 +77,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-theme="dark" className={`h-[100dvh] antialiased ${instrumentSerif.variable} ${unbounded.variable}`}>
+    <html lang="en" data-theme="dark" className={`h-[100dvh] antialiased ${cormorantGaramond.variable} ${unbounded.variable}`}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

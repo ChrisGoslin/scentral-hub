@@ -22,7 +22,7 @@
   --shadow-card: 0 2px 8px oklch(0.2 0.02 60 / 0.08), 0 8px 24px oklch(0.2 0.02 60 / 0.06);
   
   /* Typography */
-  --font-display: var(--font-instrument-serif), Georgia, serif;
+  --font-display: var(--font-cormorant), Georgia, serif;
   --font-body: var(--font-unbounded), 'Unbounded', sans-serif;
 
   /* M3 type scale — fluid clamp() roles (Sprint 1-A) */
