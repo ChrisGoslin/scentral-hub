@@ -6,6 +6,8 @@ import { AnimatePresence, motion } from 'framer-motion'
 import SpritzCard from '@/components/schedule/SpritzCard'
 import type { SpritzEvent } from '@/lib/aura'
 import { track } from '@/lib/posthog'
+import { getPersonaCopy } from '@/lib/personaCopy'
+import OccasionPicker from '@/components/brief/OccasionPicker'
 
 function getOrCreateAnonId(): string {
   try {
@@ -38,6 +40,9 @@ export default function SpritzClient() {
   const [streakToast, setStreakToast] = useState<string | null>(null)
   const [cardRotation, setCardRotation] = useState(0)
   const [collection] = useState(getCollection())
+  const [showOccasionPicker, setShowOccasionPicker] = useState(false)
+  const [wornToast, setWornToast] = useState<string | null>(null)
+  const copy = getPersonaCopy(typeof window !== 'undefined' ? localStorage.getItem('scentral_persona') : null)
 
   useEffect(() => {
     const personaId = localStorage.getItem('scentral_persona') ?? undefined
@@ -126,9 +131,9 @@ export default function SpritzClient() {
       }}
     >
       <div style={{ width: '100%', maxWidth: 360, display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 24, color: 'var(--text)' }}>Today's Brief</h1>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 24, color: 'var(--text)' }}>{copy.briefTitle}</h1>
         {streak > 0 && (
-          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--xp-color)' }}>🔥 {streak}-day streak</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent)' }}>🔥 {streak}-day streak</span>
         )}
       </div>
 
@@ -146,21 +151,21 @@ export default function SpritzClient() {
             {collection.length === 0 ? (
               <>
                 <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 20, color: 'var(--text)', marginBottom: 8 }}>
-                  Your brief is waiting.
+                  {copy.briefEmpty}
                 </p>
                 <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 24 }}>
                   Add fragrances to your collection to start your daily ritual.
                 </p>
-                <Link href="/discover" style={{ fontSize: 13, color: 'var(--aura)', fontWeight: 600 }}>
+                <Link href="/discover" style={{ fontSize: 13, color: 'var(--accent)', fontWeight: 600 }}>
                   Explore Fragrances →
                 </Link>
               </>
             ) : (
               <>
                 <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 20, color: 'var(--text)', marginBottom: 8 }}>
-                  That's the day, taken care of.
+                  {copy.briefDone}
                 </p>
-                <Link href="/collection" style={{ fontSize: 13, color: 'var(--aura)', fontWeight: 600 }}>
+                <Link href="/collection" style={{ fontSize: 13, color: 'var(--accent)', fontWeight: 600 }}>
                   Back to your wardrobe →
                 </Link>
               </>
@@ -208,7 +213,7 @@ export default function SpritzClient() {
                   background: 'none',
                   border: 'none',
                   fontSize: 13,
-                  color: 'var(--aura)',
+                  color: 'var(--accent)',
                   cursor: 'pointer',
                   padding: 0,
                   whiteSpace: 'nowrap',
@@ -234,7 +239,7 @@ export default function SpritzClient() {
                 fontStyle: 'italic',
                 fontSize: 28,
                 fontWeight: 700,
-                color: 'var(--xp-color)',
+                color: 'var(--accent)',
                 pointerEvents: 'none',
               }}
             >
@@ -255,7 +260,7 @@ export default function SpritzClient() {
                 top: '35%',
                 fontSize: 12,
                 fontWeight: 700,
-                color: 'var(--xp-color)',
+                color: 'var(--accent)',
                 pointerEvents: 'none',
                 textAlign: 'center',
               }}
@@ -273,6 +278,59 @@ export default function SpritzClient() {
           </p>
         </div>
       )}
+
+      {/* Quick Pick floating pill */}
+      {collection.length > 0 && (
+        <button
+          onClick={() => setShowOccasionPicker(true)}
+          style={{
+            position: 'fixed',
+            bottom: 'calc(env(safe-area-inset-bottom, 0px) + 80px)',
+            right: 16,
+            background: 'var(--surface)',
+            border: '1px solid var(--accent)',
+            borderRadius: 20,
+            padding: '8px 16px',
+            fontSize: 11,
+            color: 'var(--accent)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.1em',
+            cursor: 'pointer',
+            zIndex: 50,
+          }}
+        >
+          ◈ Quick Pick
+        </button>
+      )}
+
+      {wornToast && (
+        <div style={{
+          position: 'fixed',
+          bottom: 'calc(env(safe-area-inset-bottom, 0px) + 140px)',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: 'var(--surface)',
+          border: '1px solid var(--accent)',
+          borderRadius: 12,
+          padding: '10px 20px',
+          fontSize: 13,
+          color: 'var(--accent)',
+          zIndex: 100,
+          whiteSpace: 'nowrap',
+        }}>
+          ✓ Wearing {wornToast}
+        </div>
+      )}
+
+      <OccasionPicker
+        isOpen={showOccasionPicker}
+        onClose={() => setShowOccasionPicker(false)}
+        onWear={(fragranceId, fragranceName) => {
+          void fragranceId
+          setWornToast(fragranceName)
+          setTimeout(() => setWornToast(null), 3000)
+        }}
+      />
     </div>
   )
 }
