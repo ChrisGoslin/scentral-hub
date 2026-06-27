@@ -16,8 +16,10 @@ import { cookies } from 'next/headers'
 import { Users } from 'lucide-react'
 import { getSimilarityExplanation } from '@/lib/similarity'
 import { getRarityBadge } from '@/lib/rarity'
+import { FirstDiscoveryToast } from '@/components/ui/FirstDiscoveryToast'
 import BuyLinks from '@/app/components/BuyLinks'
 import AffiliateButton from '@/components/ads/AffiliateButton'
+import GiftThis from './GiftThis'
 
 const PHASE_LABEL: Record<number, string> = {
   1: 'Anchor',
@@ -219,12 +221,25 @@ export default async function FragranceDetailPage({
           <p style={{ fontSize: 14, color: 'var(--text-muted)', marginTop: 4 }}>
             {phaseLabel} · {f.family}
           </p>
-          {ownerCount > 0 && (
+          {/* Rarity block — replaces simple owner count */}
+          {rarity.level !== 'none' ? (
+            <div style={{ marginTop: 8 }}>
+              <span style={{ fontSize: 9, color: rarity.level === 'cult' ? 'color-mix(in srgb, var(--accent) 70%, transparent)' : 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700 }}>
+                {rarity.label}
+              </span>
+              {rarity.isRare && f.inspired_by && (
+                <p style={{ fontSize: 12, color: 'var(--accent)', marginTop: 6, lineHeight: '18px' }}>
+                  Rare and beautiful — there&apos;s an Inspired By alternative.<br />
+                  <strong>{f.inspired_by}</strong> · a fraction of the price.
+                </p>
+              )}
+            </div>
+          ) : ownerCount > 0 ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '13px', color: 'var(--text-muted)', marginTop: 6 }}>
               <Users size={14} style={{ color: 'var(--accent)' }} />
-              <span>{ownerCount} {ownerCount === 1 ? 'person in the BaseNote community owns this' : 'people in the BaseNote community own this'}</span>
+              <span>{ownerCount} {ownerCount === 1 ? 'person' : 'people'} in the BaseNote community own this</span>
             </div>
-          )}
+          ) : null}
           {f.plain_description && (
             <p style={{ fontSize: 15, fontStyle: 'italic', color: 'var(--text)', marginTop: 12, lineHeight: '22px' }}>
               "{f.plain_description}"
@@ -430,6 +445,15 @@ export default async function FragranceDetailPage({
         <Link href="/layering">
           <Button fullWidth>Try layering this →</Button>
         </Link>
+        <GiftThis
+          fragranceId={f.id}
+          brand={f.brand}
+          name={f.name}
+          family={f.family}
+          optimalSeason={f.optimal_season}
+          plainDescription={f.plain_description}
+          inspiredBy={f.clone_target || f.inspired_by}
+        />
         {collectionRow?.id && (
           <LogWearButton collectionId={collectionRow.id} initialWears={initialWears} initialStreak={initialStreak} />
         )}
@@ -446,6 +470,7 @@ export default async function FragranceDetailPage({
           Back to Discover
         </Link>
       </div>
+      <FirstDiscoveryToast fragranceId={f.id} ownerCount={ownerCount} />
     </div>
   )
 }
