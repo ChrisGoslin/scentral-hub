@@ -63,68 +63,29 @@ export default function Home() {
       <HeroSection />
       <PersonaTeasers />
 
-      {/* ── Christopher Moment ── */}
-      <section style={{ width: '100%', maxWidth: 960, padding: '0 24px 80px', boxSizing: 'border-box' }}>
-        <div
-          className="surface-glass"
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 24,
-            borderRadius: 'var(--r-card)',
-            padding: '32px 28px',
-            background: 'rgba(255,255,255,0.05)',
-            backdropFilter: 'blur(12px)',
-            border: '1px solid rgba(255,255,255,0.10)',
-          }}
-        >
-          <div className="flex flex-col md:flex-row md:items-center" style={{ gap: 28 }}>
-            <div
-              aria-hidden="true"
-              style={{
-                flex: '0 0 auto',
-                width: '100%',
-                maxWidth: 220,
-                height: 160,
-                borderRadius: 'var(--r-card)',
-                background:
-                  'linear-gradient(135deg, rgba(6,182,212,0.35) 0%, rgba(15,23,42,0.6) 100%)',
-                margin: '0 auto',
-              }}
-            />
-            <div style={{ flex: 1 }}>
-              <p
-                style={{
-                  fontFamily: 'var(--font-display)',
-                  fontStyle: 'italic',
-                  fontSize: 'clamp(1.4rem, 3vw, 1.9rem)',
-                  color: 'var(--text)',
-                  margin: '0 0 12px',
-                  lineHeight: 1.25,
-                }}
-              >
-                Your £140 bottle has an £18 clone.
-              </p>
-              <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.6, margin: '0 0 20px' }}>
-                We map designer and niche fragrances to their closest affordable
-                alternatives — same DNA, a fraction of the price.
-              </p>
-              <Link
-                href="/clones"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  minHeight: 48,
-                  fontSize: 12,
-                  fontWeight: 700,
-                  letterSpacing: '0.1em',
-                  textTransform: 'uppercase',
-                  color: 'var(--aura)',
-                }}
-              >
-                Discover Clones →
-              </Link>
-            </div>
+      {/* ── Inspired By Engine ── */}
+      <section style={{ padding: '80px 24px', background: '#1A1208', width: '100%', boxSizing: 'border-box' }}>
+        <p style={{ fontSize: 11, color: '#6B635A', textTransform: 'uppercase', letterSpacing: '0.12em', textAlign: 'center', marginBottom: 8 }}>
+          The Inspired By Engine
+        </p>
+        <h2 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'clamp(1.8rem, 4vw, 3rem)', color: '#F5F0E8', textAlign: 'center', marginBottom: 12, margin: '0 0 12px' }}>
+          Your £140 bottle has an inspired-by at £18.
+        </h2>
+        <p style={{ color: '#6B635A', textAlign: 'center', marginBottom: 48, fontSize: 15 }}>
+          We find them. You decide.
+        </p>
+        <div style={{ display: 'flex', gap: 16, maxWidth: 480, margin: '0 auto', justifyContent: 'center' }}>
+          {/* Designer card */}
+          <div style={{ flex: 1, padding: '24px 16px', borderRadius: 12, background: 'linear-gradient(160deg, #5c4033, #8d7662)', textAlign: 'center' }}>
+            <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 8, margin: 0 }}>Designer</p>
+            <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', color: '#F5F0E8', fontSize: 18, margin: '8px 0' }}>Baccarat Rouge 540</p>
+            <p style={{ color: '#B8913A', fontSize: 13, marginTop: 4, margin: '4px 0 0' }}>£285</p>
+          </div>
+          {/* Inspired By card */}
+          <div style={{ flex: 1, padding: '24px 16px', borderRadius: 12, background: 'linear-gradient(160deg, #c49a3c, #8a4b2e)', textAlign: 'center' }}>
+            <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 8, margin: 0 }}>Inspired By</p>
+            <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', color: '#F5F0E8', fontSize: 18, margin: '8px 0' }}>DNA Match · 94%</p>
+            <p style={{ color: '#B8913A', fontSize: 13, marginTop: 4, margin: '4px 0 0' }}>£19</p>
           </div>
         </div>
       </section>
