@@ -1,5 +1,6 @@
 'use client'
 
+import { Fragment, useEffect, useState } from 'react'
 import Link from 'next/link'
 import EmptyState from '@/components/ui/EmptyState'
 import ErrorInline from '@/components/ui/ErrorInline'
@@ -8,6 +9,8 @@ import { FragranceCardMedia } from '@/components/discover/FragranceCardMedia'
 import AdSlot from '@/components/ads/AdSlot'
 import { track } from '@/lib/posthog'
 import type { DiscoverFragrance } from '@/lib/useFragranceSearch'
+import { getPersonaById, type Persona } from '@/lib/personas'
+import { getFitNarrative } from '@/lib/fitNarrative'
 
 type Props = {
   filtered: DiscoverFragrance[]
@@ -47,6 +50,13 @@ export function DiscoverGrid({
   onClearFilters,
   onRetrySearch,
 }: Props) {
+  const [persona, setPersona] = useState<Persona | null>(null)
+
+  useEffect(() => {
+    const personaId = localStorage.getItem('scentral_persona')
+    setPersona(personaId ? getPersonaById(personaId) ?? null : null)
+  }, [])
+
   return (
     <>
       {/* Result count */}
@@ -100,14 +110,35 @@ export function DiscoverGrid({
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 px-2">
-          {filtered.map((f, idx) => (
-            <>
+          {filtered.map((f, idx) => {
+            const fit = persona ? getFitNarrative(f.family, f.name, persona) : null
+            return (
+            <Fragment key={f.id}>
               <Link
-                key={f.id}
                 href={`/collection/${f.id}?from=discover`}
                 style={{ textDecoration: 'none', display: 'block', position: 'relative' }}
               >
                 <FragranceCardMedia imageUrl={f.image_url} brand={f.brand} name={f.name} family={f.family} rating={f.rating} ownerCount={f.owner_count} wall />
+                {fit?.level === 'signature' && (
+                  <span
+                    style={{
+                      position: 'absolute',
+                      top: 4,
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      fontSize: 9,
+                      color: 'var(--accent)',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.1em',
+                      background: 'color-mix(in srgb, var(--bg) 70%, transparent)',
+                      borderRadius: 999,
+                      padding: '2px 8px',
+                      zIndex: 2,
+                    }}
+                  >
+                    ◆ Strong fit
+                  </span>
+                )}
                 <button
                   onClick={e => {
                     e.preventDefault()
@@ -167,8 +198,9 @@ export function DiscoverGrid({
                   <AdSlot slot="discover-grid" />
                 </div>
               )}
-            </>
-          ))}
+            </Fragment>
+            )
+          })}
         </div>
       )}
 

@@ -20,6 +20,7 @@ import { FirstDiscoveryToast } from '@/components/ui/FirstDiscoveryToast'
 import BuyLinks from '@/app/components/BuyLinks'
 import AffiliateButton from '@/components/ads/AffiliateButton'
 import GiftThis from './GiftThis'
+import FitNarrativeCard from './FitNarrativeCard'
 
 const PHASE_LABEL: Record<number, string> = {
   1: 'Anchor',
@@ -334,6 +335,13 @@ export default async function FragranceDetailPage({
             </div>
           </div>
         )}
+
+        {/* Fit Narrative — persona voice */}
+        <FitNarrativeCard
+          family={f.family}
+          fragranceName={f.name}
+          inspiredBy={f.clone_target || f.inspired_by}
+        />
 
         {/* Notes Pyramid */}
         <NotesPyramid pyramid={f.pyramid} />
