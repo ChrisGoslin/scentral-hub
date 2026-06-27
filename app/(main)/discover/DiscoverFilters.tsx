@@ -185,6 +185,48 @@ export function DiscoverFilters({
 
   return (
     <div style={{ padding: '16px 0 24px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+      {/* Scent DNA Search Card */}
+      <div
+        onClick={() => {
+          onSmellsLikeToggle()
+          track('scent_dna_toggled', { active: !smellsLikeMode })
+        }}
+        style={{
+          margin: '0 16px',
+          padding: '12px 14px',
+          background: smellsLikeMode ? 'color-mix(in srgb, var(--accent) 12%, transparent)' : 'var(--surface)',
+          border: smellsLikeMode ? '1px solid var(--accent)' : '1px solid var(--line)',
+          borderRadius: 'var(--r-card)',
+          cursor: 'pointer',
+          transition: 'all 0.15s',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
+        <p
+          style={{
+            fontSize: 11,
+            color: 'var(--text-muted)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.1em',
+            margin: 0,
+            fontWeight: 500,
+          }}
+        >
+          SCENT DNA SEARCH
+        </p>
+        <span
+          style={{
+            fontSize: 12,
+            color: smellsLikeMode ? 'var(--accent)' : 'var(--text-muted)',
+            fontWeight: 500,
+          }}
+        >
+          {smellsLikeMode ? '✓ Active' : 'Describe a scent →'}
+        </span>
+      </div>
+
       {/* Search */}
       <div style={{ padding: '0 16px' }}>
         <p
@@ -201,7 +243,7 @@ export function DiscoverFilters({
         <div style={{ display: 'flex', gap: 8 }}>
           <input
             type="text"
-            placeholder="Search by brand or scent…"
+            placeholder={smellsLikeMode ? 'Describe your ideal scent — warm amber, fresh citrus, dry wood…' : 'Search by brand or scent…'}
             value={searchTerm}
             onChange={e => onSearchTermChange(e.target.value)}
             onFocus={() => onSearchFocus(true)}
@@ -220,32 +262,6 @@ export function DiscoverFilters({
               boxSizing: 'border-box',
             }}
           />
-          <button
-            onClick={() => {
-              onSmellsLikeToggle()
-              track('smells_like_toggled', { active: !smellsLikeMode })
-            }}
-            aria-pressed={smellsLikeMode}
-            style={{
-              padding: '10px 14px',
-              fontSize: 12,
-              fontWeight: 600,
-              letterSpacing: '0.02em',
-              whiteSpace: 'nowrap',
-              flexShrink: 0,
-              borderRadius: 'var(--r-card)',
-              fontFamily: 'var(--font-body)',
-              cursor: 'pointer',
-              transition: 'all 0.15s',
-              background: smellsLikeMode
-                ? 'color-mix(in srgb, var(--accent) 16%, transparent)'
-                : 'var(--surface)',
-              border: smellsLikeMode ? '1px solid var(--accent)' : '1px solid var(--line)',
-              color: smellsLikeMode ? 'var(--accent)' : 'var(--text-muted)',
-            }}
-          >
-            {smellsLikeMode ? '✓ Smells Like' : 'Smells Like'}
-          </button>
         </div>
       </div>
 
