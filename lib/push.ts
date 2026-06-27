@@ -1,5 +1,5 @@
 /**
- * Web Push Utilities for AnotherSense
+ * Web Push Utilities for BaseNote
  * No-auth push subscriptions via Web Push API + Supabase Edge Function
  */
 

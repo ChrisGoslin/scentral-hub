@@ -99,7 +99,7 @@ export default function FeedbackWidget() {
         {submitted ? (
           <div className="flex flex-col items-center text-center gap-4 py-6">
             <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 20, color: 'var(--text)', lineHeight: '28px' }}>
-              Received. Every submission shapes what AnotherSense becomes — thank you.
+              Received. Every submission shapes what BaseNote becomes — thank you.
             </p>
             <Button onClick={close}>Done</Button>
           </div>

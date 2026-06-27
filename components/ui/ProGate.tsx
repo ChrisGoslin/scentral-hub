@@ -83,7 +83,7 @@ export default function ProGate({ featureName, description, preview }: ProGatePr
               color: 'var(--accent)',
             }}
           >
-            AnotherSense Pro
+            BaseNote Pro
           </p>
           <h2
             style={{
