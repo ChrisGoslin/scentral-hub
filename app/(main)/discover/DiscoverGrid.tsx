@@ -107,7 +107,7 @@ export function DiscoverGrid({
                 href={`/collection/${f.id}?from=discover`}
                 style={{ textDecoration: 'none', display: 'block', position: 'relative' }}
               >
-                <FragranceCardMedia imageUrl={f.image_url} brand={f.brand} name={f.name} family={f.family} wall />
+                <FragranceCardMedia imageUrl={f.image_url} brand={f.brand} name={f.name} family={f.family} rating={f.rating} wall />
                 <button
                   onClick={e => {
                     e.preventDefault()

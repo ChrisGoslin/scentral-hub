@@ -10,13 +10,14 @@ type Props = {
   brand: string
   name: string
   family: string
+  rating?: number | null
   compact?: boolean
   /** Borderless glass square for the Collector's Wall grid: full-bleed image,
    * no permanent ombre/caption — brand+name reveal on hover instead. */
   wall?: boolean
 }
 
-export function FragranceCardMedia({ imageUrl, brand, name, family, compact = false, wall = false }: Props) {
+export function FragranceCardMedia({ imageUrl, brand, name, family, rating, compact = false, wall = false }: Props) {
   const [hovered, setHovered] = useState(false)
   const [pressed, setPressed] = useState(false)
   const [imgError, setImgError] = useState(false)
@@ -46,7 +47,7 @@ export function FragranceCardMedia({ imageUrl, brand, name, family, compact = fa
             src={imageUrl}
             alt={`${brand} ${name}`}
             fill
-            sizes="(max-width: 768px) 25vw, (max-width: 1280px) 16vw, 10vw"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             style={{ objectFit: 'cover' }}
             onError={() => setImgError(true)}
           />
@@ -58,14 +59,14 @@ export function FragranceCardMedia({ imageUrl, brand, name, family, compact = fa
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
-              padding: '16px 12px',
+              padding: '12px 10px',
             }}
           >
-            {/* Brand name — top quarter */}
+            {/* Brand name — top-left */}
             <p
               style={{
-                fontSize: 10,
-                color: '#6B635A',
+                fontSize: 9,
+                color: 'rgba(255,255,255,0.45)',
                 textTransform: 'uppercase',
                 letterSpacing: '0.12em',
                 margin: 0,
@@ -75,23 +76,14 @@ export function FragranceCardMedia({ imageUrl, brand, name, family, compact = fa
               {brand}
             </p>
 
-            {/* Fragrance name with score line — lower third */}
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 6,
-              }}
-            >
-              <div
-                style={{
-                  borderTop: '1px solid rgba(255,255,255,0.2)',
-                }}
-              />
+            {/* Score line + fragrance name — vertically centred lower third */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+              {/* The blotter mark */}
+              <div style={{ borderTop: '1px solid rgba(255,255,255,0.15)' }} />
               <p
                 style={{
                   fontFamily: 'var(--font-display)',
-                  fontSize: 16,
+                  fontSize: 15,
                   color: '#fff',
                   lineHeight: '1.2',
                   margin: 0,
@@ -104,6 +96,25 @@ export function FragranceCardMedia({ imageUrl, brand, name, family, compact = fa
               >
                 {name}
               </p>
+              {/* Family chip + rating row */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 2 }}>
+                <span
+                  style={{
+                    fontSize: 8,
+                    fontFamily: 'var(--font-ui)',
+                    color: 'rgba(107,99,90,0.85)',
+                    letterSpacing: '0.08em',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  {family}
+                </span>
+                {rating != null && (
+                  <span style={{ fontSize: 8, color: 'var(--accent)', fontWeight: 600 }}>
+                    {'★'.repeat(Math.round(rating / 2))}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         )}
