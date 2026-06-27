@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 type AdFormat = 'auto' | 'fluid' | 'rectangle' | 'vertical' | 'horizontal'
 
@@ -25,11 +25,14 @@ declare global {
 export default function AdSlot({ slot, format = 'auto', className, style }: Props) {
   const adRef = useRef<HTMLModElement>(null)
   const clientId = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID
+  const [adLoaded, setAdLoaded] = useState(false)
 
   useEffect(() => {
     if (!clientId || !adRef.current) return
     try {
       ;(window.adsbygoogle = window.adsbygoogle || []).push({})
+      // Mark as loaded after push attempt (ads may load asynchronously)
+      setTimeout(() => setAdLoaded(true), 100)
     } catch {
       // AdSense already initialised or blocked — safe to ignore
     }
@@ -47,6 +50,31 @@ export default function AdSlot({ slot, format = 'auto', className, style }: Prop
       }}
       aria-label="Advertisement"
     >
+      {!adLoaded && (
+        <div
+          style={{
+            minHeight: 100,
+            background: 'var(--surface)',
+            borderRadius: 'var(--r-card)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            border: '1px solid var(--line)',
+          }}
+        >
+          <p
+            style={{
+              fontSize: 11,
+              color: 'var(--text-muted)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              margin: 0,
+            }}
+          >
+            Supported by our partners
+          </p>
+        </div>
+      )}
       <ins
         ref={adRef}
         className="adsbygoogle"
