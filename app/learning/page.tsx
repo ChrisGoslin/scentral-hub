@@ -91,13 +91,13 @@ export default function LexiconPage() {
             className="inline-flex items-center gap-3 bg-stone-900 text-stone-50 px-8 py-3 rounded-sm transition-all text-[10px] uppercase tracking-[0.2em] font-bold shadow-lg hover:bg-stone-800"
           >
             {showAddSection ? 'Close Portal' : 'Record Wisdom'}
-            <span className="text-[#c49a3c]">{showAddSection ? '×' : '＋'}</span>
+            <span className="text-[var(--accent)]">{showAddSection ? '×' : '＋'}</span>
           </button>
         </header>
 
         {showAddSection && (
           <section className="luxury-card p-10 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <h2 className="editorial-title text-2xl text-[#c49a3c]">New Observation</h2>
+            <h2 className="editorial-title text-2xl text-[var(--accent)]">New Observation</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
               <div className="space-y-6">
@@ -108,7 +108,7 @@ export default function LexiconPage() {
                     placeholder="e.g. Humidity on Vetiver"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    className="w-full bg-stone-50 border-b border-stone-200 py-2 focus:outline-none focus:border-[#c49a3c] transition-colors font-serif text-lg placeholder:text-stone-300"
+                    className="w-full bg-stone-50 border-b border-stone-200 py-2 focus:outline-none focus:border-[var(--accent)] transition-colors font-serif text-lg placeholder:text-stone-300"
                   />
                 </div>
                 <div>
@@ -116,7 +116,7 @@ export default function LexiconPage() {
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="w-full bg-stone-50 border-b border-stone-200 py-2 focus:outline-none focus:border-[#c49a3c] transition-colors appearance-none text-stone-600"
+                    className="w-full bg-stone-50 border-b border-stone-200 py-2 focus:outline-none focus:border-[var(--accent)] transition-colors appearance-none text-stone-600"
                   >
                     {categories.map((cat) => (
                       <option key={cat} value={cat}>
@@ -135,7 +135,7 @@ export default function LexiconPage() {
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                     rows={4}
-                    className="w-full bg-stone-50 border border-stone-100 rounded-sm p-4 focus:outline-none focus:border-[#c49a3c] transition-colors resize-none h-full font-serif text-stone-700 leading-relaxed"
+                    className="w-full bg-stone-50 border border-stone-100 rounded-sm p-4 focus:outline-none focus:border-[var(--accent)] transition-colors resize-none h-full font-serif text-stone-700 leading-relaxed"
                   />
                 </div>
               </div>
@@ -144,7 +144,7 @@ export default function LexiconPage() {
             <div className="flex justify-end pt-4">
               <button
                 onClick={addNote}
-                className="bg-[#c49a3c] text-white px-10 py-4 rounded-sm text-[10px] uppercase tracking-[0.3em] font-bold hover:bg-[#b38a32] transition-colors shadow-md"
+                className="text-white px-10 py-4 rounded-sm text-[10px] uppercase tracking-[0.3em] font-bold transition-colors shadow-md" style={{ background: 'var(--accent)' }}
               >
                 Save to Lexicon
               </button>
@@ -175,7 +175,7 @@ export default function LexiconPage() {
                   </button>
                 </div>
                 
-                <h3 className="text-xl font-serif text-stone-900 mb-4 group-hover:text-[#c49a3c] transition-colors">{note.title}</h3>
+                <h3 className="text-xl font-serif text-stone-900 mb-4 group-hover:text-[var(--accent)] transition-colors">{note.title}</h3>
                 <p className="text-stone-600 text-sm leading-relaxed mb-8 font-serif italic whitespace-pre-wrap">
                   {note.content}
                 </p>

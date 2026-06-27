@@ -60,11 +60,6 @@
   --bg-gradient-start: #fffaf3;
   --bg-gradient-end: #ece3d7;
 
-  /* Aura AI — amber-gold glow (Epic 4: Spritz Schedule) */
-  --aura: oklch(0.72 0.08 60);
-  --aura-surface: oklch(0.18 0.04 60 / 0.6);
-  --aura-border: oklch(0.45 0.06 60 / 0.3);
-  --xp-color: oklch(0.78 0.14 85);
 
   /* Motion scale */
   --motion-instant: 80ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -1188,7 +1183,7 @@ blockquote {
   background: oklch(from var(--surface, oklch(0.15 0.02 60)) calc(l * 1.02) calc(c * 0.8) calc(h + 5deg) / 0.82);
   backdrop-filter: blur(20px) saturate(1.6) brightness(1.05);
   -webkit-backdrop-filter: blur(20px) saturate(1.6) brightness(1.05);
-  border: 1px solid var(--aura-border);
+  border: 1px solid var(--line);
 }
 
 /* Dark mode image enhancements for bottle cards and detail photos */

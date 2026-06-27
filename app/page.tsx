@@ -64,28 +64,28 @@ export default function Home() {
       <PersonaTeasers />
 
       {/* ── Inspired By Engine ── */}
-      <section style={{ padding: '80px 24px', background: '#1A1208', width: '100%', boxSizing: 'border-box' }}>
-        <p style={{ fontSize: 11, color: '#6B635A', textTransform: 'uppercase', letterSpacing: '0.12em', textAlign: 'center', marginBottom: 8 }}>
+      <section style={{ padding: '80px 24px', background: 'var(--color-bg, #1A1208)', width: '100%', boxSizing: 'border-box' }}>
+        <p style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.12em', textAlign: 'center', marginBottom: 8 }}>
           The Inspired By Engine
         </p>
-        <h2 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'clamp(1.8rem, 4vw, 3rem)', color: '#F5F0E8', textAlign: 'center', marginBottom: 12, margin: '0 0 12px' }}>
+        <h2 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'clamp(1.8rem, 4vw, 3rem)', color: 'var(--text)', textAlign: 'center', marginBottom: 12, margin: '0 0 12px' }}>
           Your £140 bottle has an inspired-by at £18.
         </h2>
-        <p style={{ color: '#6B635A', textAlign: 'center', marginBottom: 48, fontSize: 15 }}>
+        <p style={{ color: 'var(--text-muted)', textAlign: 'center', marginBottom: 48, fontSize: 15 }}>
           We find them. You decide.
         </p>
         <div style={{ display: 'flex', gap: 16, maxWidth: 480, margin: '0 auto', justifyContent: 'center' }}>
-          {/* Designer card */}
-          <div style={{ flex: 1, padding: '24px 16px', borderRadius: 12, background: 'linear-gradient(160deg, #5c4033, #8d7662)', textAlign: 'center' }}>
+          {/* Designer card — woody gradient from family tokens */}
+          <div style={{ flex: 1, padding: '24px 16px', borderRadius: 12, background: 'linear-gradient(160deg, var(--family-woody-start), var(--family-woody-end))', textAlign: 'center' }}>
             <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 8, margin: 0 }}>Designer</p>
             <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', color: '#F5F0E8', fontSize: 18, margin: '8px 0' }}>Baccarat Rouge 540</p>
-            <p style={{ color: '#B8913A', fontSize: 13, marginTop: 4, margin: '4px 0 0' }}>£285</p>
+            <p style={{ color: 'var(--accent)', fontSize: 13, marginTop: 4, margin: '4px 0 0' }}>£285</p>
           </div>
-          {/* Inspired By card */}
-          <div style={{ flex: 1, padding: '24px 16px', borderRadius: 12, background: 'linear-gradient(160deg, #c49a3c, #8a4b2e)', textAlign: 'center' }}>
+          {/* Inspired By card — oriental gradient from family tokens */}
+          <div style={{ flex: 1, padding: '24px 16px', borderRadius: 12, background: 'linear-gradient(160deg, var(--family-oriental-start), var(--family-oriental-end))', textAlign: 'center' }}>
             <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 8, margin: 0 }}>Inspired By</p>
             <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', color: '#F5F0E8', fontSize: 18, margin: '8px 0' }}>DNA Match · 94%</p>
-            <p style={{ color: '#B8913A', fontSize: 13, marginTop: 4, margin: '4px 0 0' }}>£19</p>
+            <p style={{ color: 'var(--accent)', fontSize: 13, marginTop: 4, margin: '4px 0 0' }}>£19</p>
           </div>
         </div>
       </section>

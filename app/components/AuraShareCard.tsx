@@ -37,7 +37,7 @@ function drawCard(canvas: HTMLCanvasElement, data: AuraShareData) {
   // Top accent line
   const grad = ctx.createLinearGradient(0, 0, W, 0)
   grad.addColorStop(0, 'transparent')
-  grad.addColorStop(0.5, '#c49a3c')
+  grad.addColorStop(0.5, '#B8913A') /* Parfumeur's Gold — hardcoded: canvas context, CSS vars unavailable */
   grad.addColorStop(1, 'transparent')
   ctx.strokeStyle = grad
   ctx.lineWidth = 1
@@ -46,12 +46,12 @@ function drawCard(canvas: HTMLCanvasElement, data: AuraShareData) {
   ctx.lineTo(W, 180)
   ctx.stroke()
 
-  // ANOTHERSENSE wordmark
-  ctx.fillStyle = '#c49a3c'
+  // BaseNote wordmark
+  ctx.fillStyle = '#B8913A' /* Parfumeur's Gold — hardcoded: canvas context, CSS vars unavailable */
   ctx.font = '600 48px serif'
   ctx.letterSpacing = '0.3em'
   ctx.textAlign = 'center'
-  ctx.fillText('ANOTHERSENSE', W / 2, 140)
+  ctx.fillText('BASENOTE', W / 2, 140)
 
   // AURA badge
   ctx.fillStyle = 'rgba(196,154,60,0.12)'

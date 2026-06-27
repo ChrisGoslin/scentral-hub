@@ -182,8 +182,8 @@ export default function OnboardingPage() {
                       <span key={note} style={{
                         display: 'inline-block', fontSize: 11,
                         padding: '3px 8px', borderRadius: 999,
-                        background: `${persona.ui_theme.accentColor}18`,
-                        color: persona.ui_theme.accentColor,
+                        background: 'color-mix(in srgb, var(--accent) 10%, transparent)',
+                        color: 'var(--accent)',
                         marginBottom: 4, marginRight: 4,
                         opacity: revealVisible ? 1 : 0,
                         transition: prefersReducedMotion.current ? 'opacity 200ms ease' : `opacity 300ms ease ${560 + ni * 40}ms`,
@@ -204,7 +204,7 @@ export default function OnboardingPage() {
           }}>
             <button onClick={handleFinish} style={{
               width: '100%', padding: '15px 24px',
-              background: persona.ui_theme.accentColor,
+              background: 'var(--accent)',
               color: '#fff', border: 'none', borderRadius: 12,
               fontSize: 15, fontWeight: 600, cursor: 'pointer',
               marginBottom: 12, letterSpacing: '0.01em',

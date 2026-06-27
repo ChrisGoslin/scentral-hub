@@ -31,7 +31,7 @@ export default function OpengraphImage() {
           style={{
             marginTop: 20,
             fontSize: 28,
-            color: '#c49a3c',
+            color: '#B8913A', /* Parfumeur's Gold — hardcoded: canvas/OG image context, CSS vars unavailable */
             letterSpacing: '0.04em',
             textTransform: 'uppercase',
           }}

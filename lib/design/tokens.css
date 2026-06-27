@@ -72,7 +72,7 @@
 
   --shadow-elevated:
     var(--shadow-object),
-    0 0 0 1px var(--aura-border);
+    0 0 0 1px var(--line, rgba(0, 0, 0, 0.08));
 
   /* Family gradient tokens — fallback card backgrounds when a fragrance has
      no image_url (consumed by lib/familyGradients.ts) */

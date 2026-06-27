@@ -43,7 +43,7 @@ export default function DisclaimerPage() {
         <div className="space-y-12">
           {sections.map(({ heading, body }) => (
             <section key={heading} className="luxury-card p-8">
-              <h2 className="editorial-title text-2xl mb-4 text-[#c49a3c]">{heading}</h2>
+              <h2 className="editorial-title text-2xl mb-4 text-[var(--accent)]">{heading}</h2>
               <p className="text-stone-600 text-sm leading-relaxed font-serif italic">
                 {body}
               </p>
