@@ -95,9 +95,10 @@ export default function SpritzClient() {
       setStreak(currentStreak)
       setXpToast(data.xp?.gained ?? null)
       setTimeout(() => setXpToast(null), 1600)
-      if (currentStreak === 0 || currentStreak === 1) {
-        setStreakToast('🔥 Streak started!')
-        setTimeout(() => setStreakToast(null), 2000)
+      if (currentStreak === 1 && !localStorage.getItem('scentral_streak_celebrated')) {
+        localStorage.setItem('scentral_streak_celebrated', '1')
+        setStreakToast('🔥 Streak started! Come back tomorrow to keep it alive.')
+        setTimeout(() => setStreakToast(null), 3000)
       }
     } catch {
       // best-effort — swipe already advanced, XP/streak just won't update this time
@@ -216,15 +217,15 @@ export default function SpritzClient() {
               initial={{ opacity: 0, y: 0 }}
               animate={{ opacity: 1, y: -40 }}
               exit={{ opacity: 0 }}
+              transition={{ duration: 3 }}
               style={{
                 position: 'absolute',
                 top: '35%',
-                fontFamily: 'var(--font-display)',
-                fontStyle: 'italic',
-                fontSize: 24,
+                fontSize: 12,
                 fontWeight: 700,
-                color: 'var(--aura)',
+                color: 'var(--xp-color)',
                 pointerEvents: 'none',
+                textAlign: 'center',
               }}
             >
               {streakToast}
