@@ -63,8 +63,7 @@ const SHOPIFY_BRANDS = {
   'Afnan':         { store: 'afnan.com' },
   'Armaf':         { store: 'www.armaf.com' },
   'Amouage':       { store: 'www.amouage.com' },
-  'Initio':        { store: 'www.initio-parfums.com' },
-  'Montale':       { store: 'www.montaleparis.com' },
+  'Initio':        { store: 'www.initioparfums.com' },
   'Swiss Arabian': { store: 'www.swissarabian.com' },
   'Xerjoff':       { store: 'www.xerjoff.com' },
 }
@@ -104,6 +103,14 @@ function levenshtein(a, b) {
 }
 
 // Best catalog entry for a fragrance name, or null if nothing is close enough.
+// Trailing digits distinguish numbered product lines (e.g. "Magnetic Blend 1"
+// vs "Magnetic Blend 7") — a single-digit difference passes the 0.85 fuzzy
+// threshold on short names, so it must be checked separately from edit distance.
+function trailingNumber(s) {
+  const m = s.match(/(\d+)$/)
+  return m ? m[1] : null
+}
+
 function matchInCatalog(catalog, fragranceName) {
   const target = normalizeTitle(fragranceName)
   if (!target) return null
@@ -112,11 +119,16 @@ function matchInCatalog(catalog, fragranceName) {
   const exact = catalog.find(p => p.normalizedTitle === target)
   if (exact) return exact
 
+  const targetNum = trailingNumber(target)
+
   // Fuzzy fallback: smallest edit distance, gated by a similarity ratio so
   // unrelated short names don't false-positive against each other.
   let best = null
   let bestDist = Infinity
   for (const p of catalog) {
+    const candidateNum = trailingNumber(p.normalizedTitle)
+    if (targetNum !== candidateNum) continue // distinguishing, like gender terms
+
     const dist = levenshtein(target, p.normalizedTitle)
     const maxLen = Math.max(target.length, p.normalizedTitle.length)
     const similarity = 1 - dist / maxLen
@@ -240,6 +252,20 @@ async function runValidationTest() {
   console.log('✅ Validation passed. Proceeding...\n')
 }
 
+// ─── Manual Overrides ─────────────────────────────────────────────────────────
+
+const MANUAL_OVERRIDES = {
+  'Afnan | Supremacy CE': 'Supremacy Collector\'s Edition',
+  'Afnan | S. Not Only Intense': 'Supremacy Not Only Intense',
+  'Afnan | Turathi Homme Brown': 'Turathi Brown',
+  'Armaf | CDN Urban Man Elixir': 'Club De Nuit Urban Elixir',
+  'Armaf | Club de Nuit Blue Iconic': 'Club De Nuit Blue Iconic',
+  'Armaf | Shades Wood': 'Shades Wood',
+  'Xerjoff | Casamorati 1888': '1888',
+  'Xerjoff | Casamorati Mefisto': 'Mefisto',
+  'Swiss Arabian | Bade\'e Al Oud Amethyst': 'SKIP', // Actually Lattafa
+}
+
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
@@ -300,7 +326,15 @@ async function main() {
 
   for (const frag of fragrances) {
     const catalog = catalogsByBrand.get(frag.brand)
-    const match = catalog ? matchInCatalog(catalog, frag.name) : null
+    const overrideKey = `${frag.brand} | ${frag.name}`
+    const searchName = MANUAL_OVERRIDES[overrideKey] || frag.name
+
+    if (searchName === 'SKIP') {
+      console.log(`  ○ skip  ${frag.brand} / ${frag.name} (manual override)`)
+      continue
+    }
+
+    const match = catalog ? matchInCatalog(catalog, searchName) : null
 
     if (match) {
       if (!isDryRun) {
