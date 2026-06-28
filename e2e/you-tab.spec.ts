@@ -6,15 +6,11 @@ test.describe('You Tab', () => {
       localStorage.setItem('scentral_onboarded', 'true');
     });
   });
-test('shows signed-out state with teaser cards', async ({ page }) => {
+test('shows signed-out state with identity prompt', async ({ page }) => {
   await page.goto('/you');
-  await expect(page.locator('text=See your scent profile.')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Sign in to see yours' })).toBeVisible();
-
-  // Check for teaser card content with exact match to avoid subtext conflicts
-  await expect(page.getByText('THIS WEEK', { exact: true })).toBeVisible();
-  await expect(page.getByText('STREAK', { exact: true })).toBeVisible();
-  await expect(page.getByText('SAVED', { exact: true })).toBeVisible();
+  // No persona set: signed-out state shows identity quiz prompt
+  await expect(page.locator('text=Your identity is waiting.')).toBeVisible({ timeout: 10000 });
+  await expect(page.getByRole('link', { name: /Find Your Base Note/i })).toBeVisible();
 });
 
 test('shows wishlist if not empty', async ({ page }) => {
