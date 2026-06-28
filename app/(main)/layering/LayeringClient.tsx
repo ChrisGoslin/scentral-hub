@@ -19,6 +19,7 @@ import {
 } from './useLayeringWizard'
 import { AuraResultCard } from './ChemistryCalculator'
 import { handleSaveCombination, handleShareCombination } from './LayerCart'
+import FormulaCard from './FormulaCard'
 
 const ChemistPanel = dynamic(() => import('@/components/ChemistPanel'), { ssr: false })
 const AuraShareCard = dynamic(() => import('@/app/components/AuraShareCard'), { ssr: false })
@@ -47,6 +48,8 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
   const searchParams = useSearchParams()
   const wizard = useLayeringWizard(fragrances)
   const [backLink, setBackLink] = useState<{ href: string; label: string; useHistory: boolean } | null>(null)
+  const [savedItemIds, setSavedItemIds] = useState<Set<string>>(new Set())
+  const [formulaCardItem, setFormulaCardItem] = useState<AuraResultItem | null>(null)
 
   useEffect(() => {
     const from = searchParams.get('from')
@@ -456,6 +459,7 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
                         auraEnvironment: wizard.auraEnvironment,
                       }).then(() => {
                         wizard.toggleUsedLayer(item.id)
+                        setSavedItemIds(prev => new Set([...prev, item.id]))
                       }).catch(() => {
                         // Handle error
                       })}
@@ -469,6 +473,17 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
                     >
                       Share this layer
                     </Button>
+
+                    {savedItemIds.has(item.id) && (
+                      <Button
+                        fullWidth
+                        variant="secondary"
+                        onClick={() => setFormulaCardItem(item)}
+                        style={{ border: '1px solid var(--accent)' }}
+                      >
+                        Share Formula →
+                      </Button>
+                    )}
                   </div>
                 ))}
 
@@ -620,6 +635,13 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
           </div>
         </div>
       </Sheet>
+
+      <FormulaCard
+        open={formulaCardItem != null}
+        onClose={() => setFormulaCardItem(null)}
+        base={wizard.baseFragrance}
+        top={formulaCardItem}
+      />
 
       {/* Bottom spacer */}
       <div style={{ height: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }} />
