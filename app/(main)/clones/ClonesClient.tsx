@@ -67,7 +67,7 @@ export default function ClonesClient({ clones, topOriginals, error }: Props) {
         background: 'linear-gradient(135deg, var(--color-surface) 0%, var(--bg) 100%)',
       }}>
         <p style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: 6 }}>
-          Clone Finder
+          Inspired By
         </p>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.75rem, 5vw, 2.5rem)', color: 'var(--text)', fontStyle: 'italic', lineHeight: 1.1, marginBottom: 10 }}>
           Smells like<br />your favourite
