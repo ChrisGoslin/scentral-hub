@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'media.parfumo.com' },
       { protocol: 'https', hostname: 'fimgs.net' },
       { protocol: 'https', hostname: 'www.fragrantica.com' },
+      { protocol: 'https', hostname: 'upload.wikimedia.org' },
     ],
   },
   webpack: (config, { isServer }) => {
