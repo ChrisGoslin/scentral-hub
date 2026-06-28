@@ -14,6 +14,7 @@ import ProfileCard from './ProfileCard'
 import InsightsPanel, { type WeekWearEntry, type SavedCombination } from './InsightsPanel'
 import YourContributions from '@/components/feedback/YourContributions'
 import { getPersonaById, type Persona } from '@/lib/personas'
+import { calculateIdentityScore, type IdentityScore } from '@/lib/identityScore'
 
 export type { WeekWearEntry, SavedCombination }
 import { track } from '@/lib/posthog'
@@ -46,6 +47,7 @@ export default function YouClient(props: YouClientProps) {
   const [localPersona, setLocalPersona] = useState<Persona | null>(null)
   const [localCollectionCount, setLocalCollectionCount] = useState(0)
   const [localScentHistory, setLocalScentHistory] = useState<{ fragranceId: string; brand: string; name: string; loggedAt: string }[]>([])
+  const [identityScore, setIdentityScore] = useState<IdentityScore | null>(null)
 
   // Fetch saved combinations
   const userId = props.state === 'signed-in' ? (props.email ? 'user-id' : null) : null
@@ -63,9 +65,20 @@ export default function YouClient(props: YouClientProps) {
       if (p) setLocalPersona(p)
     }
 
+    const supabase = createClient()
+
     try {
       const col: string[] = JSON.parse(localStorage.getItem('scentral_collection') ?? '[]')
       setLocalCollectionCount(col.length)
+      if (col.length > 0) {
+        // Fetch families for identity score
+        supabase.from('fragrances').select('family').in('id', col).then(({ data }) => {
+          if (data) {
+            const families = data.map(f => f.family).filter(Boolean) as string[]
+            setIdentityScore(calculateIdentityScore(families))
+          }
+        })
+      }
     } catch {
       // best-effort
     }
@@ -75,7 +88,6 @@ export default function YouClient(props: YouClientProps) {
     if (anonId) {
       ;(async () => {
         try {
-          const supabase = createClient()
           const { data } = await supabase
             .from('user_streaks')
             .select('current_streak')
@@ -257,6 +269,40 @@ export default function YouClient(props: YouClientProps) {
                 {auraStreak > 0 && <span>🔥 {auraStreak}-day streak</span>}
                 {localScentHistory[0] && <span>Last worn {formatRelativeDate(localScentHistory[0].loggedAt)}</span>}
               </div>
+
+              {localCollectionCount >= 3 && localCollectionCount < 5 && (
+                <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid rgba(0,0,0,0.05)' }}>
+                  <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>
+                    Your identity is still forming. Add {5 - localCollectionCount} more to unlock your full score.
+                  </p>
+                  <div style={{ height: 4, borderRadius: 2, overflow: 'hidden', background: 'var(--surface-2)', display: 'flex' }}>
+                    <div style={{ width: `${(localCollectionCount / 5) * 100}%`, background: localPersona.ui_theme.accentColor }} />
+                  </div>
+                </div>
+              )}
+
+              {localCollectionCount >= 5 && identityScore && (
+                <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid rgba(0,0,0,0.05)' }}>
+                  <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 12 }}>Your scent identity score</p>
+
+                  {/* Identity bar */}
+                  <div style={{ height: 6, borderRadius: 3, overflow: 'hidden', display: 'flex', marginBottom: 12 }}>
+                    <div style={{ width: `${identityScore.topPercent}%`, background: identityScore.topPersona.ui_theme.accentColor }} />
+                    <div style={{ width: `${identityScore.secondPercent}%`, background: identityScore.secondPersona.ui_theme.accentColor, opacity: 0.6 }} />
+                    <div style={{ flex: 1, background: 'var(--line)' }} />
+                  </div>
+
+                  <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 16, color: 'var(--text)', lineHeight: 1.4, marginBottom: 8 }}>
+                    {identityScore.topPercent}% {identityScore.topPersona.name.replace('The ', '')}, {identityScore.secondPercent}% {identityScore.secondPersona.name.replace('The ', '')}.
+                  </p>
+                  <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>Based on {identityScore.collectionCount} fragrances in your collection.</p>
+
+                  <button style={{ marginTop: 12, fontSize: 11, color: 'var(--accent)', background: 'none', border: 'none', textDecoration: 'underline', cursor: 'pointer', padding: 0 }}>
+                    Share your identity →
+                  </button>
+                </div>
+              )}
+
               <Link
                 href={`/discover?persona=${localPersona.id}`}
                 style={{ display: 'inline-block', marginTop: 16, fontSize: 13, fontWeight: 600, color: localPersona.ui_theme.accentColor }}

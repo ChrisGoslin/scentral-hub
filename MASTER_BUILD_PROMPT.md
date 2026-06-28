@@ -511,7 +511,7 @@ git commit -m "feat(discover): per-fragrance Fit Narrative — persona voice, In
 
 ---
 
-### G3 — Bottle Scanner MVP: The Shop Floor Moment
+### G3 — Bottle Scanner: Surface What Already Exists
 
 *Marlowe: "The highest-intent moment in fragrance is standing in a shop holding a bottle. Every other app misses this moment. We capture it."*
 
@@ -520,74 +520,52 @@ Read AGENTS.md, BASENOTE_BRAND.md.
 
 Ground yourself: one line.
 
-NOTE on dependencies: per AGENTS.md §8, verify whether npm install can run in this environment.
-If not, give Christopher the exact command to run locally first: npm install tesseract.js
+CONTEXT:
+- app/(main)/scanner already exists with barcode scanning via /api/scan/barcode
+- app/api/scan/route.ts (Claude Vision) was dead code and has been deleted — do not recreate it
+- The scanner currently routes to /collection on success — a dead-end from a Discover flow
+- No new OCR or Vision dependencies needed. This prompt is about wiring, not building.
 
-STEP 1 — API route app/api/ocr/route.ts:
-import { createWorker } from 'tesseract.js'
-import { NextRequest } from 'next/server'
+STEP 1 — Add ?from= return flow to app/(main)/scanner/page.tsx:
+Read useSearchParams() for ?from param.
+On successful barcode scan + fragrance match:
+  if (from === 'discover') router.push(`/discover?q=${encodeURIComponent(fragranceName)}`)
+  else router.push('/collection')  // existing behaviour unchanged
 
-export async function POST(req: NextRequest) {
-  const formData = await req.formData()
-  const file = formData.get('image') as File
-  if (!file) return Response.json({ error: 'No image' }, { status: 400 })
-  const buffer = Buffer.from(await file.arrayBuffer())
-  const worker = await createWorker('eng')
-  const { data: { text } } = await worker.recognize(buffer)
-  await worker.terminate()
-  const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 3 && !/^\d+$/.test(l)).sort((a, b) => b.length - a.length)
-  return Response.json({ text: lines[0] ?? '' })
-}
-Note: createClient is NOT used here — no Supabase at module level.
+On failed scan (no barcode match):
+  if (from === 'discover') show inline message:
+    "Couldn't find this barcode — search by name?"
+    with a link: href="/discover" in var(--accent)
+  else existing error behaviour
 
-STEP 2 — Camera button in DiscoverClient.tsx:
-Add camera icon to right end of search input. Show only on mobile (check navigator.mediaDevices):
+STEP 2 — Camera shortcut in DiscoverClient.tsx search bar:
+Add camera icon button to right end of search input.
+Only render when navigator.mediaDevices is available (mobile check):
   const canScan = typeof navigator !== 'undefined' && !!navigator.mediaDevices
 
-  <button onClick={() => fileInputRef.current?.click()} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--accent)', cursor: 'pointer', fontSize: 18 }}>
-    {isScanning ? <ScanAnimation /> : '⊡'}
-  </button>
-  <input ref={fileInputRef} type="file" accept="image/*" capture="environment" style={{ display: 'none' }} onChange={handleScan} />
+  <a
+    href="/scanner?from=discover"
+    style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
+      color: 'var(--accent)', fontSize: 18, lineHeight: 1, textDecoration: 'none' }}
+    aria-label="Scan a bottle"
+  >
+    ⊡
+  </a>
 
-Scanning animation (CSS only, no library):
-  @keyframes scan-sweep { from { top: 0 } to { top: calc(100% - 1px) } }
-  A 1px horizontal gold line sweeping up and down over a 20px container.
-
-STEP 3 — handleScan function:
-async function handleScan(e: React.ChangeEvent<HTMLInputElement>) {
-  const file = e.target.files?.[0]
-  if (!file) return
-  setIsScanning(true)
-  const formData = new FormData()
-  formData.append('image', file)
-  try {
-    const res = await fetch('/api/ocr', { method: 'POST', body: formData })
-    const { text } = await res.json()
-    if (text?.length > 2) {
-      setSearchQuery(text)
-      triggerSearch(text)
-      setIsScanResult(true)
-    } else {
-      setScanMessage("Couldn't read the bottle — type the name?")
-      setTimeout(() => setScanMessage(''), 4000)
-    }
-  } catch {
-    setScanMessage("Scan failed — check your connection.")
-    setTimeout(() => setScanMessage(''), 4000)
-  } finally {
-    setIsScanning(false)
-    if (fileInputRef.current) fileInputRef.current.value = ''
-  }
-}
-
-STEP 4 — Scan result context banner above results:
-When isScanResult is true:
-  <div style={{ background: 'var(--surface)', padding: '10px 16px', borderBottom: '1px solid var(--line)', fontSize: 12, color: 'var(--text-muted)' }}>
-    ⊡ Scanned: "{searchQuery}" · <button onClick={clearScan} style={{ color: 'var(--accent)', background: 'none', border: 'none', fontSize: 12, cursor: 'pointer' }}>Clear</button>
+STEP 3 — Scan result context banner in DiscoverClient.tsx:
+Read useSearchParams() for ?q param on mount.
+If ?q is present AND referrer was /scanner (check ?from=scanner or sessionStorage flag):
+  Show banner above results:
+  <div style={{ background: 'var(--surface)', padding: '10px 16px',
+    borderBottom: '1px solid var(--line)', fontSize: 12, color: 'var(--text-muted)' }}>
+    ⊡ Scanned: "{q}" ·
+    <button onClick={clearQ} style={{ color: 'var(--accent)', background: 'none',
+      border: 'none', fontSize: 12, cursor: 'pointer' }}>Clear</button>
   </div>
+  clearQ: router.replace('/discover') to remove the query param.
 
 npm run build → zero errors.
-git commit -m "feat(discover): bottle scanner MVP — tesseract.js OCR, camera input, scan-to-search"
+git commit -m "feat(scanner): return-to-discover flow, camera shortcut in search bar, scan result banner"
 ```
 
 ---
@@ -1104,48 +1082,17 @@ git commit -m "feat(brief): swipe affordance, rock tutorial, empty state, rename
 
 ---
 
-### P3 — Identity Tab Signed-Out State
+### P3 — Identity Tab Signed-Out State ✅ SHIPPED
 
-```
-Read AGENTS.md, BASENOTE_BRAND.md.
+**What was built (verified 2026-06-28):**
+- `YouClient.tsx` had only an auth-gated email sign-in CTA — no persona-aware view
+- Added `localPersona` / `localCollectionCount` / `localScentHistory` state block
+- Reads `scentral_persona`, `scentral_collection` from localStorage
+- Queries `wear_logs` by `anon_id` (confirmed: `app/api/spritz/log-wear/route.ts` stores anon IDs in `user_id`)
+- When persona exists: renders persona identity card (name, tagline, base notes, collection count, streak, last-worn) + "Your Scent History" list
+- No `pointerEvents:'none'` blur or fake "Lattafa Asad" data existed — those spec assumptions didn't apply
 
-Ground yourself: one line.
-
-In app/(main)/you/YouClient.tsx:
-
-1. Find the signed-out state (look for pointerEvents: 'none' or blurred preview cards)
-2. Replace with clean full-screen identity state:
-
-When no persona set (no scentral_persona in localStorage):
-  <div style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 32, textAlign: 'center' }}>
-    <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'clamp(2rem, 6vw, 3.5rem)', color: 'var(--text)', marginBottom: 16 }}>
-      Your identity is waiting.
-    </p>
-    <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 32, maxWidth: 280 }}>
-      Take the 2-minute quiz to discover your scent identity.
-    </p>
-    <a href="/onboarding" style={{ background: 'var(--accent)', color: '#1A1208', padding: '14px 28px', borderRadius: 9999, fontSize: 14, fontWeight: 600, textDecoration: 'none' }}>
-      Find Your Base Note →
-    </a>
-  </div>
-
-When persona IS set in localStorage:
-  Load persona data from lib/personas.ts getPersonaById(personaId)
-  Show rich identity card:
-    Persona name in Cormorant italic, large, persona.ui_theme.accentColor
-    Persona tagline, 14px, var(--text)
-    Three base notes in small mono, Vetiver Grey
-    Collection count + streak + last worn date from localStorage
-    CTA: "Explore your [Persona Name] fragrances →" → Discover filtered by persona
-  Below identity card: "Your Scent History" — vertical list of last 7 wears from scentral_wear_notes localStorage.
-    Each: fragrance name in Cormorant italic, date in mono muted.
-
-3. Remove pointerEvents: 'none' from any blurred cards — replace with above states entirely.
-4. Remove hardcoded fake data (any hardcoded "Lattafa Asad" references in the upsell state).
-
-npm run build → zero errors.
-git commit -m "feat(identity): clean signed-out state, persona identity card, local wear history"
-```
+**Skip this prompt — already live.**
 
 ---
 
