@@ -21,6 +21,7 @@ import BuyLinks from '@/app/components/BuyLinks'
 import AffiliateButton from '@/components/ads/AffiliateButton'
 import GiftThis from './GiftThis'
 import FitNarrativeCard from './FitNarrativeCard'
+import CommunityDepth from './CommunityDepth'
 
 const PHASE_LABEL: Record<number, string> = {
   1: 'Anchor',
@@ -369,6 +370,8 @@ export default async function FragranceDetailPage({
         )}
 
         <DidYouKnow family={f.family} />
+
+        <CommunityDepth fragranceId={f.id} />
 
         {/* Resonance — Find Similar */}
         <SimilarFragrances fragranceId={f.id} />
