@@ -90,6 +90,14 @@ export default function SpritzClient() {
     advance()
     track('spritz_card_worn', { slot: event?.slot })
 
+    if (event?.fragrance?.id) {
+      try {
+        const history = JSON.parse(localStorage.getItem('scentral_wear_history') ?? '[]')
+        history.push({ fragrance_id: event.fragrance.id, fragrance_name: event.fragrance.name, date: new Date().toISOString() })
+        localStorage.setItem('scentral_wear_history', JSON.stringify(history))
+      } catch { /* ignore */ }
+    }
+
     try {
       const anonId = getOrCreateAnonId()
       const res = await fetch('/api/spritz/log-wear', {

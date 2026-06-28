@@ -16,6 +16,7 @@ import YourContributions from '@/components/feedback/YourContributions'
 import { getPersonaById, type Persona } from '@/lib/personas'
 import { calculateIdentityScore, type IdentityScore } from '@/lib/identityScore'
 import NoseReportSheet from '@/components/ui/NoseReportSheet'
+import RitualCalendar from './RitualCalendar'
 
 export type { WeekWearEntry, SavedCombination }
 import { track } from '@/lib/posthog'
@@ -444,6 +445,8 @@ export default function YouClient(props: YouClientProps) {
           isAtRisk={engagement.isAtRisk}
           streak={engagement.streak}
         />
+
+        <RitualCalendar auraStreak={auraStreak} />
 
         <YourContributions />
       </div>
