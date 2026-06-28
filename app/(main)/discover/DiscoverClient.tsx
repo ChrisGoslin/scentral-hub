@@ -123,13 +123,13 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
     }
 
     const params = new URLSearchParams(window.location.search)
-    const scanned = params.get('scan')
+    const scanned = params.get('q')
     if (scanned) {
       setSearchTerm(scanned)
       setIsScanResult(true)
       track('scan_to_search', { query: scanned })
       const url = new URL(window.location.href)
-      url.searchParams.delete('scan')
+      url.searchParams.delete('q')
       window.history.replaceState({}, '', url.toString())
     }
 

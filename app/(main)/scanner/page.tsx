@@ -46,6 +46,8 @@ function ScannerPageInner() {
   const [noMatchBarcode, setNoMatchBarcode] = useState<string | null>(null)
   const [isScanning, setIsScanning] = useState(false)
   const [scanMessage, setScanMessage] = useState('Point at barcode to scan')
+  const [visionState, setVisionState] = useState<'idle' | 'reading' | 'failed'>('idle')
+  const [visionMatch, setVisionMatch] = useState<{ brand: string; name: string } | null>(null)
   const [xpToast, setXpToast] = useState<number | null>(null)
   const [formLoading, setFormLoading] = useState(false)
   const scanIntervalRef = useRef<NodeJS.Timeout | null>(null)
@@ -148,18 +150,85 @@ function ScannerPageInner() {
   }
 
   /**
-   * Handle barcode with no match in DB
+   * Capture the current video frame as base64 JPEG for Claude Vision
+   */
+  function captureFrameBase64(): string | null {
+    if (!videoRef.current) return null
+    const video = videoRef.current
+    const canvas = document.createElement('canvas')
+    canvas.width = video.videoWidth
+    canvas.height = video.videoHeight
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return null
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.85)
+    return dataUrl.split(',')[1] ?? null
+  }
+
+  /**
+   * Vision fallback when barcode lookup fails — reads the bottle label directly
+   */
+  async function tryVisionFallback(): Promise<boolean> {
+    const image_base64 = captureFrameBase64()
+    if (!image_base64) {
+      setVisionState('failed')
+      return false
+    }
+
+    setVisionState('reading')
+    setScanMessage('Reading bottle…')
+
+    try {
+      const res = await fetch('/api/scan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image_base64, media_type: 'image/jpeg' }),
+      })
+
+      if (!res.ok) {
+        setVisionState('failed')
+        return false
+      }
+
+      const { result } = await res.json()
+      if (!result?.brand && !result?.name) {
+        setVisionState('failed')
+        return false
+      }
+
+      setIsScanning(false)
+      if (scanIntervalRef.current) clearInterval(scanIntervalRef.current)
+      setVisionMatch({ brand: result.brand ?? '', name: result.name ?? '' })
+      setScanMessage(`Read: ${result.brand ?? ''} ${result.name ?? ''}`.trim())
+
+      if ('vibrate' in navigator) {
+        navigator.vibrate([100, 50, 100])
+      }
+      return true
+    } catch (error) {
+      console.error('Vision fallback error:', error)
+      setVisionState('failed')
+      return false
+    }
+  }
+
+  /**
+   * Handle barcode with no match in DB — try Vision before falling back to manual add
    */
   function handleNoMatch(barcode: string) {
     setIsScanning(false)
     if (scanIntervalRef.current) clearInterval(scanIntervalRef.current)
-    setNoMatchBarcode(barcode)
     setScanMessage(`Not in catalogue: ${barcode}`)
 
-    // Haptic feedback if available
     if ('vibrate' in navigator) {
       navigator.vibrate([100, 50, 100, 50, 100])
     }
+
+    void tryVisionFallback().then(visionSucceeded => {
+      if (!visionSucceeded) {
+        setNoMatchBarcode(barcode)
+      }
+    })
   }
 
   /**
@@ -229,7 +298,7 @@ function ScannerPageInner() {
 
       // Navigate back to collection — or to Discover with a scan-to-search prefill
       if (fromDiscover) {
-        router.push(`/discover?scan=${encodeURIComponent(scannedFragrance.name)}`)
+        router.push(`/discover?q=${encodeURIComponent(scannedFragrance.name)}`)
       } else {
         router.push('/collection')
       }
@@ -503,6 +572,60 @@ function ScannerPageInner() {
               Scan Another
             </Button>
           </div>
+        </div>
+      ) : visionMatch ? (
+        <div style={{
+          width: '100%',
+          maxWidth: '400px',
+          padding: '24px',
+          borderRadius: '12px',
+          background: 'var(--surface)',
+          border: '1px solid var(--line)',
+          marginBottom: '24px',
+        }}>
+          <p style={{ fontSize: 10, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>
+            Read from label
+          </p>
+          <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px', color: 'var(--text)' }}>
+            {visionMatch.brand}
+          </h2>
+          <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '16px' }}>
+            {visionMatch.name}
+          </p>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <Button
+              onClick={() => router.push(`/discover?q=${encodeURIComponent(`${visionMatch.brand} ${visionMatch.name}`.trim())}`)}
+              variant="primary"
+              style={{ flex: 1 }}
+            >
+              Search by name →
+            </Button>
+            <Button onClick={scanAgain} variant="secondary" style={{ flex: 1 }}>
+              Scan Another
+            </Button>
+          </div>
+        </div>
+      ) : visionState === 'reading' ? (
+        <div style={{ width: '100%', maxWidth: '400px', textAlign: 'center', marginBottom: '24px', color: 'var(--text-muted)', fontSize: '14px' }}>
+          Reading bottle…
+        </div>
+      ) : fromDiscover && visionState === 'failed' && noMatchBarcode ? (
+        <div style={{
+          width: '100%',
+          maxWidth: '400px',
+          padding: '24px',
+          borderRadius: '12px',
+          background: 'var(--surface)',
+          border: '1px solid var(--line)',
+          marginBottom: '24px',
+          textAlign: 'center',
+        }}>
+          <p style={{ fontSize: '14px', color: 'var(--text)', marginBottom: 12 }}>
+            Couldn&apos;t read this bottle —
+          </p>
+          <Link href="/discover" style={{ fontSize: 13, color: 'var(--accent)', fontWeight: 600 }}>
+            search by name?
+          </Link>
         </div>
       ) : noMatchBarcode ? (
         <div style={{

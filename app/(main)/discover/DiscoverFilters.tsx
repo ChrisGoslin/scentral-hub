@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Chip from '@/components/ui/Chip'
 import {
@@ -155,6 +155,12 @@ export function DiscoverFilters({
   onSortChange,
   onShowSavedToggle,
 }: Props) {
+  const [canScan, setCanScan] = useState(false)
+
+  useEffect(() => {
+    setCanScan(typeof navigator !== 'undefined' && !!navigator.mediaDevices)
+  }, [])
+
   const toggleVibe = (v: string) => {
     const isAdding = !vibe.includes(v)
     onVibeToggle(v)
@@ -274,7 +280,7 @@ export function DiscoverFilters({
                 boxSizing: 'border-box',
               }}
             />
-            <Link
+            {canScan && <Link
               href="/scanner?from=discover"
               aria-label="Scan a bottle"
               style={{
@@ -289,7 +295,7 @@ export function DiscoverFilters({
               }}
             >
               ⊡
-            </Link>
+            </Link>}
           </div>
         </div>
       </div>

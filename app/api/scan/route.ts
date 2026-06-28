@@ -6,8 +6,6 @@
 
 import { NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
-import { cookies } from 'next/headers';
-import { createClient } from '@/utils/supabase/server';
 
 type ScanRequest = {
   image_base64: string;
@@ -24,16 +22,6 @@ type ScanResult = {
 
 export async function POST(req: Request) {
   try {
-    const cookieStore = await cookies();
-    const supabase = await createClient(cookieStore);
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const body: ScanRequest = await req.json();
     const { image_base64, media_type } = body;
 
