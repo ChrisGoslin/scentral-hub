@@ -1,21 +1,22 @@
 /**
- * Affiliate link builders for Scentral Hub
+ * Affiliate link builders for BaseNote
  *
  * Network: AWIN (primary — covers EU fragrance market)
- * Publisher ID: set AWIN_PUBLISHER_ID below once approved
+ * Publisher ID: 2955445 (approved 2026-06-28)
  *
- * To activate:
- *   1. Apply at awin.com/gb/publisher (use "Scentral" as trading name)
- *   2. Get approved, then join Notino + Douglas programmes within AWIN
- *   3. Replace AWIN_PUBLISHER_ID with your real publisher ID
- *   4. Replace each AWIN_MID_* with the merchant ID from the AWIN programme page
- *   5. Add NEXT_PUBLIC_AWIN_PUBLISHER_ID to Vercel environment variables
+ * To activate merchant links:
+ *   1. Apply to Notino + Douglas programmes within AWIN dashboard
+ *   2. Await merchant approval (they review separately from AWIN publisher approval)
+ *   3. Replace each AWIN_MID_* with the merchant ID from the AWIN programme page
+ *   4. Add NEXT_PUBLIC_AWIN_PUBLISHER_ID=2955445 to Vercel environment variables
+ *
+ * Until merchant IDs are set, all links fall back to plain search URLs (functional, no commission).
  */
 
 // ─── AWIN config ─────────────────────────────────────────────────────────────
-// Replace with your real AWIN publisher ID after approval
+// AWIN publisher ID — approved 2026-06-28. Add to Vercel as NEXT_PUBLIC_AWIN_PUBLISHER_ID=2955445
 const AWIN_PUBLISHER_ID =
-  process.env.NEXT_PUBLIC_AWIN_PUBLISHER_ID || 'PENDING'
+  process.env.NEXT_PUBLIC_AWIN_PUBLISHER_ID || '2955445'
 
 // Merchant IDs — find these on each programme's page inside AWIN
 const AWIN_MID_NOTINO = 'PENDING'    // Notino IE/EU — dominant EU fragrance retailer
