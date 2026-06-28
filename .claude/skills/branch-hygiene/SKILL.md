@@ -87,6 +87,13 @@ git show --stat HEAD
 # `npm run build` would have caught every one of them locally, before push.
 npm run build
 
+# If your task touched ANY of these, also run the e2e suite before pushing:
+# - UI copy / headings / placeholder text (e2e tests assert exact strings)
+# - image_url backfill scripts or any new external image source
+# - Discover page, Collection page, or You page rendering logic
+# Run takes ~10s and catches crashes the build step misses:
+npm run test:e2e -- --project=chromium
+
 git push origin main
 ```
 

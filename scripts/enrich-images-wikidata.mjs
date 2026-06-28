@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// @image-domains: upload.wikimedia.org
 // Enrich fragrances.image_url from Wikidata/Wikimedia Commons.
 // Why this exists: Parfumo/Fragrantica scraping (scripts/enrich-images.mjs) hits
 // Cloudflare bot-protection 403s and, before that, produced wrong-product mismatches

@@ -316,6 +316,25 @@ hadn't been committed yet. Use `git reset HEAD~1` (mixed, the default) to drop a
 touching the working tree, never `--hard`, unless you've confirmed via `git status` there's nothing
 uncommitted you want to keep.
 
+**L16 — Every new external image source needs a `next.config.ts` remotePatterns entry.** On 2026-06-28,
+`scripts/enrich-images-wikidata.mjs` backfilled `image_url` with `upload.wikimedia.org` URLs. The hostname
+was not added to `next.config.ts` remotePatterns. `next/image` throws a runtime error on unconfigured
+hostnames — it doesn't degrade gracefully. The React ErrorBoundary caught it and rendered "Something went
+wrong" for the entire Discover page (all users, all sessions). The fix is one line in next.config.ts, but
+the bug is invisible to `npm run build` and `tsc --noEmit` because next/image validates hostnames at render
+time, not compile time. **Rule: whenever a script writes external `image_url` values, immediately add the
+source domain to `next.config.ts` remotePatterns in the same commit.** The pre-push hook (`.husky/pre-push`)
+now greps scripts that touch `image_url` and blocks the push if any new domain is absent from the whitelist.
+
+**L17 — E2e tests with text-based selectors must be updated whenever UI copy changes.** On 2026-06-28,
+`e2e/discover.spec.ts` asserted `'Fresh & Clean'` (old vibe chip label, since renamed to `'Fresh'`) and
+`e2e/you-tab.spec.ts` asserted `'See your scent profile.'` (old You-page copy, replaced with
+`'Your identity is waiting.'`). Both had silently drifted and were failing since the copy changed — caught
+only when the full suite was run. Two safeguards: (1) prefer `getByRole()` / `aria-label` selectors over
+literal text wherever possible — they survive copy rewrites; (2) the branch-hygiene SKILL.md now lists
+running `npm run test:e2e -- --project=chromium` as a mandatory step before pushing whenever UI copy,
+headings, or placeholder text was changed.
+
 ## 10. LLM briefing block (copy-paste into Claude Code / Cursor / other agents)
 
 Use this block at the start of every new CLI agent session. Summary of §1 — update both when §1 changes. Last verified: 2026-06-22.
