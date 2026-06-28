@@ -29,12 +29,26 @@ guarantee hits.
 | Brand | Domain | Domain status | Live-run hits (verified in DB) |
 |---|---|---|---|
 | Armaf | www.armaf.com | ✅ reachable | 95 |
+| Swiss Arabian | www.swissarabian.com | ✅ reachable | 81 |
 | Amouage | www.amouage.com | ✅ reachable | 46 |
 | Afnan | ~~www.afnanperfumes.com~~ → `afnan.com` | ✅ fixed, reachable | 38 |
-| Swiss Arabian | www.swissarabian.com | ✅ reachable | 16 |
-| Initio | www.initio-parfums.com | ✅ reachable | 0 — `/products.json` returned 0 products on the live run despite the domain resolving. Possible auth wall or schema difference. Logged in misses file with `catalog_size=0`. |
-| Montale | www.montaleparis.com | ✅ reachable | 0 — same symptom as Initio, logged with `catalog_size=0`. |
-| Xerjoff | www.xerjoff.com | ✅ reachable | **0, and zero entries in the misses log at all** — distinct from Initio/Montale. This brand appears to not have been processed in the run (likely the script errored or was cut short right after Swiss Arabian; Xerjoff is last in the `SHOPIFY_BRANDS` object). Before re-running: check the script's console output/exit code for an error after the Swiss Arabian catalog fetch, not just the misses file. |
+| Initio | ~~www.initio-parfums.com~~ → `www.initioparfums.com` | ✅ fixed, reachable | 16 |
+| Xerjoff | www.xerjoff.com | ✅ reachable | 10 |
+| Montale | ~~www.montaleparis.com~~ — domain fully dead | ❌ removed from `SHOPIFY_BRANDS` | n/a — `montaleparis.com` now serves a JS-redirect parked-domain stub (GoDaddy), and `montale.com` redirects to a domain-marketplace listing (atom.com). No live Shopify storefront found for this brand. Re-check periodically in case the brand relaunches a store. |
+
+**Running total across these 6 brands: 286 fragrances enriched** (verified against DB 2026-06-28,
+after fixing Initio's domain and a fuzzy-match bug — see below).
+
+### What "0 hits, 0 catalog products" actually meant for Initio (don't assume WAF/Cloudflare)
+The first live run logged Initio and Montale both as `catalog_size=0` and assumed it was an auth
+wall or Cloudflare block, same as Lattafa/Rasasi/Lalique. **That assumption was wrong for Initio** —
+the real cause was a stale domain in `SHOPIFY_BRANDS` (`initio-parfums.com` doesn't resolve to the
+brand at all). The correct domain is `www.initioparfums.com` (no hyphen), confirmed working with 121
+catalog products. Montale's domain genuinely is dead (parked page), so that one really has no fix
+available right now — but don't assume "0 catalog products" means the same root cause across brands
+without checking each one with curl. The Xerjoff "0 hits AND 0 misses logged" result from the same
+run turned out to be a one-off network blip in that session — a later run got 10 hits from the same
+domain with no code change, so it was never actually broken.
 | Lattafa / Lattafa Pride | ~~www.lattafa.ae~~ → `lattafa.com` | ❌ domain fixed but Cloudflare 403s `/products.json` — unusable via this method |
 | Rasasi | www.rasasi.com | ❌ Cloudflare 406 |
 | Lalique | www.lalique.com | ❌ WAF 403 |
@@ -66,6 +80,10 @@ node -e "console.log(require('/tmp/check.json').products.map(p => ({handle:p.han
 ```
 
 - `200` + real product titles in the JSON = usable.
+- **`200` with a tiny HTML body (a few hundred bytes, a `<script>window.location...</script>` stub,
+  or "Temporary Redirect" to `forsale.godaddy.com` / a domain marketplace) = the domain is dead and
+  parked, not a working store.** A bare status-code check (step 1) will report this as "200, looks
+  fine" — always inspect the actual body in step 3, don't stop at the status code.
 - `403`/`406` = Cloudflare/WAF blocking the public API — do not add to the map, it'll never work
   with plain `fetch()`, no amount of retrying or header-tweaking from a script is worth it.
 - `404` on `/products.json` with a 200 on the root = probably not a Shopify store (or migrated
@@ -86,6 +104,14 @@ actual Shopify handle doesn't match a naive slugify. Instead:
    fallback for near-misses like "9 PM" vs "9pm Night Out").
 4. Log non-matches with the brand's actual catalog size, so a 0-hit brand is distinguishable from
    "catalog has 5 products and none of them match" vs "catalog fetch itself failed."
+
+**Trailing numbers are distinguishing, like gender terms.** The 0.85 similarity threshold treats a
+single-digit difference in a short name as a near-match — Initio's "Magnetic Blend 1" matched
+"Magnetic Blend 7" in testing (one digit difference, ~93% similarity). Fixed by comparing trailing
+digit sequences exactly before considering a fuzzy match (see `trailingNumber()` in the script) —
+the same principle as not stripping gender terms from normalization. Any numbered product line
+("Opus I/II/III", "Library Collection", "Amphorae 16/17/27") is at risk of this; if you add fuzzy
+matching elsewhere, carry this check with it.
 
 ## When a brand returns 0 hits in a future run
 Don't assume the matching logic regressed. Re-run the verification procedure against that one

@@ -22,6 +22,7 @@ import AffiliateButton from '@/components/ads/AffiliateButton'
 import GiftThis from './GiftThis'
 import FitNarrativeCard from './FitNarrativeCard'
 import CommunityDepth from './CommunityDepth'
+import { GradientPlaceholder } from '@/components/ui/GradientPlaceholder'
 
 const PHASE_LABEL: Record<number, string> = {
   1: 'Anchor',
@@ -193,20 +194,8 @@ export default async function FragranceDetailPage({
             />
           </div>
         ) : (
-          <div
-            style={{
-              width: 'min(45vw, 200px)', height: 'min(45vw, 200px)',
-              borderRadius: 'var(--r-card)',
-              background: 'linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%)',
-              display: 'flex', flexDirection: 'column',
-              alignItems: 'center', justifyContent: 'center',
-              gap: 8, padding: 16, textAlign: 'center',
-            }}
-          >
-            <span style={{ fontSize: 48 }}>{getBrandEmoji(f.brand)}</span>
-            <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 4 }}>
-              {f.brand}
-            </p>
+          <div style={{ width: 'min(45vw, 200px)', height: 'min(45vw, 200px)', borderRadius: 'var(--r-card)', overflow: 'hidden' }}>
+            <GradientPlaceholder brand={f.brand} name={f.name} family={f.family} />
           </div>
         )}
       </div>

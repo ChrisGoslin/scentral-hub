@@ -57,8 +57,11 @@ const brandArg = process.argv.find(a => a.startsWith('--brand='))
 const brandFilter = brandArg ? brandArg.split('=')[1] : null
 
 // ─── Brand → Shopify store map (confirmed working 2026-06-28) ─────────────────
-// Re-verify via .claude/skills/shopify-image-enrichment/SKILL.md before adding
-// a brand or trusting a 0-hit result against one already here.
+// Re-verify via .claude/skills/shopify-image-enrichment/SKILL.md curl procedure
+// before adding ANY new brand. Not all brand sites run Shopify:
+//   ❌ Lattafa — www.lattafa.com → WordPress (301 to HTML, not JSON). Do not add.
+//   ❌ Montale — removed (failed verification)
+//   ? Mancera, Rasasi, Khadlaj, Parfums de Marly — unverified, run curl check first
 const SHOPIFY_BRANDS = {
   'Afnan':         { store: 'afnan.com' },
   'Armaf':         { store: 'www.armaf.com' },
@@ -73,8 +76,19 @@ const SHOPIFY_BRANDS = {
 // Only strip truly non-semantic suffixes. Gender terms (pour homme / pour femme /
 // for men / for women) are DISTINGUISHING — stripping them caused "9 AM Pour Homme"
 // to match "9 AM Pour Femme" in the catalog (wrong image, wrong gender).
+//
+// Brand name suffixes: some Shopify stores embed the brand name mid-title, e.g.
+//   Armaf store: "Club De Nuit Intense Man Armaf Eau De Parfum"
+//   Swiss Arabian store: "Shaghaf Oud Swiss Arabian Eau De Parfum"
+// These must be stripped so they match our DB names ("Club De Nuit Intense Man").
+// Year suffixes like "Armaf 2012" are handled by the alphanumeric strip below
+// since year digits alone won't fuzzy-match to a different fragrance.
 const NOISE_WORDS = [
   'eau de parfum', 'eau de toilette', 'eau de cologne', 'edp', 'edt', 'edc',
+  // Brand name suffixes embedded in Shopify catalog titles (verified 2026-06-28)
+  'armaf', 'swiss arabian',
+  // Format suffixes that aren't the fragrance name
+  'body spray', 'hair mist', 'perfume oil', 'parfum oil',
 ]
 
 function normalizeTitle(s) {
@@ -83,6 +97,11 @@ function normalizeTitle(s) {
     .replace(/[̀-ͯ]/g, '') // strip diacritics
     .toLowerCase()
   for (const noise of NOISE_WORDS) t = t.replaceAll(noise, '')
+  // Strip 4-digit years (e.g. "Armaf 2012 Eau De Parfum" → don't want "2012" in key).
+  // Year suffixes appear in Armaf Shopify titles as edition markers, not fragrance names.
+  // Guard: only strip years in the range 1900–2099, not arbitrary 4-digit numbers that
+  // might be part of a fragrance name (e.g. "Oud 1000" should NOT be stripped).
+  t = t.replace(/\b(19|20)\d{2}\b/g, '')
   // Compact key: strip ALL non-alphanumeric so "9 PM" === "9PM", "9pm", etc.
   // Previous version used replace(/[^a-z0-9]+/g, ' ') which kept spaces,
   // causing "9pm" ≠ "9 pm" and missing those catalog matches.

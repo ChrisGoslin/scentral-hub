@@ -17,7 +17,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { ShoppingBag } from 'lucide-react';
 import { getFamilyGradient } from '@/lib/familyGradients';
-import { FragranceBottleIcon } from '@/components/FragranceBottleIcon';
+import { GradientPlaceholder } from '@/components/ui/GradientPlaceholder';
 import { type CollectionFragrance } from '@/app/(main)/collection/CollectionClient';
 import WearLogModal from '@/app/(main)/collection/WearLogModal';
 import BuyLinks from '@/app/components/BuyLinks';
@@ -173,28 +173,21 @@ export default function OptimizedBottleCard({
               onError={() => setImgError(true)}
             />
           ) : (
+            <div style={{ position: 'absolute', inset: 0 }}>
+              <GradientPlaceholder brand={f.brand} name={f.name} family={f.family} />
+            </div>
+          )}
+
+          {/* Ombre overlay for text readability (only if showing image, as placeholder has its own) */}
+          {showImage && (
             <div
               style={{
                 position: 'absolute',
                 inset: 0,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'rgba(255,255,255,0.9)',
+                background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.18) 45%, transparent 70%)',
               }}
-            >
-              <FragranceBottleIcon />
-            </div>
+            />
           )}
-
-          {/* Ombre overlay for text readability */}
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.18) 45%, transparent 70%)',
-            }}
-          />
 
           {/* Maceration progress wash — derived from maceration_started_at/ready_at */}
           {progress !== null && progress < 100 && (
@@ -315,28 +308,30 @@ export default function OptimizedBottleCard({
           )}
 
           {/* Name + brand overlay */}
-          <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: 10 }}>
-            <p style={{
-              fontSize: 9,
-              color: 'rgba(255,255,255,0.8)',
-              textTransform: 'uppercase',
-              letterSpacing: '0.08em',
-              textShadow: '0 1px 2px rgba(0,0,0,0.5)',
-            }}>
-              {f.brand}
-            </p>
-            <p style={{
-              fontSize: 12,
-              fontFamily: 'var(--font-display)',
-              color: '#fff',
-              textShadow: '0 1px 3px rgba(0,0,0,0.6)',
-              overflow: 'hidden',
-              whiteSpace: 'nowrap',
-              textOverflow: 'ellipsis',
-            }}>
-              {f.name}
-            </p>
-          </div>
+          {showImage && (
+            <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: 10 }}>
+              <p style={{
+                fontSize: 9,
+                color: 'rgba(255,255,255,0.8)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                textShadow: '0 1px 2px rgba(0,0,0,0.5)',
+              }}>
+                {f.brand}
+              </p>
+              <p style={{
+                fontSize: 12,
+                fontFamily: 'var(--font-display)',
+                color: '#fff',
+                textShadow: '0 1px 3px rgba(0,0,0,0.6)',
+                overflow: 'hidden',
+                whiteSpace: 'nowrap',
+                textOverflow: 'ellipsis',
+              }}>
+                {f.name}
+              </p>
+            </div>
+          )}
         </div>
       </div>
       <WearLogModal
