@@ -8,6 +8,7 @@ import type { SpritzEvent } from '@/lib/aura'
 import { track } from '@/lib/posthog'
 import { getPersonaCopy } from '@/lib/personaCopy'
 import OccasionPicker from '@/components/brief/OccasionPicker'
+import WearNoteSheet from './WearNoteSheet'
 
 function getOrCreateAnonId(): string {
   try {
@@ -42,6 +43,8 @@ export default function SpritzClient() {
   const [collection] = useState(getCollection())
   const [showOccasionPicker, setShowOccasionPicker] = useState(false)
   const [wornToast, setWornToast] = useState<string | null>(null)
+  const [noteSheetOpen, setNoteSheetOpen] = useState(false)
+  const [currentWearLogId, setCurrentWearLogId] = useState<string | null>(null)
   const copy = getPersonaCopy(typeof window !== 'undefined' ? localStorage.getItem('scentral_persona') : null)
 
   useEffect(() => {
@@ -92,7 +95,7 @@ export default function SpritzClient() {
       const res = await fetch('/api/spritz/log-wear', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ anonId }),
+        body: JSON.stringify({ anonId, fragranceId: event?.fragrance?.id }),
       })
       if (!res.ok) return
       const data = await res.json()
@@ -104,6 +107,10 @@ export default function SpritzClient() {
         localStorage.setItem('scentral_streak_celebrated', '1')
         setStreakToast('🔥 Streak started! Come back tomorrow to keep it alive.')
         setTimeout(() => setStreakToast(null), 3000)
+      }
+      if (data.wearLogId) {
+        setCurrentWearLogId(data.wearLogId)
+        setNoteSheetOpen(true)
       }
     } catch {
       // best-effort — swipe already advanced, XP/streak just won't update this time
@@ -330,6 +337,12 @@ export default function SpritzClient() {
           setWornToast(fragranceName)
           setTimeout(() => setWornToast(null), 3000)
         }}
+      />
+
+      <WearNoteSheet
+        isOpen={noteSheetOpen}
+        onClose={() => setNoteSheetOpen(false)}
+        wearLogId={currentWearLogId}
       />
     </div>
   )

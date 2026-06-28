@@ -232,12 +232,18 @@ async function main() {
   let batchIndex = 1;
   let totalHits = 0;
   let totalMisses = 0;
+  // Cursor on id, NOT just "image_url IS NULL" — misses stay NULL forever, so a
+  // filter-only query with no stable order can return the same window repeatedly
+  // and never advance through the catalog. Always move past the last id seen.
+  let lastId = '00000000-0000-0000-0000-000000000000';
 
   while (true) {
     let query = supabase
       .from('fragrances')
       .select('id, brand, name')
       .is('image_url', null)
+      .gt('id', lastId)
+      .order('id', { ascending: true })
       .limit(500);
 
     if (limit > 0 && limit < 500) query = query.limit(limit);
@@ -258,6 +264,7 @@ async function main() {
     totalMisses += result.misses;
     console.log(`\n✅ Batch ${batchIndex} summary: ${result.hits} hits, ${result.misses} misses\n`);
 
+    lastId = fragrances[fragrances.length - 1].id;
     batchIndex++;
     if (isDryRun || limit > 0) break;
   }

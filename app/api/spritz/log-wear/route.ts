@@ -29,6 +29,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const anonId: string | undefined = body.anonId
+    const fragranceId: string | undefined = body.fragranceId
 
     if (!anonId) {
       return NextResponse.json({ error: 'Missing anonId' }, { status: 400 })
@@ -45,6 +46,27 @@ export async function POST(req: NextRequest) {
     const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
       auth: { autoRefreshToken: false, persistSession: false },
     })
+
+    // --- Insert Wear Log ---
+    let wearLogId = null
+    if (fragranceId) {
+      const { data: logData, error: logError } = await supabaseAdmin
+        .from('wear_logs')
+        .insert({
+          user_id: anonId,
+          fragrance_id: fragranceId,
+          logged_at: new Date().toISOString(),
+          rating: null
+        })
+        .select('id')
+        .single()
+
+      if (!logError && logData) {
+        wearLogId = logData.id
+      } else {
+        console.error('wear_logs insert error:', logError)
+      }
+    }
 
     // --- XP ---
     const { data: xpRow } = await supabaseAdmin
@@ -105,6 +127,7 @@ export async function POST(req: NextRequest) {
       success: true,
       xp: { totalXp: newTotalXp, level: newLevel, gained: SWIPE_RIGHT_XP },
       streak: { current: currentStreak, longest: longestStreak },
+      wearLogId,
     })
   } catch (error: any) {
     console.error('Spritz Log Wear API Error:', error)
