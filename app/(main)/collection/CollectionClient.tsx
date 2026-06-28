@@ -19,6 +19,7 @@ import { getAffinityTier } from '@/lib/affinity'
 import WardrobeShelf from './WardrobeShelf'
 import { CollectionShelfModal } from '@/components/collection/CollectionShelfModal'
 import { getPersonaCopy, type PersonaCopy } from '@/lib/personaCopy'
+import CoherenceCard from './CoherenceCard'
 
 export type CollectionFragrance = {
   id: string
@@ -369,6 +370,9 @@ export default function CollectionClient({ fragrances, totalCount }: { fragrance
         <WardrobeShelf fragrances={fragrances} />
       ) : (
         <>
+          <div className="pt-4">
+            <CoherenceCard owned={ownedFragrances} />
+          </div>
           <div className="px-4 pt-3 pb-2">
             <input
               type="search"
