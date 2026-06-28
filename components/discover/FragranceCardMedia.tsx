@@ -94,8 +94,8 @@ export function FragranceCardMedia({ imageUrl, brand, name, family, rating, owne
 
             {/* Score line + fragrance name — vertically centred lower third */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-              {/* The blotter mark */}
-              <div style={{ borderTop: '1px solid rgba(255,255,255,0.15)' }} />
+              {/* The blotter mark — gold gradient matches portrait card score line */}
+              <div style={{ height: 1, background: 'linear-gradient(to right, var(--accent), transparent)', opacity: 0.6 }} />
               <p
                 style={{
                   fontFamily: 'var(--font-display)',

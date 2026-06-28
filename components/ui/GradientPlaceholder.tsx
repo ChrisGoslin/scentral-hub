@@ -25,20 +25,37 @@ export function GradientPlaceholder({ brand, name, family, compact = false, styl
         ...style
       }}
     >
-      {/* Brand initial — large typographic anchor */}
-      <span
-        style={{
-          fontFamily: 'var(--font-display)',
-          fontSize: compact ? 48 : 64,
-          lineHeight: 1,
-          color: 'rgba(255,255,255,0.15)',
-          fontStyle: 'italic',
-          userSelect: 'none',
-          letterSpacing: '-0.02em',
-        }}
-      >
-        {brand.charAt(0)}
-      </span>
+      {/* Top row — brand in small caps (matches wall card convention) + initial as ghost anchor */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', position: 'relative', zIndex: 2 }}>
+        <p
+          style={{
+            fontSize: 9,
+            color: 'var(--accent)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.12em',
+            margin: 0,
+            opacity: 0.9,
+            textShadow: '0 1px 2px rgba(0,0,0,0.4)',
+          }}
+        >
+          {brand}
+        </p>
+        {/* Brand initial — ghost typographic anchor, top-right */}
+        <span
+          style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: compact ? 40 : 52,
+            lineHeight: 0.9,
+            color: 'rgba(255,255,255,0.12)',
+            fontStyle: 'italic',
+            userSelect: 'none',
+            letterSpacing: '-0.02em',
+            marginTop: -4,
+          }}
+        >
+          {brand.charAt(0)}
+        </span>
+      </div>
 
       {/* Lower third — gold score line + name */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6, position: 'relative', zIndex: 2 }}>
@@ -65,19 +82,6 @@ export function GradientPlaceholder({ brand, name, family, compact = false, styl
           }}
         >
           {name}
-        </p>
-        <p
-          style={{
-            fontSize: 8,
-            color: 'var(--accent)',
-            textTransform: 'uppercase',
-            letterSpacing: '0.12em',
-            margin: 0,
-            opacity: 0.9,
-            textShadow: '0 1px 2px rgba(0,0,0,0.4)',
-          }}
-        >
-          {brand}
         </p>
       </div>
       
