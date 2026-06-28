@@ -110,7 +110,7 @@ export default function HeroSection() {
         }
       `}</style>
       <Link href="/onboarding" className="hero-cta">
-        Begin
+        Begin →
       </Link>
     </section>
   )
