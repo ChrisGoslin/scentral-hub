@@ -4,7 +4,7 @@ import React, { useState, useTransition, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
-import { calculateEngagement } from '@/lib/engagement'
+import { calculateEngagement, formatDate as formatRelativeDate } from '@/lib/engagement'
 import { useSavedCombinations } from '@/hooks/useSavedCombinations'
 import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
@@ -13,6 +13,7 @@ import AuthSheet from '@/components/auth/AuthSheet'
 import ProfileCard from './ProfileCard'
 import InsightsPanel, { type WeekWearEntry, type SavedCombination } from './InsightsPanel'
 import YourContributions from '@/components/feedback/YourContributions'
+import { getPersonaById, type Persona } from '@/lib/personas'
 
 export type { WeekWearEntry, SavedCombination }
 import { track } from '@/lib/posthog'
@@ -42,6 +43,9 @@ export default function YouClient(props: YouClientProps) {
   const [weekWear, setWeekWear] = useState<WeekWearEntry[]>(props.state === 'signed-in' ? props.weekWear : [])
   const [ownedCount, setOwnedCount] = useState(props.state === 'signed-in' ? props.ownedCount : 0)
   const [auraStreak, setAuraStreak] = useState(0)
+  const [localPersona, setLocalPersona] = useState<Persona | null>(null)
+  const [localCollectionCount, setLocalCollectionCount] = useState(0)
+  const [localScentHistory, setLocalScentHistory] = useState<{ fragranceId: string; brand: string; name: string; loggedAt: string }[]>([])
 
   // Fetch saved combinations
   const userId = props.state === 'signed-in' ? (props.email ? 'user-id' : null) : null
@@ -53,17 +57,48 @@ export default function YouClient(props: YouClientProps) {
     setEngagement(calculateEngagement())
     setMounted(true)
 
+    const personaId = localStorage.getItem('scentral_persona')
+    if (personaId) {
+      const p = getPersonaById(personaId)
+      if (p) setLocalPersona(p)
+    }
+
+    try {
+      const col: string[] = JSON.parse(localStorage.getItem('scentral_collection') ?? '[]')
+      setLocalCollectionCount(col.length)
+    } catch {
+      // best-effort
+    }
+
     // Aura Spritz Schedule streak — anon_id-keyed, independent of auth state.
     const anonId = localStorage.getItem('scentral_anon_id')
     if (anonId) {
       ;(async () => {
         try {
-          const { data } = await createClient()
+          const supabase = createClient()
+          const { data } = await supabase
             .from('user_streaks')
             .select('current_streak')
             .eq('anon_id', anonId)
             .maybeSingle()
           setAuraStreak(data?.current_streak ?? 0)
+
+          const { data: logs } = await supabase
+            .from('wear_logs')
+            .select('fragrance_id, logged_at, fragrances ( brand, name )')
+            .eq('user_id', anonId)
+            .order('logged_at', { ascending: false })
+            .limit(7)
+          if (logs) {
+            setLocalScentHistory(
+              logs.map((log: any) => ({
+                fragranceId: log.fragrance_id,
+                brand: log.fragrances?.brand ?? 'Unknown',
+                name: log.fragrances?.name ?? 'Unknown',
+                loggedAt: log.logged_at,
+              }))
+            )
+          }
         } catch {
           // best-effort — badge just won't show
         }
@@ -179,17 +214,78 @@ export default function YouClient(props: YouClientProps) {
           )}
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', padding: 32, textAlign: 'center' }}>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--text)', lineHeight: '34px', fontStyle: 'italic', marginBottom: 16 }}>
-            Your identity is waiting.
-          </h2>
-          <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: '20px', maxWidth: 320, marginBottom: 32 }}>
-            Take the 2-minute quiz to discover your scent identity.
-          </p>
-          <Button fullWidth onClick={() => setAuthSheetOpen(true)} style={{ maxWidth: 280 }}>
-            Find Your Base Note →
-          </Button>
-        </div>
+        {!localPersona ? (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', padding: 32, textAlign: 'center' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--text)', lineHeight: '34px', fontStyle: 'italic', marginBottom: 16 }}>
+              Your identity is waiting.
+            </h2>
+            <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: '20px', maxWidth: 320, marginBottom: 32 }}>
+              Take the 2-minute quiz to discover your scent identity.
+            </p>
+            <Link href="/onboarding" style={{ width: '100%', maxWidth: 280 }}>
+              <Button fullWidth>Find Your Base Note →</Button>
+            </Link>
+          </div>
+        ) : (
+          <div className="px-4 py-6 flex flex-col gap-6">
+            <div
+              className="relative rounded-[16px] p-5 overflow-hidden shadow-sm border"
+              style={{
+                background: localPersona.ui_theme.cardBg,
+                borderColor: `${localPersona.ui_theme.accentColor}30`,
+                borderLeft: `4px solid ${localPersona.ui_theme.accentColor}`,
+              }}
+            >
+              <p style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.12em', fontWeight: 700 }}>
+                Your Scent Identity
+              </p>
+              <p style={{ fontSize: 26, fontFamily: 'var(--font-display)', fontStyle: 'italic', color: localPersona.ui_theme.accentColor, marginTop: 4 }}>
+                {localPersona.name}
+              </p>
+              <p style={{ fontSize: 14, color: 'var(--text)', marginTop: 4, lineHeight: '20px' }}>
+                {localPersona.narrative.tagline}
+              </p>
+              <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
+                {localPersona.scent_spectrum.base.slice(0, 3).map((note) => (
+                  <span key={note} style={{ fontSize: 11, fontFamily: 'var(--font-mono, monospace)', color: 'var(--text-muted)' }}>
+                    {note}
+                  </span>
+                ))}
+              </div>
+              <div style={{ display: 'flex', gap: 16, marginTop: 16, fontSize: 12, color: 'var(--text-muted)' }}>
+                <span>{localCollectionCount} in collection</span>
+                {auraStreak > 0 && <span>🔥 {auraStreak}-day streak</span>}
+                {localScentHistory[0] && <span>Last worn {formatRelativeDate(localScentHistory[0].loggedAt)}</span>}
+              </div>
+              <Link
+                href={`/discover?persona=${localPersona.id}`}
+                style={{ display: 'inline-block', marginTop: 16, fontSize: 13, fontWeight: 600, color: localPersona.ui_theme.accentColor }}
+              >
+                Explore your {localPersona.name} fragrances →
+              </Link>
+            </div>
+
+            {localScentHistory.length > 0 && (
+              <div>
+                <p style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700, marginBottom: 12 }}>
+                  Your Scent History
+                </p>
+                <div className="flex flex-col gap-3">
+                  {localScentHistory.map((entry, i) => (
+                    <div key={`${entry.fragranceId}-${i}`} className="flex items-baseline justify-between" style={{ borderBottom: '1px solid var(--line)', paddingBottom: 8 }}>
+                      <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 16, color: 'var(--text)' }}>
+                        {entry.brand} {entry.name}
+                      </p>
+                      <p style={{ fontSize: 11, fontFamily: 'var(--font-mono, monospace)', color: 'var(--text-muted)' }}>
+                        {formatRelativeDate(entry.loggedAt)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="px-6 pb-8">
           <YourContributions />
