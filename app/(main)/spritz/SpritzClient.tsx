@@ -343,6 +343,7 @@ export default function SpritzClient() {
         isOpen={noteSheetOpen}
         onClose={() => setNoteSheetOpen(false)}
         wearLogId={currentWearLogId}
+        placeholder={copy.briefCTA}
       />
     </div>
   )

@@ -657,6 +657,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
             loadMoreError={loadMoreError}
             hasMore={hasMore}
             totalCount={localFragrances.length}
+            sort={sort}
             onWishlistToggle={toggleWishlist}
             onLoadMore={loadMore}
             onClearFilters={clearFilters}

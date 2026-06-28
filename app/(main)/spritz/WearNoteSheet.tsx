@@ -7,9 +7,10 @@ type Props = {
   isOpen: boolean
   onClose: () => void
   wearLogId: string | null
+  placeholder?: string
 }
 
-export default function WearNoteSheet({ isOpen, onClose, wearLogId }: Props) {
+export default function WearNoteSheet({ isOpen, onClose, wearLogId, placeholder }: Props) {
   const [note, setNote] = useState('')
   const [saving, setSaving] = useState(false)
   const [progress, setProgress] = useState(100)
@@ -105,7 +106,7 @@ export default function WearNoteSheet({ isOpen, onClose, wearLogId }: Props) {
               setInteracted(true)
             }}
             onFocus={() => setInteracted(true)}
-            placeholder=""
+            placeholder={placeholder ?? "What does it remind you of?"}
             maxLength={120}
             style={{
               flex: 1,

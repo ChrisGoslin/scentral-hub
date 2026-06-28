@@ -25,6 +25,7 @@ type Props = {
   loadMoreError: string | null
   hasMore: boolean
   totalCount: number
+  sort: string
 
   onWishlistToggle: (id: string) => void
   onLoadMore: () => void
@@ -45,6 +46,7 @@ export function DiscoverGrid({
   loadMoreError,
   hasMore,
   totalCount,
+  sort,
   onWishlistToggle,
   onLoadMore,
   onClearFilters,
@@ -137,6 +139,26 @@ export function DiscoverGrid({
                     }}
                   >
                     ◆ Strong fit
+                  </span>
+                )}
+                {sort === '◆ Rare' && f.inspired_by && (
+                  <span
+                    style={{
+                      position: 'absolute',
+                      bottom: 8,
+                      left: 8,
+                      fontSize: 9,
+                      color: 'var(--accent)',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.1em',
+                      background: 'color-mix(in srgb, var(--bg) 80%, transparent)',
+                      borderRadius: 4,
+                      padding: '2px 6px',
+                      zIndex: 2,
+                      fontWeight: 600,
+                    }}
+                  >
+                    Inspired By available
                   </span>
                 )}
                 <button
