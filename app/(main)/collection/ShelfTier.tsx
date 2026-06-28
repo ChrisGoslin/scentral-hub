@@ -17,6 +17,13 @@ interface ShelfTierProps {
   isMobile?: boolean
 }
 
+const TIER_EXPLAINERS: Record<TierKey, string> = {
+  tier0: 'What you reach for most. Your identity bottles.',
+  tier1: 'Context-specific. Right bottle, right moment.',
+  tier2: 'Starting points. Building your nose.',
+  tier3: 'Not yet rated. Give them time.',
+}
+
 export default function ShelfTier({ tierId, label, sublabel, items, locked, activeId, isMobile = false }: ShelfTierProps) {
   const { setNodeRef, isOver } = useDroppable({ id: tierId })
 
@@ -51,6 +58,19 @@ export default function ShelfTier({ tierId, label, sublabel, items, locked, acti
           {items.length}
         </span>
       </div>
+
+      {items.length > 0 && (
+        <p style={{
+          fontSize: 10,
+          color: 'var(--text-muted)',
+          fontStyle: 'italic',
+          marginTop: 2,
+          marginBottom: 6,
+          paddingLeft: 4,
+        }}>
+          {TIER_EXPLAINERS[tierId]}
+        </p>
+      )}
 
       {/* Shelf body */}
       <div
@@ -122,7 +142,7 @@ export default function ShelfTier({ tierId, label, sublabel, items, locked, acti
                 letterSpacing: '0.06em',
                 textTransform: 'uppercase',
               }}>
-                {locked ? 'New bottles appear here' : 'Drag bottles here'}
+                {locked ? 'Rate a fragrance 1–20 to move it to the right tier.' : 'Drag bottles here'}
               </div>
             ) : (
               items.map(f => (

@@ -343,6 +343,8 @@ export default function SpritzClient() {
         isOpen={noteSheetOpen}
         onClose={() => setNoteSheetOpen(false)}
         wearLogId={currentWearLogId}
+        fragranceId={schedule[currentCardIndex - 1]?.fragrance?.id}
+        fragranceName={schedule[currentCardIndex - 1]?.fragrance?.name}
         placeholder={copy.briefCTA}
       />
     </div>

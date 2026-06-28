@@ -7,10 +7,12 @@ type Props = {
   isOpen: boolean
   onClose: () => void
   wearLogId: string | null
+  fragranceId?: string
+  fragranceName?: string
   placeholder?: string
 }
 
-export default function WearNoteSheet({ isOpen, onClose, wearLogId, placeholder }: Props) {
+export default function WearNoteSheet({ isOpen, onClose, wearLogId, fragranceId, fragranceName, placeholder }: Props) {
   const [note, setNote] = useState('')
   const [saving, setSaving] = useState(false)
   const [progress, setProgress] = useState(100)
@@ -53,6 +55,22 @@ export default function WearNoteSheet({ isOpen, onClose, wearLogId, placeholder 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ wearLogId, note: note.trim() }),
       })
+
+      // Push to Scentral Strip Queue
+      const queueItem = {
+        wearLogId,
+        note: note.trim(),
+        fragranceId,
+        fragranceName,
+        timestamp: Date.now()
+      }
+      try {
+        const q = JSON.parse(localStorage.getItem('scentral_strip_queue') ?? '[]')
+        q.push(queueItem)
+        localStorage.setItem('scentral_strip_queue', JSON.stringify(q))
+      } catch (e) {
+        console.error('Queue save failed', e)
+      }
     } catch (e) {
       console.error(e)
     } finally {

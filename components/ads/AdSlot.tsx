@@ -38,7 +38,39 @@ export default function AdSlot({ slot, format = 'auto', className, style }: Prop
     }
   }, [clientId])
 
-  if (!clientId) return null
+  const fallback = (
+    <div
+      style={{
+        minHeight: 100,
+        background: 'var(--surface)',
+        borderRadius: 'var(--r-card)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        border: '1px solid var(--line)',
+      }}
+    >
+      <p
+        style={{
+          fontSize: 11,
+          color: 'var(--text-muted)',
+          textTransform: 'uppercase',
+          letterSpacing: '0.08em',
+          margin: 0,
+        }}
+      >
+        Supported by our partners
+      </p>
+    </div>
+  )
+
+  if (!clientId) {
+    return (
+      <div className={className} style={{ overflow: 'hidden', textAlign: 'center', ...style }} aria-label="Advertisement">
+        {fallback}
+      </div>
+    )
+  }
 
   return (
     <div
@@ -50,31 +82,7 @@ export default function AdSlot({ slot, format = 'auto', className, style }: Prop
       }}
       aria-label="Advertisement"
     >
-      {!adLoaded && (
-        <div
-          style={{
-            minHeight: 100,
-            background: 'var(--surface)',
-            borderRadius: 'var(--r-card)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            border: '1px solid var(--line)',
-          }}
-        >
-          <p
-            style={{
-              fontSize: 11,
-              color: 'var(--text-muted)',
-              textTransform: 'uppercase',
-              letterSpacing: '0.08em',
-              margin: 0,
-            }}
-          >
-            Supported by our partners
-          </p>
-        </div>
-      )}
+      {!adLoaded && fallback}
       <ins
         ref={adRef}
         className="adsbygoogle"

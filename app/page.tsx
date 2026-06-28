@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Metadata } from 'next'
 import HeroSection from '@/components/landing/HeroSection'
 import PersonaTeasers from '@/components/landing/PersonaTeasers'
+import InspiredByCounter from '@/components/landing/InspiredByCounter'
 
 const TITLE = 'BaseNote — Your Scent Fingerprint'
 const DESCRIPTION =
@@ -71,10 +72,11 @@ export default function Home() {
         <h2 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'clamp(1.8rem, 4vw, 3rem)', color: 'var(--text)', textAlign: 'center', marginBottom: 12, margin: '0 0 12px' }}>
           Your £140 bottle has an inspired-by at £18.
         </h2>
-        <p style={{ color: 'var(--text-muted)', textAlign: 'center', marginBottom: 48, fontSize: 15 }}>
+        <p style={{ color: 'var(--text-muted)', textAlign: 'center', marginBottom: 8, fontSize: 15 }}>
           We find them. You decide.
         </p>
-        <div style={{ display: 'flex', gap: 16, maxWidth: 480, margin: '0 auto', justifyContent: 'center' }}>
+        <InspiredByCounter />
+        <div style={{ display: 'flex', gap: 16, maxWidth: 480, margin: '40px auto 0', justifyContent: 'center' }}>
           {/* Designer card — woody gradient from family tokens */}
           <div style={{ flex: 1, padding: '24px 16px', borderRadius: 12, background: 'linear-gradient(160deg, var(--family-woody-start), var(--family-woody-end))', textAlign: 'center' }}>
             <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 8, margin: 0 }}>Designer</p>
