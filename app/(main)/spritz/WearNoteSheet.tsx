@@ -71,6 +71,14 @@ export default function WearNoteSheet({ isOpen, onClose, wearLogId, fragranceId,
       } catch (e) {
         console.error('Queue save failed', e)
       }
+
+      try {
+        const notes = JSON.parse(localStorage.getItem('scentral_wear_notes') ?? '[]')
+        notes.push({ fragrance_id: fragranceId, note: note.trim(), date: new Date().toISOString() })
+        localStorage.setItem('scentral_wear_notes', JSON.stringify(notes))
+      } catch (e) {
+        console.error('Wear note save failed', e)
+      }
     } catch (e) {
       console.error(e)
     } finally {
