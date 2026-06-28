@@ -15,6 +15,7 @@ import InsightsPanel, { type WeekWearEntry, type SavedCombination } from './Insi
 import YourContributions from '@/components/feedback/YourContributions'
 import { getPersonaById, type Persona } from '@/lib/personas'
 import { calculateIdentityScore, type IdentityScore } from '@/lib/identityScore'
+import NoseReportSheet from '@/components/ui/NoseReportSheet'
 
 export type { WeekWearEntry, SavedCombination }
 import { track } from '@/lib/posthog'
@@ -48,6 +49,9 @@ export default function YouClient(props: YouClientProps) {
   const [localCollectionCount, setLocalCollectionCount] = useState(0)
   const [localScentHistory, setLocalScentHistory] = useState<{ fragranceId: string; brand: string; name: string; loggedAt: string }[]>([])
   const [identityScore, setIdentityScore] = useState<IdentityScore | null>(null)
+  
+  // Nose Report
+  const [noseReportData, setNoseReportData] = useState<any>(null)
 
   // Fetch saved combinations
   const userId = props.state === 'signed-in' ? (props.email ? 'user-id' : null) : null
@@ -83,27 +87,27 @@ export default function YouClient(props: YouClientProps) {
       // best-effort
     }
 
-    // Aura Spritz Schedule streak — anon_id-keyed, independent of auth state.
+    // Aura Spritz Schedule streak & Nose Report
     const anonId = localStorage.getItem('scentral_anon_id')
     if (anonId) {
       ;(async () => {
         try {
-          const { data } = await supabase
+          const { data: streakData } = await supabase
             .from('user_streaks')
-            .select('current_streak')
+            .select('current_streak, longest_streak')
             .eq('anon_id', anonId)
             .maybeSingle()
-          setAuraStreak(data?.current_streak ?? 0)
+          setAuraStreak(streakData?.current_streak ?? 0)
 
           const { data: logs } = await supabase
             .from('wear_logs')
             .select('fragrance_id, logged_at, fragrances ( brand, name )')
             .eq('user_id', anonId)
             .order('logged_at', { ascending: false })
-            .limit(7)
-          if (logs) {
+            
+          if (logs && logs.length > 0) {
             setLocalScentHistory(
-              logs.map((log: any) => ({
+              logs.slice(0, 7).map((log: any) => ({
                 fragranceId: log.fragrance_id,
                 brand: log.fragrances?.brand ?? 'Unknown',
                 name: log.fragrances?.name ?? 'Unknown',
@@ -111,8 +115,57 @@ export default function YouClient(props: YouClientProps) {
               }))
             )
           }
+
+          // Nose Report logic
+          const date = new Date()
+          const currentMonthYear = date.toLocaleString('default', { month: 'long', year: 'numeric' }).toUpperCase()
+          const lastReport = localStorage.getItem('scentral_last_nose_report')
+          
+          if (lastReport !== currentMonthYear && logs && logs.length > 0) {
+            // Check if they have wears *this month*
+            const thisMonthLogs = logs.filter((l: any) => new Date(l.logged_at).getMonth() === date.getMonth())
+            if (thisMonthLogs.length > 0) {
+              const countMap = new Map<string, { count: number, name: string, brand: string }>()
+              thisMonthLogs.forEach((l: any) => {
+                const existing = countMap.get(l.fragrance_id)
+                if (existing) {
+                  existing.count++
+                } else {
+                  countMap.set(l.fragrance_id, { count: 1, name: l.fragrances?.name, brand: l.fragrances?.brand })
+                }
+              })
+              let mostWorn = { count: 0, name: '', brand: '' }
+              countMap.forEach(v => { if (v.count > mostWorn.count) mostWorn = v })
+
+              // Unworn calculation
+              let unwornName = null
+              try {
+                const col: string[] = JSON.parse(localStorage.getItem('scentral_collection') ?? '[]')
+                const wornIds = new Set(logs.map((l: any) => l.fragrance_id))
+                const unwornIds = col.filter(id => !wornIds.has(id))
+                if (unwornIds.length > 0) {
+                  const { data: unwornData } = await supabase.from('fragrances').select('name').eq('id', unwornIds[0]).single()
+                  if (unwornData) unwornName = unwornData.name
+                }
+              } catch {}
+
+              setNoseReportData({
+                monthYear: currentMonthYear,
+                wornsThisMonth: thisMonthLogs.length,
+                mostWornName: mostWorn.name,
+                mostWornBrand: mostWorn.brand,
+                dominantPersonaId: personaId,
+                longestStreak: streakData?.longest_streak ?? streakData?.current_streak ?? 0,
+                unwornName
+              })
+            } else if (logs.length > 0) {
+               // They have logs, but none this month. Maybe set report so it doesn't keep checking?
+               // Let's not trigger it if they have 0 wears this month to avoid "0 wears" empty states
+               localStorage.setItem('scentral_last_nose_report', currentMonthYear)
+            }
+          }
         } catch {
-          // best-effort — badge just won't show
+          // best-effort
         }
       })()
     }
@@ -397,6 +450,17 @@ export default function YouClient(props: YouClientProps) {
 
       {/* Bottom spacer */}
       <div style={{ height: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }} />
+
+      {noseReportData && (
+        <NoseReportSheet
+          isOpen={true}
+          onClose={() => {
+            setNoseReportData(null)
+            localStorage.setItem('scentral_last_nose_report', noseReportData.monthYear)
+          }}
+          {...noseReportData}
+        />
+      )}
     </div>
   )
 }
