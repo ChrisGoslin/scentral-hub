@@ -183,34 +183,8 @@ async function updateFragranceImageUrl(fragranceId: string, imageUrl: string): P
 
 // ── Main Handler ───────────────────────────────────────────────────────────────
 export async function POST(req: Request): Promise<NextResponse<GenerateImageResponse>> {
-  const startTime = new Date();
-
-  try {
-    const envCheck = validateEnvironment();
-    if (!envCheck.valid) return NextResponse.json({ success: false, error: envCheck.error }, { status: 500 });
-
-    const { fragranceId } = await req.json();
-    if (!fragranceId) return NextResponse.json({ success: false, error: 'fragranceId is required' }, { status: 400 });
-
-    console.log(`[Generate Image] Routing to Vertex AI for: ${fragranceId}`);
-
-    const fragrance = await fetchFragranceDetails(fragranceId);
-    const prompt = buildGeminiPrompt(fragrance);
-    const base64Image = await generateImageWithVertex(prompt);
-    const { publicUrl, fileName } = await uploadToSupabase(base64Image, fragranceId);
-    await updateFragranceImageUrl(fragranceId, publicUrl);
-
-    const generatedAt = new Date().toISOString();
-    return NextResponse.json({
-      success: true,
-      imageUrl: publicUrl,
-      fileName,
-      generatedAt,
-      metadata: { dimensions: IMAGE_DIMENSIONS, model: MODEL_ID, timestamp: generatedAt }
-    });
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error(`[Error] Vertex Migration Outage: ${errorMessage}`);
-    return NextResponse.json({ success: false, error: errorMessage }, { status: 500 });
-  }
+  return NextResponse.json(
+    { success: false, error: 'Image generation is disabled in MVP. Use Shopify enrichment or GradientPlaceholder instead.' },
+    { status: 503 }
+  );
 }
