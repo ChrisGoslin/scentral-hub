@@ -4,6 +4,7 @@ import HeroSection from '@/components/landing/HeroSection'
 import PressMarquee from '@/components/ui/PressMarquee'
 import PersonaTeasers from '@/components/landing/PersonaTeasers'
 import InspiredByCounter from '@/components/landing/InspiredByCounter'
+import DiscoveryBoxCard from './(main)/components/DiscoveryBoxCard'
 
 const TITLE = 'BaseNote — Your Scent Fingerprint'
 const DESCRIPTION =
@@ -92,6 +93,11 @@ export default function Home() {
             <p style={{ color: 'var(--accent)', fontSize: 13, marginTop: 4, margin: '4px 0 0' }}>£19</p>
           </div>
         </div>
+      </section>
+
+      {/* ── Discovery Box ── */}
+      <section style={{ padding: '80px 24px', width: '100%', maxWidth: 480, margin: '0 auto', boxSizing: 'border-box' }}>
+        <DiscoveryBoxCard />
       </section>
 
       {/* ── Footer ── */}
