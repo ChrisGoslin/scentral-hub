@@ -50,24 +50,33 @@ async function seedBoxes() {
     const boxes = [
       {
         name: 'Arabian Nights Starter',
-        theme: 'Middle Eastern',
-        fragrances: arabianIds,
-        price_gbp: 24.99,
-        is_active: true,
+        slug: 'arabian-nights-starter',
+        theme: 'oud',
+        tier: 'discovery',
+        description: 'Bold Middle Eastern scents at a fraction of designer prices.',
+        fragrance_ids: arabianIds.map(String),
+        shopify_product_id: 'placeholder-arabian-nights',
+        price_cents: 2499,
       },
       {
         name: 'Office Hours',
-        theme: 'Clean & Professional',
-        fragrances: officeIds,
-        price_gbp: 22.99,
-        is_active: true,
+        slug: 'office-hours',
+        theme: 'fresh',
+        tier: 'discovery',
+        description: 'Clean, professional fragrances for everyday wear.',
+        fragrance_ids: officeIds.map(String),
+        shopify_product_id: 'placeholder-office-hours',
+        price_cents: 2299,
       },
       {
         name: 'Weekend Wanderer',
-        theme: 'Casual & Versatile',
-        fragrances: weekendIds,
-        price_gbp: 24.99,
-        is_active: true,
+        slug: 'weekend-wanderer',
+        theme: 'casual',
+        tier: 'discovery',
+        description: 'Versatile scents for casual days and social occasions.',
+        fragrance_ids: weekendIds.map(String),
+        shopify_product_id: 'placeholder-weekend-wanderer',
+        price_cents: 2499,
       },
     ]
 
@@ -81,7 +90,7 @@ async function seedBoxes() {
 
     console.log(`✅ Successfully seeded ${data?.length || 0} discovery boxes:`)
     data?.forEach(box => {
-      console.log(`  ✓ ${box.name} (${box.fragrances.length} fragrances) — £${box.price_gbp}`)
+      console.log(`  ✓ ${box.name} (${box.fragrance_ids?.length ?? 0} fragrances) — ${box.slug}`)
     })
   } catch (err) {
     console.error('❌ Seeding failed:', err.message)

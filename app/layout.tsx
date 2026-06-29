@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, Unbounded } from "next/font/google";
+import { Unbounded } from "next/font/google";
 import "./globals.css";
 import "../lib/design/tokens.css";
 import PWARegistration from "./components/PWARegistration";
@@ -8,15 +8,6 @@ import { Providers } from "./providers";
 import PageTracker from "./components/PageTracker";
 import DeferredFontLink from "./components/DeferredFontLink";
 import FeedbackWidget from "@/components/feedback/FeedbackWidget";
-
-const cormorantGaramond = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["400"],
-  style: ["italic"],
-  variable: "--font-cormorant",
-  display: "swap",
-  preload: true,
-});
 
 const unbounded = Unbounded({
   subsets: ["latin"],
@@ -78,24 +69,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-theme="dark" className={`h-[100dvh] antialiased ${cormorantGaramond.variable} ${unbounded.variable}`}>
+    <html lang="en" data-theme="dark" style={{ "--font-cormorant": "Cormorant Garamond" } as React.CSSProperties} className={`h-[100dvh] antialiased ${unbounded.variable}`}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+        <link rel="preload" href="/fonts/cormorant-garamond-v21-latin-italic.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <DeferredFontLink />
-        {/* AdSense verification + script — activates when env var is set in Vercel */}
-        {process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID && (
-          <>
-            <meta name="google-adsense-account" content={process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID} />
-            <script
-              async
-              defer
-              src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID}`}
-              crossOrigin="anonymous"
-            />
-          </>
-        )}
       </head>
       <body className="min-h-[100dvh] flex flex-col" style={{ background: "var(--bg)", color: "var(--text)", fontFamily: "var(--font-ui)" }}>
         <Providers>
