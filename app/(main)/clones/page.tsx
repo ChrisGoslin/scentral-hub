@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import { createClient } from '@/utils/supabase/server'
 import ClonesClient from './ClonesClient'
+import PressMarquee from '@/components/ui/PressMarquee'
 
 export const metadata: Metadata = {
   title: 'Inspired By | BaseNote',
@@ -62,10 +63,13 @@ export default async function ClonesPage() {
     .map(([name, count]) => ({ name, count }))
 
   return (
-    <ClonesClient
-      clones={clones}
-      topOriginals={topOriginals}
-      error={error?.message ?? null}
-    />
+    <>
+      <PressMarquee />
+      <ClonesClient
+        clones={clones}
+        topOriginals={topOriginals}
+        error={error?.message ?? null}
+      />
+    </>
   )
 }

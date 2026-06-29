@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Metadata } from 'next'
 import HeroSection from '@/components/landing/HeroSection'
+import PressMarquee from '@/components/ui/PressMarquee'
 import PersonaTeasers from '@/components/landing/PersonaTeasers'
 import InspiredByCounter from '@/components/landing/InspiredByCounter'
 
@@ -62,6 +63,7 @@ export default function Home() {
       )}
 
       <HeroSection />
+      <PressMarquee />
       <PersonaTeasers />
 
       {/* ── Inspired By Engine ── */}
