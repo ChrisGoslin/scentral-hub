@@ -21,8 +21,8 @@ const boxes = [
     theme: 'oriental',
     tier: 'premium',
     fragrance_ids: [],
-    shopify_product_id: null,
-    price: null,
+    shopify_product_id: 'gid://shopify/Product/VELVET_EDIT_001',
+    price_cents: null,
   },
   {
     name: 'The Solar Set',
@@ -31,8 +31,8 @@ const boxes = [
     theme: 'fresh',
     tier: 'standard',
     fragrance_ids: [],
-    shopify_product_id: null,
-    price: null,
+    shopify_product_id: 'gid://shopify/Product/SOLAR_SET_001',
+    price_cents: null,
   },
   {
     name: 'The Dark Atelier',
@@ -41,8 +41,8 @@ const boxes = [
     theme: 'leather',
     tier: 'premium',
     fragrance_ids: [],
-    shopify_product_id: null,
-    price: null,
+    shopify_product_id: 'gid://shopify/Product/DARK_ATELIER_001',
+    price_cents: null,
   },
   {
     name: 'The Ritual Kit',
@@ -51,8 +51,8 @@ const boxes = [
     theme: 'woody',
     tier: 'standard',
     fragrance_ids: [],
-    shopify_product_id: null,
-    price: null,
+    shopify_product_id: 'gid://shopify/Product/RITUAL_KIT_001',
+    price_cents: null,
   },
   {
     name: 'The Lab Pack',
@@ -61,8 +61,8 @@ const boxes = [
     theme: 'aromatic',
     tier: 'standard',
     fragrance_ids: [],
-    shopify_product_id: null,
-    price: null,
+    shopify_product_id: 'gid://shopify/Product/LAB_PACK_001',
+    price_cents: null,
   },
   {
     name: 'The Comfort Collection',
@@ -71,8 +71,8 @@ const boxes = [
     theme: 'gourmand',
     tier: 'standard',
     fragrance_ids: [],
-    shopify_product_id: null,
-    price: null,
+    shopify_product_id: 'gid://shopify/Product/COMFORT_COLLECTION_001',
+    price_cents: null,
   },
 ]
 
