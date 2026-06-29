@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
-import { GoogleGenAI, Type } from '@google/genai';
+import Anthropic from '@anthropic-ai/sdk';
 import { createClient } from '@/utils/supabase/server';
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 const SYSTEM_INSTRUCTION = `
 You are the Alchemist, the master of Olfactory Resonance.
@@ -37,36 +36,55 @@ export async function POST(req: Request) {
     const fragA = fragrances.find((f) => f.id === fragrance_a_id)!;
     const fragB = fragrances.find((f) => f.id === fragrance_b_id)!;
 
+    // Sort IDs for cache lookup (smaller ID first)
+    const [sortedA, sortedB] = [fragrance_a_id, fragrance_b_id].sort();
+
+    // Check cache before calling AI
+    const { data: cached } = await supabase
+      .from('chemist_cache')
+      .select('score, category, narrative')
+      .eq('fragrance_a_id', sortedA)
+      .eq('fragrance_b_id', sortedB)
+      .maybeSingle();
+
+    if (cached) {
+      return NextResponse.json({ ...cached, success: true, cached: true });
+    }
+
     const prompt = `
       Compare these two essences:
       Essence Alpha: ${fragA.brand} ${fragA.name} (${fragA.family}) [Concentration: ${fragA.concentration ?? 'Unknown'}] [Notes: ${fragA.notes ?? 'Unknown'}]
       Essence Beta: ${fragB.brand} ${fragB.name} (${fragB.family}) [Concentration: ${fragB.concentration ?? 'Unknown'}] [Notes: ${fragB.notes ?? 'Unknown'}]
 
-      Determine the resonance.
+      Determine the resonance. Respond with JSON: { "score": number, "category": string, "narrative": string }
     `;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-      config: {
-        systemInstruction: SYSTEM_INSTRUCTION,
-        responseMimeType: 'application/json',
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            score: { type: Type.NUMBER },
-            category: { type: Type.STRING },
-            narrative: { type: Type.STRING }
-          },
-          required: ['score', 'category', 'narrative']
-        }
-      }
+    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    const message = await anthropic.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 512,
+      system: SYSTEM_INSTRUCTION,
+      messages: [{ role: 'user', content: prompt }],
     });
 
-    const resultText = response.candidates?.[0]?.content?.parts?.[0]?.text;
+    const resultText = (message.content[0] as { type: 'text'; text: string }).text;
     if (!resultText) throw new Error('Synthesis failed');
 
-    return NextResponse.json({ ...JSON.parse(resultText), success: true });
+    const result = JSON.parse(resultText);
+
+    // Upsert to cache
+    await supabase.from('chemist_cache').upsert(
+      {
+        fragrance_a_id: sortedA,
+        fragrance_b_id: sortedB,
+        score: result.score,
+        category: result.category,
+        narrative: result.narrative,
+      },
+      { onConflict: 'fragrance_a_id,fragrance_b_id' }
+    );
+
+    return NextResponse.json({ ...result, success: true });
   } catch (error: any) {
     console.error('Resonance API Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
