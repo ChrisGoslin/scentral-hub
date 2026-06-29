@@ -184,7 +184,7 @@ async function updateFragranceImageUrl(fragranceId: string, imageUrl: string): P
 // ── Main Handler ───────────────────────────────────────────────────────────────
 export async function POST(req: Request): Promise<NextResponse<GenerateImageResponse>> {
   return NextResponse.json(
-    { success: false, error: 'Image generation is disabled in MVP. Use Shopify enrichment or GradientPlaceholder instead.' },
+    { success: false, error: 'Image generation disabled in MVP.' },
     { status: 503 }
   );
 }

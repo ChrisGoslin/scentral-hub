@@ -337,7 +337,11 @@ headings, or placeholder text was changed.
 
 ## 10. LLM briefing block (copy-paste into Claude Code / Cursor / other agents)
 
-Use this block at the start of every new CLI agent session. Summary of §1 — update both when §1 changes. Last verified: 2026-06-22.
+Use this block at the start of every new CLI agent session. Summary of §1 — update both when §1 changes. Last verified: 2026-06-29.
+
+**Token hygiene:** `.claudeignore` is active — excludes `.next/`, `node_modules/`, `.claude/worktrees/`, `scripts/data/`, `scripts/archived/` from all file searches. Do not grep these paths manually.
+
+**Pending work:** None — all Claude Code prompts complete through Sprint 7 (2026-06-29).
 
 ```
 # BaseNote — Project Briefing
