@@ -1,0 +1,29 @@
+# .claudeignore — tells Claude Code what NOT to read/search
+# This cuts token usage dramatically on every session.
+
+# Build artifacts — never useful to read
+.next/
+out/
+build/
+coverage/
+
+# Dependencies — never search these
+node_modules/
+
+# Claude's own worktrees and cache
+.claude/worktrees/
+.claude/skills/
+
+# Large data files — read on demand only, never auto-scanned
+scripts/data/
+scripts/archived/
+
+# Test result artifacts
+test-results/
+e2e-report/
+*.tracezip
+playwright-report/
+
+# Supabase local dev
+supabase/.branches/
+supabase/.temp/

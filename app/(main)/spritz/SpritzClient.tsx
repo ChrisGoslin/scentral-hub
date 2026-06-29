@@ -9,6 +9,15 @@ import { track } from '@/lib/posthog'
 import { getPersonaCopy } from '@/lib/personaCopy'
 import OccasionPicker from '@/components/brief/OccasionPicker'
 import WearNoteSheet from './WearNoteSheet'
+import { createClient } from '@/utils/supabase/client'
+
+type RandomizerFragrance = {
+  id: string
+  brand: string
+  name: string
+  family: string | null
+  affinity_score: number
+}
 
 function getOrCreateAnonId(): string {
   try {
@@ -45,7 +54,60 @@ export default function SpritzClient() {
   const [wornToast, setWornToast] = useState<string | null>(null)
   const [noteSheetOpen, setNoteSheetOpen] = useState(false)
   const [currentWearLogId, setCurrentWearLogId] = useState<string | null>(null)
+  const [randomResult, setRandomResult] = useState<RandomizerFragrance | null>(null)
+  const [randomLoading, setRandomLoading] = useState(false)
+  const [randomCollectionLoaded, setRandomCollectionLoaded] = useState<RandomizerFragrance[]>([])
   const copy = getPersonaCopy(typeof window !== 'undefined' ? localStorage.getItem('scentral_persona') : null)
+
+  const loadRandomizerCollection = useCallback(async () => {
+    try {
+      const anonId = getOrCreateAnonId()
+      const supabase = createClient()
+      const { data, error: err } = await supabase
+        .from('collections')
+        .select(`
+          affinity_score,
+          fragrances!inner(
+            id,
+            brand,
+            name,
+            family
+          )
+        `)
+        .eq('anon_id', anonId)
+        .not('affinity_score', 'is', null)
+        .order('affinity_score', { ascending: false })
+        .limit(20)
+
+      if (err) throw err
+      const fragrances = (data ?? []).map(row => ({
+        id: (row.fragrances as any).id,
+        brand: (row.fragrances as any).brand,
+        name: (row.fragrances as any).name,
+        family: (row.fragrances as any).family,
+        affinity_score: row.affinity_score,
+      }))
+      setRandomCollectionLoaded(fragrances)
+    } catch (err) {
+      console.error('Failed to load randomizer collection:', err)
+    }
+  }, [])
+
+  const pickRandomFragrance = useCallback(() => {
+    if (randomCollectionLoaded.length === 0) return
+
+    // Weighted random: create array with duplicates based on affinity
+    const weighted: RandomizerFragrance[] = []
+    randomCollectionLoaded.forEach(frag => {
+      const weight = Math.max(1, Math.ceil(frag.affinity_score / 2))
+      for (let i = 0; i < weight; i++) {
+        weighted.push(frag)
+      }
+    })
+
+    const picked = weighted[Math.floor(Math.random() * weighted.length)]
+    setRandomResult(picked)
+  }, [randomCollectionLoaded])
 
   useEffect(() => {
     const personaId = localStorage.getItem('scentral_persona') ?? undefined
@@ -62,6 +124,7 @@ export default function SpritzClient() {
       .catch(err => setError(err.message))
       .finally(() => setLoading(false))
 
+    loadRandomizerCollection()
     track('spritz_schedule_viewed')
 
     // Tutorial animation on first visit
@@ -85,25 +148,13 @@ export default function SpritzClient() {
     setCurrentCardIndex(i => i + 1)
   }, [])
 
-  const handleSwipeRight = useCallback(async () => {
-    const event = schedule[currentCardIndex]
-    advance()
-    track('spritz_card_worn', { slot: event?.slot })
-
-    if (event?.fragrance?.id) {
-      try {
-        const history = JSON.parse(localStorage.getItem('scentral_wear_history') ?? '[]')
-        history.push({ fragrance_id: event.fragrance.id, fragrance_name: event.fragrance.name, date: new Date().toISOString() })
-        localStorage.setItem('scentral_wear_history', JSON.stringify(history))
-      } catch { /* ignore */ }
-    }
-
+  const logWear = useCallback(async (fragranceId: string, fragranceName?: string) => {
     try {
       const anonId = getOrCreateAnonId()
       const res = await fetch('/api/spritz/log-wear', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ anonId, fragranceId: event?.fragrance?.id }),
+        body: JSON.stringify({ anonId, fragranceId }),
       })
       if (!res.ok) return
       const data = await res.json()
@@ -121,9 +172,25 @@ export default function SpritzClient() {
         setNoteSheetOpen(true)
       }
     } catch {
-      // best-effort — swipe already advanced, XP/streak just won't update this time
+      // best-effort
     }
-  }, [schedule, currentCardIndex, advance])
+  }, [])
+
+  const handleSwipeRight = useCallback(async () => {
+    const event = schedule[currentCardIndex]
+    advance()
+    track('spritz_card_worn', { slot: event?.slot })
+
+    if (event?.fragrance?.id) {
+      try {
+        const history = JSON.parse(localStorage.getItem('scentral_wear_history') ?? '[]')
+        history.push({ fragrance_id: event.fragrance.id, fragrance_name: event.fragrance.name, date: new Date().toISOString() })
+        localStorage.setItem('scentral_wear_history', JSON.stringify(history))
+      } catch { /* ignore */ }
+    }
+
+    await logWear(event?.fragrance?.id)
+  }, [schedule, currentCardIndex, advance, logWear])
 
   const handleSwipeLeft = useCallback(() => {
     track('spritz_card_deferred', { slot: schedule[currentCardIndex]?.slot })
@@ -151,6 +218,90 @@ export default function SpritzClient() {
           <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent)' }}>🔥 {streak}-day streak</span>
         )}
       </div>
+
+      {/* Randomizer section */}
+      {randomCollectionLoaded.length > 0 ? (
+        <div style={{ width: '100%', maxWidth: 360, marginBottom: 24 }}>
+          {randomResult ? (
+            <div style={{
+              background: 'var(--surface)',
+              borderRadius: 'var(--r-card)',
+              borderLeft: '3px solid var(--accent)',
+              padding: 16,
+              marginBottom: 16,
+            }}>
+              <p style={{ fontSize: 10, color: 'var(--accent)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 8px 0', fontVariant: 'small-caps' }}>
+                {randomResult.brand}
+              </p>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 20, color: 'var(--text)', margin: '0 0 6px 0' }}>
+                {randomResult.name}
+              </h2>
+              {randomResult.family && (
+                <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', margin: '0 0 12px 0', letterSpacing: '0.05em' }}>
+                  {randomResult.family}
+                </p>
+              )}
+              <button
+                onClick={() => {
+                  logWear(randomResult.id)
+                  setRandomResult(null)
+                }}
+                style={{
+                  background: 'var(--accent)',
+                  color: 'var(--bg)',
+                  border: 'none',
+                  borderRadius: 6,
+                  padding: '8px 12px',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  width: '100%',
+                }}
+              >
+                Log as worn today →
+              </button>
+            </div>
+          ) : null}
+          <button
+            onClick={() => {
+              setRandomLoading(true)
+              pickRandomFragrance()
+              setRandomLoading(false)
+            }}
+            style={{
+              width: '100%',
+              background: 'var(--surface)',
+              border: '1px solid var(--line)',
+              borderRadius: 'var(--r-card)',
+              padding: '12px 16px',
+              fontSize: 13,
+              fontWeight: 600,
+              color: 'var(--text)',
+              cursor: 'pointer',
+              transition: 'all 160ms cubic-bezier(0.4, 0, 0.2, 1)',
+            }}
+            onMouseEnter={(e) => {
+              (e.target as HTMLButtonElement).style.borderColor = 'var(--accent)'
+              ;(e.target as HTMLButtonElement).style.color = 'var(--accent)'
+            }}
+            onMouseLeave={(e) => {
+              (e.target as HTMLButtonElement).style.borderColor = 'var(--line)'
+              ;(e.target as HTMLButtonElement).style.color = 'var(--text)'
+            }}
+          >
+            🎲 Surprise Me
+          </button>
+        </div>
+      ) : (
+        <div style={{ width: '100%', maxWidth: 360, marginBottom: 24, textAlign: 'center' }}>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: 0 }}>
+            Add fragrances to your wardrobe to unlock this.
+          </p>
+          <Link href="/discover" style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 600, marginTop: 8, display: 'inline-block' }}>
+            Explore Fragrances →
+          </Link>
+        </div>
+      )}
 
       <div style={{ position: 'relative', width: '100%', maxWidth: 360, flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         {loading && (
