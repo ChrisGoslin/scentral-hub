@@ -234,17 +234,6 @@ export function DiscoverFilters({
         </span>
       </div>
 
-      {/* Saved — toggle */}
-      <div style={{ padding: '0 16px' }}>
-        <Chip
-          selected={showSaved}
-          onClick={() => onShowSavedToggle(!showSaved)}
-          style={{ minHeight: 44 }}
-        >
-          ❤ Saved
-        </Chip>
-      </div>
-
       {/* Search */}
       <div style={{ padding: '0 16px' }}>
         <p
@@ -298,6 +287,17 @@ export function DiscoverFilters({
             </Link>}
           </div>
         </div>
+      </div>
+
+      {/* Saved — quick toggle, above filters */}
+      <div style={{ padding: '6px 16px 0' }}>
+        <Chip
+          selected={showSaved}
+          onClick={() => onShowSavedToggle(!showSaved)}
+          style={{ minHeight: 44 }}
+        >
+          ❤ Saved
+        </Chip>
       </div>
 
       <FilterCarousel
