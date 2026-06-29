@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import { AnimatePresence, motion } from 'framer-motion'
 import SpritzCard from '@/components/schedule/SpritzCard'
@@ -10,6 +10,13 @@ import { getPersonaCopy } from '@/lib/personaCopy'
 import OccasionPicker from '@/components/brief/OccasionPicker'
 import WearNoteSheet from './WearNoteSheet'
 import { createClient } from '@/utils/supabase/client'
+
+type Fragrance = {
+  id: string
+  brand: string
+  name: string
+  family: string | null
+}
 
 type RandomizerFragrance = {
   id: string
@@ -54,60 +61,64 @@ export default function SpritzClient() {
   const [wornToast, setWornToast] = useState<string | null>(null)
   const [noteSheetOpen, setNoteSheetOpen] = useState(false)
   const [currentWearLogId, setCurrentWearLogId] = useState<string | null>(null)
-  const [randomResult, setRandomResult] = useState<RandomizerFragrance | null>(null)
+  const [randomResult, setRandomResult] = useState<Fragrance | null>(null)
   const [randomLoading, setRandomLoading] = useState(false)
-  const [randomCollectionLoaded, setRandomCollectionLoaded] = useState<RandomizerFragrance[]>([])
+  const [shakeToast, setShakeToast] = useState(false)
+  const lastShakeRef = useRef(0)
   const copy = getPersonaCopy(typeof window !== 'undefined' ? localStorage.getItem('scentral_persona') : null)
 
-  const loadRandomizerCollection = useCallback(async () => {
+  const randomizeFragrance = useCallback(async () => {
+    setRandomLoading(true)
     try {
-      const anonId = getOrCreateAnonId()
       const supabase = createClient()
-      const { data, error: err } = await supabase
-        .from('collections')
-        .select(`
-          affinity_score,
-          fragrances!inner(
-            id,
-            brand,
-            name,
-            family
-          )
-        `)
-        .eq('anon_id', anonId)
-        .not('affinity_score', 'is', null)
-        .order('affinity_score', { ascending: false })
-        .limit(20)
 
-      if (err) throw err
-      const fragrances = (data ?? []).map(row => ({
-        id: (row.fragrances as any).id,
-        brand: (row.fragrances as any).brand,
-        name: (row.fragrances as any).name,
-        family: (row.fragrances as any).family,
-        affinity_score: row.affinity_score,
-      }))
-      setRandomCollectionLoaded(fragrances)
+      // Try to get from scentral_collection localStorage first
+      const collectionStr = localStorage.getItem('scentral_collection')
+      let fragrances: Fragrance[] = []
+
+      if (collectionStr) {
+        try {
+          const collectionIds = JSON.parse(collectionStr)
+          if (collectionIds.length > 0) {
+            const { data, error: err } = await supabase
+              .from('fragrances')
+              .select('id, brand, name, family')
+              .in('id', collectionIds.slice(0, 20))
+
+            if (!err && data) {
+              fragrances = data as Fragrance[]
+            }
+          }
+        } catch (e) {
+          console.error('Failed to parse collection:', e)
+        }
+      }
+
+      // Fallback: fetch curated fragrances (phase IS NOT NULL)
+      if (fragrances.length === 0) {
+        const { data, error: err } = await supabase
+          .from('fragrances')
+          .select('id, brand, name, family')
+          .not('phase', 'is', null)
+          .limit(20)
+
+        if (!err && data) {
+          fragrances = data as Fragrance[]
+        }
+      }
+
+      if (fragrances.length > 0) {
+        const picked = fragrances[Math.floor(Math.random() * fragrances.length)]
+        setRandomResult(picked)
+        setShakeToast(true)
+        setTimeout(() => setShakeToast(false), 2000)
+      }
     } catch (err) {
-      console.error('Failed to load randomizer collection:', err)
+      console.error('Failed to randomize:', err)
+    } finally {
+      setRandomLoading(false)
     }
   }, [])
-
-  const pickRandomFragrance = useCallback(() => {
-    if (randomCollectionLoaded.length === 0) return
-
-    // Weighted random: create array with duplicates based on affinity
-    const weighted: RandomizerFragrance[] = []
-    randomCollectionLoaded.forEach(frag => {
-      const weight = Math.max(1, Math.ceil(frag.affinity_score / 2))
-      for (let i = 0; i < weight; i++) {
-        weighted.push(frag)
-      }
-    })
-
-    const picked = weighted[Math.floor(Math.random() * weighted.length)]
-    setRandomResult(picked)
-  }, [randomCollectionLoaded])
 
   useEffect(() => {
     const personaId = localStorage.getItem('scentral_persona') ?? undefined
@@ -124,8 +135,24 @@ export default function SpritzClient() {
       .catch(err => setError(err.message))
       .finally(() => setLoading(false))
 
-    loadRandomizerCollection()
     track('spritz_schedule_viewed')
+
+    // Shake detection listener
+    const handleShake = (event: DeviceMotionEvent) => {
+      const acc = event.accelerationIncludingGravity
+      if (!acc) return
+
+      const acceleration = Math.sqrt((acc.x || 0) ** 2 + (acc.y || 0) ** 2 + (acc.z || 0) ** 2)
+      const now = Date.now()
+
+      if (acceleration > 15 && now - lastShakeRef.current > 1000) {
+        lastShakeRef.current = now
+        randomizeFragrance()
+      }
+    }
+
+    window.addEventListener('devicemotion', handleShake)
+    return () => window.removeEventListener('devicemotion', handleShake)
 
     // Tutorial animation on first visit
     if (!localStorage.getItem('scentral_brief_tutorialSeen') && collection.length > 0) {
@@ -219,87 +246,96 @@ export default function SpritzClient() {
         )}
       </div>
 
-      {/* Randomizer section */}
-      {randomCollectionLoaded.length > 0 ? (
-        <div style={{ width: '100%', maxWidth: 360, marginBottom: 24 }}>
-          {randomResult ? (
-            <div style={{
-              background: 'var(--surface)',
-              borderRadius: 'var(--r-card)',
-              borderLeft: '3px solid var(--accent)',
-              padding: 16,
-              marginBottom: 16,
-            }}>
-              <p style={{ fontSize: 10, color: 'var(--accent)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 8px 0', fontVariant: 'small-caps' }}>
-                {randomResult.brand}
+      {/* Shake Randomizer */}
+      <div style={{ width: '100%', maxWidth: 360, marginBottom: 24 }}>
+        {randomResult && (
+          <div style={{
+            background: 'var(--surface)',
+            borderRadius: 'var(--r-card)',
+            borderLeft: '3px solid var(--accent)',
+            padding: 16,
+            marginBottom: 16,
+          }}>
+            <p style={{ fontSize: 10, color: 'var(--accent)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 8px 0', fontVariant: 'small-caps' }}>
+              {randomResult.brand}
+            </p>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 20, color: 'var(--text)', margin: '0 0 6px 0' }}>
+              {randomResult.name}
+            </h2>
+            {randomResult.family && (
+              <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', margin: '0 0 12px 0', letterSpacing: '0.05em' }}>
+                {randomResult.family}
               </p>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 20, color: 'var(--text)', margin: '0 0 6px 0' }}>
-                {randomResult.name}
-              </h2>
-              {randomResult.family && (
-                <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', margin: '0 0 12px 0', letterSpacing: '0.05em' }}>
-                  {randomResult.family}
-                </p>
-              )}
-              <button
-                onClick={() => {
-                  logWear(randomResult.id)
-                  setRandomResult(null)
-                }}
-                style={{
-                  background: 'var(--accent)',
-                  color: 'var(--bg)',
-                  border: 'none',
-                  borderRadius: 6,
-                  padding: '8px 12px',
-                  fontSize: 12,
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  width: '100%',
-                }}
-              >
-                Log as worn today →
-              </button>
-            </div>
-          ) : null}
-          <button
-            onClick={() => {
-              setRandomLoading(true)
-              pickRandomFragrance()
-              setRandomLoading(false)
-            }}
-            style={{
-              width: '100%',
-              background: 'var(--surface)',
-              border: '1px solid var(--line)',
-              borderRadius: 'var(--r-card)',
-              padding: '12px 16px',
-              fontSize: 13,
-              fontWeight: 600,
-              color: 'var(--text)',
-              cursor: 'pointer',
-              transition: 'all 160ms cubic-bezier(0.4, 0, 0.2, 1)',
-            }}
-            onMouseEnter={(e) => {
+            )}
+            <button
+              onClick={() => {
+                logWear(randomResult.id)
+                setRandomResult(null)
+              }}
+              style={{
+                background: 'var(--accent)',
+                color: 'var(--bg)',
+                border: 'none',
+                borderRadius: 6,
+                padding: '8px 12px',
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: 'pointer',
+                width: '100%',
+              }}
+            >
+              Log as worn today →
+            </button>
+          </div>
+        )}
+        <button
+          onClick={randomizeFragrance}
+          disabled={randomLoading}
+          style={{
+            width: '100%',
+            background: 'var(--surface)',
+            border: '1px solid var(--line)',
+            borderRadius: 'var(--r-card)',
+            padding: '12px 16px',
+            fontSize: 13,
+            fontWeight: 600,
+            color: 'var(--text)',
+            cursor: randomLoading ? 'default' : 'pointer',
+            opacity: randomLoading ? 0.6 : 1,
+            transition: 'all 160ms cubic-bezier(0.4, 0, 0.2, 1)',
+          }}
+          onMouseEnter={(e) => {
+            if (!randomLoading) {
               (e.target as HTMLButtonElement).style.borderColor = 'var(--accent)'
               ;(e.target as HTMLButtonElement).style.color = 'var(--accent)'
-            }}
-            onMouseLeave={(e) => {
-              (e.target as HTMLButtonElement).style.borderColor = 'var(--line)'
-              ;(e.target as HTMLButtonElement).style.color = 'var(--text)'
-            }}
-          >
-            🎲 Surprise Me
-          </button>
-        </div>
-      ) : (
-        <div style={{ width: '100%', maxWidth: 360, marginBottom: 24, textAlign: 'center' }}>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: 0 }}>
-            Add fragrances to your wardrobe to unlock this.
-          </p>
-          <Link href="/discover" style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 600, marginTop: 8, display: 'inline-block' }}>
-            Explore Fragrances →
-          </Link>
+            }
+          }}
+          onMouseLeave={(e) => {
+            (e.target as HTMLButtonElement).style.borderColor = 'var(--line)'
+            ;(e.target as HTMLButtonElement).style.color = 'var(--text)'
+          }}
+        >
+          {randomLoading ? '⏳ Loading...' : '🎲 Shake or tap'}
+        </button>
+      </div>
+
+      {/* Shake toast */}
+      {shakeToast && (
+        <div style={{
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          background: 'var(--surface)',
+          border: '1px solid var(--accent)',
+          borderRadius: 'var(--r-card)',
+          padding: '16px 24px',
+          fontSize: 14,
+          color: 'var(--text)',
+          zIndex: 1000,
+          pointerEvents: 'none',
+        }}>
+          🎲 Randomized!
         </div>
       )}
 

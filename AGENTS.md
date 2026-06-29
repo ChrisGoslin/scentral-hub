@@ -341,7 +341,7 @@ Use this block at the start of every new CLI agent session. Summary of §1 — u
 
 **Token hygiene:** `.claudeignore` is active — excludes `.next/`, `node_modules/`, `.claude/worktrees/`, `scripts/data/`, `scripts/archived/` from all file searches. Do not grep these paths manually.
 
-**Pending work:** None — all Claude Code prompts complete through Sprint 7 (2026-06-29).
+**Pending work:** Sprint 8 — 5 parallel sessions in `CLAUDE_CODE_PROMPTS.md` (Shake Randomizer, Scent Journal, AI Pros/Cons, Discovery Box seeding, Lighthouse audit).
 
 ```
 # BaseNote — Project Briefing
