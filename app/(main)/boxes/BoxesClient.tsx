@@ -171,62 +171,137 @@ export default function BoxesClient({ boxes, error }: Props) {
         </div>
       ) : (
         <div style={{ padding: '16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12 }}>
-          {filtered.map(box => (
-            <Link
-              key={box.id}
-              href={`/boxes/${box.slug}`}
-              onClick={() => handleBoxClick(box.id, box.name)}
-              style={{ textDecoration: 'none' }}
-            >
-              <div style={{
-                border: '1px solid var(--line)',
-                borderRadius: 'var(--r-card)',
-                overflow: 'hidden',
-                transition: 'all var(--motion-responsive)',
-                cursor: 'pointer',
-                aspectRatio: '1/1.2',
-                display: 'flex',
-                flexDirection: 'column',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = 'var(--accent)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'var(--line)';
-              }}>
-                {/* Image */}
+          {filtered.map(box => {
+            const hasShopifyId = !!box.shopify_product_id
+
+            return hasShopifyId ? (
+              <Link
+                key={box.id}
+                href={`/boxes/${box.slug}`}
+                onClick={() => handleBoxClick(box.id, box.name)}
+                style={{ textDecoration: 'none' }}
+              >
+                <div style={{
+                  border: '1px solid var(--line)',
+                  borderRadius: 'var(--r-card)',
+                  overflow: 'hidden',
+                  transition: 'all var(--motion-responsive)',
+                  cursor: 'pointer',
+                  aspectRatio: '1/1.2',
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--accent)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--line)';
+                }}>
+                  {/* Image */}
+                  <div style={{
+                    flex: 1,
+                    background: 'var(--color-surface)',
+                    backgroundImage: box.image_url ? `url(${box.image_url})` : undefined,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                    {!box.image_url && (
+                      <span style={{ fontSize: 32 }}>📦</span>
+                    )}
+                  </div>
+
+                  {/* Info */}
+                  <div style={{ padding: '8px', backgroundColor: 'var(--color-surface)' }}>
+                    <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--text)', lineHeight: 1.3, marginBottom: 2 }}>
+                      {box.name}
+                    </p>
+                    <p style={{ fontSize: 9, color: 'var(--text-muted)' }}>
+                      {box.fragrances?.length || 0} scents
+                    </p>
+                    {box.price_cents && (
+                      <p style={{ fontSize: 10, color: 'var(--accent)', fontWeight: 600, marginTop: 4 }}>
+                        ${(box.price_cents / 100).toFixed(2)}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </Link>
+            ) : (
+              <div
+                key={box.id}
+                style={{
+                  border: '1px solid var(--accent)',
+                  borderRadius: 'var(--r-card)',
+                  overflow: 'hidden',
+                  transition: 'all var(--motion-responsive)',
+                  cursor: 'pointer',
+                  aspectRatio: '1/1.2',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  backgroundColor: 'transparent',
+                  padding: 12,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--accent) 8%, transparent)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
+              >
+                {/* Image placeholder */}
                 <div style={{
                   flex: 1,
-                  background: 'var(--color-surface)',
-                  backgroundImage: box.image_url ? `url(${box.image_url})` : undefined,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
+                  background: 'transparent',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}>
-                  {!box.image_url && (
-                    <span style={{ fontSize: 32 }}>📦</span>
-                  )}
+                  <span style={{ fontSize: 32 }}>📦</span>
                 </div>
 
                 {/* Info */}
-                <div style={{ padding: '8px', backgroundColor: 'var(--color-surface)' }}>
-                  <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--text)', lineHeight: 1.3, marginBottom: 2 }}>
-                    {box.name}
-                  </p>
-                  <p style={{ fontSize: 9, color: 'var(--text-muted)' }}>
-                    {box.fragrances?.length || 0} scents
-                  </p>
-                  {box.price_cents && (
-                    <p style={{ fontSize: 10, color: 'var(--accent)', fontWeight: 600, marginTop: 4 }}>
-                      ${(box.price_cents / 100).toFixed(2)}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div>
+                    <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--text)', lineHeight: 1.3, marginBottom: 2 }}>
+                      {box.name}
                     </p>
-                  )}
+                    <p style={{ fontSize: 9, color: 'var(--text-muted)' }}>
+                      {box.fragrances?.length || 0} scents
+                    </p>
+                  </div>
+
+                  {/* Coming Soon CTA */}
+                  <Link href="/waitlist" style={{ textDecoration: 'none' }}>
+                    <button style={{
+                      width: '100%',
+                      background: 'transparent',
+                      border: '1px solid var(--accent)',
+                      borderRadius: 4,
+                      padding: '6px 8px',
+                      fontSize: 10,
+                      color: 'var(--accent)',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      transition: 'all var(--motion-responsive)',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = 'var(--accent)';
+                      e.currentTarget.style.color = 'var(--bg)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                      e.currentTarget.style.color = 'var(--accent)';
+                    }}>
+                      Join Waitlist →
+                    </button>
+                  </Link>
                 </div>
               </div>
-            </Link>
-          ))}
+            )
+          })}
         </div>
       )}
     </div>

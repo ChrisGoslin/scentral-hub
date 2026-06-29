@@ -1,116 +1,110 @@
-import { createClient } from '@supabase/supabase-js';
+import dotenv from 'dotenv'
+import { createClient } from '@supabase/supabase-js'
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+dotenv.config({ path: '.env.local' })
 
-if (!SUPABASE_URL || !SERVICE_KEY) {
-  console.error('Missing Supabase credentials. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_KEY.');
-  process.exit(1);
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseKey = process.env.SUPABASE_SERVICE_KEY
+
+if (!supabaseUrl || !supabaseKey) {
+  console.error('❌ Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_KEY in .env.local')
+  process.exit(1)
 }
 
-const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
+const supabase = createClient(supabaseUrl, supabaseKey)
 
-/**
- * Sample discovery boxes to seed.
- * Note: Shopify product IDs are placeholders — replace with real product IDs from your store.
- */
-const SAMPLE_BOXES = [
+const boxes = [
   {
-    name: 'Oud Essentials Sampler',
-    slug: 'oud-essentials-sampler',
-    description: 'Explore the richness of oud. Five carefully selected fragrances featuring prominent oud notes.',
-    image_url: null,
-    fragrance_ids: [], // Will be populated with real IDs
-    shopify_product_id: 'gid://shopify/Product/OUD_SAMPLER_001',
-    price_cents: 4999, // $49.99
-    tier: 'discovery',
-    theme: 'oud',
+    name: 'The Velvet Edit',
+    slug: 'velvet-edit',
+    description: 'Rich, complex, and intellectually layered. Five bottles for the fragrance thinker.',
+    theme: 'oriental',
+    tier: 'premium',
+    fragrance_ids: [],
+    shopify_product_id: null,
+    price: null,
   },
   {
-    name: 'Fresh & Citrus Collection',
-    slug: 'fresh-citrus-collection',
-    description: 'Bright, energizing scents perfect for daily wear. Discover your new everyday fragrance.',
-    image_url: null,
-    fragrance_ids: [],
-    shopify_product_id: 'gid://shopify/Product/FRESH_CITRUS_001',
-    price_cents: 3999, // $39.99
-    tier: 'discovery',
+    name: 'The Solar Set',
+    slug: 'solar-set',
+    description: 'Clean, precise, and effortlessly modern. Light that lingers.',
     theme: 'fresh',
+    tier: 'standard',
+    fragrance_ids: [],
+    shopify_product_id: null,
+    price: null,
   },
   {
-    name: 'Warm & Spicy Journey',
-    slug: 'warm-spicy-journey',
-    description: 'Rich, inviting warmth with exotic spices. Perfect for cooler seasons and evening wear.',
-    image_url: null,
+    name: 'The Dark Atelier',
+    slug: 'dark-atelier',
+    description: 'Smoky, leathery, and unapologetically intense. Not for the faint-hearted.',
+    theme: 'leather',
+    tier: 'premium',
     fragrance_ids: [],
-    shopify_product_id: 'gid://shopify/Product/WARM_SPICY_001',
-    price_cents: 4999, // $49.99
-    tier: 'discovery',
-    theme: 'warm',
+    shopify_product_id: null,
+    price: null,
   },
-];
+  {
+    name: 'The Ritual Kit',
+    slug: 'ritual-kit',
+    description: 'Meditative, grounding, and quietly powerful. Scents that become ceremony.',
+    theme: 'woody',
+    tier: 'standard',
+    fragrance_ids: [],
+    shopify_product_id: null,
+    price: null,
+  },
+  {
+    name: 'The Lab Pack',
+    slug: 'lab-pack',
+    description: 'Experimental, genre-defying, and conversation-starting. Five wildcards.',
+    theme: 'aromatic',
+    tier: 'standard',
+    fragrance_ids: [],
+    shopify_product_id: null,
+    price: null,
+  },
+  {
+    name: 'The Comfort Collection',
+    slug: 'comfort-collection',
+    description: 'Warm, enveloping, and instantly familiar. Scents like a hug.',
+    theme: 'gourmand',
+    tier: 'standard',
+    fragrance_ids: [],
+    shopify_product_id: null,
+    price: null,
+  },
+]
 
-async function seedBoxes() {
-  console.log('🌸 Seeding Discovery Boxes...');
+const dryRun = process.argv.includes('--dry-run')
 
-  // Step 1: Fetch some fragrances to use in boxes
-  console.log('📊 Fetching fragrances by theme...');
-
-  const { data: oudFragrances } = await supabase
-    .from('fragrances')
-    .select('id')
-    .ilike('plain_description', '%oud%')
-    .limit(5);
-
-  const { data: freshFragrances } = await supabase
-    .from('fragrances')
-    .select('id')
-    .ilike('family', '%Fresh%')
-    .limit(5);
-
-  const { data: warmFragrances } = await supabase
-    .from('fragrances')
-    .select('id')
-    .ilike('family', '%Warm%')
-    .limit(5);
-
-  const boxFragrances = [
-    oudFragrances?.map(f => f.id) || [],
-    freshFragrances?.map(f => f.id) || [],
-    warmFragrances?.map(f => f.id) || [],
-  ];
-
-  // Step 2: Insert boxes
-  const boxesToInsert = SAMPLE_BOXES.map((box, idx) => ({
-    ...box,
-    fragrance_ids: boxFragrances[idx],
-  })).filter(box => box.fragrance_ids.length > 0);
-
-  if (boxesToInsert.length === 0) {
-    console.warn('⚠️  No fragrances found to populate boxes. Ensure fragrances table has data.');
-    return;
+async function seed() {
+  if (dryRun) {
+    console.log('🔍 DRY RUN — would insert:')
+    boxes.forEach(box => {
+      console.log(`  • ${box.name} (${box.slug})`)
+    })
+    console.log(`\n✓ Ready to insert ${boxes.length} boxes. Run without --dry-run to proceed.`)
+    return
   }
 
-  console.log(`✅ Found fragrances. Inserting ${boxesToInsert.length} boxes...`);
+  console.log(`📦 Seeding ${boxes.length} discovery boxes...`)
 
-  const { data, error } = await supabase
-    .from('discovery_boxes')
-    .insert(boxesToInsert)
-    .select();
+  try {
+    const { data, error } = await supabase
+      .from('discovery_boxes')
+      .upsert(boxes, { onConflict: 'slug' })
 
-  if (error) {
-    console.error('❌ Error inserting boxes:', error.message);
-    process.exit(1);
+    if (error) throw error
+
+    console.log(`✅ Successfully upserted ${boxes.length} discovery boxes`)
+    boxes.forEach(box => {
+      console.log(`  ✓ ${box.name}`)
+    })
+  } catch (err) {
+    console.error('❌ Seeding failed:', err.message)
+    process.exit(1)
   }
-
-  console.log(`✅ Successfully seeded ${data?.length || 0} discovery boxes!`);
-  console.log('\nBoxes created:');
-  data?.forEach(box => {
-    console.log(`  • ${box.name} (${box.fragrance_ids.length} fragrances) — /boxes/${box.slug}`);
-  });
 }
 
-seedBoxes().catch(err => {
-  console.error('Fatal error:', err.message);
-  process.exit(1);
-});
+seed()
