@@ -20,7 +20,7 @@ export default function PersonaTeasers() {
       <p
         style={{
           fontSize: 10,
-          color: '#6B635A',
+          color: 'var(--text-muted)',
           textTransform: 'uppercase',
           letterSpacing: '0.12em',
           textAlign: 'center',

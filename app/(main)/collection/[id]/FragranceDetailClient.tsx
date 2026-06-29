@@ -92,51 +92,40 @@ export function WearLogButton({ fragranceId, fragranceName, brandName, collectio
 
 interface ScentJournalProps {
   fragranceId: string
-  collectionId: string
-  initialNotes: string | null
 }
 
-export function ScentJournal({ fragranceId, collectionId, initialNotes }: ScentJournalProps) {
-  const [notes, setNotes] = useState(initialNotes ?? '')
-  const [saving, setSaving] = useState(false)
+const MAX_CHARS = 500
+
+export function ScentJournal({ fragranceId }: ScentJournalProps) {
+  const storageKey = `scentral_journal_${fragranceId}`
+  const [notes, setNotes] = useState(() => localStorage.getItem(storageKey) ?? '')
   const [saved, setSaved] = useState(false)
+  const charCount = notes.length
 
-  const handleBlur = useCallback(async () => {
-    setSaving(true)
-    try {
-      const anonId = localStorage.getItem('scentral_anon_id')
-      if (!anonId) throw new Error('No anon ID')
+  const handleSave = useCallback(() => {
+    localStorage.setItem(storageKey, notes)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
+  }, [notes, storageKey])
 
-      const supabase = createClient()
-      const { error } = await supabase
-        .from('collections')
-        .update({ scent_memory: notes || null })
-        .eq('id', collectionId)
-        .eq('anon_id', anonId)
-
-      if (error) throw error
-
-      setSaved(true)
-      setTimeout(() => setSaved(false), 1500)
-    } catch (err) {
-      console.error('Failed to save notes:', err)
-    } finally {
-      setSaving(false)
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    if (e.target.value.length <= MAX_CHARS) {
+      setNotes(e.target.value)
     }
-  }, [collectionId, notes])
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--accent)' }}>
+      <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--text-muted)' }}>
         My Notes
       </p>
       <textarea
         value={notes}
-        onChange={(e) => setNotes(e.target.value)}
-        onBlur={handleBlur}
+        onChange={handleChange}
         placeholder="What does this smell like to you? A memory, a place, a person..."
+        maxLength={MAX_CHARS}
         style={{
-          fontFamily: 'var(--font-display)',
+          fontFamily: 'var(--font-cormorant)',
           fontStyle: 'italic',
           fontSize: 15,
           color: 'var(--text)',
@@ -150,11 +139,40 @@ export function ScentJournal({ fragranceId, collectionId, initialNotes }: ScentJ
           lineHeight: '22px',
         }}
       />
-      {saved && (
-        <p style={{ fontSize: 12, color: 'var(--positive)', fontWeight: 500, margin: 0 }}>
-          ✓ Saved
-        </p>
-      )}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+          {charCount} / {MAX_CHARS}
+        </span>
+        <button
+          onClick={handleSave}
+          disabled={saved}
+          style={{
+            background: 'transparent',
+            border: '1px solid var(--line)',
+            borderRadius: 4,
+            padding: '6px 12px',
+            fontSize: 12,
+            fontWeight: 600,
+            color: saved ? 'var(--positive)' : 'var(--text-muted)',
+            cursor: saved ? 'default' : 'pointer',
+            transition: 'all 200ms',
+          }}
+          onMouseEnter={(e) => {
+            if (!saved) {
+              (e.target as HTMLButtonElement).style.borderColor = 'var(--accent)'
+              ;(e.target as HTMLButtonElement).style.color = 'var(--accent)'
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!saved) {
+              (e.target as HTMLButtonElement).style.borderColor = 'var(--line)'
+              ;(e.target as HTMLButtonElement).style.color = 'var(--text-muted)'
+            }
+          }}
+        >
+          {saved ? 'Saved ✓' : 'Save'}
+        </button>
+      </div>
     </div>
   )
 }

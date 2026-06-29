@@ -243,13 +243,7 @@ export default async function FragranceDetailPage({
         <ProsCons fragranceId={f.id} />
 
         {/* Scent Journal */}
-        {collectionRow?.id && (
-          <ScentJournal
-            fragranceId={f.id}
-            collectionId={collectionRow.id}
-            initialNotes={collectionRow.scent_memory ?? null}
-          />
-        )}
+        <ScentJournal fragranceId={f.id} />
 
         {/* Maturation Banner */}
         {readyAt && readyAt > now && (

@@ -11,10 +11,11 @@ import FeedbackWidget from "@/components/feedback/FeedbackWidget";
 
 const cormorantGaramond = Cormorant_Garamond({
   subsets: ["latin"],
-  weight: ["400", "600"],
-  style: ["normal", "italic"],
+  weight: ["400"],
+  style: ["italic"],
   variable: "--font-cormorant",
   display: "swap",
+  preload: true,
 });
 
 const unbounded = Unbounded({
@@ -66,8 +67,8 @@ export const viewport: Viewport = {
   themeColor: "#0F172A",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  maximumScale: 5,
+  userScalable: true,
   viewportFit: "cover",
 };
 
@@ -81,6 +82,7 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
         <DeferredFontLink />
         {/* AdSense verification + script — activates when env var is set in Vercel */}
         {process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID && (
@@ -88,6 +90,7 @@ export default function RootLayout({
             <meta name="google-adsense-account" content={process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID} />
             <script
               async
+              defer
               src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID}`}
               crossOrigin="anonymous"
             />
