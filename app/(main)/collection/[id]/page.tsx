@@ -10,7 +10,7 @@ import InspiredByClones from './InspiredByClones'
 import LogWearButton from './LogWearButton'
 import AffinityRater from './AffinityRater'
 import RateProjection from './RateProjection'
-import { NotesPyramid, WearLogButton } from './FragranceDetailClient'
+import { NotesPyramid, WearLogButton, ScentJournal } from './FragranceDetailClient'
 import { getBrandEmoji } from '@/lib/brandEmoji'
 import { cookies } from 'next/headers'
 import { Users } from 'lucide-react'
@@ -65,7 +65,7 @@ export default async function FragranceDetailPage({
       .single(),
     supabase
       .from('collections')
-      .select('id, affinity_score, maceration_started_at, maceration_ready_at')
+      .select('id, affinity_score, maceration_started_at, maceration_ready_at, scent_memory')
       .eq('fragrance_id', id)
       .maybeSingle(),
     supabase
@@ -237,6 +237,15 @@ export default async function FragranceDetailPage({
             </p>
           )}
         </div>
+
+        {/* Scent Journal */}
+        {collectionRow?.id && (
+          <ScentJournal
+            fragranceId={f.id}
+            collectionId={collectionRow.id}
+            initialNotes={collectionRow.scent_memory ?? null}
+          />
+        )}
 
         {/* Maturation Banner */}
         {readyAt && readyAt > now && (
