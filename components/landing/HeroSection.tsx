@@ -1,21 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import StaticHeading from './StaticHeading'
 
 export default function HeroSection() {
-  const [animatedLines, setAnimatedLines] = useState<{ [key: number]: boolean }>({})
-
-  useEffect(() => {
-    const lines = [0, 1, 2]
-    lines.forEach((lineIndex, idx) => {
-      const timer = setTimeout(() => {
-        setAnimatedLines(prev => ({ ...prev, [lineIndex]: true }))
-      }, idx * 400)
-      return () => clearTimeout(timer)
-    })
-  }, [])
-
   return (
     <section
       style={{
@@ -34,59 +22,7 @@ export default function HeroSection() {
           "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E\")",
       }}
     >
-      <div style={{ marginBottom: 48 }}>
-        <h1
-          style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(3rem, 8vw, 6rem)',
-            fontStyle: 'italic',
-            fontWeight: 400,
-            lineHeight: 1.15,
-            letterSpacing: '-0.02em',
-            color: '#F5F0E8',
-            margin: 0,
-            maxWidth: 900,
-            opacity: animatedLines[0] ? 1 : 0,
-            transition: 'opacity 800ms cubic-bezier(0.16, 1, 0.3, 1)',
-          }}
-        >
-          You already have
-        </h1>
-        <h1
-          style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(3rem, 8vw, 6rem)',
-            fontStyle: 'italic',
-            fontWeight: 400,
-            lineHeight: 1.15,
-            letterSpacing: '-0.02em',
-            color: '#F5F0E8',
-            margin: 0,
-            maxWidth: 900,
-            opacity: animatedLines[1] ? 1 : 0,
-            transition: 'opacity 800ms cubic-bezier(0.16, 1, 0.3, 1)',
-          }}
-        >
-          a scent identity.
-        </h1>
-        <h1
-          style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(3rem, 8vw, 6rem)',
-            fontStyle: 'italic',
-            fontWeight: 400,
-            lineHeight: 1.15,
-            letterSpacing: '-0.02em',
-            color: '#F5F0E8',
-            margin: 0,
-            maxWidth: 900,
-            opacity: animatedLines[2] ? 1 : 0,
-            transition: 'opacity 800ms cubic-bezier(0.16, 1, 0.3, 1)',
-          }}
-        >
-          BaseNote finds it.
-        </h1>
-      </div>
+      <StaticHeading />
 
       <style>{`
         .hero-cta {
