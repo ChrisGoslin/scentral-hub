@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createClient } from '@/utils/supabase/server'
-import { GoogleGenerativeAI } from '@google/generative-ai'
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
+import Anthropic from '@anthropic-ai/sdk'
 
 export async function POST(req: Request) {
   try {
@@ -73,9 +71,9 @@ export async function POST(req: Request) {
         projection_gaps: projGaps
       }
 
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
+      const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
       const prompt = `You are the Scentral Collection Sommelier. Analyze this fragrance wardrobe's data and provide strategic intelligence.
-      
+
       COLLECTION DATA:
       ${JSON.stringify(gapContext, null, 2)}
 
@@ -88,8 +86,12 @@ export async function POST(req: Request) {
         "archetype_description": "2 sentences"
       }`
 
-      const result = await model.generateContent(prompt)
-      const text = result.response.text()
+      const message = await anthropic.messages.create({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1024,
+        messages: [{ role: 'user', content: prompt }],
+      })
+      const text = (message.content[0] as { type: 'text'; text: string }).text
       const jsonStr = text.replace(/```json/g, '').replace(/```/g, '').trim()
       const geminiResult = JSON.parse(jsonStr)
 
