@@ -11,6 +11,7 @@ import LogWearButton from './LogWearButton'
 import AffinityRater from './AffinityRater'
 import RateProjection from './RateProjection'
 import { NotesPyramid, WearLogButton, ScentJournal } from './FragranceDetailClient'
+import ProsCons from '@/components/collection/ProsCons'
 import { getBrandEmoji } from '@/lib/brandEmoji'
 import { cookies } from 'next/headers'
 import { Users } from 'lucide-react'
@@ -237,6 +238,9 @@ export default async function FragranceDetailPage({
             </p>
           )}
         </div>
+
+        {/* The Verdict */}
+        <ProsCons fragranceId={f.id} />
 
         {/* Scent Journal */}
         {collectionRow?.id && (
