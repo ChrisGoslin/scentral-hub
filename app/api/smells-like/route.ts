@@ -52,29 +52,40 @@ export async function POST(request: NextRequest) {
 
     // Call Claude Haiku to parse the query
     const anthropic = new Anthropic({ apiKey })
-    const response = await anthropic.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 500,
-      system: SYSTEM_PROMPT,
-      messages: [
-        {
-          role: 'user',
-          content: `Parse this scent description: "${query.trim()}"`,
-        },
-      ],
-    })
+
+    let response
+    try {
+      response = await anthropic.messages.create({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 500,
+        system: SYSTEM_PROMPT,
+        messages: [
+          {
+            role: 'user',
+            content: `Parse this scent description: "${query.trim()}"`,
+          },
+        ],
+      })
+    } catch (claudeError) {
+      console.error('Claude API error:', claudeError)
+      return NextResponse.json(
+        { error: 'Failed to call Claude API' },
+        { status: 500 }
+      )
+    }
 
     // Extract the text content from the response
     const content = response.content[0]
     if (content.type !== 'text') {
+      console.error('Unexpected response type from Claude:', content.type)
       throw new Error('Unexpected response type from Claude')
     }
 
     let searchTerms: SearchTerms
     try {
       searchTerms = JSON.parse(content.text)
-    } catch {
-      console.error('Failed to parse Claude response:', content.text)
+    } catch (parseError) {
+      console.error('Failed to parse Claude response:', content.text, parseError)
       return NextResponse.json(
         { error: 'Failed to parse search query' },
         { status: 500 }
