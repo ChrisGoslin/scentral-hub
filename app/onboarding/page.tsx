@@ -2,9 +2,185 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import html2canvas from 'html2canvas'
 import { getPersonaByInputs, type Persona } from '@/lib/personas'
 import { track } from '@/lib/posthog'
 import PersonaRevealOverlay from './PersonaRevealOverlay'
+
+interface NosePrintCardProps {
+  persona: Persona
+}
+
+function NosePrintCard({ persona }: NosePrintCardProps) {
+  const cardRef = useRef<HTMLDivElement>(null)
+  const [copied, setCopied] = useState(false)
+
+  const handleDownload = async () => {
+    if (!cardRef.current) return
+    try {
+      const canvas = await html2canvas(cardRef.current, {
+        backgroundColor: '#1A1208',
+        scale: 2,
+        logging: false,
+      })
+      const link = document.createElement('a')
+      link.href = canvas.toDataURL('image/png')
+      link.download = 'my-noseprint.png'
+      link.click()
+      track('noseprint_card_downloaded', { persona_id: persona.id })
+    } catch (err) {
+      console.error('Failed to download card:', err)
+    }
+  }
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText('https://basenote.app/onboarding')
+    setCopied(true)
+    track('noseprint_link_copied', { persona_id: persona.id })
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  const topThreeTraits = [
+    persona.scent_spectrum.top[0],
+    persona.scent_spectrum.heart[0],
+    persona.scent_spectrum.base[0],
+  ].filter(Boolean)
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      {/* Card Preview */}
+      <div
+        ref={cardRef}
+        style={{
+          width: 320,
+          aspectRatio: '1',
+          background: 'var(--bg-card, #1A1208)',
+          border: `2px solid ${persona.ui_theme.accentColor}40`,
+          borderRadius: 16,
+          padding: 24,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          textAlign: 'center',
+          boxShadow: `0 0 32px ${persona.ui_theme.accentColor}20`,
+          position: 'relative',
+        }}
+      >
+        {/* BaseNote Logo/Wordmark */}
+        <div style={{
+          fontFamily: 'var(--font-display)',
+          fontSize: 14,
+          fontWeight: 700,
+          letterSpacing: '0.08em',
+          textTransform: 'uppercase',
+          color: persona.ui_theme.accentColor,
+          marginBottom: 8,
+        }}>
+          BaseNote
+        </div>
+
+        {/* Persona Name */}
+        <div style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          gap: 16,
+        }}>
+          <h2 style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 24,
+            fontStyle: 'italic',
+            fontWeight: 400,
+            color: '#fff',
+            lineHeight: 1.2,
+            margin: 0,
+          }}>
+            {persona.name}
+          </h2>
+
+          {/* Top 3 Scent Traits */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 8,
+          }}>
+            {topThreeTraits.map((trait) => (
+              <div key={trait} style={{
+                fontSize: 11,
+                color: persona.ui_theme.accentColor,
+                fontWeight: 600,
+                letterSpacing: '0.05em',
+                textTransform: 'uppercase',
+                opacity: 0.9,
+              }}>
+                {trait}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer Text */}
+        <div style={{
+          fontSize: 9,
+          color: persona.ui_theme.accentColor,
+          opacity: 0.7,
+          fontWeight: 500,
+          letterSpacing: '0.04em',
+        }}>
+          Find your NosePrint at basenote.app
+        </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button
+          onClick={handleDownload}
+          style={{
+            flex: 1,
+            padding: '12px 16px',
+            background: persona.ui_theme.accentColor,
+            color: '#fff',
+            border: 'none',
+            borderRadius: 8,
+            fontSize: 13,
+            fontWeight: 600,
+            cursor: 'pointer',
+            transition: 'opacity 200ms ease',
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
+          onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
+        >
+          Save Card
+        </button>
+        <button
+          onClick={handleCopyLink}
+          style={{
+            flex: 1,
+            padding: '12px 16px',
+            background: `${persona.ui_theme.accentColor}20`,
+            color: persona.ui_theme.accentColor,
+            border: `1px solid ${persona.ui_theme.accentColor}40`,
+            borderRadius: 8,
+            fontSize: 13,
+            fontWeight: 600,
+            cursor: 'pointer',
+            transition: 'all 200ms ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = `${persona.ui_theme.accentColor}30`
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = `${persona.ui_theme.accentColor}20`
+          }}
+        >
+          {copied ? '✓ Copied!' : 'Copy Link'}
+        </button>
+      </div>
+    </div>
+  )
+}
 
 // ─── Sanctuary options ────────────────────────────────────────────────────────
 const SANCTUARIES = [
@@ -194,6 +370,17 @@ export default function OnboardingPage() {
                   </div>
                 ))}
               </div>
+            </div>
+
+            <div style={{
+              marginTop: 32,
+              opacity: revealVisible ? 1 : 0,
+              transition: prefersReducedMotion.current ? 'opacity 200ms ease' : 'opacity 400ms ease 640ms',
+            }}>
+              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: persona.ui_theme.accentColor, marginBottom: 16 }}>
+                Share Your NosePrint
+              </p>
+              <NosePrintCard persona={persona} />
             </div>
           </div>
 

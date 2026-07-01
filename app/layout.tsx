@@ -8,6 +8,7 @@ import { Providers } from "./providers";
 import PageTracker from "./components/PageTracker";
 import DeferredFontLink from "./components/DeferredFontLink";
 import FeedbackWidget from "@/components/feedback/FeedbackWidget";
+import CompareBar from "@/components/ui/CompareBar";
 
 const unbounded = Unbounded({
   subsets: ["latin"],
@@ -86,6 +87,7 @@ export default function RootLayout({
               {children}
             </main>
             <FeedbackWidget />
+            <CompareBar />
           </AnalyticsProvider>
         </Providers>
       </body>

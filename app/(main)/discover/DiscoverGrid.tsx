@@ -2,6 +2,7 @@
 
 import { Fragment, useEffect, useState } from 'react'
 import Link from 'next/link'
+import { Scale } from 'lucide-react'
 import EmptyState from '@/components/ui/EmptyState'
 import ErrorInline from '@/components/ui/ErrorInline'
 import Button from '@/components/ui/Button'
@@ -11,6 +12,7 @@ import { track } from '@/lib/posthog'
 import type { DiscoverFragrance } from '@/lib/useFragranceSearch'
 import { getPersonaById, type Persona } from '@/lib/personas'
 import { getFitNarrative } from '@/lib/fitNarrative'
+import { useCompare } from '@/hooks/useCompare'
 
 type Props = {
   filtered: DiscoverFragrance[]
@@ -53,6 +55,7 @@ export function DiscoverGrid({
   onRetrySearch,
 }: Props) {
   const [persona, setPersona] = useState<Persona | null>(null)
+  const { compareIds, toggleCompare } = useCompare()
 
   useEffect(() => {
     const personaId = localStorage.getItem('scentral_persona')
@@ -161,6 +164,33 @@ export function DiscoverGrid({
                     Inspired By available
                   </span>
                 )}
+                <button
+                  onClick={e => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    toggleCompare(f.id)
+                  }}
+                  aria-label={compareIds.includes(f.id) ? 'Remove from compare' : 'Add to compare'}
+                  style={{
+                    position: 'absolute',
+                    top: 4,
+                    right: 28,
+                    width: 20,
+                    height: 20,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: compareIds.includes(f.id) ? 'var(--accent)' : 'color-mix(in srgb, var(--bg) 70%, transparent)',
+                    border: 'none',
+                    borderRadius: '50%',
+                    cursor: 'pointer',
+                    padding: 0,
+                    color: compareIds.includes(f.id) ? 'rgba(0,0,0,0.85)' : 'var(--text-muted)',
+                    zIndex: 2,
+                  }}
+                >
+                  <Scale size={11} />
+                </button>
                 <button
                   onClick={e => {
                     e.preventDefault()

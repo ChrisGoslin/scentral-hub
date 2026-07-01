@@ -15,10 +15,11 @@ import React, { useRef, useCallback, useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { ShoppingBag } from 'lucide-react';
+import { ShoppingBag, Scale } from 'lucide-react';
 import { getFamilyGradient } from '@/lib/familyGradients';
 import { GradientPlaceholder } from '@/components/ui/GradientPlaceholder';
 import { type CollectionFragrance } from '@/app/(main)/collection/CollectionClient';
+import { useCompare } from '@/hooks/useCompare';
 import WearLogModal from '@/app/(main)/collection/WearLogModal';
 import BuyLinks from '@/app/components/BuyLinks';
 
@@ -62,6 +63,7 @@ export default function OptimizedBottleCard({
   const [isBuyOpen, setIsBuyOpen] = useState(false);
   const [isAnchorUnlocked, setIsAnchorUnlocked] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const { compareIds, toggleCompare } = useCompare();
 
   const touchStartTimeRef = useRef<number | null>(null);
   const frameIdRef = useRef<number | null>(null);
@@ -278,6 +280,31 @@ export default function OptimizedBottleCard({
                 }}
               >
                 Log Wear
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  toggleCompare(f.id);
+                }}
+                onPointerDown={(e) => { e.stopPropagation(); }}
+                title="Compare this fragrance"
+                style={{
+                  background: compareIds.includes(f.id) ? 'var(--accent)' : 'rgba(250,247,242,0.92)',
+                  color: compareIds.includes(f.id) ? 'rgba(0,0,0,0.85)' : 'rgba(60,50,40,0.85)',
+                  border: 'none',
+                  borderRadius: 999,
+                  width: 26,
+                  height: 26,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.25)',
+                  flexShrink: 0,
+                }}
+              >
+                <Scale size={12} />
               </button>
               <button
                 onClick={(e) => {

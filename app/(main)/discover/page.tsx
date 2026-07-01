@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import { createClient } from '@/utils/supabase/server'
 import DiscoverClient, { type DiscoverFragrance } from './DiscoverClient'
+import ActiveChallengeSection from '@/components/features/ActiveChallengeSection'
 
 export const metadata: Metadata = {
   title: 'Discover | BaseNote',
@@ -54,11 +55,14 @@ export default async function DiscoverPage() {
   const hasMore = (data?.length ?? 0) < (totalCount ?? 0)
 
   return (
-    <DiscoverClient
-      fragrances={fragrances}
-      error={error?.message ?? null}
-      hasMore={hasMore}
-      totalCount={totalCount ?? 0}
-    />
+    <>
+      <ActiveChallengeSection />
+      <DiscoverClient
+        fragrances={fragrances}
+        error={error?.message ?? null}
+        hasMore={hasMore}
+        totalCount={totalCount ?? 0}
+      />
+    </>
   )
 }

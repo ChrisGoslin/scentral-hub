@@ -81,7 +81,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
     setSemanticError,
   } = useFragranceSearch(localFragrances)
 
-  // "Smells Like" proximity search
+  // "Smells Like" natural language search
   const [smellsLikeMode, setSmellsLikeMode] = useState(false)
   const [smellsLikeResults, setSmellsLikeResults] = useState<SmellsLikeResult[]>([])
   const [smellsLikeLoading, setSmellsLikeLoading] = useState(false)
@@ -95,10 +95,20 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
     let cancelled = false
     setSmellsLikeLoading(true)
 
-    fetch(`/api/search?q=${encodeURIComponent(debouncedSearch.trim())}&mode=smells_like`)
+    fetch('/api/smells-like', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: debouncedSearch.trim() }),
+    })
       .then(res => res.json())
       .then(data => {
-        if (!cancelled) setSmellsLikeResults(data.results ?? [])
+        if (!cancelled) {
+          setSmellsLikeResults(data.results ?? [])
+          track('smells_like_search', {
+            query: debouncedSearch.trim(),
+            result_count: data.results?.length ?? 0,
+          })
+        }
       })
       .catch(e => {
         console.error('Smells Like search error', e)
