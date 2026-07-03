@@ -17,6 +17,7 @@ import { getPersonaById, type Persona } from '@/lib/personas'
 import { calculateIdentityScore, type IdentityScore } from '@/lib/identityScore'
 import NoseReportSheet from '@/components/ui/NoseReportSheet'
 import RitualCalendar from './RitualCalendar'
+import { EvolutionCard } from './components/EvolutionCard'
 
 export type { WeekWearEntry, SavedCombination }
 import { track } from '@/lib/posthog'
@@ -425,6 +426,9 @@ export default function YouClient(props: YouClientProps) {
       </div>
 
       <div className="px-4 py-6 flex flex-col gap-6">
+        {/* Evolution Detection Card — Noseprint shifts */}
+        <EvolutionCard />
+
         {/* Profile Section — Persona, Vibe, Settings */}
         <ProfileCard
           email={email}

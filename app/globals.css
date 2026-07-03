@@ -75,6 +75,13 @@
   --motion-responsive: 200ms cubic-bezier(0.2, 0.6, 0.2, 1);
   --motion-ceremonial: 480ms cubic-bezier(0.16, 1, 0.3, 1);
   --motion-organic: 800ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Moss Palette — Epic 14 Noseprint Evolution */
+  --moss-1: oklch(0.32 0.08 120);
+  --moss-2: oklch(0.25 0.06 120);
+  --moss-accent: oklch(0.52 0.12 120);
+  --moss-surface: oklch(0.18 0.04 120 / 0.6);
+  --moss-border: oklch(0.45 0.06 120 / 0.3);
 }
 
 [data-theme="dark"] {
