@@ -4,8 +4,8 @@
 
 create table if not exists aura_cache (
   id uuid primary key default gen_random_uuid(),
-  fragrance_id text not null,
-  context_type text not null check (context_type in ('detail', 'shelf', 'general')),
+  fragrance_id uuid not null references fragrances(id) on delete cascade,
+  context_type text not null check (context_type in ('detail', 'shelf', 'general', 'post_wear')),
   weather_state jsonb, -- { temp_c: number, humidity: number } or null for general
   advice_text text not null,
   created_at timestamptz default now(),
