@@ -23,7 +23,9 @@ import AffiliateButton from '@/components/ads/AffiliateButton'
 import GiftThis from './GiftThis'
 import FitNarrativeCard from './FitNarrativeCard'
 import CommunityDepth from './CommunityDepth'
+import FragranceTraces from './FragranceTraces'
 import { GradientPlaceholder } from '@/components/ui/GradientPlaceholder'
+import AuraAdvisory from '@/components/aura/AuraAdvisory'
 
 const PHASE_LABEL: Record<number, string> = {
   1: 'Anchor',
@@ -242,6 +244,19 @@ export default async function FragranceDetailPage({
         {/* Scent Journal */}
         <ScentJournal fragranceId={f.id} />
 
+        {/* Aura Advisory — contextual intelligence */}
+        <AuraAdvisory
+          fragranceId={f.id}
+          contextType="detail"
+          fragranceData={{
+            name: f.name,
+            brand: f.brand,
+            family: f.family,
+            projection: f.projection || 'unknown',
+            optimal_season: f.optimal_season || 'all-year',
+          }}
+        />
+
         {/* Maturation Banner */}
         {readyAt && readyAt > now && (
           <div style={{
@@ -375,6 +390,9 @@ export default async function FragranceDetailPage({
         <DidYouKnow family={f.family} />
 
         <CommunityDepth fragranceId={f.id} />
+
+        {/* Traces — identity-tied scent descriptions + insight strip */}
+        <FragranceTraces fragranceId={f.id} family={f.family} />
 
         {/* Resonance — Find Similar */}
         <SimilarFragrances fragranceId={f.id} />
