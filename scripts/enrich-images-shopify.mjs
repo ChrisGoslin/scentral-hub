@@ -15,16 +15,27 @@
  *   node scripts/enrich-images-shopify.mjs --limit=20       # first 20 matches
  *   node scripts/enrich-images-shopify.mjs                  # full run
  *   node scripts/enrich-images-shopify.mjs --brand=Armaf    # single brand
+ *   node scripts/enrich-images-shopify.mjs --retailer=Scentoria --dry-run --limit=5
+ *
+ * Two store types:
+ *   SHOPIFY_BRANDS   — official single-brand stores; the whole catalog belongs
+ *                      to one brand, so matching is name-only.
+ *   RETAILER_STORES  — multi-brand retailers (--retailer=<name>); every product
+ *                      carries a `vendor` field, so matching requires normalised
+ *                      brand AND name to agree. Retailer misses go to
+ *                      scripts/data/image-misses.txt.
  *
  * Safety gates:
  *   - Always runs the validation test before any writes
  *   - Verifies JSON response before extracting image URL
- *   - Skips fragrances that already have image_url set
- *   - Logs all misses to scripts/data/shopify-misses.txt
+ *   - Skips fragrances that already have image_url set (only fills NULL,
+ *     never overwrites; writes image_url ONLY — never descriptions or prices)
+ *   - Logs all misses to scripts/data/shopify-misses.txt (brand mode) /
+ *     scripts/data/image-misses.txt (retailer mode)
  *
- * SHOPIFY_BRANDS only contains brands whose /products.json was confirmed
- * reachable on 2026-06-28 (see the skill above). Do not add a brand here
- * without running the verification procedure in that skill first.
+ * SHOPIFY_BRANDS / RETAILER_STORES only contain stores whose /products.json was
+ * confirmed reachable (see the skill above). Do not add a store here without
+ * running the verification procedure in that skill first.
  */
 
 import dotenv from 'dotenv'
@@ -39,6 +50,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const dataDir = path.join(__dirname, 'data')
 if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true })
 const missesFile = path.join(dataDir, 'shopify-misses.txt')
+const imageMissesFile = path.join(dataDir, 'image-misses.txt')
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseKey = process.env.SUPABASE_SERVICE_KEY
@@ -55,6 +67,8 @@ const limitArg = process.argv.find(a => a.startsWith('--limit='))
 const limit = limitArg ? parseInt(limitArg.split('=')[1], 10) : 0
 const brandArg = process.argv.find(a => a.startsWith('--brand='))
 const brandFilter = brandArg ? brandArg.split('=')[1] : null
+const retailerArg = process.argv.find(a => a.startsWith('--retailer='))
+const retailerFilter = retailerArg ? retailerArg.split('=')[1] : null
 
 // ─── Brand → Shopify store map (confirmed working 2026-06-28) ─────────────────
 // Re-verify via .claude/skills/shopify-image-enrichment/SKILL.md curl procedure
@@ -69,6 +83,57 @@ const SHOPIFY_BRANDS = {
   'Initio':        { store: 'www.initioparfums.com' },
   'Swiss Arabian': { store: 'www.swissarabian.com' },
   'Xerjoff':       { store: 'www.xerjoff.com' },
+}
+
+// ─── Multi-brand retailer stores (--retailer=<name>) ──────────────────────────
+// Verified per the skill procedure before being added. Retailers stock many
+// brands, so every catalog product's `vendor` field must match the DB brand
+// (normalised, via BRAND_ALIASES) before name matching is even attempted.
+//
+// Scentoria (verified 2026-07-04): genuine-goods decant/tester reseller in
+// India — 5,000+ products, 352 vendors, all images on cdn.shopify.com.
+// ~24% of its images are hand-taken phone photos of partially used bottles
+// (filenames like IMG_4461-Photoroom.png), unusable as catalog imagery —
+// skipImage filters those out. Titles containing "Partial" are used bottles;
+// skipTitle drops them plus non-perfume products (deodorants, gift sets, …).
+const RETAILER_STORES = {
+  'Scentoria': {
+    store: 'scentoria.co.in',
+    skipTitle: /\b(partial|tester|vintage|batch|gift set|discovery set|sample set|sampler|deodorant|shower gel|body lotion|body cream|beard oil|mencare|candle|refill)\b/i,
+    skipImage: /(IMG_\d+|\d{8}_\d{6}|Photoroom|WhatsApp|Screenshot|PXL_)/i,
+  },
+}
+
+// DB brand spellings vs retailer vendor names diverge for a few big houses
+// (verified against the DB 2026-07-04: DB has "Dior"/"Christian Dior"/"dior",
+// "Yves Saint Laurent", "Maison Francis Kurkdjian"/"maison-francis-kurkdjian").
+// Keys and values are normalizeBrand() output; both sides of a comparison are
+// mapped through this, so either spelling matches the other.
+const BRAND_ALIASES = {
+  christiandior: 'dior',
+  ysl: 'yvessaintlaurent',
+  mfk: 'maisonfranciskurkdjian',
+}
+
+function normalizeBrand(s) {
+  const key = (s || '')
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '')
+  return BRAND_ALIASES[key] || key
+}
+
+// Retailer catalog titles often embed the brand ("Azzaro Pour Homme EDT") while
+// DB names may or may not ("Azzaro Pour Homme" vs "Pour Homme"). Stripping the
+// brand as a prefix/suffix from BOTH sides makes the comparison consistent
+// without risking mid-string damage ("Miss Dior" keeps its stem either way).
+function stripBrandAffix(normTitle, brandKey) {
+  if (!brandKey) return normTitle
+  let t = normTitle
+  while (t.length > brandKey.length && t.startsWith(brandKey)) t = t.slice(brandKey.length)
+  while (t.length > brandKey.length && t.endsWith(brandKey)) t = t.slice(0, -brandKey.length)
+  return t || normTitle
 }
 
 // ─── Fuzzy title matching ──────────────────────────────────────────────────────
@@ -130,8 +195,12 @@ function trailingNumber(s) {
   return m ? m[1] : null
 }
 
-function matchInCatalog(catalog, fragranceName) {
-  const target = normalizeTitle(fragranceName)
+// brandKey (retailer mode only): strip the brand affix from the target after
+// normalisation, mirroring how retailer catalog entries were indexed. Brand
+// mode passes no brandKey and behaves exactly as before.
+function matchInCatalog(catalog, fragranceName, brandKey = null) {
+  let target = normalizeTitle(fragranceName)
+  if (brandKey) target = stripBrandAffix(target, brandKey)
   if (!target) return null
 
   // Exact normalized match first.
@@ -215,6 +284,56 @@ function sleep(ms) {
   return new Promise(r => setTimeout(r, ms))
 }
 
+// Fetch a multi-brand retailer catalog and index it by normalised vendor.
+// Returns Map<brandKey, [{title, vendor, normalizedTitle, imageUrl}]> where
+// normalizedTitle is already brand-affix-stripped, so matchInCatalog can be
+// reused unchanged (pass it a brand-stripped target).
+const RETAILER_PAGE_CAP = 40 // 40 × 250 = 10,000 products
+
+async function fetchRetailerCatalog(config) {
+  const byVendor = new Map()
+  let pages = 0
+  let kept = 0
+  let skippedTitle = 0
+  let skippedImage = 0
+
+  for (let page = 1; page <= RETAILER_PAGE_CAP; page++) {
+    const { status, data } = await fetchJson(`https://${config.store}/products.json?limit=250&page=${page}`)
+    if (status !== 200 || !data?.products?.length) break
+    pages = page
+
+    for (const p of data.products) {
+      if (config.skipTitle?.test(p.title)) { skippedTitle++; continue }
+      const imageUrl = extractImage(p)
+      if (!imageUrl) continue
+      const filename = imageUrl.split('/').pop()
+      if (config.skipImage?.test(filename)) { skippedImage++; continue }
+
+      const brandKey = normalizeBrand(p.vendor)
+      if (!brandKey) continue
+      const entry = {
+        title: p.title,
+        vendor: p.vendor,
+        normalizedTitle: stripBrandAffix(normalizeTitle(p.title), brandKey),
+        imageUrl,
+      }
+      if (!byVendor.has(brandKey)) byVendor.set(brandKey, [])
+      byVendor.get(brandKey).push(entry)
+      kept++
+    }
+
+    if (data.products.length < 250) break
+    await sleep(400) // polite delay between pages
+  }
+
+  if (pages === RETAILER_PAGE_CAP) {
+    console.log(`  ⚠️  Hit the ${RETAILER_PAGE_CAP}-page cap — catalog may be larger than what was fetched.`)
+  }
+  console.log(`  📦 ${config.store}: ${pages} pages, ${kept} usable products across ${byVendor.size} vendors`)
+  console.log(`     (skipped ${skippedTitle} by title filter, ${skippedImage} phone-photo images)`)
+  return byVendor
+}
+
 // ─── Validation test ──────────────────────────────────────────────────────────
 
 async function runValidationTest() {
@@ -271,6 +390,152 @@ async function runValidationTest() {
   console.log('✅ Validation passed. Proceeding...\n')
 }
 
+// ─── Retailer validation test ─────────────────────────────────────────────────
+
+function runRetailerValidationTest(retailerName, config, byVendor) {
+  console.log(`\n🧪 Retailer validation test — ${retailerName} (runs before any DB writes)\n`)
+
+  const fail = (msg) => {
+    console.log(`  ❌ FAIL — ${msg}`)
+    console.log(`  Aborting — do not trust this script until this is fixed.\n`)
+    process.exit(1)
+  }
+
+  console.log('Test 1 — catalog fetch returned multiple vendors:')
+  if (byVendor.size < 2) fail(`only ${byVendor.size} vendor(s) — not a multi-brand catalog, or vendor field missing`)
+  console.log(`  ✅ PASS — ${byVendor.size} vendors indexed\n`)
+
+  const [someBrandKey, someProducts] = [...byVendor.entries()].find(([, v]) => v.length > 0)
+  const real = someProducts[0]
+  console.log(`Test 2 — real product matches itself within its vendor ("${real.vendor}" / "${real.title}"):`)
+  const realMatch = matchInCatalog(someProducts, real.title, someBrandKey)
+  if (!realMatch) fail('a catalog title didn\'t match itself, matching logic is broken')
+  console.log(`  ✅ PASS — matched, image: ${realMatch.imageUrl.slice(0, 80)}…\n`)
+
+  console.log('Test 3 — fake product (must return null):')
+  const fakeMatch = matchInCatalog(someProducts, 'totally-fake-xyz-12345-not-a-real-perfume')
+  if (fakeMatch) fail(`matched a fake name to "${fakeMatch.title}"`)
+  console.log('  ✅ PASS — correctly returned no match\n')
+
+  console.log('Test 4 — used-bottle/non-perfume titles are filtered:')
+  if (config.skipTitle && !config.skipTitle.test('Bleu De Chanel EDP Partial')) {
+    fail('skipTitle did not exclude a "Partial" (used bottle) title')
+  }
+  console.log('  ✅ PASS — "Partial" titles excluded\n')
+
+  console.log('Test 5 — phone-photo image filenames are filtered:')
+  if (config.skipImage && !config.skipImage.test('IMG_4461-Photoroom.png')) {
+    fail('skipImage did not exclude a phone-photo filename')
+  }
+  console.log('  ✅ PASS — phone-photo filenames excluded\n')
+
+  console.log('✅ Retailer validation passed. Proceeding...\n')
+}
+
+// ─── Retailer mode (--retailer=<name>) ────────────────────────────────────────
+
+async function runRetailerMode() {
+  const entry = Object.entries(RETAILER_STORES)
+    .find(([name]) => name.toLowerCase() === retailerFilter.toLowerCase())
+  if (!entry) {
+    console.error(`❌ Retailer "${retailerFilter}" not in RETAILER_STORES map`)
+    console.error(`   Known retailers: ${Object.keys(RETAILER_STORES).join(', ')}`)
+    process.exit(1)
+  }
+  const [retailerName, config] = entry
+
+  console.log(`🏪 Retailer mode: ${retailerName} (${config.store})`)
+  console.log(`   Brand filter: ${brandFilter || 'all stocked brands'}\n`)
+  const byVendor = await fetchRetailerCatalog(config)
+
+  runRetailerValidationTest(retailerName, config, byVendor)
+
+  // Collect candidate fragrances: NULL image_url AND brand present in the
+  // retailer's vendor index. Brand spellings vary in the DB, so we page
+  // through all NULL-image rows and filter by normalised brand client-side.
+  const candidates = []
+  let from = 0
+  while (true) {
+    const { data, error } = await supabase
+      .from('fragrances')
+      .select('id, name, brand')
+      .is('image_url', null)
+      .order('brand', { ascending: true })
+      .order('name', { ascending: true })
+      .range(from, from + 999)
+    if (error) { console.error('❌ DB error:', error.message); process.exit(1) }
+    if (!data.length) break
+    for (const frag of data) {
+      if (brandFilter && normalizeBrand(frag.brand) !== normalizeBrand(brandFilter)) continue
+      if (byVendor.has(normalizeBrand(frag.brand))) {
+        candidates.push(frag)
+        if (limit > 0 && candidates.length >= limit) break
+      }
+    }
+    if (limit > 0 && candidates.length >= limit) break
+    if (data.length < 1000) break
+    from += 1000
+  }
+
+  console.log(`Found ${candidates.length} candidate fragrances (NULL image_url, brand stocked by ${retailerName})\n`)
+  if (!candidates.length) {
+    console.log('✅ Nothing to enrich for this retailer.')
+    return
+  }
+
+  let hits = 0
+  let misses = 0
+  const missLog = []
+  const rows = []
+
+  for (const frag of candidates) {
+    const brandKey = normalizeBrand(frag.brand)
+    const vendorProducts = byVendor.get(brandKey)
+    const match = matchInCatalog(vendorProducts, frag.name, brandKey)
+
+    if (match) {
+      if (!isDryRun) {
+        const { error: updateError } = await supabase
+          .from('fragrances')
+          .update({ image_url: match.imageUrl }) // image_url ONLY — never description/price
+          .eq('id', frag.id)
+          .is('image_url', null) // belt-and-braces: never overwrite a concurrent fill
+
+        if (updateError) {
+          console.error(`  ❌ DB update failed for ${frag.brand} / ${frag.name}: ${updateError.message}`)
+          misses++
+          missLog.push(`DB_ERROR\t${retailerName}\t${frag.brand}\t${frag.name}`)
+          continue
+        }
+      }
+      hits++
+      rows.push({ status: '✅ match', brand: frag.brand, name: frag.name, detail: `"${match.title}" (vendor: ${match.vendor})` })
+    } else {
+      misses++
+      missLog.push(`NO_MATCH\t${retailerName}\t${frag.brand}\t${frag.name}\tvendor_catalog=${vendorProducts.length}`)
+      rows.push({ status: '○ miss', brand: frag.brand, name: frag.name, detail: `no title match (vendor catalog: ${vendorProducts.length} products)` })
+    }
+  }
+
+  console.log('┌── Match/miss table ' + '─'.repeat(60))
+  for (const r of rows) {
+    console.log(`│ ${r.status}  ${r.brand} / ${r.name}`)
+    console.log(`│          → ${r.detail}`)
+  }
+  console.log('└' + '─'.repeat(80))
+
+  if (missLog.length > 0) {
+    fs.appendFileSync(imageMissesFile, missLog.join('\n') + '\n')
+  }
+
+  console.log(`\n📊 Results — ${retailerName}`)
+  console.log(`   ✅ Hits:    ${hits}`)
+  console.log(`   ○  Misses:  ${misses}`)
+  if (isDryRun) console.log(`\n⚠️  Dry run — no DB changes made. Re-run without --dry-run to apply.`)
+  if (missLog.length > 0) console.log(`   Misses logged to: ${imageMissesFile}`)
+  console.log()
+}
+
 // ─── Manual Overrides ─────────────────────────────────────────────────────────
 
 const MANUAL_OVERRIDES = {
@@ -291,6 +556,10 @@ async function main() {
   console.log(`\n🛍️  BaseNote — Shopify image enrichment`)
   console.log(`   Mode: ${isDryRun ? 'DRY RUN (no DB writes)' : 'LIVE'}`)
   console.log(`   Limit: ${limit || 'none (all)'}`)
+  if (retailerFilter) {
+    await runRetailerMode()
+    return
+  }
   console.log(`   Brand filter: ${brandFilter || 'all Shopify brands'}\n`)
 
   await runValidationTest()

@@ -10,6 +10,10 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'fimgs.net' },
       { protocol: 'https', hostname: 'www.fragrantica.com' },
       { protocol: 'https', hostname: 'upload.wikimedia.org' },
+      // enrich-images-shopify.mjs writes cdn.shopify.com URLs (brand stores +
+      // multi-brand retailers). Missing since the 2026-06-28 brand run — see
+      // AGENTS.md L16, next/image throws at render time on unlisted hosts.
+      { protocol: 'https', hostname: 'cdn.shopify.com' },
     ],
   },
   webpack: (config, { isServer }) => {
