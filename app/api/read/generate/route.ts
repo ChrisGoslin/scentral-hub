@@ -27,6 +27,22 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  // Server-side rate limit: max 1 Read generation per hour per user
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
+  const { count: recentReads } = await supabase
+    .from('interactions')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+    .eq('event_type', 'read_generated')
+    .gte('created_at', oneHourAgo)
+
+  if ((recentReads ?? 0) >= 1) {
+    return NextResponse.json(
+      { error: 'Rate limited. Try again later.' },
+      { status: 429 }
+    )
+  }
+
   const body = await req.json()
   const { feelings = [], ownedIds = [], ownedFamilies = [], signals = [] } = body
 

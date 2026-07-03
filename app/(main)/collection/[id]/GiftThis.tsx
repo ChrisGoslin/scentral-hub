@@ -61,7 +61,7 @@ export default function GiftThis({ fragranceId, brand, name, family, optimalSeas
     const html2canvas = (await import('html2canvas')).default
     const canvas = await html2canvas(cardRef.current, { backgroundColor: '#1A1208', scale: 2 })
     const link = document.createElement('a')
-    link.download = `${brand}-${name}-basenote.png`.replace(/\s+/g, '-').toLowerCase()
+    link.download = `${brand}-${name}-nota.png`.replace(/\s+/g, '-').toLowerCase()
     link.href = canvas.toDataURL('image/png')
     link.click()
   }
@@ -128,7 +128,7 @@ export default function GiftThis({ fragranceId, brand, name, family, optimalSeas
             )}
             <div style={{ flex: 1 }} />
             <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', textAlign: 'right', paddingBottom: 16 }}>
-              BaseNote
+              nota.
             </p>
           </div>
           <div style={{ height: 2, width: '100%', background: 'var(--accent)' }} />

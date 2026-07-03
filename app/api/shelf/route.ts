@@ -10,7 +10,7 @@ type ShelfRequest =
   | { action: 'reorder'; order: { itemId: string; rank: number }[] }
   | { action: 'replace'; itemId: string; fragranceId: string }
 
-const SHELF_SIZE = 10
+const SHELF_SIZE = 20
 
 export async function POST(req: Request) {
   const cookieStore = await cookies()

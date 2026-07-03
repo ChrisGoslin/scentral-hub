@@ -5,7 +5,7 @@ import type { ShelfSlot, ShelfFragrance, ShelfSource } from './types'
 
 export const dynamic = 'force-dynamic'
 
-const SHELF_SIZE = 10
+const SHELF_SIZE = 20
 
 const FRAGRANCE_COLUMNS = 'id, brand, name, family, image_url'
 
@@ -60,6 +60,19 @@ async function seedShelfItems(
     .maybeSingle()
 
   const matchIds = (noseprint?.matches ?? []).slice(0, 3) as string[]
+
+  // Ensure noseprint matches exist in collections with 'tested' status (required by DB-003 trigger)
+  if (matchIds.length > 0) {
+    const matchesToInsert = matchIds.map(id => ({
+      user_id: userId,
+      fragrance_id: id,
+      status: 'tested' as const,
+    }))
+    await supabase.from('collections').upsert(matchesToInsert, {
+      onConflict: 'user_id,fragrance_id',
+    })
+  }
+
   matchIds.forEach((fragranceId, i) => {
     if (usedFragranceIds.has(fragranceId)) return
     usedFragranceIds.add(fragranceId)

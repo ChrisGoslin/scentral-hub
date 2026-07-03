@@ -34,7 +34,7 @@ function NosePrintCard({ persona }: NosePrintCardProps) {
   }
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText('https://basenote.app/onboarding')
+    navigator.clipboard.writeText('https://nota.app/onboarding')
     setCopied(true)
     track('noseprint_link_copied', { persona_id: persona.id })
     setTimeout(() => setCopied(false), 2000)
@@ -67,7 +67,7 @@ function NosePrintCard({ persona }: NosePrintCardProps) {
           position: 'relative',
         }}
       >
-        {/* BaseNote Logo/Wordmark */}
+        {/* nota. Logo/Wordmark */}
         <div style={{
           fontFamily: 'var(--font-display)',
           fontSize: 14,
@@ -77,7 +77,7 @@ function NosePrintCard({ persona }: NosePrintCardProps) {
           color: persona.ui_theme.accentColor,
           marginBottom: 8,
         }}>
-          BaseNote
+          nota.
         </div>
 
         {/* Persona Name */}
@@ -129,7 +129,7 @@ function NosePrintCard({ persona }: NosePrintCardProps) {
           fontWeight: 500,
           letterSpacing: '0.04em',
         }}>
-          Find your NosePrint at basenote.app
+          Find your Noseprint at nota.app
         </div>
       </div>
 
