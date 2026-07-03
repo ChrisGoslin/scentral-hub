@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import Button from '@/components/ui/Button'
 import WearLogModal, { type WearLogModalProps } from '../WearLogModal'
 import { createClient } from '@/utils/supabase/client'
@@ -98,9 +98,13 @@ const MAX_CHARS = 500
 
 export function ScentJournal({ fragranceId }: ScentJournalProps) {
   const storageKey = `scentral_journal_${fragranceId}`
-  const [notes, setNotes] = useState(() => localStorage.getItem(storageKey) ?? '')
+  const [notes, setNotes] = useState('')
   const [saved, setSaved] = useState(false)
   const charCount = notes.length
+
+  useEffect(() => {
+    setNotes(localStorage.getItem(storageKey) ?? '')
+  }, [storageKey])
 
   const handleSave = useCallback(() => {
     localStorage.setItem(storageKey, notes)

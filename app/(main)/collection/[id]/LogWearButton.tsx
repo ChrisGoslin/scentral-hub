@@ -2,11 +2,27 @@
 
 import { useState, useRef } from 'react'
 import { track } from '@/lib/posthog'
+import AuraAdvisory from '@/components/aura/AuraAdvisory'
 
-export default function LogWearButton({ collectionId, initialWears = 0, initialStreak = 0 }: { collectionId: string, initialWears?: number, initialStreak?: number }) {
+interface LogWearButtonProps {
+  collectionId: string
+  initialWears?: number
+  initialStreak?: number
+  fragranceId?: string
+  fragranceData?: {
+    name: string
+    brand: string
+    family: string
+    projection: string
+    optimal_season: string
+  }
+}
+
+export default function LogWearButton({ collectionId, initialWears = 0, initialStreak = 0, fragranceId, fragranceData }: LogWearButtonProps) {
   const [state, setState] = useState<'idle' | 'loading' | 'done'>('idle')
   const [wears, setWears] = useState(initialWears)
   const [streak, setStreak] = useState(initialStreak)
+  const [justLogged, setJustLogged] = useState(false)
   const buttonRef = useRef<HTMLButtonElement>(null)
 
   async function handleLog() {
@@ -40,6 +56,7 @@ export default function LogWearButton({ collectionId, initialWears = 0, initialS
         streak: data.current_streak ?? 0,
       })
       setState('done')
+      setJustLogged(true)
       setTimeout(() => setState('idle'), 1500)
     } catch {
       setState('idle')
@@ -77,6 +94,13 @@ export default function LogWearButton({ collectionId, initialWears = 0, initialS
             : 'Log a wear'}
         </span>
       </button>
+      {justLogged && fragranceId && fragranceData && (
+        <AuraAdvisory
+          fragranceId={fragranceId}
+          contextType="post_wear"
+          fragranceData={fragranceData}
+        />
+      )}
     </div>
   )
 }

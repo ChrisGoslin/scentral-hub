@@ -16,6 +16,7 @@ import { SortableContext, useSortable, rectSortingStrategy, arrayMove } from '@d
 import { CSS } from '@dnd-kit/utilities'
 import Button from '@/components/ui/Button'
 import AuthSheet from '@/components/auth/AuthSheet'
+import AuraShelfAdvisory from '@/components/aura/AuraShelfAdvisory'
 import type { ShelfSlot, ShelfFragrance } from './types'
 
 // Spec calls for a 300ms "drift/settle" drag animation. There is no 300ms token in
@@ -27,6 +28,7 @@ const DRIFT_SETTLE = '300ms cubic-bezier(0.34, 1.56, 0.64, 1)'
 interface ShelfClientProps {
   slots: ShelfSlot[]
   isSignedIn: boolean
+  topThree: Array<{ id: string; name: string; brand: string; family: string | null }>
 }
 
 type SearchResult = {
@@ -387,7 +389,7 @@ function SearchSheet({
 
 // ─── Main component ──────────────────────────────────────────────────────────
 
-export default function ShelfClient({ slots: initialSlots, isSignedIn }: ShelfClientProps) {
+export default function ShelfClient({ slots: initialSlots, isSignedIn, topThree }: ShelfClientProps) {
   const [slots, setSlots] = useState<ShelfSlot[]>(initialSlots)
   const [activeId, setActiveId] = useState<string | null>(null)
   const [searchTargetRank, setSearchTargetRank] = useState<number | null>(null)
@@ -532,6 +534,8 @@ export default function ShelfClient({ slots: initialSlots, isSignedIn }: ShelfCl
           Your Top 10. Drag to reorder, remove what's wrong, replace what's missing.
         </p>
       </div>
+
+      <AuraShelfAdvisory topThree={topThree} className="mb-4" />
 
       <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={onDragStart} onDragEnd={onDragEnd}>
         <SortableContext items={sortableIds} strategy={rectSortingStrategy}>

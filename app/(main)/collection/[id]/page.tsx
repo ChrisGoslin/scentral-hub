@@ -63,7 +63,7 @@ export default async function FragranceDetailPage({
   const [{ data, error }, { data: collectionRow }, { data: proofData }] = await Promise.all([
     supabase
       .from('fragrances')
-      .select('id, brand, name, phase, phase_label, family, projection, anosmia_risk, lean, rating, image_url, use_case, spritz_count, application_zone, maturation, inspired_by, is_user_created, optimal_season, clone_target, plain_description, pyramid, buy_url, buy_label')
+      .select('id, brand, name, phase, phase_label, family, projection, anosmia_risk, lean, rating, image_url, use_case, spritz_count, application_zone, maturation, inspired_by, is_user_created, optimal_season, plain_description, top_notes, heart_notes, base_notes, buy_url, buy_label')
       .eq('id', id)
       .single(),
     supabase
@@ -88,7 +88,7 @@ export default async function FragranceDetailPage({
 
   // Look up the reference fragrance this clone is inspired by
   let inspiredByRef: { id: string; brand: string; name: string } | null = null
-  const target = f.clone_target || f.inspired_by
+  const target = f.inspired_by
   if (target) {
     const { data: refRow } = await supabase
       .from('fragrances')
@@ -167,8 +167,8 @@ export default async function FragranceDetailPage({
     maturationChip = 'recommended'
   }
 
-  const explanation = (f.clone_target || f.inspired_by)
-    ? getSimilarityExplanation(85, f.clone_target || f.inspired_by || '', f.name)
+  const explanation = (f.inspired_by)
+    ? getSimilarityExplanation(85, f.inspired_by || '', f.name)
     : null
 
   return (
@@ -349,11 +349,11 @@ export default async function FragranceDetailPage({
         <FitNarrativeCard
           family={f.family}
           fragranceName={f.name}
-          inspiredBy={f.clone_target || f.inspired_by}
+          inspiredBy={f.inspired_by}
         />
 
         {/* Notes Pyramid */}
-        <NotesPyramid pyramid={f.pyramid} />
+        <NotesPyramid pyramid={{ top: f.top_notes, heart: f.heart_notes, base: f.base_notes }} />
 
         {/* AI Verdict */}
         {f.plain_description && (
@@ -398,7 +398,7 @@ export default async function FragranceDetailPage({
         <SimilarFragrances fragranceId={f.id} />
 
         {/* Inspired By — "Smells like" card */}
-        {(f.clone_target || f.inspired_by) && (
+        {(f.inspired_by) && (
           <div style={{
             padding: '16px',
             background: 'var(--surface)',
@@ -421,7 +421,7 @@ export default async function FragranceDetailPage({
               </Link>
             ) : (
               <p style={{ fontSize: 20, fontFamily: 'var(--font-display)', color: 'var(--text)', marginTop: 6, lineHeight: '24px' }}>
-                {f.clone_target || f.inspired_by}
+                {f.inspired_by}
               </p>
             )}
             {explanation && (
@@ -484,10 +484,22 @@ export default async function FragranceDetailPage({
           family={f.family}
           optimalSeason={f.optimal_season}
           plainDescription={f.plain_description}
-          inspiredBy={f.clone_target || f.inspired_by}
+          inspiredBy={f.inspired_by}
         />
         {collectionRow?.id && (
-          <LogWearButton collectionId={collectionRow.id} initialWears={initialWears} initialStreak={initialStreak} />
+          <LogWearButton
+            collectionId={collectionRow.id}
+            initialWears={initialWears}
+            initialStreak={initialStreak}
+            fragranceId={f.id}
+            fragranceData={{
+              name: f.name,
+              brand: f.brand,
+              family: f.family,
+              projection: f.projection || 'unknown',
+              optimal_season: f.optimal_season || 'all-year',
+            }}
+          />
         )}
         {collectionRow?.id && (
           <AffinityRater

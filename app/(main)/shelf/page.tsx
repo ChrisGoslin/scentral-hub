@@ -120,7 +120,7 @@ export default async function ShelfPage() {
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    return <ShelfClient slots={[]} isSignedIn={false} />
+    return <ShelfClient slots={[]} isSignedIn={false} topThree={[]} />
   }
 
   const { count } = await supabase
@@ -148,5 +148,16 @@ export default async function ShelfPage() {
 
   const slots = buildSlots(normalized)
 
-  return <ShelfClient slots={slots} isSignedIn={true} />
+  const topThree = normalized
+    .filter(s => s.fragrance)
+    .sort((a, b) => a.rank - b.rank)
+    .slice(0, 3)
+    .map(s => ({
+      id: s.fragrance!.id,
+      name: s.fragrance!.name,
+      brand: s.fragrance!.brand,
+      family: s.fragrance!.family,
+    }))
+
+  return <ShelfClient slots={slots} isSignedIn={true} topThree={topThree} />
 }
