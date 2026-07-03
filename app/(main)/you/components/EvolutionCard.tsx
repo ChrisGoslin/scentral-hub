@@ -4,11 +4,11 @@ import { useState } from 'react'
 import Button from '@/components/ui/Button'
 
 interface EvolutionCardProps {
-  oldIdentity: string
-  newIdentity: string
-  confidence: number
-  shiftType: string
-  onChoice: (choice: 'stay' | 'evolve' | 'keep_both') => void
+  oldIdentity?: string
+  newIdentity?: string
+  confidence?: number
+  shiftType?: string
+  onChoice?: (choice: 'stay' | 'evolve' | 'keep_both') => void
   isLoading?: boolean
 }
 
@@ -21,6 +21,12 @@ export function EvolutionCard({
   isLoading = false,
 }: EvolutionCardProps) {
   const [selected, setSelected] = useState<'stay' | 'evolve' | 'keep_both' | null>(null)
+
+  // Evolution detection isn't wired up yet — this card has no data source. Render nothing
+  // rather than crash or fake a shift the wearer never had.
+  if (!oldIdentity || !newIdentity || !onChoice) {
+    return null
+  }
 
   const handleChoice = async (choice: 'stay' | 'evolve' | 'keep_both') => {
     setSelected(choice)

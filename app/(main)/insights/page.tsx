@@ -25,7 +25,7 @@ interface CachedInsights {
   }>
   scentiment_vision?: {
     resonance_score?: number
-    warmth_factor?: number
+    warmth_factor?: string
     summary?: string
   }
   taste_evolution?: Array<{

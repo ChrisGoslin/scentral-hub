@@ -220,16 +220,19 @@ function TasteEvolutionSection({ evolution }: { evolution?: any[] }) {
           {Object.entries(latestPeriod.family_distribution)
             .sort((a, b) => (b[1] as number) - (a[1] as number))
             .slice(0, 4)
-            .map(([family, count]) => (
-              <div key={family} style={{ padding: 8, background: 'var(--surface)', borderRadius: 8 }}>
-                <p style={{ fontSize: 12, color: 'var(--text)', fontWeight: 500 }}>
-                  {family}
-                </p>
-                <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                  {count} scent{count !== 1 ? 's' : ''}
-                </p>
-              </div>
-            ))}
+            .map(([family, count]) => {
+              const n = count as number
+              return (
+                <div key={family} style={{ padding: 8, background: 'var(--surface)', borderRadius: 8 }}>
+                  <p style={{ fontSize: 12, color: 'var(--text)', fontWeight: 500 }}>
+                    {family}
+                  </p>
+                  <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                    {n} scent{n !== 1 ? 's' : ''}
+                  </p>
+                </div>
+              )
+            })}
         </div>
       )}
     </Card>
