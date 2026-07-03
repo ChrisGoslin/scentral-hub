@@ -15,7 +15,7 @@ create table if not exists aura_cache (
 );
 
 create index on aura_cache (fragrance_id, context_type);
-create index on aura_cache (expires_at) where expires_at > now();
+create index on aura_cache (expires_at);
 
 -- Enable RLS
 alter table aura_cache enable row level security;
