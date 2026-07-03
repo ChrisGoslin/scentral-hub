@@ -26,17 +26,12 @@ const BLOCKED_ROUTES = ['/traces', '/trails', '/read', '/shelf']
 
 export default function TemptationProvider() {
   const pathname = usePathname()
-  const [anonId, setAnonId] = useState<string | null>(null)
   const [fragrance, setFragrance] = useState<Fragrance | null>(null)
   const [isLoadingFragrance, setIsLoadingFragrance] = useState(false)
 
-  const { temptation, isLoading, updateStatus, dismiss } = useTemptations(anonId)
-
-  // Initialize anonId from localStorage
-  useEffect(() => {
-    const stored = localStorage.getItem('scentral_anon_id')
-    setAnonId(stored)
-  }, [])
+  // Identity is derived server-side from the auth session cookie — the API route
+  // returns { temptation: null } for signed-out visitors, which is harmless here.
+  const { temptation, isLoading, updateStatus, dismiss } = useTemptations(true)
 
   // Fetch fragrance data when temptation changes
   useEffect(() => {
@@ -81,10 +76,10 @@ export default function TemptationProvider() {
   return (
     <TemptationCard
       fragrance={fragrance}
-      temptationId={temptation.id}
-      triggerReason={temptation.trigger_reason as any}
+      onView={() => handleAction('viewed')}
+      onBlindBuy={() => handleAction('bought')}
+      onWishlist={() => handleAction('wishlisted')}
       onDismiss={dismiss}
-      onAction={handleAction}
     />
   )
 }

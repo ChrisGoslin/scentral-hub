@@ -10,7 +10,7 @@
 import { createClient } from '@supabase/supabase-js'
 
 export interface TemptationTrigger {
-  anonId: string
+  userId: string
   fragranceId: string
   reason: 'repeat_revisit' | 'wishlist_age' | 'blind_rank_match'
 }
@@ -21,7 +21,7 @@ export interface TemptationTrigger {
  */
 export async function checkRepeatRevisit(
   supabase: ReturnType<typeof createClient>,
-  anonId: string
+  userId: string
 ): Promise<TemptationTrigger[]> {
   // TODO: Implement wear_logs analysis or view-tracking RPC
   // For now, this is a placeholder. In production, query wear_logs for
@@ -34,30 +34,30 @@ export async function checkRepeatRevisit(
  */
 export async function checkWishlistAge(
   supabase: ReturnType<typeof createClient>,
-  anonId: string
+  userId: string
 ): Promise<TemptationTrigger[]> {
   const triggers: TemptationTrigger[] = []
 
-  // Query collections for wishlisted fragrances older than 14 days
   const twoWeeksAgo = new Date()
   twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14)
 
   const { data, error } = await supabase
     .from('collections')
     .select('fragrance_id')
-    .eq('anon_id', anonId)
+    .eq('user_id', userId)
     .eq('status', 'wishlist')
     .lt('created_at', twoWeeksAgo.toISOString())
     .limit(1)
+    .returns<{ fragrance_id: string }[]>()
 
   if (error) {
     console.error('checkWishlistAge error:', error)
     return []
   }
 
-  if (data && data.length > 0) {
+  if (data && data.length > 0 && data[0].fragrance_id) {
     triggers.push({
-      anonId,
+      userId,
       fragranceId: data[0].fragrance_id,
       reason: 'wishlist_age',
     })
@@ -72,7 +72,7 @@ export async function checkWishlistAge(
  */
 export async function checkBlindRankMatch(
   supabase: ReturnType<typeof createClient>,
-  anonId: string
+  userId: string
 ): Promise<TemptationTrigger[]> {
   // TODO: Implement blind ranking matching
   // Query user's blind_rank_top_picks (if stored in profiles.metadata or separate table)
@@ -85,9 +85,9 @@ export async function checkBlindRankMatch(
  */
 export async function getActiveTriggers(
   supabase: ReturnType<typeof createClient>,
-  anonId: string
+  userId: string
 ): Promise<TemptationTrigger | null> {
-  // Check if user already has a pending temptation this week
+  // Max 1 temptation surfaced per week, regardless of how it was resolved.
   const weekStart = new Date()
   weekStart.setUTCDate(weekStart.getUTCDate() - weekStart.getUTCDay())
   weekStart.setUTCHours(0, 0, 0, 0)
@@ -95,23 +95,20 @@ export async function getActiveTriggers(
   const { data: existing } = await supabase
     .from('temptations')
     .select('id')
-    .eq('anon_id', anonId)
-    .eq('status', 'pending')
-    .gte('created_at', weekStart.toISOString())
+    .eq('user_id', userId)
+    .gte('shown_at', weekStart.toISOString())
     .limit(1)
 
   if (existing && existing.length > 0) {
-    return null // Already has active temptation
+    return null // Already surfaced a temptation this week
   }
 
-  // Check triggers in order of priority
   const triggers = await Promise.all([
-    checkRepeatRevisit(supabase, anonId),
-    checkWishlistAge(supabase, anonId),
-    checkBlindRankMatch(supabase, anonId),
+    checkRepeatRevisit(supabase, userId),
+    checkWishlistAge(supabase, userId),
+    checkBlindRankMatch(supabase, userId),
   ])
 
-  // Flatten and return first non-empty trigger
   const allTriggers = triggers.flat()
   return allTriggers.length > 0 ? allTriggers[0] : null
 }

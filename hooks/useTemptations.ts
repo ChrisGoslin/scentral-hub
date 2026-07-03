@@ -4,9 +4,8 @@ interface Temptation {
   id: string
   fragrance_id: string
   status: string
-  trigger_reason?: string
-  first_shown_at: string
-  created_at: string
+  reason?: string
+  shown_at: string
 }
 
 interface UseTemptationsReturn {
@@ -17,20 +16,21 @@ interface UseTemptationsReturn {
   dismiss: () => Promise<void>
 }
 
-export function useTemptations(anonId: string | null): UseTemptationsReturn {
+// Identity is derived server-side from the Supabase auth session cookie —
+// this hook doesn't take or pass any user identifier.
+export function useTemptations(enabled: boolean): UseTemptationsReturn {
   const [temptation, setTemptation] = useState<Temptation | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Fetch active temptation on mount
   useEffect(() => {
-    if (!anonId) return
+    if (!enabled) return
 
     const fetchTemptation = async () => {
       setIsLoading(true)
       setError(null)
       try {
-        const res = await fetch(`/api/temptations?anonId=${encodeURIComponent(anonId)}`)
+        const res = await fetch('/api/temptations')
         if (!res.ok) throw new Error('Failed to fetch temptation')
         const data = await res.json()
         setTemptation(data.temptation)
@@ -42,11 +42,11 @@ export function useTemptations(anonId: string | null): UseTemptationsReturn {
     }
 
     fetchTemptation()
-  }, [anonId])
+  }, [enabled])
 
   const updateStatus = useCallback(
     async (status: 'viewed' | 'wishlisted' | 'bought' | 'dismissed') => {
-      if (!temptation || !anonId) return
+      if (!temptation) return
 
       setIsLoading(true)
       setError(null)
@@ -55,27 +55,22 @@ export function useTemptations(anonId: string | null): UseTemptationsReturn {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            anonId,
             temptationId: temptation.id,
-            status: status === 'dismissed' ? 'dismissed' : status,
+            status,
           }),
         })
 
         if (!res.ok) throw new Error('Failed to update temptation')
-        const data = await res.json()
 
-        if (status === 'dismissed') {
-          setTemptation(null)
-        } else {
-          setTemptation(data.temptation)
-        }
+        // Every PATCH resolves the temptation server-side, so clear it locally too.
+        setTemptation(null)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error')
       } finally {
         setIsLoading(false)
       }
     },
-    [temptation, anonId]
+    [temptation]
   )
 
   const dismiss = useCallback(async () => {
