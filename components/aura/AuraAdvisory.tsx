@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import { Loader2 } from 'lucide-react'
+import { createClient } from '@/utils/supabase/client'
 
 interface AuraAdvisoryProps {
   fragranceId: string
-  contextType: 'detail' | 'shelf' | 'general'
+  contextType: 'detail' | 'shelf' | 'general' | 'post_wear'
   fragranceData?: {
     name: string
     brand: string
@@ -65,24 +66,22 @@ export default function AuraAdvisory({
           console.debug('Weather fetch failed (non-critical):', String(err))
         }
 
-        const response = await fetch('/api/aura-advisory', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
+        const supabase = createClient()
+        const { data, error: invokeError } = await supabase.functions.invoke('aura-advisory', {
+          body: {
             fragrance_id: fragranceId,
             context_type: contextType,
             weather,
             fragrance_data: fragranceData,
             shelf_context: shelfContext,
-          }),
+          },
         })
 
-        if (!response.ok) {
-          throw new Error(`API error: ${response.statusText}`)
+        if (invokeError) {
+          throw invokeError
         }
 
-        const data = await response.json()
-        setAdvice(data.advice_text || null)
+        setAdvice(data?.advice_text || null)
       } catch (err) {
         console.error('Failed to fetch Aura advice:', err)
         setError(String(err))
