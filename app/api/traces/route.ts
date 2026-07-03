@@ -40,26 +40,32 @@ type TraceRow = {
   created_at: string
 }
 
-async function attachAuthorsAndReactions(supabase: ReturnType<typeof createServiceClient>, traces: TraceRow[]) {
+type ProfileRow = { id: string; display_name: string | null; username: string | null }
+type NoseprintRow = { user_id: string; descriptor: string; created_at: string }
+type ReactionRow = { trace_id: string; reaction: string }
+type FragranceRow = { id: string; brand: string; name: string }
+
+async function attachAuthorsAndReactions(supabase: ReturnType<typeof serviceClient>, traces: TraceRow[]) {
   if (traces.length === 0) return []
 
   const userIds = Array.from(new Set(traces.map(t => t.user_id)))
   const traceIds = traces.map(t => t.id)
+  const fragranceIds = traces.map(t => t.fragrance_id).filter((id): id is string => Boolean(id))
 
-  const [{ data: profiles }, { data: noseprints }, { data: reactions }, { data: fragrances }] = await Promise.all([
-    supabase.from('profiles').select('id, display_name, username').in('id', userIds),
-    supabase
-      .from('noseprints')
-      .select('user_id, descriptor, created_at')
-      .in('user_id', userIds)
-      .eq('status', 'current')
-      .order('created_at', { ascending: false }),
-    supabase.from('trace_reactions').select('trace_id, reaction').in('trace_id', traceIds),
-    supabase
-      .from('fragrances')
-      .select('id, brand, name')
-      .in('id', traces.map(t => t.fragrance_id).filter((id): id is string => Boolean(id))),
-  ])
+  const profilesRes = await supabase.from('profiles').select('id, display_name, username').in('id', userIds)
+  const noseprintsRes = await supabase
+    .from('noseprints')
+    .select('user_id, descriptor, created_at')
+    .in('user_id', userIds)
+    .eq('status', 'current')
+    .order('created_at', { ascending: false })
+  const reactionsRes = await supabase.from('trace_reactions').select('trace_id, reaction').in('trace_id', traceIds)
+  const fragrancesRes = await supabase.from('fragrances').select('id, brand, name').in('id', fragranceIds)
+
+  const profiles = (profilesRes.data ?? []) as unknown as ProfileRow[]
+  const noseprints = (noseprintsRes.data ?? []) as unknown as NoseprintRow[]
+  const reactions = (reactionsRes.data ?? []) as unknown as ReactionRow[]
+  const fragrances = (fragrancesRes.data ?? []) as unknown as FragranceRow[]
 
   const profileById = new Map((profiles ?? []).map(p => [p.id, p]))
   const noseprintByUser = new Map<string, string>()
