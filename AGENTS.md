@@ -185,10 +185,17 @@ When multiple prompts are delegated in one session, order them by dependency —
 
 **Always deploy explicitly after merging to main:**
 ```bash
-cd ~/Projects/scentral-hub && npx vercel --prod
+cd ~/Projects/scentral-hub && bin/deploy
 ```
 
-This takes ~60s and aliases directly to `scentral-hub.vercel.app`. Confirm READY state before declaring a task done.
+The `bin/deploy` script enforces:
+1. ✓ You are on `main` branch
+2. ✓ Working tree is clean (no uncommitted changes)
+3. ✓ `npm run build` passes locally
+4. ✓ `vercel deploy --prod` succeeds and waits for READY state
+5. ✓ `npm run test:smoke:prod` passes post-deployment (health check)
+
+If any step fails, the script exits with a clear error. Smoke test failure is a loud alarm — deployment has succeeded but health check failed, which requires investigation.
 
 ## 8. Script execution rules (critical — read before running any script)
 

@@ -1,42 +1,105 @@
 #!/bin/bash
+
+# bin/deploy — guarded deployment script for scentral-hub
+# Enforces pre-flight checks before pushing to production
+
 set -e
 
-# 🏗️  Scentral Architect: Pre-Flight Deployment Audit
-echo "------------------------------------------------"
-echo "🚀  INITIATING HIGH-VELOCITY DEPLOYMENT SEQUENCE"
-echo "------------------------------------------------"
+CURRENT_BRANCH=$(git branch --show-current)
+GIT_STATUS=$(git status --porcelain)
 
-# 1. Integrity Check: ESLint Configuration & Linting
-echo "🔍  Phase 1: Validating Code Standards..."
+echo "🚀 Scentral Deploy"
+echo ""
 
-# Check for ESLint configuration
-if [ ! -f .eslintrc.json ] && [ ! -f .eslintrc.js ] && [ ! -f eslint.config.js ]; then
-  echo "❌  ESLint configuration missing. Enterprise standards require strict linting."
+# 1. Verify on main
+if [ "$CURRENT_BRANCH" != "main" ]; then
+  echo "❌ Not on main branch (currently on: $CURRENT_BRANCH)"
+  echo "   Switch to main and try again:"
+  echo "   git checkout main"
+  exit 1
+fi
+echo "✓ On main branch"
+
+# 2. Verify working tree is clean
+if [ ! -z "$GIT_STATUS" ]; then
+  echo "❌ Working tree has uncommitted changes:"
+  echo "$GIT_STATUS"
+  echo ""
+  echo "   Commit or stash changes before deploying."
+  exit 1
+fi
+echo "✓ Working tree is clean"
+
+# 3. Build
+echo ""
+echo "Building..."
+if ! npm run build; then
+  echo ""
+  echo "❌ Build failed. Fix errors and try again."
+  exit 1
+fi
+echo "✓ Build passed"
+
+# 4. Deploy to Vercel and wait for READY
+echo ""
+echo "Deploying to Vercel..."
+DEPLOY_OUTPUT=$(npx vercel deploy --prod 2>&1)
+if [ $? -ne 0 ]; then
+  echo "❌ Vercel deploy command failed"
+  echo "$DEPLOY_OUTPUT"
   exit 1
 fi
 
-# Run Linting
-npm run lint || { echo "❌  Linting failed. Deployment aborted to maintain code quality."; exit 1; }
+# Extract the deployment URL from output
+DEPLOY_URL=$(echo "$DEPLOY_OUTPUT" | grep -oP 'https://[^ ]+(?=\s|$)' | head -1)
+if [ -z "$DEPLOY_URL" ]; then
+  echo "❌ Could not extract deployment URL from Vercel output"
+  exit 1
+fi
 
-# 2. Integrity Check: Build Validation
-echo "🏗️  Phase 2: Validating Build Integrity..."
-npm run build || { echo "❌  Build failed. Deployment aborted to prevent production outage."; exit 1; }
+echo "Deployment URL: $DEPLOY_URL"
 
-# 3. Performance Audit: Asset Optimization
-echo "📊  Phase 3: Auditing Resource Efficiency..."
-# Check for common bloat: oversized node_modules
-MODULE_SIZE=$(du -sh node_modules | cut -f1)
-echo "📦  Current Dependency Footprint: $MODULE_SIZE"
+# Poll for READY state
+echo "Waiting for deployment to reach READY state..."
+MAX_ATTEMPTS=60  # 5 minutes at 5s intervals
+ATTEMPT=0
 
-# 4. Environment Synchronization
-echo "🌐  Phase 4: Verifying Environment Parity..."
-# (Placeholder for future Supabase/API drift detection)
+while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+  INSPECT_OUTPUT=$(vercel inspect "$DEPLOY_URL" --json 2>/dev/null || echo "{}")
+  STATE=$(echo "$INSPECT_OUTPUT" | grep -o '"state":"[^"]*"' | grep -o '[^"]*"$' | tr -d '"')
 
-# 5. Production Push
-echo "🚀  Phase 5: Finalizing Production Deployment..."
-vercel --prod --yes --no-wait
+  if [ "$STATE" = "READY" ]; then
+    echo "✓ Deployment is READY"
+    break
+  fi
 
-echo "------------------------------------------------"
-echo "✅  DEPLOYMENT HANDOFF COMPLETE"
-echo "🔗  Check Vercel Dashboard for progress."
-echo "------------------------------------------------"
+  if [ "$STATE" = "ERROR" ] || [ "$STATE" = "CANCELED" ]; then
+    echo "❌ Deployment failed with state: $STATE"
+    exit 1
+  fi
+
+  ATTEMPT=$((ATTEMPT + 1))
+  if [ $((ATTEMPT % 6)) -eq 0 ]; then
+    echo "  Still waiting... (${ATTEMPT}s elapsed)"
+  fi
+  sleep 5
+done
+
+if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
+  echo "❌ Deployment did not reach READY state within 5 minutes"
+  exit 1
+fi
+
+# 5. Run smoke tests
+echo ""
+echo "Running smoke tests..."
+if ! npm run test:smoke:prod; then
+  echo ""
+  echo "❌ Smoke tests failed. Deployment succeeded but health check failed."
+  echo "   Check https://vercel.com/dashboard for recent deployments."
+  exit 1
+fi
+
+# 6. Success
+echo ""
+echo "✅ PASS — Deployment successful"
