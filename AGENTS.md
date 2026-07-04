@@ -77,7 +77,7 @@ fictional features, lore like "Agent Luna / Hegemony / Shadow Branching", and ha
   - `fragrances` (127,195 rows) — GIN trigram indexes: idx_fragrances_name_trgm, idx_fragrances_brand_trgm, idx_fragrances_plain_description_trgm, idx_fragrances_inspired_by_trgm (created 2026-06-24 for /api/search optimization)
   - `collections` + `scent_memory text` column ← NEW (added 2026-06-20)
   - `wear_logs`
-  - `layering_combinations`, `layer_recipes`
+  - `layering_combinations` (`layer_recipes` does NOT exist — was listed here in error, removed 2026-07-04 after schema verification)
   - `spritz_schedules` (EXISTS — Epic 9 reuses this, do NOT recreate)
   - `profiles`, `waitlist`
   - `user_xp` ← NEW: `anon_id text PK`, `total_xp int DEFAULT 0`, `level int DEFAULT 1`
@@ -392,7 +392,7 @@ wear_logs — streak calculation is timezone-aware, do not break
 user_xp — anon_id (PK), total_xp int, level int 1-6  ← NEW, keyed on scentral_anon_id
 user_streaks — anon_id (PK), current_streak, longest_streak, last_worn_date  ← NEW
 spritz_schedules — EXISTS, reuse for Epic 9 (do not recreate)
-layering_combinations, layer_recipes, profiles, waitlist
+layering_combinations, profiles, waitlist (layer_recipes does NOT exist)
 
 ## localStorage keys
 scentral_anon_id — UUID identity key (PK for all Supabase user tables)

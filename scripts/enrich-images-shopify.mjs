@@ -218,6 +218,20 @@ function trailingNumber(s) {
   return m ? m[1] : null
 }
 
+// NOISE_WORDS strips edp/edt/edc before matching, so "J'adore EDP" and
+// "J'adore EDT" normalise identically. That's deliberate (the flacon is
+// usually near-identical, and requiring equality would tank the hit rate),
+// but when the catalog stocks BOTH concentrations we should hand back the
+// right one. extractConcentration reads the RAW title, and matchInCatalog
+// prefers a same-concentration candidate among otherwise-equal matches.
+function extractConcentration(rawTitle) {
+  const t = rawTitle.toLowerCase()
+  if (/\beau de parfum\b|\bedp\b/.test(t)) return 'edp'
+  if (/\beau de toilette\b|\bedt\b/.test(t)) return 'edt'
+  if (/\beau de cologne\b|\bedc\b/.test(t)) return 'edc'
+  return null
+}
+
 // brandKey (retailer mode only): strip the brand affix from the target after
 // normalisation, mirroring how retailer catalog entries were indexed. Brand
 // mode passes no brandKey and behaves exactly as before.
@@ -226,14 +240,19 @@ function matchInCatalog(catalog, fragranceName, brandKey = null) {
   if (brandKey) target = stripBrandAffix(target, brandKey)
   if (!target) return null
 
-  // Exact normalized match first.
-  const exact = catalog.find(p => p.normalizedTitle === target)
-  if (exact) return exact
+  const targetConc = extractConcentration(fragranceName)
+  const concMatches = p => targetConc !== null && extractConcentration(p.title) === targetConc
+
+  // Exact normalized match first — preferring the same concentration when
+  // the catalog stocks several (EDP vs EDT vs EDC of the same name).
+  const exacts = catalog.filter(p => p.normalizedTitle === target)
+  if (exacts.length) return exacts.find(concMatches) || exacts[0]
 
   const targetNum = trailingNumber(target)
 
   // Fuzzy fallback: smallest edit distance, gated by a similarity ratio so
-  // unrelated short names don't false-positive against each other.
+  // unrelated short names don't false-positive against each other. Equal
+  // distances tie-break on concentration.
   let best = null
   let bestDist = Infinity
   for (const p of catalog) {
@@ -243,7 +262,7 @@ function matchInCatalog(catalog, fragranceName, brandKey = null) {
     const dist = levenshtein(target, p.normalizedTitle)
     const maxLen = Math.max(target.length, p.normalizedTitle.length)
     const similarity = 1 - dist / maxLen
-    if (similarity >= 0.85 && dist < bestDist) {
+    if (similarity >= 0.85 && (dist < bestDist || (dist === bestDist && best && concMatches(p) && !concMatches(best)))) {
       best = p
       bestDist = dist
     }
@@ -359,6 +378,19 @@ async function fetchRetailerCatalog(config) {
 
 // ─── Validation test ──────────────────────────────────────────────────────────
 
+// Pure-logic test shared by brand and retailer validation: when a catalog
+// stocks both concentrations of a name, the matching one must win.
+function concentrationPreferenceOk() {
+  const synth = [
+    { title: "J'adore EDT", normalizedTitle: normalizeTitle("J'adore EDT"), imageUrl: 'edt.jpg' },
+    { title: "J'adore EDP", normalizedTitle: normalizeTitle("J'adore EDP"), imageUrl: 'edp.jpg' },
+  ]
+  const edp = matchInCatalog(synth, "J'adore Eau De Parfum")
+  const edt = matchInCatalog(synth, "J'adore Eau De Toilette")
+  const bare = matchInCatalog(synth, "J'adore") // no concentration → any match is fine
+  return edp?.imageUrl === 'edp.jpg' && edt?.imageUrl === 'edt.jpg' && !!bare
+}
+
 async function runValidationTest() {
   console.log('\n🧪 Validation test (runs before any DB writes)\n')
 
@@ -410,6 +442,15 @@ async function runValidationTest() {
     process.exit(1)
   }
 
+  console.log(`Test 5 — concentration preference (EDP must not take the EDT image when both exist):`)
+  if (concentrationPreferenceOk()) {
+    console.log(`  ✅ PASS — same-concentration candidate preferred\n`)
+  } else {
+    console.log(`  ❌ FAIL — concentration preference broken in matchInCatalog`)
+    console.log(`  Aborting — do not trust this script until this is fixed.\n`)
+    process.exit(1)
+  }
+
   console.log('✅ Validation passed. Proceeding...\n')
 }
 
@@ -451,6 +492,10 @@ function runRetailerValidationTest(retailerName, config, byVendor) {
     fail(`skipImage did not exclude fixture "${config.skipImageFixture}"`)
   }
   console.log(`  ✅ PASS — "${config.skipImageFixture || 'n/a'}" excluded\n`)
+
+  console.log('Test 6 — concentration preference (EDP must not take the EDT image when both exist):')
+  if (!concentrationPreferenceOk()) fail('concentration preference broken in matchInCatalog')
+  console.log('  ✅ PASS — same-concentration candidate preferred\n')
 
   console.log('✅ Retailer validation passed. Proceeding...\n')
 }
