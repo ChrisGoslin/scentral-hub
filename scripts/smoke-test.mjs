@@ -25,6 +25,8 @@ const ROUTES = [
   ['/dna-match',       200, 'Compare Scents (beta-open Pro route)'],
   ['/api/fragrances?q=lattafa', 200, 'Search API'],
   ['/api/search?q=rose', 200, 'Smells Like Search API'],
+  ['/api/fragrances?q=rose,or(name.like.*)', 200, 'Search API with injection attempt (sanitized)'],
+  ['/api/search?q=rose(test,foo)', 200, 'Smells Like Search API with injection attempt (sanitized)'],
   ['/api/waitlist',    405, 'Waitlist API (GET should 405)'],
   ['/api/wear',        405, 'Wear API (GET should 405)'],
 ]

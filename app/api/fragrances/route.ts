@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server'
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const id = searchParams.get('id')
-  const search = searchParams.get('search') || searchParams.get('q')
+  let search = searchParams.get('search') || searchParams.get('q')
 
   try {
     const supabase = await createClient()
@@ -18,6 +18,8 @@ export async function GET(request: Request) {
     } else {
       query = query.order('brand', { ascending: true })
       if (search && search.trim().length > 0) {
+        // Sanitize: strip PostgREST filter operators (commas, parentheses) to prevent injection
+        search = search.replace(/[,()]/g, '')
         // Search: brand, name, inspired_by (for "Smells Like" mode)
         query = query
           .or(

@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
-  const q = searchParams.get('q')?.trim() ?? '';
+  let q = searchParams.get('q')?.trim() ?? '';
   const limitParam = parseInt(searchParams.get('limit') ?? '10', 10);
   const limit = Math.min(isNaN(limitParam) ? 10 : limitParam, 20);
 
@@ -12,6 +12,9 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    // Sanitize: strip PostgREST filter operators (commas, parentheses) to prevent injection
+    q = q.replace(/[,()]/g, '')
+
     const supabase = await createClient();
     const { data, error } = await supabase
       .from('fragrances')
