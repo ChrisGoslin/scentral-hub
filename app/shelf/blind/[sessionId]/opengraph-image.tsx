@@ -48,7 +48,7 @@ export default async function BlindRankingOpengraphImage({
             That's what I prefer?
           </div>
           <div style={{ marginTop: 16, fontSize: 24, color: GOLD, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-            A blind Top 10 on BaseNote
+            A blind Top 10 on nota.
           </div>
         </div>
       ),
@@ -123,7 +123,7 @@ export default async function BlindRankingOpengraphImage({
           ))}
         </div>
         <div style={{ marginTop: 40, fontSize: 22, color: GOLD, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-          Blind-ranked on BaseNote
+          Blind-ranked on nota.
         </div>
       </div>
     ),

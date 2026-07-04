@@ -86,7 +86,7 @@ async function enrichTraces(
       fragrance_id: t.fragrance_id,
       fragrance: fragrance ? { id: fragrance.id, brand: fragrance.brand, name: fragrance.name } : null,
       author: {
-        display_name: profile?.display_name ?? 'A BaseNote member',
+        display_name: profile?.display_name ?? 'A nota. member',
         username: profile?.username ?? null,
         noseprint_descriptor: noseprintByUser.get(t.user_id) ?? null,
       },

@@ -177,12 +177,12 @@ export async function handleShareCombination(
   const base = baseFragrance?.name || 'My anchor'
   const top = topItem.name
   const occasion = useCase || 'daily'
-  const shareText = `I'm wearing ${base} + ${top} — ${occasion} combo 💫 via BaseNote`
+  const shareText = `I'm wearing ${base} + ${top} — ${occasion} combo 💫 via nota.`
 
   if (navigator.share) {
     try {
       await navigator.share({
-        title: 'BaseNote Layering',
+        title: 'nota. Layering',
         text: shareText,
         url: window.location.href,
       })

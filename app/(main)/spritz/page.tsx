@@ -4,7 +4,7 @@ import SpritzClient from './SpritzClient'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'Your Brief | BaseNote',
+  title: 'Your Brief | nota.',
 }
 
 export default function SpritzPage() {

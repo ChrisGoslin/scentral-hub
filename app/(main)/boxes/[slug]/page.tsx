@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .single()
 
   return {
-    title: `${box?.name || 'Box'} | BaseNote`,
+    title: `${box?.name || 'Box'} | nota.`,
     description: box?.description || 'Curated fragrance sample set',
   }
 }

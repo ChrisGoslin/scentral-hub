@@ -25,7 +25,7 @@ export async function GET() {
             letterSpacing: '-0.02em',
           }}
         >
-          BaseNote
+          nota.
         </div>
         <div
           style={{

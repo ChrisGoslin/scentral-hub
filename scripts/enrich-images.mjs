@@ -28,8 +28,16 @@ if (!supabaseUrl || !supabaseKey) {
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 const isDryRun = process.argv.includes('--dry-run');
+const force = process.argv.includes('--force');
 const limitArg = process.argv.find(arg => arg.startsWith('--limit='));
 const limit = limitArg ? parseInt(limitArg.split('=')[1], 10) : 0; // 0 = no limit (process all null rows)
+
+// Circuit breaker: if the hit rate is still under 1% after a 1,000-row sample,
+// stop and require --force to continue. Prevents grinding through the full
+// ~127k-row table on a data property (e.g. bulk-imported names with no
+// Parfumo/Fragrantica page) that a human should explicitly decide to accept.
+const YIELD_CHECK_MIN_ROWS = 1000;
+const YIELD_CHECK_MIN_RATE = 0.01;
 
 // Normalize name to slug: lowercase, handle accents, replace non-alphanumeric with hyphen
 function toSlug(str) {
@@ -235,6 +243,21 @@ async function main() {
     console.log(
       `\n✅ Batch ${batchIndex} summary: ${result.hits} hits, ${result.misses} misses\n`
     );
+
+    if (!force && !isDryRun && totalProcessed >= YIELD_CHECK_MIN_ROWS) {
+      const yieldRate = totalHits / totalProcessed;
+      if (yieldRate < YIELD_CHECK_MIN_RATE) {
+        console.log(
+          `\n🛑 Circuit breaker: hit rate is ${(yieldRate * 100).toFixed(2)}% after ${totalProcessed} rows ` +
+            `(below ${(YIELD_CHECK_MIN_RATE * 100).toFixed(0)}% threshold).`
+        );
+        console.log(
+          `   This usually means the remaining rows don't exist on Parfumo/Fragrantica, not a script bug.\n` +
+            `   Re-run with --force to continue anyway.\n`
+        );
+        break;
+      }
+    }
 
     batchIndex++;
 

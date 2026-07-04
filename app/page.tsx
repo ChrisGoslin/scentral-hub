@@ -6,9 +6,9 @@ import PersonaTeasers from '@/components/landing/PersonaTeasers'
 import InspiredByCounter from '@/components/landing/InspiredByCounter'
 import DiscoveryBoxCard from './(main)/components/DiscoveryBoxCard'
 
-const TITLE = 'BaseNote — Your Scent Fingerprint'
+const TITLE = 'nota. — Your Scent Identity'
 const DESCRIPTION =
-  'Discover fragrances that match your unique sensory identity — guided by your personal scent profile.'
+  'You already have a scent identity. nota. understands it, reflects it, and evolves it with you.'
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -112,7 +112,7 @@ export default function Home() {
         }}
       >
         <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-          BaseNote · Your daily scent ritual
+          nota. · your scent identity
           <br /><br />
           <Link href="/privacy" style={{ textDecoration: 'none', color: 'inherit' }}>Privacy</Link>
           {' · '}

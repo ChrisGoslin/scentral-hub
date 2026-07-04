@@ -1,5 +1,5 @@
 /**
- * Web Push Utilities for BaseNote
+ * Web Push Utilities for nota.
  * No-auth push subscriptions via Web Push API + Supabase Edge Function
  */
 

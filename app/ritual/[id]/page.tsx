@@ -62,12 +62,12 @@ export async function generateMetadata(
   const { id } = await params
   const schedule = await fetchSchedule(id)
 
-  if (!schedule) return { title: 'Ritual · BaseNote' }
+  if (!schedule) return { title: 'Ritual · nota.' }
 
-  const title = `${schedule.name} · BaseNote`
+  const title = `${schedule.name} · nota.`
   const description = schedule.occasion
-    ? `A ${schedule.occasion} ritual formulated on BaseNote — your digital fragrance wardrobe.`
-    : 'A ritual formulated on BaseNote — your digital fragrance wardrobe.'
+    ? `A ${schedule.occasion} ritual formulated on nota. — your digital fragrance wardrobe.`
+    : 'A ritual formulated on nota. — your digital fragrance wardrobe.'
 
   return {
     title,
@@ -233,7 +233,7 @@ export default async function RitualPage({ params }: { params: Promise<{ id: str
               lineHeight: 1,
             }}
           >
-            BaseNote
+            nota.
           </span>
           <span
             style={{

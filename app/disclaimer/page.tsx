@@ -24,11 +24,11 @@ export default function DisclaimerPage() {
     },
     {
       heading: 'No Liability',
-      body: 'BaseNote and its creator accept no liability for adverse reactions, skin irritation, or any harm arising from fragrance application based on suggestions in this tool. Use at your own discretion.',
+      body: 'nota. and its creator accept no liability for adverse reactions, skin irritation, or any harm arising from fragrance application based on suggestions in this tool. Use at your own discretion.',
     },
     {
-      heading: 'About BaseNote',
-      body: 'BaseNote is an independent hobby project. It is not affiliated with, endorsed by, or connected to any fragrance brand or retailer mentioned within the app.',
+      heading: 'About nota.',
+      body: 'nota. is an independent hobby project. It is not affiliated with, endorsed by, or connected to any fragrance brand or retailer mentioned within the app.',
     },
   ]
 
@@ -53,7 +53,7 @@ export default function DisclaimerPage() {
 
         <footer className="mt-20 pt-8 border-t border-stone-200 text-center">
           <p className="text-stone-400 text-[10px] uppercase tracking-[0.3em] font-bold">
-            BaseNote · Usage Agreement
+            nota. · Usage Agreement
           </p>
         </footer>
       </div>

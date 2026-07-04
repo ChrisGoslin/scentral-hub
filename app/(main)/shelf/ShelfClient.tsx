@@ -528,10 +528,10 @@ export default function ShelfClient({ slots: initialSlots, isSignedIn, topThree 
     <div style={{ padding: '20px 16px calc(5rem + env(safe-area-inset-bottom, 0px))' }}>
       <div style={{ marginBottom: 16 }}>
         <h1 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 26, color: 'var(--text)' }}>
-          The Shelf
+          My Shelf
         </h1>
         <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>
-          Your Top 10. Drag to reorder, remove what's wrong, replace what's missing.
+          Your top ten, ranked. Drag to reorder, remove what's wrong, replace what's missing.
         </p>
       </div>
 

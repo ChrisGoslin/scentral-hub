@@ -25,7 +25,7 @@ export default function OpengraphImage() {
             letterSpacing: '-0.02em',
           }}
         >
-          BaseNote
+          nota.
         </div>
         <div
           style={{

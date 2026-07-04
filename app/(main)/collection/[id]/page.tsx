@@ -231,7 +231,7 @@ export default async function FragranceDetailPage({
           ) : ownerCount > 0 ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '13px', color: 'var(--text-muted)', marginTop: 6 }}>
               <Users size={14} style={{ color: 'var(--accent)' }} />
-              <span>{ownerCount} {ownerCount === 1 ? 'person' : 'people'} in the BaseNote community own this</span>
+              <span>{ownerCount} {ownerCount === 1 ? 'person' : 'people'} in the nota. community own this</span>
             </div>
           ) : null}
           {f.plain_description && (

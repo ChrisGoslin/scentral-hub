@@ -1,7 +1,7 @@
 import CompareClient from './CompareClient';
 
 export const metadata = {
-  title: 'Compare Fragrances | BaseNote',
+  title: 'Compare Fragrances | nota.',
   description: 'Compare two fragrances side-by-side',
 };
 

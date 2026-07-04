@@ -20,27 +20,27 @@ const unbounded = Unbounded({
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://scentral-hub.vercel.app"),
-  title: "BaseNote",
-  description: "Your daily scent ritual. Remember how you smell.",
+  title: "nota.",
+  description: "Your scent identity, understood.",
   manifest: "/manifest.json",
   icons: {
     apple: "/icons/icon-192.png",
   },
   openGraph: {
-    siteName: "BaseNote",
-    title: "BaseNote — Your Daily Scent Ritual",
-    description: "Discover, collect and understand the fragrances that define you.",
+    siteName: "nota.",
+    title: "nota. — Your Scent Identity",
+    description: "A system that understands, reflects, and evolves your scent identity.",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "BaseNote — Your Daily Scent Ritual",
-    description: "Discover, collect and understand the fragrances that define you.",
+    title: "nota. — Your Scent Identity",
+    description: "A system that understands, reflects, and evolves your scent identity.",
   },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "BaseNote",
+    title: "nota.",
     startupImage: [
       { url: "/icons/splash/icon_750x1334.png", media: "screen and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" },
       { url: "/icons/splash/icon_828x1792.png", media: "screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" },

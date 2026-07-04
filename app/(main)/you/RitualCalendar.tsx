@@ -58,7 +58,7 @@ export default function RitualCalendar({ auraStreak }: { auraStreak: number }) {
   const daysWornThisMonth = cells.filter(c => c && wearsByDay[c.key]?.length).length
 
   async function handleShare() {
-    const text = `${daysWornThisMonth} days this month — ${MONTH_NAMES[month]} ${year}\nBaseNote · Find your base note`
+    const text = `${daysWornThisMonth} days this month — ${MONTH_NAMES[month]} ${year}\nnota. · Find your base note`
     if (navigator.share) {
       try {
         await navigator.share({ text })

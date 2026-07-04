@@ -30,7 +30,7 @@ export default function NoseprintClient({
   const [showHistory, setShowHistory] = useState(false)
   const [copied, setCopied] = useState(false)
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://scentral-seven.vercel.app'
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://scentral-hub.vercel.app'
   const shareText = `My Noseprint is "${noseprint.name}". Find yours at nota.`
   const shareUrl = `${siteUrl}/noseprint`
   const ogImageUrl = `${siteUrl}/api/og/noseprint?name=${encodeURIComponent(noseprint.name)}&descriptor=${encodeURIComponent(noseprint.descriptor)}`

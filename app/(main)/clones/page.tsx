@@ -4,7 +4,7 @@ import ClonesClient from './ClonesClient'
 import PressMarquee from '@/components/ui/PressMarquee'
 
 export const metadata: Metadata = {
-  title: 'Inspired By | BaseNote',
+  title: 'Inspired By | nota.',
   description: 'Find affordable alternatives to your favourite designer and niche fragrances. 100+ Middle Eastern clones mapped to their inspirations.',
   alternates: { canonical: '/clones' },
 }

@@ -4,8 +4,8 @@ import DiscoverClient, { type DiscoverFragrance } from './DiscoverClient'
 import ActiveChallengeSection from '@/components/features/ActiveChallengeSection'
 
 export const metadata: Metadata = {
-  title: 'Discover | BaseNote',
-  description: 'Search and explore the BaseNote fragrance catalogue. Find your next signature scent from hundreds of designer and niche fragrances.',
+  title: 'Discover | nota.',
+  description: 'Search and explore the nota. fragrance catalogue. Find your next signature scent from hundreds of designer and niche fragrances.',
   alternates: { canonical: '/discover' },
 }
 

@@ -44,7 +44,7 @@ export default function StaticHeading() {
           maxWidth: 900,
         }}
       >
-        BaseNote finds it.
+        nota. finds it.
       </h1>
     </div>
   )

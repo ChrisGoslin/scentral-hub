@@ -115,7 +115,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const familyName = slug.replace(/-/g, ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
   return {
-    title: `${familyName} Fragrances | BaseNote`,
+    title: `${familyName} Fragrances | nota.`,
     description: `Explore fragrances in the ${familyName} scent family. Discover notes and find your next signature scent.`,
   }
 }
