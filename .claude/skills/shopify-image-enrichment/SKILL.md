@@ -39,6 +39,36 @@ guarantee hits.
 **Running total across these 6 brands: 286 fragrances enriched** (verified against DB 2026-06-28,
 after fixing Initio's domain and a fuzzy-match bug — see below).
 
+## Multi-brand retailer stores (`--retailer=<name>`, added 2026-07-04)
+
+The script also supports multi-brand retailers via `RETAILER_STORES`. Retailer products carry a
+`vendor` field, so matching requires normalised brand (through `BRAND_ALIASES` — DB "Dior"/"dior"
+↔ vendor "Christian Dior", "YSL" ↔ "Yves Saint Laurent", "MFK" ↔ "Maison Francis Kurkdjian")
+AND name to agree. Retailer misses append to `scripts/data/image-misses.txt` (cumulative, same
+caveat as shopify-misses.txt).
+
+| Retailer | Domain | Status | Live-run hits (verified in DB) |
+|---|---|---|---|
+| Scentoria | scentoria.co.in | ✅ verified 2026-07-04 | 5,744 (path prefix `/s/files/1/0679/6096/3326/`) |
+
+**Scentoria authenticity profile (checked 2026-07-04):** genuine-goods decant/tester reseller in
+India — ~8.5k products, 400+ vendors, authentic-market pricing, zero clone/dupe language. BUT
+~24% of its images are hand-taken phone photos of used bottles ("Partial" listings, filenames like
+`IMG_4461-Photoroom.png`). The `skipTitle`/`skipImage` filters in its `RETAILER_STORES` entry
+exclude those — do not remove them. Known imperfection: some kept images show tester-cap bottles
+(title clean, only the filename says tester, e.g. `Ciel_Woman_With_tester_Cap.webp`) — genuine
+product, plain cap.
+
+**Before adding a new retailer:** run the same curl verification procedure below, PLUS an
+authenticity check — pull ~10 designer products and sanity-check price/name/vendor (clone sellers
+price 100ml designer at ₹500–800; genuine-market is 3–10×), scan titles for
+partial/decant/tester/inspired/clone language, and check image filename patterns for phone photos.
+Set per-retailer `skipTitle`/`skipImage` accordingly.
+
+**Every image host needs a `next.config.ts` remotePatterns entry (AGENTS.md L16).** The 2026-06-28
+brand run wrote `cdn.shopify.com` URLs without adding the host — a live L16 bug (next/image throws
+at render) that sat unnoticed until 2026-07-04. Fixed; verified via `/_next/image` returning 200.
+
 ### What "0 hits, 0 catalog products" actually meant for Initio (don't assume WAF/Cloudflare)
 The first live run logged Initio and Montale both as `catalog_size=0` and assumed it was an auth
 wall or Cloudflare block, same as Lattafa/Rasasi/Lalique. **That assumption was wrong for Initio** —
