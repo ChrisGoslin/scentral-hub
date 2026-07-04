@@ -14,6 +14,9 @@
 | 6 | **Token discipline sweep** (Read/Shelf/landing) + humanist sans swap + a11y faint-text fix | DS-001,002,006 | Do alongside 2–4 while touching those files |
 | 7 | **"I tried something" capture** (Tested flow, 30s) | UX-007 | Depends on DB-001; the store-tester journey's front door |
 | 8 | **Server-side Read regen cap + DB-004 wishlist consolidation + swap schema (DB-005)** | D§3, DB-004/005 | Hardening + schema-now-UI-later |
+| 9 | **Security headers + Vercel Firewall bot rules + rate limits on `/api/search`·`/api/read/generate`·`/api/og/*`** | F§2.4, F§3.1 | Dashboard + config work; must precede public traffic |
+| 10 | **GDPR minimum**: PostHog consent gating, privacy-page truthing, DSAR delete script (verify FK cascades) | F§2.6 | Must precede notalabs.io DNS cutover (EU exposure) |
+| 11 | **RLS adversarial suite + CI Stage 2/3** (build + chromium e2e, needs repo secrets) | F§1.2, F§2.1 | Proves the migrations in rows 1–2; CI Stage 1 (tsc+lint) already live |
 
 Post-launch queue: 'close' Read adjustment (UX-009), evolution ceremony (UX-010), discover feel-first sections (UX-011), swap UI + trust tooling (UX-012), daylight theme (DS-007), anon→auth XP claim (DB-006), interactions retention.
 

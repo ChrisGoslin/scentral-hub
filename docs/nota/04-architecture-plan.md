@@ -1,6 +1,7 @@
 # nota. — Architecture Modernisation Plan (Deliverable D)
 
 > Phase 3, 2026-07-04. Evidence: live schema + RLS via Supabase MCP, API route reads, edge-function inventory, `lib/affiliates.ts` / `lib/shopify.ts`. **All SQL below is PROPOSED — nothing has been applied.** Labels: **[V]** verified, **[A]** assumption, **[T]** tentative.
+> **Hardening companion (Phase 5):** RLS adversarial testing, security headers, rate limiting, and bot/scraper defence for everything in this plan now live in `06-testing-security-abuse.md` (§2 security, §3 abuse). Any migration from §2 below must run the RLS adversarial suite per the `security-hardening` skill.
 
 ## 1. Schema review — what's solid
 

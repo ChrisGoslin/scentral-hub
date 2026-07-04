@@ -1,0 +1,213 @@
+================================================================================
+                    NOTA. PROJECT HANDOFF SUMMARY
+================================================================================
+
+PROJECT STATUS: ✅ LAUNCHED (Tier 1 & 2 Complete)
+DATE: 2026-07-04
+LIVE URL: https://scentral-hub.vercel.app
+
+================================================================================
+WHAT WAS DELIVERED
+================================================================================
+
+✅ TIER 1 BLOCKERS (All 100% Complete)
+  • Shelf: Expanded 10→20 slots, S/A/B/C tiers, DB-enforced eligibility
+  • Blind Buy: Tracking column + auto-propagation trigger
+  • Identity: user_id integration + legacy claim flow
+  • Rate Limiting: 1 Read per hour (server-side, protects API)
+  • Brand: Unified tone system (BRAND.md + Dot component + naming fixes)
+
+✅ TIER 2 HIGH PRIORITY (All 100% Complete)
+  • Trails: 3 educational paths live (Spraying, Longevity, Anosmia)
+  • Insights: "Your Impact" section verified + working
+  • Accessibility: Motion hooks respect prefers-reduced-motion
+
+⏳ TIER 3 POST-LAUNCH (Deferred, Not Blocking)
+  • Imagery: Hero/onboarding/empty-state art assets
+  • Onboarding: 3-step entry redesign
+  • Wear-log: Aura contextual intelligence
+  • Swap: Trading UI (tables created, feature pending)
+
+================================================================================
+CRITICAL SYSTEMS (Operations)
+================================================================================
+
+1. SHELF MODEL
+   - 20 slots with S/A/B/C tiers (rank 1-20 maps to tier)
+   - Eligibility trigger: Only Tested/Owned/Past-Purchase fragrances
+   - If trigger blocks: backfill missing collections entry
+
+2. IDENTITY MIGRATION (anon_id → user_id)
+   - Runs on login via /auth/callback
+   - Silently claims: temptations, shelf_events, evolution_events
+   - Client-side: localStorage wishlist → collections(status='wishlist')
+   - Both auth paths supported: auth.uid() + legacy anon_id
+
+3. RATE LIMITING
+   - Endpoint: POST /api/read/generate
+   - Rule: Max 1 generation per hour per user
+   - Returns: 429 when exceeded
+
+4. BLIND BUY PROPAGATION
+   - Trigger: set_blind_buy_on_reveal()
+   - Marks blind_ranking entries as blind_buy=true if not in collections
+   - Queryable for Insights ("Your blind buys outrank researched")
+
+================================================================================
+OPS SCRIPTS (Ready to Use)
+================================================================================
+
+📁 scripts/ops-*.sh — All scripts are executable and documented
+
+  1. ops-migrations-verify.sh
+     • Verify all 7 migrations are applied to Supabase
+     • Run before launch, weekly
+
+  2. ops-health-check.sh
+     • Daily health check (deployment, API, build)
+     • Runs in < 1 minute
+
+  3. ops-claim-legacy-data.sh <user-uuid> <anon-id>
+     • Manually claim user's legacy data (if auto-claim fails)
+     • Requires confirmation before running
+
+  4. ops-troubleshoot.sh <command>
+     • rate-limits [days]      — Who hit rate limits?
+     • shelf-ineligible        — Which fragrances blocked?
+     • auth-claims <user-id>   — Did user claim data?
+     • blind-buys <user-id>    — What did user blind-buy?
+     • shelf-stats             — Aggregate metrics
+
+📖 Read: scripts/OPS_SCRIPTS_README.md for full guide
+
+================================================================================
+MONITORING & ALERTS
+================================================================================
+
+Daily checks:
+  • ./scripts/ops-health-check.sh (or cron @ 08:00)
+  • Check Vercel logs: https://vercel.com/.../scentral-hub
+
+Weekly checks:
+  • ./scripts/ops-troubleshoot.sh shelf-stats
+  • ./scripts/ops-troubleshoot.sh rate-limits 7
+
+On-demand:
+  • User can't add to shelf? → ops-troubleshoot shelf-ineligible
+  • User lost data? → ops-troubleshoot auth-claims <uuid>
+  • Rate limit spamming? → ops-troubleshoot rate-limits 1
+
+================================================================================
+SUPPORT CHANNELS
+================================================================================
+
+Tech issues (code/API/DB):
+  → Christopher Goslin (christopher@example.com)
+
+User support (features/login/data):
+  → Forward to your support team with:
+     • User ID (UUID)
+     • What they report (lost data/rate limit/shelf issue)
+     • When it happened (timestamp)
+
+For issues:
+  • See docs/HANDOVER.md (Architecture & Rollback)
+  • See scripts/OPS_SCRIPTS_README.md (Diagnostics)
+  • Check Vercel logs if deployment issue
+  • Check Supabase logs if DB issue
+
+================================================================================
+COMMUNICATIONS TO USERS
+================================================================================
+
+At launch:
+  "nota. is live with a smarter 20-slot shelf, guided learning trails,
+   and seamless sign-in. Your past shelf and wishlists are preserved
+   when you log in."
+
+Key talking points:
+  ✅ Shelf now has 4 tiers (S/A/B/C) for organization
+  ✅ Blind ranking shows you what you *really* prefer
+  ✅ 3 new trails on spraying, longevity, olfaction
+  ✅ Your identity is saved (login once, it's there forever)
+
+Escalation topics:
+  "Rate limit error on Read" → Max 1 per hour; try again in 1h
+  "I lost my shelf" → Need to log in; shelf auto-saves
+  "Can't add X to shelf" → Fragrance must be tested/owned first
+
+================================================================================
+DEPLOYMENT INFO
+================================================================================
+
+Vercel Project: scentral-hub
+  URL: https://scentral-hub.vercel.app
+  Deployment ID: dpl_FRGnmMz9BSkGge3Aeh75XLxoDDFG
+  Status: READY (as of 2026-07-04)
+  Build time: ~2 minutes
+  Deploy command: npx vercel --prod
+
+Supabase Project: scentral-mvp
+  Project ID: lrkdwobnemczvhpixpky
+  Migrations: All 7 applied
+  RLS: Dual-auth enabled (user_id + anon_id)
+  Dashboard: https://app.supabase.com/project/lrkdwobnemczvhpixpky
+
+Git Commit: fdbab61
+  Message: feat(nota): implement pre-launch tier-1 fixes and shelf expansion
+  Files: 20 changed, 854 insertions
+
+================================================================================
+POST-LAUNCH ROADMAP
+================================================================================
+
+Week 1-2:
+  □ Monitor error logs & user feedback
+  □ Adjust rate limiting if needed
+  □ Watch for DB trigger issues
+
+Week 3-4:
+  □ Imagery assets (hero, onboarding, empty states)
+  □ Onboarding flow redesign (3-step scent-picker)
+  □ Wear-log Aura context
+
+Month 2:
+  □ Swap tables + UI (wishlist → trades)
+  □ Advanced Insights (blind-buy analysis)
+
+================================================================================
+QUICK REFERENCE
+================================================================================
+
+Verify migrations applied:
+  $ ./scripts/ops-migrations-verify.sh
+
+Daily health check:
+  $ ./scripts/ops-health-check.sh
+
+Check shelf eligibility issues:
+  $ ./scripts/ops-troubleshoot.sh shelf-ineligible
+
+Claim user data manually:
+  $ ./scripts/ops-claim-legacy-data.sh $USER_UUID $ANON_ID
+
+View all options:
+  $ ./scripts/ops-troubleshoot.sh
+
+================================================================================
+DOCS
+================================================================================
+
+Technical architecture:
+  → /docs/HANDOVER.md (full ops guide with rollback procedures)
+
+Brand & tone:
+  → /docs/BRAND.md (tone system, banned patterns, language)
+
+Operations scripts:
+  → /scripts/OPS_SCRIPTS_README.md (how to use all tools)
+
+================================================================================
+Status: Ready for Launch ✅
+Next: Monitor daily, collect feedback, plan Week 3 imagery work.
+================================================================================
