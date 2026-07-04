@@ -53,3 +53,6 @@ scripts/data/
 
 # supabase CLI temp files
 supabase/.temp/
+
+# Sentry Config File
+.env.sentry-build-plugin
