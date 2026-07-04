@@ -5,7 +5,7 @@ import EmptyState from '@/components/ui/EmptyState'
 import CreatorProfileClient from './CreatorProfileClient'
 
 export const metadata: Metadata = {
-  title: 'Creator Profile | BaseNote',
+  title: 'Creator Profile | nota.',
   description: 'Discover creator fragrance content and recommendations.',
 }
 

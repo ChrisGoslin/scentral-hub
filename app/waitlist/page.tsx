@@ -91,7 +91,7 @@ export default function WaitlistPage() {
   return (
     <div style={s.page}>
       <div style={s.inner}>
-        <h1 style={s.wordmark}>BaseNote</h1>
+        <h1 style={s.wordmark}>nota.</h1>
         <p style={s.tagline}>
           The world&rsquo;s first intelligent scent-layering ecosystem.
         </p>

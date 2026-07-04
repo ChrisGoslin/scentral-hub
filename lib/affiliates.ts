@@ -1,5 +1,5 @@
 /**
- * Affiliate link builders for BaseNote
+ * Affiliate link builders for nota.
  *
  * Network: AWIN (primary — covers EU fragrance market)
  * Publisher ID: 2955445 (approved 2026-06-28)

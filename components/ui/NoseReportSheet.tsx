@@ -105,7 +105,7 @@ export default function NoseReportSheet({ isOpen, onClose, monthYear, wornsThisM
           
           <div style={{ flex: 1 }} />
           <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', textAlign: 'right', paddingBottom: 16 }}>
-            BaseNote
+            nota.
           </p>
         </div>
       </div>

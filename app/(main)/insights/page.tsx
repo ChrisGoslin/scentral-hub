@@ -4,7 +4,7 @@ import { createClient } from '@/utils/supabase/server'
 import InsightsClient from './InsightsClient'
 
 export const metadata: Metadata = {
-  title: 'Insights | BaseNote',
+  title: 'Insights | nota.',
   description: 'Your scent impact, evolution, and discovery patterns — computed nightly.',
   alternates: { canonical: '/insights' },
 }

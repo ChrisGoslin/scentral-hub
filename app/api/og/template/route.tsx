@@ -158,7 +158,7 @@ export async function GET(req: NextRequest) {
                   fontFamily: 'system-ui, sans-serif',
                 }}
               >
-                BaseNote
+                nota.
               </div>
             </div>
           ),
@@ -221,7 +221,7 @@ export async function GET(req: NextRequest) {
                   fontFamily: 'system-ui, sans-serif',
                 }}
               >
-                Remembered on BaseNote
+                Remembered on nota.
               </div>
             </div>
           ),
@@ -252,7 +252,7 @@ export async function GET(req: NextRequest) {
                   marginBottom: 20,
                 }}
               >
-                BaseNote
+                nota.
               </div>
               <div
                 style={{
@@ -288,7 +288,7 @@ export async function GET(req: NextRequest) {
             fontSize: 48,
           }}
         >
-          BaseNote
+          nota.
         </div>
       ),
       { width: 1200, height: 630 }

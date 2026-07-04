@@ -83,7 +83,7 @@ export default function ProGate({ featureName, description, preview }: ProGatePr
               color: 'var(--accent)',
             }}
           >
-            BaseNote Pro
+            nota. pro
           </p>
           <h2
             style={{

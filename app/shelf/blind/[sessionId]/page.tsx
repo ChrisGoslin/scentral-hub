@@ -9,7 +9,7 @@ type PageProps = {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   return {
-    title: "That's what I prefer? — BaseNote Blind Ranking",
+    title: "That's what I prefer? — nota. Blind Ranking",
     description: 'A blind Top 10, ranked on notes and accords alone — no brand, no bottle, no bias.',
   }
 }
@@ -89,7 +89,7 @@ export default async function BlindRankingSharePage({ params }: PageProps) {
         ))}
       </div>
       <p style={{ fontSize: 12, color: 'var(--text-muted)', textAlign: 'center', marginTop: 24 }}>
-        Ranked blind, on notes and accords alone. Find your own Top 10 on BaseNote.
+        Ranked blind, on notes and accords alone. Find your own Top 10 on nota..
       </p>
     </div>
   )

@@ -15,7 +15,7 @@ export default function ProPage() {
 
       <div style={{ maxWidth: 400, margin: '0 auto', textAlign: 'center' }}>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 32, marginBottom: 16 }}>
-          BaseNote Pro
+          nota. pro
         </h1>
         <p style={{ fontSize: 16, color: 'var(--text-muted)', marginBottom: 40, lineHeight: 1.5 }}>
           Unlock the full potential of your fragrance wardrobe with advanced intelligence and limitless layering formulas.

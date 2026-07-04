@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { createClient } from '@/utils/supabase/server'
 
 export const metadata: Metadata = {
-  title: 'Scent Encyclopedia | BaseNote',
+  title: 'Scent Encyclopedia | nota.',
   description: 'Explore our encyclopedia of scent families. Discover fragrances by olfactive family and axis, from fresh aromatic to dark oud.',
   alternates: { canonical: '/notes' },
 }

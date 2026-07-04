@@ -167,7 +167,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
   }, [])
 
   useEffect(() => {
-    document.title = activePersona ? `Discover · For ${activePersona.name}` : 'Discover | BaseNote'
+    document.title = activePersona ? `Discover · For ${activePersona.name}` : 'Discover | nota.'
   }, [activePersona])
 
   // Track search usage

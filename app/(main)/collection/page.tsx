@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 import CollectionClientWrapper from './CollectionClientWrapper'
 
 export const metadata: Metadata = {
-  title: 'My Bottles | BaseNote',
+  title: 'My Bottles | nota.',
   description: 'Your personal fragrance wardrobe. Track your collection, manage bottle levels, and organize your scents on virtual walnut shelves.',
 }
 

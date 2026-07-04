@@ -58,7 +58,7 @@ export default function FormulaCard({ open, onClose, base, top, third }: Props) 
   }
 
   async function handleShare() {
-    const text = `${name}\n${base!.name} (base) + ${top!.name} (layer)${third ? ` + ${third.name} (finish)` : ''}\nBaseNote · Find your base note`
+    const text = `${name}\n${base!.name} (base) + ${top!.name} (layer)${third ? ` + ${third.name} (finish)` : ''}\nnota. · Find your base note`
     if (navigator.share) {
       try {
         await navigator.share({ title: name, text, url: deepLink })
@@ -138,7 +138,7 @@ export default function FormulaCard({ open, onClose, base, top, third }: Props) 
         <div style={{ height: 1, width: '100%', background: 'var(--accent)' }} />
 
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginTop: 12 }}>
-          <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)' }}>BaseNote · Find your base note</p>
+          <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)' }}>nota. · Find your base note</p>
           {deepLink && (
             <div style={{ background: 'white', padding: 4, borderRadius: 4 }}>
               <QRCodeSVG value={deepLink} size={48} />
