@@ -99,8 +99,29 @@ export function useFragranceSearch(localFragrances: DiscoverFragrance[]) {
           return
         }
 
+        // Fetch owner counts for all returned fragrances (batched)
+        const fragrances = data ?? []
+        let ownerCounts: Record<string, number> = {}
+
+        if (fragrances.length > 0) {
+          try {
+            const fragIds = fragrances.map(f => f.id)
+            const { data: socialProof, error: spError } = await supabase.rpc(
+              'get_fragrance_social_proof',
+              { fragrance_ids: fragIds }
+            )
+            if (!spError && socialProof) {
+              socialProof.forEach((row: { fragrance_id: string; owner_count: number }) => {
+                ownerCounts[row.fragrance_id] = Number(row.owner_count)
+              })
+            }
+          } catch (err) {
+            console.error('Failed to fetch owner counts:', err)
+          }
+        }
+
         setDbResults(
-          (data ?? []).map(f => ({
+          fragrances.map(f => ({
             id: f.id,
             brand: f.brand,
             name: f.name,
@@ -114,7 +135,7 @@ export function useFragranceSearch(localFragrances: DiscoverFragrance[]) {
             image_url: f.image_url ?? null,
             rating: f.rating ? Number(f.rating) : null,
             created_at: f.created_at,
-            owner_count: 0,
+            owner_count: ownerCounts[f.id] ?? 0,
           }))
         )
       } catch (e) {
@@ -175,7 +196,7 @@ export function useFragranceSearch(localFragrances: DiscoverFragrance[]) {
               image_url: r.image_url,
               rating: r.rating,
               created_at: r.created_at,
-              owner_count: 0,
+              owner_count: r.owner_count ?? 0,
             }))
         )
         setSemanticError(null)
