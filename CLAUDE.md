@@ -39,7 +39,7 @@ Next.js 16.2.9 (App Router, route groups `(main)` `(community)` `(account)`), Re
 
 **nota-era tables (all `user_id uuid`):**
 - `noseprints` — name, descriptor, read_text, signals jsonb, matches uuid[], stretch_note, status ('current').
-- `shelf_items` — fragrance_id, **rank int (1–10)**, source ('noseprint_match'|'manual'|'blind_ranking'), locked bool. **No tier column, no blind_buy, no eligibility constraint.**
+- `shelf_items` — fragrance_id, **rank int (±20, ≠0 — negative = transient during two-phase reorder)**, `tier` text GENERATED from rank (S 1–5 / A 6–10 / B 11–15 / C 16–20), `blind_buy` bool, source ('noseprint_match'|'manual'|'blind_ranking'), locked bool. **`enforce_shelf_eligibility` trigger live:** insert/update of fragrance_id fails unless a collections row exists with status owned/tested/past_purchase. `set_blind_buy_on_reveal` trigger propagates BB from blind ranking. (Migrations applied 2026-07-04; app UI still 10 slots — see §6.)
 - `shelf_events` — audit trail (added/removed/rank_changed/replaced/returned).
 - `blind_ranking_sessions` (fragrance_pool uuid[], revealed_at) + `blind_ranking_choices` (placed_rank).
 - `traces` (trace_type, body, image_url) + `trace_reactions`.
@@ -55,7 +55,7 @@ Next.js 16.2.9 (App Router, route groups `(main)` `(community)` `(account)`), Re
 
 - **Current:** 10 slots (SHELF_SIZE=10 in `app/(main)/shelf/page.tsx` AND `app/api/shelf/route.ts`). Seeded once: top-3 noseprint matches + owned collections by tier/affinity. Actions: add/remove/reorder (two-phase negative-rank update)/replace, all audited to `shelf_events` + `interactions`.
 - **Spec (founder brief):** **20 slots in 4 tiers** — S (1–5), A (6–10), B (11–15), C (16–20, at-risk). Eligibility: only Tested/Own/Past-Purchase fragrances, **enforced in data model**. Blind-buy = distinct BB stamp. Shareable to Traces now, social OG later.
-- **Gap:** size 10→20, no tiers, no eligibility statuses in `collections.status`, no BB flag, no DB constraint.
+- **Gap (updated post-migrations 2026-07-04):** DB layer is DONE (tiers, BB, eligibility trigger, ±20 ranks). Remaining is ALL app-layer: SHELF_SIZE 10→20 in both files, tier-row UI, BB stamp render, eligibility-filtered search sheet, and mapping the trigger's exception to a friendly 409 in `/api/shelf` (until then, ineligible adds surface as generic 500s — **known live rough edge**).
 
 ## 7. LLM / cost posture (verified)
 
