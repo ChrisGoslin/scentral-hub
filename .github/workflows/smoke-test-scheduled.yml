@@ -1,0 +1,46 @@
+# Scheduled smoke test — runs every 2 hours to detect production outages
+name: Smoke Test Scheduled
+
+on:
+  schedule:
+    # Run every 2 hours at :00 minutes
+    - cron: '0 */2 * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  smoke-test:
+    name: Production Smoke Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run smoke tests against production
+        run: npm run test:smoke:prod
+        timeout-minutes: 5
+
+      - name: Report success
+        if: success()
+        run: |
+          echo "### ✅ Production Smoke Test Passed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "All critical endpoints are responding at https://scentral-hub.vercel.app" >> $GITHUB_STEP_SUMMARY
+
+      - name: Report failure
+        if: failure()
+        run: |
+          echo "### ❌ Production Smoke Test Failed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "One or more critical endpoints are not responding." >> $GITHUB_STEP_SUMMARY
+          echo "Check https://vercel.com/dashboard for deployment status." >> $GITHUB_STEP_SUMMARY
+          exit 1
