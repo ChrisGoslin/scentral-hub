@@ -9,7 +9,7 @@ export async function GET(request: Request) {
     const supabase = await createClient()
     let query = supabase
       .from('fragrances')
-      .select('id, brand, name, full_name, family, projection, optimal_season, use_case, plain_description, inspired_by, image_url, rating, created_at, owner_count')
+      .select('id, brand, name, full_name, family, projection, optimal_season, use_case, plain_description, inspired_by, image_url, rating, created_at')
       .order('brand', { ascending: true })
 
     if (search && search.trim().length > 0) {
