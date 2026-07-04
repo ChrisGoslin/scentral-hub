@@ -101,6 +101,24 @@ const RETAILER_STORES = {
     store: 'scentoria.co.in',
     skipTitle: /\b(partial|tester|vintage|batch|gift set|discovery set|sample set|sampler|deodorant|shower gel|body lotion|body cream|beard oil|mencare|candle|refill)\b/i,
     skipImage: /(IMG_\d+|\d{8}_\d{6}|Photoroom|WhatsApp|Screenshot|PXL_)/i,
+    // Real listings this store publishes that the filters MUST exclude —
+    // validation aborts before any DB write if either stops matching.
+    skipTitleFixture: 'Bleu De Chanel EDP Partial',
+    skipImageFixture: 'IMG_4461-Photoroom.png',
+  },
+  // Les Senteurs (verified 2026-07-04): long-established London niche perfumery.
+  // 1,048 products, 55 genuine brand vendors, authentic GBP pricing, boutique
+  // imagery on cdn.shopify.com. 283 "Free Sample" and 51 tester listings are
+  // dropped by skipTitle. ~1/3 of products carry no image (extractImage skips).
+  // Rejected candidate from the same sweep: roullierwhite.com — vendor field
+  // holds distributors/categories ("Perfume Playground", "KGA"), real brand is
+  // embedded in the title, so vendor-based brand matching cannot work there.
+  'LesSenteurs': {
+    store: 'www.lessenteurs.com',
+    skipTitle: /\b(sample|tester|gift with purchase|gift set|discovery|candle|diffuser|home spray|room spray|soap|shower|body|lotion|hand cream)\b/i,
+    skipImage: /(IMG_\d+|\d{8}_\d{6}|Photoroom|WhatsApp|Screenshot|PXL_)/i,
+    skipTitleFixture: 'Néroli Hasbaya Free Sample',
+    skipImageFixture: 'IMG_0001-Photoroom.png',
   },
 }
 
@@ -113,6 +131,11 @@ const BRAND_ALIASES = {
   christiandior: 'dior',
   ysl: 'yvessaintlaurent',
   mfk: 'maisonfranciskurkdjian',
+  // Les Senteurs vendors vs DB spellings (verified against the DB 2026-07-04)
+  kilianparis: 'kilian',
+  bykilian: 'kilian',
+  editionsdeparfumsfredericmalle: 'fredericmalle',
+  jamesheeley: 'heeley',
 }
 
 function normalizeBrand(s) {
@@ -417,17 +440,17 @@ function runRetailerValidationTest(retailerName, config, byVendor) {
   if (fakeMatch) fail(`matched a fake name to "${fakeMatch.title}"`)
   console.log('  ✅ PASS — correctly returned no match\n')
 
-  console.log('Test 4 — used-bottle/non-perfume titles are filtered:')
-  if (config.skipTitle && !config.skipTitle.test('Bleu De Chanel EDP Partial')) {
-    fail('skipTitle did not exclude a "Partial" (used bottle) title')
+  console.log('Test 4 — retailer-specific unwanted titles are filtered:')
+  if (config.skipTitle && config.skipTitleFixture && !config.skipTitle.test(config.skipTitleFixture)) {
+    fail(`skipTitle did not exclude fixture "${config.skipTitleFixture}"`)
   }
-  console.log('  ✅ PASS — "Partial" titles excluded\n')
+  console.log(`  ✅ PASS — "${config.skipTitleFixture || 'n/a'}" excluded\n`)
 
-  console.log('Test 5 — phone-photo image filenames are filtered:')
-  if (config.skipImage && !config.skipImage.test('IMG_4461-Photoroom.png')) {
-    fail('skipImage did not exclude a phone-photo filename')
+  console.log('Test 5 — unwanted image filenames are filtered:')
+  if (config.skipImage && config.skipImageFixture && !config.skipImage.test(config.skipImageFixture)) {
+    fail(`skipImage did not exclude fixture "${config.skipImageFixture}"`)
   }
-  console.log('  ✅ PASS — phone-photo filenames excluded\n')
+  console.log(`  ✅ PASS — "${config.skipImageFixture || 'n/a'}" excluded\n`)
 
   console.log('✅ Retailer validation passed. Proceeding...\n')
 }

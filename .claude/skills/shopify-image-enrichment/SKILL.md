@@ -50,6 +50,16 @@ caveat as shopify-misses.txt).
 | Retailer | Domain | Status | Live-run hits (verified in DB) |
 |---|---|---|---|
 | Scentoria | scentoria.co.in | ✅ verified 2026-07-04 | 5,744 (path prefix `/s/files/1/0679/6096/3326/`) |
+| Les Senteurs | www.lessenteurs.com | ✅ verified 2026-07-04 | 281 (path prefix `/s/files/1/2213/5535/`) — London niche boutique, clean imagery, 55 genuine vendors; ~1/3 of listings have no image |
+
+**EU/UK candidates probed and REJECTED 2026-07-04** (don't re-probe without reason):
+- `roullierwhite.com` — /products.json works (780 products) but vendor field holds
+  distributors/categories ("Perfume Playground", "KGA", "SG Brands"), real brand embedded in
+  title ("Maison Matine - Ukhu Pacha (EdP)"). Vendor-based brand matching cannot work. Would
+  need a title-parsing strategy — not worth it for 780 mixed homeware/perfume products.
+- `jovoyparis.com`, `perfumelounge.eu`, `skins.nl` — 404 on /products.json (not Shopify or API closed)
+- `www.essenza-nobile.de`, `www.perfumery.co.uk` — 403 (WAF)
+- `osme.uk`, `aveparfum.com`, `sospiri.it` — dead/unreachable
 
 **Scentoria authenticity profile (checked 2026-07-04):** genuine-goods decant/tester reseller in
 India — ~8.5k products, 400+ vendors, authentic-market pricing, zero clone/dupe language. BUT
