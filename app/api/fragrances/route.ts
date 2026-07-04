@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
+  const id = searchParams.get('id')
   const search = searchParams.get('search') || searchParams.get('q')
 
   try {
@@ -10,17 +11,22 @@ export async function GET(request: Request) {
     let query = supabase
       .from('fragrances')
       .select('id, brand, name, full_name, family, projection, optimal_season, use_case, plain_description, inspired_by, image_url, rating, created_at')
-      .order('brand', { ascending: true })
 
-    if (search && search.trim().length > 0) {
-      // Search: brand, name, inspired_by (for "Smells Like" mode)
-      query = query
-        .or(
-          `brand.ilike.%${search}%,name.ilike.%${search}%,inspired_by.ilike.%${search}%,plain_description.ilike.%${search}%`
-        )
-        .limit(40)
+    if (id) {
+      // Lookup by ID: return single fragrance
+      query = query.eq('id', id).limit(1)
     } else {
-      query = query.limit(100)
+      query = query.order('brand', { ascending: true })
+      if (search && search.trim().length > 0) {
+        // Search: brand, name, inspired_by (for "Smells Like" mode)
+        query = query
+          .or(
+            `brand.ilike.%${search}%,name.ilike.%${search}%,inspired_by.ilike.%${search}%,plain_description.ilike.%${search}%`
+          )
+          .limit(40)
+      } else {
+        query = query.limit(100)
+      }
     }
 
     const { data, error } = await query
