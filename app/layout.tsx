@@ -10,6 +10,7 @@ import DeferredFontLink from "./components/DeferredFontLink";
 import FeedbackWidget from "@/components/feedback/FeedbackWidget";
 import CompareBar from "@/components/ui/CompareBar";
 import TemptationProvider from "@/components/temptations/TemptationProvider";
+import ConsentBanner from "@/components/ConsentBanner";
 
 const unbounded = Unbounded({
   subsets: ["latin"],
@@ -90,6 +91,7 @@ export default function RootLayout({
             <FeedbackWidget />
             <CompareBar />
             <TemptationProvider />
+            <ConsentBanner />
           </AnalyticsProvider>
         </Providers>
       </body>

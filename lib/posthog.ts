@@ -2,7 +2,11 @@
 // after the browser is idle, so it never blocks LCP / inflates the initial
 // route bundle on first paint. All callers below go through the same lazy
 // singleton so PostHog is only ever initialized once.
+//
+// GDPR: PostHog is gated behind explicit user consent (lib/consent.ts).
+// Check hasAnalyticsConsent() before calling any PostHog methods.
 import type posthogJs from 'posthog-js'
+import { hasAnalyticsConsent } from './consent'
 
 type PostHogClient = typeof posthogJs
 
@@ -12,7 +16,7 @@ function loadClient(): Promise<PostHogClient> {
   if (!clientPromise) {
     clientPromise = import('posthog-js').then(({ default: posthog }) => {
       const key = process.env.NEXT_PUBLIC_POSTHOG_KEY
-      if (key && !posthog.__loaded) {
+      if (key && !posthog.__loaded && hasAnalyticsConsent()) {
         posthog.init(key, {
           api_host: 'https://eu.i.posthog.com',
           person_profiles: 'identified_only',
