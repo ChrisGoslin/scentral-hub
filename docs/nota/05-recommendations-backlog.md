@@ -79,3 +79,8 @@ Existing e2e coverage: collection, discover, layering, onboarding, you-tab — *
 - `/insights`, `/you`, onboarding, `/wheel`, `/spritz` were surveyed but not deep-audited (breadth trade-off); their scores in A§3 are code-informed, not pixel-inspected.
 - Palette lock (PRODUCT_TRUTH 🟡 #1) still pending founder decision — colour recommendations marked [T].
 - Live walkthrough was signed-out only; signed-in Shelf/Read states were audited from code, not the browser.
+
+## 7. Audit follow-up note
+
+- Lighthouse production score landed at **71** on performance. The main visible drag is the long LCP path on the landing and Discover surfaces, not a single isolated route failure.
+- Accessibility found contrast issues in the marquee / landing-copy area. Treat those as launch polish, but they are real enough to stay on the backlog until the copy and colour treatment are tightened.
