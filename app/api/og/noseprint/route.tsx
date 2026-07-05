@@ -1,11 +1,20 @@
 import { ImageResponse } from 'next/og'
 import { type NextRequest } from 'next/server'
+import { makeLimiter, enforce, clientIp } from '@/lib/rate-limit'
 
 export const runtime = 'edge'
 
+// Unauthenticated by design (link unfurlers fetch this) — so params are
+// hostile input and the route needs its own abuse cap (06 §2.4, §3.1).
+const ogLimiter = makeLimiter('og-noseprint', 20, '1 m')
+
 export async function GET(request: NextRequest) {
+  if (!(await enforce(ogLimiter, clientIp(request)))) {
+    return new Response('Too many requests', { status: 429 })
+  }
+
   const { searchParams } = new URL(request.url)
-  const name = searchParams.get('name') || 'The Still Night'
+  const name = (searchParams.get('name') || 'The Still Night').slice(0, 60)
   const descriptor = searchParams.get('descriptor') || 'Your scent identity.'
 
   const trimmedDescriptor = descriptor.length > 100

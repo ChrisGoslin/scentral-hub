@@ -22,3 +22,11 @@
 ## QE-5 (2026-07-04) — CI ran audit only; type/lint errors could reach main via web UI
 **Bug class:** gate existed locally (husky) but not server-side — any GitHub-web edit or hook-bypassed push skipped tsc entirely.
 **Guard now in place:** `.github/workflows/ci.yml` Stage 1 (tsc + lint on every PR/push to main); staging plan for build/e2e in 06 §1.2.
+
+## QE-6 (2026-07-05) — QE-3/AGENTS.md L16 rule didn't cover search-based enrichment; 12 hosts drifted in silently
+**Bug class:** "add remotePatterns host in the same commit" only works when a script writes from one known domain. Generic reverse-image-search enrichment (DuckDuckGo/Google-CSE) can return a hit from any host on the internet — no commit ever touches `next.config.ts` for those, so the allowlist silently falls behind live data. Found via `SELECT DISTINCT host FROM fragrances` — 11 hosts beyond the one that actually crashed a test were already live and unconfigured.
+**Guard now in place:** all 12 hosts added to `next.config.ts`; regression test `e2e/discover.spec.ts` asserts a card from the previously-broken host renders. Full incident + the still-open structural gap (no periodic host-audit check) in `nota-failure-archaeology` Incident 11 — re-run the host-audit query periodically, don't assume the allowlist is complete.
+
+## QE-7 (2026-07-05) — `networkidle` wait is a flake source on data-heavy dev pages
+**Bug class:** `page.waitForLoadState('networkidle')` against `/discover` (127k-row catalogue + PostHog/analytics keep-alive requests) never reliably settles, causing intermittent 30s timeouts unrelated to the feature under test.
+**Guard now in place:** `e2e/discover.spec.ts` rewritten to wait on specific elements (`getByPlaceholder(...)`, `getByText(...)` with explicit `toBeVisible({ timeout })`) instead of `networkidle`. Apply the same pattern to any future spec touching a data-heavy or analytics-instrumented page.

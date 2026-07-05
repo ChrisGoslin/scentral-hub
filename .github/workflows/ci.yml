@@ -1,7 +1,7 @@
-# CI Stage 1 — typecheck + lint. Zero secrets required, cannot flake.
-# Stage 2 (build) and Stage 3 (chromium e2e) are specified in
-# docs/nota/06-testing-security-abuse.md §1.2 — add them only after the
-# required repo secrets exist (NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY).
+# CI Stages 1+2 — typecheck + lint (no secrets) and production build (repo
+# secrets NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY, set 2026-07-05).
+# Stage 3 (chromium e2e) is specified in docs/nota/06-testing-security-abuse.md
+# §1.2 — add it only once the suite is verified green locally.
 name: CI
 on:
   push:
@@ -29,3 +29,16 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm run lint
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
