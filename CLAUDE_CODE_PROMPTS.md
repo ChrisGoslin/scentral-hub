@@ -150,9 +150,8 @@ node scripts/seed-discovery-boxes.mjs
 ```
 Run a Lighthouse audit against https://scentral-hub.vercel.app and report scores.
 
-1. Install if needed: npm install -g @lhci/cli
-2. Run: npx lhci autorun --collect.url=https://scentral-hub.vercel.app --collect.numberOfRuns=1 2>&1 | tail -50
-3. Report the 4 scores: Performance, Accessibility, Best Practices, SEO. Flag any below 85.
-4. Check docs/LAUNCH_READINESS_CHECKLIST.md for remaining submission items.
-5. Do NOT modify any app code. Audit and report only.
+1. Run: npx lighthouse https://scentral-hub.vercel.app --only-categories=performance,accessibility,best-practices,seo --output=json --output-path=/tmp/nota-lighthouse.json --chrome-flags="--headless --no-sandbox"
+2. Report the 4 scores: Performance, Accessibility, Best Practices, SEO. Flag any below 85.
+3. Check docs/LAUNCH_READINESS_CHECKLIST.md for remaining submission items.
+4. Do NOT modify any app code. Audit and report only.
 ```

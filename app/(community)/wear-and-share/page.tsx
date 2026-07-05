@@ -2,7 +2,6 @@ import { Metadata } from 'next'
 import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
 import EmptyState from '@/components/ui/EmptyState'
-import Link from 'next/link'
 import WearAndShareClient from './WearAndShareClient'
 
 export const metadata: Metadata = {
