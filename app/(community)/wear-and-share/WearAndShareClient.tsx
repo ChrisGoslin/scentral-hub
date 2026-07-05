@@ -18,13 +18,11 @@ interface Post {
 
 interface Props {
   posts: Post[]
-  currentUserId: string
   userLikedPostIds: Set<string>
 }
 
 export default function WearAndShareClient({
   posts,
-  currentUserId,
   userLikedPostIds: initialLikedPostIds,
 }: Props) {
   const [likedPostIds, setLikedPostIds] = useState(initialLikedPostIds)
@@ -53,7 +51,6 @@ export default function WearAndShareClient({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           postId,
-          userId: currentUserId,
           action,
         }),
       })

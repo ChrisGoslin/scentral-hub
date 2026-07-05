@@ -71,6 +71,31 @@ async function testFragranceById(fragranceId) {
   }
 }
 
+async function testDiscoverCarriesMannenzaakImage() {
+  const url = `${BASE_URL}/discover`
+  try {
+    const res = await fetch(url, {
+      method: 'GET',
+      redirect: 'follow',
+      headers: { 'User-Agent': 'scentral-smoke-test/1.0' },
+      signal: AbortSignal.timeout(10_000),
+    })
+
+    if (!res.ok) {
+      throw new Error(`Expected 200, got ${res.status}`)
+    }
+
+    const html = await res.text()
+    if (!html.includes('www.mannenzaak.nl')) {
+      throw new Error('Discover did not render a card sourced from www.mannenzaak.nl')
+    }
+
+    return { ok: true, msg: null }
+  } catch (err) {
+    return { ok: false, msg: err.message }
+  }
+}
+
 async function run() {
   console.log(`\n${DIM}Smoke testing ${BASE_URL}${RST}\n`)
 
@@ -135,6 +160,24 @@ async function run() {
     }
   } catch (err) {
     // Silently skip this test if search fails — it's an enhancement, not a critical path
+  }
+
+  try {
+    const discoverResult = await testDiscoverCarriesMannenzaakImage()
+    if (discoverResult.ok) {
+      passed++
+      console.log(`  ${PASS} Discover renders a Mannenzaak image card ${DIM}(200)${RST}`)
+    } else {
+      failed++
+      const msg = discoverResult.msg
+      failures.push({ label: 'Discover renders a Mannenzaak image card', url: `${BASE_URL}/discover`, msg })
+      console.log(`  ${FAIL} Discover renders a Mannenzaak image card ${DIM}— ${msg}${RST}`)
+    }
+  } catch (err) {
+    failed++
+    const msg = err.message
+    failures.push({ label: 'Discover renders a Mannenzaak image card', url: `${BASE_URL}/discover`, msg })
+    console.log(`  ${FAIL} Discover renders a Mannenzaak image card ${DIM}— ${msg}${RST}`)
   }
 
   console.log(`\n  ${passed} passed · ${failed} failed\n`)

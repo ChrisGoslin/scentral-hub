@@ -82,7 +82,6 @@ export default async function WearAndSharePage() {
 
         <WearAndShareClient
           posts={posts || []}
-          currentUserId={user.id}
           userLikedPostIds={userLikedPostIds}
         />
 

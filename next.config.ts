@@ -2,6 +2,23 @@ import type { NextConfig } from "next";
 import { withSentryConfig } from '@sentry/nextjs';
 
 const nextConfig: NextConfig = {
+  // Baseline security headers (docs/nota/06-testing-security-abuse.md §2.4).
+  // CSP is deliberately deferred — ship Report-Only first, tighten from real
+  // reports. Do not add a blocking CSP here untested.
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+        ],
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'lrkdwobnemczvhpixpky.supabase.co' },
@@ -14,6 +31,21 @@ const nextConfig: NextConfig = {
       // multi-brand retailers). Missing since the 2026-06-28 brand run — see
       // AGENTS.md L16, next/image throws at render time on unlisted hosts.
       { protocol: 'https', hostname: 'cdn.shopify.com' },
+      // Long-tail retailer/enrichment hosts found live in fragrances.image_url
+      // 2026-07-05 that were missing from this list — each one 500s next/image
+      // and crashes the page for any user who scrolls to that row (AGENTS.md L16).
+      { protocol: 'https', hostname: 'parfumistas.com' },
+      { protocol: 'https', hostname: 'dlagentlemana.pl' },
+      { protocol: 'https', hostname: 'res.cloudinary.com' },
+      { protocol: 'https', hostname: 'cdn.awsli.com.br' },
+      { protocol: 'https', hostname: 'f.fcdn.app' },
+      { protocol: 'https', hostname: 'img.fragrancex.com' },
+      { protocol: 'https', hostname: 'media.falabella.com' },
+      { protocol: 'https', hostname: 'newfragrance.com' },
+      { protocol: 'https', hostname: 'piimages.parfumo.de' },
+      { protocol: 'https', hostname: 'rimage.ripley.cl' },
+      { protocol: 'https', hostname: 'store.womostore.com' },
+      { protocol: 'https', hostname: 'www.mannenzaak.nl' },
     ],
   },
   webpack: (config, { isServer }) => {

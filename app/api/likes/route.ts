@@ -1,5 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
+import { createClient as createServerClient } from '@/utils/supabase/server'
+import { buildLikeRequest } from '@/lib/security/likes'
 
 export async function POST(request: NextRequest) {
   const supabase = createClient(
@@ -7,14 +10,25 @@ export async function POST(request: NextRequest) {
     process.env.SUPABASE_SERVICE_KEY!
   )
   try {
-    const { postId, userId, action } = await request.json()
+    const cookieStore = await cookies()
+    const authedSupabase = await createServerClient(cookieStore)
+    const { data: { user }, error: authError } = await authedSupabase.auth.getUser()
 
-    if (!postId || !userId || !action) {
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const body = await request.json()
+    const likeRequest = buildLikeRequest(body, user.id)
+
+    if (!likeRequest) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
       )
     }
+
+    const { postId, action, userId } = likeRequest
 
     if (action === 'like') {
       const { data, error } = await supabase

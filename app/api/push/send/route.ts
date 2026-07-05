@@ -1,8 +1,19 @@
 import { NextResponse } from 'next/server';
 import webpush from 'web-push';
 import { createClient } from '@supabase/supabase-js';
+import { isAuthorizedPushBroadcast } from '@/lib/security/push'
 
 export async function POST(request: Request) {
+  const broadcastSecret = process.env.PUSH_BROADCAST_SECRET;
+
+  if (!broadcastSecret) {
+    return NextResponse.json({ error: 'Push broadcast secret not configured' }, { status: 500 });
+  }
+
+  if (!isAuthorizedPushBroadcast(request, broadcastSecret)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY!;
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
