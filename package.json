@@ -1,6 +1,6 @@
 {
-  "name": "scentral",
-  "version": "0.1.0",
+  "name": "nota",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -9,7 +9,7 @@
     "lint": "eslint",
     "sanity-check": "node scripts/sanity-check.mjs",
     "test:smoke": "node scripts/smoke-test.mjs",
-    "test:smoke:prod": "BASE_URL=https://scentral-hub.vercel.app node scripts/smoke-test.mjs",
+    "test:smoke:prod": "BASE_URL=https://nota.vercel.app node scripts/smoke-test.mjs",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
     "audit": "npm audit --audit-level=high"

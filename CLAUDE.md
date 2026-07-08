@@ -1,61 +1,63 @@
 # CLAUDE.md — nota. System Memory
 
 > **Living factual memory for the nota. product.** Created 2026-07-04 (Phase 0 of pre-launch audit).
-> Where this disagrees with older docs (AGENTS.md branding, PRODUCT_TRUTH.md, executive-suite), **this wins** — except AGENTS.md §8–§9 operational lessons (L1–L17), git hygiene, and deploy rules, which remain binding and are incorporated by reference. Read AGENTS.md for those.
+> **Updated 2026-07-08:** scentral + scentral-hub consolidated into nota (Phase 6).
+> Where this disagrees with older docs (AGENTS.md branding, PRODUCT_TRUTH.md, executive-suite), **this wins** — except AGENTS.md §8–§9 operational lessons (L1–L17), git hygiene, and deploy [...]
 > Update this file at the end of every working phase. Never assert a fact you haven't verified against repo, DB, or deploy.
 
 ## 1. Identity & doctrine
 
-- **Product:** **nota.** — lowercase, with the dot. A personal scent identity system: understands, reflects, and evolves a user's scent identity over time. NOT a marketplace/review site/influencer platform.
+- **Product:** **nota.** — lowercase, with the dot. A personal scent identity system: understands, reflects, and evolves a user's scent identity over time. NOT a marketplace/review site/influence[...]
 - **Core rule:** "If it's not personalised, it shouldn't exist."
 - **Emotional loop:** understands me → reflects me → evolves me → connects me to others.
 - **Tone:** calm, intelligent, observational, slightly playful, restrained. No hype, no luxury clichés, no generic AI language.
 - **2036 test:** reject anything trendy or clever-for-its-own-sake.
-- **Rebrand history:** Scentral → BaseNote → AnotherSense (docs only) → **nota.** (2026-07-04, per founder brief; the brief is the doctrine source — no separate handover doc exists in-repo). Repo stays `scentral-hub`, DB stays `scentral-mvp` (`lrkdwobnemczvhpixpky`), internal names unchanged.
-- **⚠️ Rebrand debt (verified 2026-07-04):** `app/layout.tsx` metadata still says "BaseNote"; `lib/affiliates.ts` header says BaseNote; `docs/PRODUCT_TRUTH.md` says AnotherSense and claims 282 fragrances (live count: 127,595). The Read prompt (`app/api/read/generate/route.ts:61`) already says "nota." — the only place the new name exists in code.
+- **Rebrand history:** Scentral → BaseNote → AnotherSense (docs only) → **nota.** (2026-07-04, per founder brief; the brief is the doctrine source — no separate handover doc exists in-repo[...])
+- **Consolidation (2026-07-08):** Two repos (`scentral`, `scentral-hub`) merged into single canonical repo. `scentral` archived (read-only). See MERGE_SUMMARY.md.
+- **⚠️ Rebrand debt (RESOLVED 2026-07-08):** All display strings updated to nota. (was: BaseNote in metadata, lib/affiliates.ts; AnotherSense in docs).
 
-## 2. Stack (verified from repo, 2026-07-04)
+## 2. Stack (verified from repo, 2026-07-04; updated 2026-07-08 post-merge)
 
-Next.js 16.2.9 (App Router, route groups `(main)` `(community)` `(account)`), React 19.2, Tailwind 4 + CSS variables, Supabase JS 2.110 + `@supabase/ssr`, `@anthropic-ai/sdk` 0.110, `@google/genai`, dnd-kit, framer-motion, Sentry, PostHog, web-push. Vercel → `scentral-hub.vercel.app` (deploy explicitly: `npx vercel --prod`; webhook unreliable). PWA (manifest + splash icons).
-**Domain:** `notalabs.io` purchased 2026-07-04 via Shopify — NOT yet pointed at Vercel. Until DNS cutover, all code fallbacks stay on `scentral-hub.vercel.app`; after cutover, set `NEXT_PUBLIC_SITE_URL=https://notalabs.io` in Vercel env (used by `app/layout.tsx` metadataBase + `NoseprintClient` share links) and repoint `scripts/smoke-test.mjs` / `package.json` `test:smoke:prod`.
+Next.js 16.2.9 (App Router, route groups `(main)` `(community)` `(account)`), React 19.2.7, Tailwind 4 + CSS variables, Supabase JS 2.110 + `@supabase/ssr`, `@anthropic-ai/sdk` 0.110, `@google/genai` 2.10, Playwright 1.60 (e2e). TypeScript 6.
+**Domain:** `notalabs.io` purchased 2026-07-04 via Shopify — NOT yet pointed at Vercel. Until DNS cutover, code fallback = `nota.vercel.app` (post-consolidation); after cutover, set `NEXT_PUBLIC_SITE_URL=https://notalabs.io` in Vercel env.
 
 ## 3. Identity model — ⚠️ MIXED, needs resolution
 
 - **New system (current):** real Supabase Auth via `@supabase/ssr` cookies (`utils/supabase/server.ts`, `app/login`). All nota-era tables key on `user_id uuid` → `auth.users`.
-- **Legacy system:** `scentral_anon_id` localStorage UUID; `user_xp` / `user_streaks` still key on `anon_id text`. Wishlist exists BOTH as `scentral_wishlist` localStorage AND `collections.status='wishlist'`.
+- **Legacy system:** `scentral_anon_id` localStorage UUID; `user_xp` / `user_streaks` still key on `anon_id text`. Wishlist exists BOTH as `scentral_wishlist` localStorage AND `collections.status=[...]
 - Signed-out users get empty-state Shelf (`ShelfClient slots=[] isSignedIn={false}`).
 
 ## 4. Route surface (verified `find app -name page.tsx`, 2026-07-04)
 
-**nota. core:** `/read` (The Read — feeling-chip flow → Haiku identity reveal), `/noseprint` (identity artefact + OG share `app/api/og/noseprint`), `/shelf` (Top-N ranked shelf) + `/shelf/blind` + `/shelf/blind/[sessionId]` (blind ranking), `/traces` (community posts), `/trails` + `/trails/[slug]` (guided journeys, TrailPlayer), `/insights`, `/you`.
-**Catalogue:** `/discover`, `/collection` + `/collection/[id]` (Living Wardrobe, dnd-kit — `cabinetSnapshot` CustomEvent must NEVER be removed), `/compare`, `/clones`, `/notes`, `/ingredients/[slug]`, `/dna-match`, `/wheel`, `/layering`, `/scanner`.
-**Engagement/commerce:** `/spritz` (XP/streaks), `/boxes` + `/boxes/[slug]` (discovery boxes → Shopify), `/social`, `/wear-and-share`, `/creators/[username]`, `/creator`, `/schedule` (legacy), `/intelligence`, `/pro`, `/profile`.
+**nota. core:** `/read` (The Read — feeling-chip flow → Haiku identity reveal), `/noseprint` (identity artefact + OG share `app/api/og/noseprint`), `/shelf` (Top-N ranked shelf) + `/shelf/blin[...]
+**Catalogue:** `/discover`, `/collection` + `/collection/[id]` (Living Wardrobe, dnd-kit — `cabinetSnapshot` CustomEvent must NEVER be removed), `/compare`, `/clones`, `/notes`, `/ingredients/[s[...]
+**Engagement/commerce:** `/spritz` (XP/streaks), `/boxes` + `/boxes/[slug]` (discovery boxes → Shopify), `/social`, `/wear-and-share`, `/creators/[username]`, `/creator`, `/schedule` (legacy), `[...]
 **System:** `/`, `/onboarding`, `/login`, `/learning`, `/ritual/[id]`, `/waitlist`, `/privacy`, `/terms`, `/disclaimer`, `/admin/enrichment`, `/admin/feedback`.
-**~58 API routes** under `app/api/` incl. `read/generate`, `shelf`, `blind-ranking/{session,place,reveal}`, `traces`, `trails/progress`, `temptations`, `evolution/detect`, `insights`, `aura`, `og/*`.
+**~58 API routes** under `app/api/` incl. `read/generate`, `shelf`, `blind-ranking/{session,place,reveal}`, `traces`, `trails/progress`, `temptations`, `evolution/detect`, `insights`, `aura`, `og/[...]
 
 ## 5. Database (live schema verified via Supabase MCP, 2026-07-04)
 
-37 public tables, all RLS-enabled. `fragrances` = **127,595 rows** (`plain_description`, `inspired_by`, `family`, `projection`, `optimal_season`, `use_case`, `lean`, `image_url`, `popularity_rank`; GIN trigram indexes on name/brand/description/inspired_by). `projection` valid values ONLY: Beast Mode, Strong, Moderate, Medium, Weak.
+37 public tables, all RLS-enabled. `fragrances` = **127,595 rows** (`plain_description`, `inspired_by`, `family`, `projection`, `optimal_season`, `use_case`, `lean`, `image_url`, `popularity_rank`[...]
 
 **nota-era tables (all `user_id uuid`):**
 - `noseprints` — name, descriptor, read_text, signals jsonb, matches uuid[], stretch_note, status ('current').
-- `shelf_items` — fragrance_id, **rank int (±20, ≠0 — negative = transient during two-phase reorder)**, `tier` text GENERATED from rank (S 1–5 / A 6–10 / B 11–15 / C 16–20), `blind_buy` bool, source ('noseprint_match'|'manual'|'blind_ranking'), locked bool. **`enforce_shelf_eligibility` trigger live:** insert/update of fragrance_id fails unless a collections row exists with status owned/tested/past_purchase. `set_blind_buy_on_reveal` trigger propagates BB from blind ranking. (Migrations applied 2026-07-04; app UI still 10 slots — see §6.)
+- `shelf_items` — fragrance_id, **rank int (±20, ≠0 — negative = transient during two-phase reorder)**, `tier` text GENERATED from rank (S 1–5 / A 6–10 / B 11–15 / C 16–20), `blind_[...]
 - `shelf_events` — audit trail (added/removed/rank_changed/replaced/returned).
 - `blind_ranking_sessions` (fragrance_pool uuid[], revealed_at) + `blind_ranking_choices` (placed_rank).
 - `traces` (trace_type, body, image_url) + `trace_reactions`.
 - `trails` (slug, published) + `trail_steps` (position, step_type, content jsonb) + `trail_progress`.
-- `temptations` (reason, status shown/resolved), `evolution_events` (from/to_noseprint, choice, trigger_signals), `interactions` (event_type/entity/metadata — general event log), `insights_cache` (payload jsonb per user+period), `aura_cache` (fragrance_id+context, 24h expiry).
+- `temptations` (reason, status shown/resolved), `evolution_events` (from/to_noseprint, choice, trigger_signals), `interactions` (event_type/entity/metadata — general event log), `insights_cache[...]
 - `houses`, `profiles` (username, house_id, onboarding_completed_at).
 
-**Legacy-era:** `collections` (status 'owned'|'wishlist' only — **no 'tested'/'past_purchase'**; wear_state, shelf_tier int default 2, affinity_score int default 50, scent_memory), `wear_logs` (keyed collection_id), `user_xp`/`user_streaks` (anon_id text PK), `spritz_schedules`, `wear_posts`, `post_likes`, `creator_reels`, `layering_*`, `chemist_cache`, `sommelier_cache`, `discovery_boxes` (9 rows), `fragrance_notes` (56), `description_enrichment_queue`, `pending_contributions`, `feedback`, `waitlist`.
+**Legacy-era:** `collections` (status 'owned'|'wishlist' only — **no 'tested'/'past_purchase'**; wear_state, shelf_tier int default 2, affinity_score int default 50, scent_memory), `wear_logs` ([...]
 
-**⚠️ Two competing shelf models:** `shelf_items.rank` (nota Shelf) vs `collections.shelf_tier` + `affinity_score` (Living Wardrobe). Both live. Seeding bridges them (`app/(main)/shelf/page.tsx:seedShelfItems`).
+**⚠️ Two competing shelf models:** `shelf_items.rank` (nota Shelf) vs `collections.shelf_tier` + `affinity_score` (Living Wardrobe). Both live. Seeding bridges them (`app/(main)/shelf/page.tsx[...]
 
 ## 6. My Shelf — current implementation vs. spec
 
-- **Current:** 10 slots (SHELF_SIZE=10 in `app/(main)/shelf/page.tsx` AND `app/api/shelf/route.ts`). Seeded once: top-3 noseprint matches + owned collections by tier/affinity. Actions: add/remove/reorder (two-phase negative-rank update)/replace, all audited to `shelf_events` + `interactions`.
-- **Spec (founder brief):** **20 slots in 4 tiers** — S (1–5), A (6–10), B (11–15), C (16–20, at-risk). Eligibility: only Tested/Own/Past-Purchase fragrances, **enforced in data model**. Blind-buy = distinct BB stamp. Shareable to Traces now, social OG later.
-- **Gap (updated post-migrations 2026-07-04):** DB layer is DONE (tiers, BB, eligibility trigger, ±20 ranks). Remaining is ALL app-layer: SHELF_SIZE 10→20 in both files, tier-row UI, BB stamp render, eligibility-filtered search sheet, and mapping the trigger's exception to a friendly 409 in `/api/shelf` (until then, ineligible adds surface as generic 500s — **known live rough edge**).
+- **Current:** 10 slots (SHELF_SIZE=10 in `app/(main)/shelf/page.tsx` AND `app/api/shelf/route.ts`). Seeded once: top-3 noseprint matches + owned collections by tier/affinity. Actions: add/remove/[...]
+- **Spec (founder brief):** **20 slots in 4 tiers** — S (1–5), A (6–10), B (11–15), C (16–20, at-risk). Eligibility: only Tested/Own/Past-Purchase fragrances, **enforced in data model**.[...]
+- **Gap (updated post-migrations 2026-07-04):** DB layer is DONE (tiers, BB, eligibility trigger, ±20 ranks). Remaining is ALL app-layer: SHELF_SIZE 10→20 in both files, tier-row UI, BB stamp r[...]
 
 ## 7. LLM / cost posture (verified)
 
@@ -63,19 +65,19 @@ Next.js 16.2.9 (App Router, route groups `(main)` `(community)` `(account)`), Re
 - **Aura advisory:** moved to Supabase Edge Function (`supabase/functions/aura-advisory/`), cached in `aura_cache` (24h TTL).
 - **Insights:** `insights_cache` precomputed pattern. Chemist/Sommelier: cached tables.
 - **Rule:** no per-fragrance LLM calls, no per-request LLM in UI paths. Batch/queue heavy work (`description_enrichment_queue` + `/admin/enrichment` review UI exist).
-- **Images at 127k:** bulk URL-guess enrichment yields ~0.09% (53k-row run, 2026-07-03; miss log `scripts/data/image-misses.txt`, 249k entries). **Default = family gradients** (`lib/familyGradients.ts` + `--family-*` tokens); `image_url` is the override, not the norm. Every new image host needs `next.config.ts` remotePatterns (L16).
+- **Images at 127k:** bulk URL-guess enrichment yields ~0.09% (53k-row run, 2026-07-03; miss log `scripts/data/image-misses.txt`, 249k entries). **Default = family gradients** (`lib/familyGradient[...]
 
 ## 8. Design primitives (verified in code)
 
-- **Fonts:** Unbounded (nav/functional, next/font) + **Cormorant Garamond italic** (emotional/display, self-hosted woff2, `--font-display`). NOTE: older docs say Instrument Serif — code says Cormorant Garamond.
-- **Colour:** light parchment palette in `:root` (`--color-bg #F7F3EE`, primary gold `#B8913A`) but `app/layout.tsx` hardcodes `data-theme="dark"` → effective default is dark slate `#0F172A` + gold. Tokens bridged: `lib/design/tokens.css` aliases `--bg/--surface/--text/--accent` to `--color-*` in `app/globals.css`.
-- **Motion tokens:** `--motion-instant` 80ms / `--motion-responsive` 200ms / `--motion-ceremonial` 480ms / `--motion-organic` 800ms (+ legacy `--motion-fast/base`). Brief's motion verbs: reveal, drift, morph, fade, settle, breathe.
+- **Fonts:** Unbounded (nav/functional, next/font) + **Cormorant Garamond italic** (emotional/display, self-hosted woff2, `--font-display`). NOTE: older docs say Instrument Serif — code says Cor[...]
+- **Colour:** light parchment palette in `:root` (`--color-bg #F7F3EE`, primary gold `#B8913A`) but `app/layout.tsx` hardcodes `data-theme="dark"` → effective default is dark slate `#0F172A` + g[...]
+- **Motion tokens:** `--motion-instant` 80ms / `--motion-responsive` 200ms / `--motion-ceremonial` 480ms / `--motion-organic` 800ms (+ legacy `--motion-fast/base`). Brief's motion verbs: reveal, d[...]
 - **Other:** glassmorphism (`--glass-*`), 8-layer `--shadow-object`, radius `--r-card 12px`/pill buttons, spacing `--sp-1..5`, fluid type scale (`--text-display` etc.), family gradient tokens.
 - **UI kit:** `components/ui/` (Button, Sheet, Card, Chip, EmptyState, ProGate, ErrorInline, LoadingShimmer, CompareBar…), Temptations (`components/temptations/`), Aura (`components/aura/`).
 
 ## 9. Monetisation wiring (verified)
 
-- **AWIN affiliate** (`lib/affiliates.ts`): publisher ID 2955445 approved 2026-06-28; merchant IDs Notino/Douglas/FeelUnique = 'PENDING' → links fall back to plain search URLs (functional, no commission). Clean `isActive` abstraction.
+- **AWIN affiliate** (`lib/affiliates.ts`): publisher ID 2955445 approved 2026-06-28; merchant IDs Notino/Douglas/FeelUnique = 'PENDING' → links fall back to plain search URLs (functional, no co[...]
 - **Shopify Storefront** (`lib/shopify.ts`): env-driven (`NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN`, `SHOPIFY_STOREFRONT_API_KEY`), graceful null when unconfigured. Consumed by `/boxes`.
 - **Pro gating:** `getIsPro()` is a global `NEXT_PUBLIC_BETA_MODE` flag, not per-user (known footgun; no Stripe).
 
@@ -99,10 +101,11 @@ Next.js 16.2.9 (App Router, route groups `(main)` `(community)` `(account)`), Re
 
 ## 12. Phase log
 
-- **Phase 0 (2026-07-04):** Repo/schema digested. Key findings: Shelf 10-not-20 with no tiers/eligibility/BB; mixed identity model (auth uuid vs anon_id text); dual shelf models; dual wishlist; rebrand debt (BaseNote metadata); typography drift (Cormorant Garamond vs documented Instrument Serif); PRODUCT_TRUTH.md stale (282 vs 127,595 fragrances); affiliate/Shopify abstractions clean and launch-ready pending IDs.
-- **Phase 1 (2026-07-04):** CX audit → `docs/nota/01-cx-journey-audit.md`. Headline: nota core loop absent from main nav; landing tone violates doctrine; Shelf flat/ungated/unshared; Tested state missing. 14 UX findings.
-- **Phase 2 (2026-07-04):** Brand pack + DS audit → `docs/nota/02-brand-pack.md`, `03-design-system-audit.md`. Wordmark Route A (minimal humanist, gold dot); dot state machine defined; Unbounded off-doctrine; ~130 hardcoded hex; lean `--nota-*` token proposal. 8 DS findings.
-- **Phase 3 (2026-07-04):** Architecture → `docs/nota/04-architecture-plan.md`. RLS verified sound; 7 DB-### proposed changes (SQL shown, NOT applied — eligibility statuses, blind_buy, 20-rank tier model + trigger, wishlist consolidation, swap tables); 3-tier image strategy; LLM posture clean (one server-side regen cap needed).
-- **Migrations approved & applied (2026-07-04):** Founder approved Deliverable D §2. Live DB now has: collections status incl. 'tested'/'past_purchase' (pre-existed — Phase 0's "only owned/wishlist" was code usage, not the constraint); shelf_items.blind_buy + tier (generated) + rank_range ±20 + enforce_shelf_eligibility trigger + set_blind_buy_on_reveal trigger (applied by a concurrent session working the same plan); legacy 1–10 rank check dropped + swap_offers table w/ RLS (applied this session, mirrored in supabase/migrations/20260704_*). App still SHELF_SIZE=10 — Shelf v2 (20-slot tiers UI, eligibility-filtered search) is the next build item.
-- **Phase 4 (2026-07-04):** Backlog + safe diffs → `docs/nota/05-recommendations-backlog.md`. Applied: full display-layer rebrand BaseNote→nota. (~30 files, display strings/metadata/OG only), "My Shelf" heading rename. Verified: `tsc --noEmit` + `npm run build` pass; live preview shows zero "BaseNote" on landing. NOT done (need approval): all migrations, nav rebuild, font swap, marquee rewrite.
-- **Phase 5 (2026-07-04):** Testing/security/abuse layer → `docs/nota/06-testing-security-abuse.md` + three living skills (`.claude/skills/{qe-automation,security-hardening,resilience-abuse}/`, each SKILL.md + append-only LESSONS.md — **consult before relevant work, append after every bug/vuln/abuse event**). Applied: `.github/workflows/ci.yml` (Stage 1: tsc + lint, zero secrets); backlog rows 9–11; cross-ref in Deliverable D. Baseline verified: rate limiting existed only on `/api/formulate` (Upstash sliding-window pattern — reuse it); `proxy.ts` = session refresh only; no security headers anywhere; CI was npm-audit only; no unit runner; 8 legacy e2e specs, zero nota-core. NOT done (config/dashboard or needs decisions): security headers in `next.config.ts`, Vercel Firewall rules, Read regen cap, RLS adversarial suite, GDPR consent gating + DSAR script, CI Stages 2–3 (need repo secrets).
+- **Phase 0 (2026-07-04):** Repo/schema digested. Key findings: Shelf 10-not-20 with no tiers/eligibility/BB; mixed identity model (auth uuid vs anon_id text); dual shelf models; dual wishlist; r[...]
+- **Phase 1 (2026-07-04):** CX audit → `docs/nota/01-cx-journey-audit.md`. Headline: nota core loop absent from main nav; landing tone violates doctrine; Shelf flat/ungated/unshared; Tested sta[...]
+- **Phase 2 (2026-07-04):** Brand pack + DS audit → `docs/nota/02-brand-pack.md`, `03-design-system-audit.md`. Wordmark Route A (minimal humanist, gold dot); dot state machine defined; Unbounde[...]
+- **Phase 3 (2026-07-04):** Architecture → `docs/nota/04-architecture-plan.md`. RLS verified sound; 7 DB-### proposed changes (SQL shown, NOT applied — eligibility statuses, blind_buy, 20-ran[...]
+- **Migrations approved & applied (2026-07-04):** Founder approved Deliverable D §2. Live DB now has: collections status incl. 'tested'/'past_purchase' (pre-existed — Phase 0's "only owned/wis[...]
+- **Phase 4 (2026-07-04):** Backlog + safe diffs → `docs/nota/05-recommendations-backlog.md`. Applied: full display-layer rebrand BaseNote→nota. (~30 files, display strings/metadata/OG only),[...]
+- **Phase 5 (2026-07-04):** Testing/security/abuse layer → `docs/nota/06-testing-security-abuse.md` + three living skills (`.claude/skills/{qe-automation,security-hardening,resilience-abuse}/`,[...]
+- **Phase 6 (2026-07-08):** Repository consolidation: `scentral` + `scentral-hub` → **nota** (single canonical repo). Deduplicated code/deps, archived legacy docs to `docs/ARCHIVE/`, updated Sentry org ID. See MERGE_SUMMARY.md.
