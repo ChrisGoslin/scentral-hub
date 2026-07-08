@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import Chip from '@/components/ui/Chip'
@@ -20,6 +19,8 @@ import WardrobeShelf from './WardrobeShelf'
 import { CollectionShelfModal } from '@/components/collection/CollectionShelfModal'
 import { getPersonaCopy, type PersonaCopy } from '@/lib/personaCopy'
 import CoherenceCard from './CoherenceCard'
+import { SafeFragranceImage } from '@/components/fragrance/SafeFragranceImage'
+import { FragranceBottleIcon } from '@/components/FragranceBottleIcon'
 
 export type CollectionFragrance = {
   id: string
@@ -68,40 +69,34 @@ const PHASE_DOT: Record<string, string> = {
 }
 
 function FragranceImage({ imageUrl, brand, name }: { imageUrl: string | null; brand: string; name: string }) {
-  const [failed, setFailed] = useState(false)
-
-  if (!imageUrl || failed) {
-    return (
-      <div
-        style={{
-          width: '100%', aspectRatio: '3/4',
-          display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center',
-          borderRadius: 10,
-          padding: 8,
-          background: 'var(--surface)',
-          position: 'relative',
-          border: '1px solid var(--line)'
-        }}
-      >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M9 3h6v3H9zM6 6h12v15H6zM9 11h6M9 15h6" />
-        </svg>
-      </div>
-    )
-  }
-
   return (
-    <div style={{ width: '100%', aspectRatio: '3/4', borderRadius: 10, position: 'relative', background: 'var(--surface-2)' }}>
-      <Image
-        src={imageUrl}
-        alt={`${brand} ${name}`}
-        fill
-        sizes="(max-width: 768px) 50vw, 25vw"
-        style={{ objectFit: 'contain' }}
-        onError={() => setFailed(true)}
-      />
-    </div>
+    <SafeFragranceImage
+      imageUrl={imageUrl}
+      brand={brand}
+      name={name}
+      sizes="(max-width: 768px) 50vw, 25vw"
+      wrapperStyle={{ width: '100%', aspectRatio: '3/4', borderRadius: 10, background: 'var(--surface-2)' }}
+      imageStyle={{ objectFit: 'contain' }}
+      fallback={
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: 10,
+            padding: 8,
+            background: 'var(--surface)',
+            border: '1px solid var(--line)',
+            color: 'var(--text-faint)',
+          }}
+        >
+          <FragranceBottleIcon opacity={0.45} />
+        </div>
+      }
+    />
   )
 }
 

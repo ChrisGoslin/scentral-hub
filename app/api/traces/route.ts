@@ -17,11 +17,13 @@ import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createClient as createServerClient } from '@/utils/supabase/server'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
+import { enforce, makeLimiter } from '@/lib/rate-limit'
 
 const MAX_CHARS = 500
 const TRACE_TYPES = ['fragrance', 'moment', 'emotional'] as const
 const DEFAULT_LIMIT = 20
 const MAX_LIMIT = 50
+const tracePostLimiter = makeLimiter('traces-post', 12, '1 m')
 
 function serviceClient() {
   return createServiceClient(
@@ -150,6 +152,10 @@ export async function POST(req: Request) {
 
     if (authError || !userData?.user) {
       return NextResponse.json({ error: 'Sign in required to post a trace' }, { status: 401 })
+    }
+
+    if (!(await enforce(tracePostLimiter, userData.user.id))) {
+      return NextResponse.json({ error: 'Too many traces. Try again in a minute.' }, { status: 429 })
     }
 
     const body = await req.json()

@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { formatDate } from '@/lib/engagement'
@@ -12,6 +11,10 @@ import LoadingShimmer from '@/components/ui/LoadingShimmer'
 import ErrorInline from '@/components/ui/ErrorInline'
 import Button from '@/components/ui/Button'
 import WardrobeIntelligence from './WardrobeIntelligence'
+import { SafeFragranceImage } from '@/components/fragrance/SafeFragranceImage'
+import PostItNote from '@/components/ui/PostItNote'
+import SketchAnnotation from '@/components/ui/SketchAnnotation'
+import { getPersonaById, type Persona } from '@/lib/personas'
 
 export type WeekWearEntry = {
   fragrance_id: string
@@ -123,7 +126,17 @@ function StatTiles({ ownedCount, weekWear }: { ownedCount: number; weekWear: Wee
   )
 }
 
-function RotationIntelligence({ weekWear, ownedCount }: { weekWear: WeekWearEntry[]; ownedCount: number }) {
+function RotationIntelligence({
+  weekWear,
+  ownedCount,
+  persona,
+  isMounted
+}: {
+  weekWear: WeekWearEntry[]
+  ownedCount: number
+  persona: Persona | null
+  isMounted: boolean
+}) {
   if (weekWear.length === 0) return null
 
   const top = weekWear[0]
@@ -135,6 +148,24 @@ function RotationIntelligence({ weekWear, ownedCount }: { weekWear: WeekWearEntr
       <p style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>
         Rotation Intelligence
       </p>
+
+      {isMounted && persona && (
+        <div style={{ marginBottom: 16 }}>
+          <PostItNote variant="smoked-glass" rotation="slight-right" className="w-full">
+            <h4 style={{ fontWeight: 700, fontSize: 14, marginBottom: 4, color: 'var(--accent)' }}>
+              {persona.name} rotation tip
+            </h4>
+            <p style={{ fontStyle: 'italic', fontSize: 12, marginBottom: 8, color: 'var(--text-muted)' }}>
+              &ldquo;{persona.narrative.tagline}&rdquo;
+            </p>
+            {persona.recommendations.layering_tips.length > 0 && (
+              <p style={{ fontSize: 12, margin: 0, color: 'var(--text)' }}>
+                💡 Tip: {persona.recommendations.layering_tips[0]}
+              </p>
+            )}
+          </PostItNote>
+        </div>
+      )}
 
       <div className="flex items-center justify-between" style={{ padding: '10px 0', borderBottom: '1px solid var(--line)' }}>
         <div>
@@ -200,6 +231,19 @@ export default function InsightsPanel({
   const router = useRouter()
   const [wishlistItems, setWishlistItems] = useState<WishlistFragrance[]>([])
   const [loadingWishlist, setLoadingWishlist] = useState(false)
+  const [clientPersona, setClientPersona] = useState<Persona | null>(null)
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsMounted(true)
+    const personaId = localStorage.getItem('scentral_persona')
+    if (personaId) {
+      const p = getPersonaById(personaId)
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (p) setClientPersona(p)
+    }
+  }, [])
 
   useEffect(() => {
     const storedWishlist = localStorage.getItem('scentral_wishlist')
@@ -234,9 +278,14 @@ export default function InsightsPanel({
       {/* Weekly Stats Section */}
       <section>
         <div className="mb-6">
-          <p style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 12 }}>
-            THIS WEEK
-          </p>
+          <div className="flex items-center gap-2 mb-3">
+            <p style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', margin: 0 }}>
+              THIS WEEK
+            </p>
+            <SketchAnnotation color="brass" arrowDirection="right" arrowPlacement="after" className="text-[11px] font-normal italic">
+              active rotation
+            </SketchAnnotation>
+          </div>
           {weekWear.length > 0 ? (
             <div
               style={{
@@ -285,9 +334,14 @@ export default function InsightsPanel({
 
         {/* Wishlist Section */}
         <div className="mb-6">
-          <p style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 12 }}>
-            MY WISHLIST
-          </p>
+          <div className="flex items-center gap-2 mb-3">
+            <p style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', margin: 0 }}>
+              MY WISHLIST
+            </p>
+            <SketchAnnotation color="gold" arrowDirection="up-right" arrowPlacement="after" className="text-[11px] font-normal italic">
+              future additions
+            </SketchAnnotation>
+          </div>
           {loadingWishlist ? (
             <LoadingShimmer variant="line" />
           ) : wishlistItems.length === 0 ? (
@@ -311,12 +365,13 @@ export default function InsightsPanel({
                     textDecoration: 'none'
                   }}
                 >
-                  <Image
-                    src={item.image_url ?? '/placeholder-bottle.png'}
-                    alt={item.name}
-                    width={48}
-                    height={48}
-                    style={{ objectFit: 'contain', borderRadius: 8 }}
+                  <SafeFragranceImage
+                    imageUrl={item.image_url}
+                    brand={item.brand}
+                    name={item.name}
+                    sizes="48px"
+                    wrapperStyle={{ width: 48, height: 48, borderRadius: 8, flexShrink: 0, background: 'var(--surface-2)' }}
+                    imageStyle={{ objectFit: 'contain', borderRadius: 8 }}
                   />
                   <div style={{ flex: 1 }}>
                     <p style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
@@ -356,7 +411,7 @@ export default function InsightsPanel({
       </div>
 
       {/* Rotation Intelligence */}
-      <RotationIntelligence weekWear={weekWear} ownedCount={ownedCount} />
+      <RotationIntelligence weekWear={weekWear} ownedCount={ownedCount} persona={clientPersona} isMounted={isMounted} />
 
       {/* Wardrobe Intelligence */}
       <WardrobeIntelligence />

@@ -17,6 +17,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { ShoppingBag, Scale } from 'lucide-react';
 import { getFamilyGradient } from '@/lib/familyGradients';
+import { getSafeFragranceImageUrl } from '@/lib/fragranceImageUrl';
 import { GradientPlaceholder } from '@/components/ui/GradientPlaceholder';
 import { type CollectionFragrance } from '@/app/(main)/collection/CollectionClient';
 import { useCompare } from '@/hooks/useCompare';
@@ -119,7 +120,8 @@ export default function OptimizedBottleCard({
   }, []);
 
   const progress = maceProgress(f);
-  const showImage = !!f.image_url && !imgError;
+  const safeImageUrl = getSafeFragranceImageUrl(f.image_url)
+  const showImage = !!safeImageUrl && !imgError;
   // isDragging/locked are functional D&D states and take priority over the
   // cosmetic hover/press opacity from the card-interaction spec (0.8/0.9).
   const opacity = isDragging ? 0.4 : locked ? 0.6 : pressed ? 0.9 : hovered ? 0.8 : 1;
@@ -167,7 +169,7 @@ export default function OptimizedBottleCard({
         >
           {showImage ? (
             <Image
-              src={f.image_url!}
+              src={safeImageUrl!}
               alt={`${f.brand} ${f.name}`}
               fill
               sizes="(max-width: 768px) 45vw, 200px"

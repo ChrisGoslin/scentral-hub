@@ -1,9 +1,16 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import Anthropic from '@anthropic-ai/sdk'
+import { clientIp, enforce, makeLimiter } from '@/lib/rate-limit'
+
+const cloneConfidenceLimiter = makeLimiter('clone-confidence', 20, '1 m')
 
 export async function POST(req: Request) {
   try {
+    if (!(await enforce(cloneConfidenceLimiter, clientIp(req)))) {
+      return NextResponse.json({ error: 'Too many verdict requests. Try again in a minute.' }, { status: 429 })
+    }
+
     const { cloneName, cloneBrand, inspirationName, inspirationBrand, cloneId } = await req.json()
 
     if (!cloneName || !cloneBrand || !inspirationName || !inspirationBrand) {

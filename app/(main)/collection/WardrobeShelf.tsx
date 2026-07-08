@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useState, useCallback, useRef, useEffect } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import {
   DndContext,
@@ -23,6 +22,10 @@ import { getBrandEmoji } from '@/lib/brandEmoji'
 import { AFFINITY_TIER_DEFS, type TierKey, getAffinityTier } from '@/lib/affinity'
 import EmptyState from '@/components/ui/EmptyState'
 import Button from '@/components/ui/Button'
+import { SafeFragranceImage } from '@/components/fragrance/SafeFragranceImage'
+import PostItNote from '@/components/ui/PostItNote'
+import SketchAnnotation from '@/components/ui/SketchAnnotation'
+import { getPersonaById, PERSONAS, type Persona } from '@/lib/personas'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -131,31 +134,27 @@ function GroupShelf({ label, items, isHighlighted = false }: { label: string; it
 }
 
 function MiniBottle({ f }: { f: CollectionFragrance }) {
-  const [failed, setFailed] = useState(false)
-  if (!f.image_url || failed) {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-        <span style={{ fontSize: 24 }}>{getBrandEmoji(f.brand)}</span>
-        <p style={{ fontSize: 8, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.06em', textAlign: 'center', lineHeight: '10px' }}>
-          {f.brand.length > 10 ? f.brand.slice(0, 9) + '…' : f.brand}
-        </p>
-        <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.8)', fontFamily: 'var(--font-display)', textAlign: 'center', lineHeight: '11px' }}>
-          {f.name.length > 14 ? f.name.slice(0, 12) + '…' : f.name}
-        </p>
-      </div>
-    )
-  }
   return (
-    <div style={{ width: '100%', aspectRatio: '3/4', position: 'relative' }}>
-      <Image
-        src={f.image_url || '/placeholder-bottle.png'}
-        alt={`${f.brand} ${f.name}`}
-        fill
-        sizes="64px"
-        style={{ objectFit: 'contain', borderRadius: 4 }}
-        onError={() => setFailed(true)}
-      />
-    </div>
+    <SafeFragranceImage
+      imageUrl={f.image_url}
+      brand={f.brand}
+      name={f.name}
+      family={f.family}
+      sizes="64px"
+      wrapperStyle={{ width: '100%', aspectRatio: '3/4' }}
+      imageStyle={{ objectFit: 'contain', borderRadius: 4 }}
+      fallback={
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
+          <span style={{ fontSize: 24 }}>{getBrandEmoji(f.brand)}</span>
+          <p style={{ fontSize: 8, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.06em', textAlign: 'center', lineHeight: '10px' }}>
+            {f.brand.length > 10 ? f.brand.slice(0, 9) + '…' : f.brand}
+          </p>
+          <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.8)', fontFamily: 'var(--font-display)', textAlign: 'center', lineHeight: '11px' }}>
+            {f.name.length > 14 ? f.name.slice(0, 12) + '…' : f.name}
+          </p>
+        </div>
+      }
+    />
   )
 }
 
@@ -163,6 +162,7 @@ function ByHouseView({ items }: { items: CollectionFragrance[] }) {
   const [activePersona, setActivePersona] = useState<string | null>(null)
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setActivePersona(localStorage.getItem('scentral_persona'))
   }, [])
 
@@ -265,11 +265,24 @@ export default function WardrobeShelf({ fragrances }: WardrobeShelfProps) {
   const [isMobile, setIsMobile] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [pendingBottle, setPendingBottle] = useState<CollectionFragrance | null>(null)
+  const [clientPersona, setClientPersona] = useState<Persona | null>(null)
+  const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsMounted(true)
     try {
       const stored = localStorage.getItem('scentral_wishlist')
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (stored) setWishlistIds(JSON.parse(stored))
+    } catch { /* ignore */ }
+    try {
+      const personaId = localStorage.getItem('scentral_persona')
+      if (personaId) {
+        const p = getPersonaById(personaId)
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        if (p) setClientPersona(p)
+      }
     } catch { /* ignore */ }
   }, [])
 
@@ -279,22 +292,6 @@ export default function WardrobeShelf({ fragrances }: WardrobeShelfProps) {
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
-
-  if (owned.length === 0) {
-    return (
-      <div style={{ minHeight: '100dvh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
-        <EmptyState
-          headline="Your wardrobe is waiting"
-          caption="Add your first bottle from Discover to start building your collection."
-          action={
-            <Link href="/discover" style={{ textDecoration: 'none' }}>
-              <Button>Explore Fragrances</Button>
-            </Link>
-          }
-        />
-      </div>
-    )
-  }
 
   const wishlist = fragrances.filter(f => wishlistIds.includes(f.id))
 
@@ -331,7 +328,9 @@ export default function WardrobeShelf({ fragrances }: WardrobeShelfProps) {
 
   // Ref keeps DnD handlers from going stale between renders
   const tiersRef = useRef<TierState>(tiers)
-  tiersRef.current = tiers
+  useEffect(() => {
+    tiersRef.current = tiers
+  }, [tiers])
 
   const supabase = createClient()
 
@@ -486,6 +485,22 @@ export default function WardrobeShelf({ fragrances }: WardrobeShelfProps) {
     }
   }, [supabase])
 
+  if (owned.length === 0) {
+    return (
+      <div style={{ minHeight: '100dvh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+        <EmptyState
+          headline="Your wardrobe is waiting"
+          caption="Add your first bottle from Discover to start building your collection."
+          action={
+            <Link href="/discover" style={{ textDecoration: 'none' }}>
+              <Button>Explore Fragrances</Button>
+            </Link>
+          }
+        />
+      </div>
+    )
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', minHeight: '80vh' }}>
       {/* Sidebar / tab strip */}
@@ -555,6 +570,67 @@ export default function WardrobeShelf({ fragrances }: WardrobeShelfProps) {
         {viewMode === 'byHouse' && <ByHouseView items={applyLensFilter(owned)} />}
         {viewMode === 'bySeason' && <BySeasonView items={applyLensFilter(owned)} />}
         {viewMode === 'wishlist' && <WishlistView items={applyLensFilter(wishlist)} />}
+
+        {isMounted && (
+          <div style={{
+            marginTop: 40,
+            paddingTop: 24,
+            borderTop: '1px dashed rgba(255,255,255,0.15)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 16,
+            width: '100%',
+            paddingBottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))'
+          }}>
+            {clientPersona ? (
+              <>
+                <SketchAnnotation color="gold" arrowDirection="down-right" arrowPlacement="before">
+                  Persona Profile: {clientPersona.name}
+                </SketchAnnotation>
+                
+                <PostItNote variant="brass" rotation="slight-left" style={{ maxWidth: 400, width: '100%' }}>
+                  <h4 style={{ fontWeight: 700, fontSize: 16, marginBottom: 4 }}>
+                    {clientPersona.name}
+                  </h4>
+                  <p style={{ fontStyle: 'italic', fontSize: 13, marginBottom: 12 }}>
+                    &ldquo;{clientPersona.narrative.tagline}&rdquo;
+                  </p>
+                  {clientPersona.recommendations.layering_tips.length > 0 && (
+                    <div style={{ fontSize: 12 }}>
+                      <strong style={{ display: 'block', marginBottom: 4 }}>Layering Suggestions:</strong>
+                      <ul style={{ paddingLeft: 16, margin: 0, listStyleType: 'disc' }}>
+                        {clientPersona.recommendations.layering_tips.map((tip, idx) => (
+                          <li key={idx} style={{ marginBottom: 4 }}>{tip}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </PostItNote>
+              </>
+            ) : (
+              <>
+                <SketchAnnotation color="clay" arrowDirection="down-right" arrowPlacement="before">
+                  Discover Your Persona
+                </SketchAnnotation>
+                
+                <PostItNote variant="clay" rotation="slight-left" style={{ maxWidth: 400, width: '100%' }}>
+                  <h4 style={{ fontWeight: 700, fontSize: 16, marginBottom: 4 }}>
+                    Your Scent Journey
+                  </h4>
+                  <p style={{ fontStyle: 'italic', fontSize: 13, marginBottom: 12 }}>
+                    &ldquo;Find the scent identity that truly resonates with you.&rdquo;
+                  </p>
+                  <div style={{ fontSize: 12 }}>
+                    <p style={{ margin: 0 }}>
+                      Visit the <strong>You</strong> tab to take the scent identity quiz and unlock personalized layering tips here!
+                    </p>
+                  </div>
+                </PostItNote>
+              </>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Collection Shelf Modal — triggers when trying to add 21st bottle to Top Shelf */}

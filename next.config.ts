@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from '@sentry/nextjs';
+import { ALLOWED_FRAGRANCE_IMAGE_HOSTS } from './lib/fragranceImageHosts'
 
 const nextConfig: NextConfig = {
   // Baseline security headers (docs/nota/06-testing-security-abuse.md §2.4).
@@ -20,33 +21,10 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
-    remotePatterns: [
-      { protocol: 'https', hostname: 'lrkdwobnemczvhpixpky.supabase.co' },
-      { protocol: 'https', hostname: 'media.parfumo.com' },
-      { protocol: 'https', hostname: 'www.parfumo.com' },
-      { protocol: 'https', hostname: 'fimgs.net' },
-      { protocol: 'https', hostname: 'www.fragrantica.com' },
-      { protocol: 'https', hostname: 'upload.wikimedia.org' },
-      // enrich-images-shopify.mjs writes cdn.shopify.com URLs (brand stores +
-      // multi-brand retailers). Missing since the 2026-06-28 brand run — see
-      // AGENTS.md L16, next/image throws at render time on unlisted hosts.
-      { protocol: 'https', hostname: 'cdn.shopify.com' },
-      // Long-tail retailer/enrichment hosts found live in fragrances.image_url
-      // 2026-07-05 that were missing from this list — each one 500s next/image
-      // and crashes the page for any user who scrolls to that row (AGENTS.md L16).
-      { protocol: 'https', hostname: 'parfumistas.com' },
-      { protocol: 'https', hostname: 'dlagentlemana.pl' },
-      { protocol: 'https', hostname: 'res.cloudinary.com' },
-      { protocol: 'https', hostname: 'cdn.awsli.com.br' },
-      { protocol: 'https', hostname: 'f.fcdn.app' },
-      { protocol: 'https', hostname: 'img.fragrancex.com' },
-      { protocol: 'https', hostname: 'media.falabella.com' },
-      { protocol: 'https', hostname: 'newfragrance.com' },
-      { protocol: 'https', hostname: 'piimages.parfumo.de' },
-      { protocol: 'https', hostname: 'rimage.ripley.cl' },
-      { protocol: 'https', hostname: 'store.womostore.com' },
-      { protocol: 'https', hostname: 'www.mannenzaak.nl' },
-    ],
+    remotePatterns: ALLOWED_FRAGRANCE_IMAGE_HOSTS.map(hostname => ({ protocol: 'https', hostname })),
+  },
+  turbopack: {
+    root: process.cwd(),
   },
   webpack: (config, { isServer }) => {
     // Prevent script output files from triggering dev server hot reloads.

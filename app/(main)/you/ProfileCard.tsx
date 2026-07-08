@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { getPersonaById } from '@/lib/personas'
+import { buildPersonalNote } from '@/lib/personalization'
 import ThemeToggle from '@/components/ThemeToggle'
 import Button from '@/components/ui/Button'
 import Chip from '@/components/ui/Chip'
@@ -23,7 +24,15 @@ export type ProfileCardProps = {
 }
 
 function PersonaCardComponent({ persona }: { persona: Persona }) {
+  const [personaId, setPersonaId] = useState<string | null>(null)
   const router = useRouter()
+  useEffect(() => {
+    setPersonaId(localStorage.getItem('scentral_persona'))
+  }, [])
+  const note = buildPersonalNote({
+    personaId,
+    personaName: persona.name,
+  })
   return (
     <div
       className="relative rounded-[16px] p-5 mb-2 overflow-hidden shadow-sm border"
@@ -43,6 +52,22 @@ function PersonaCardComponent({ persona }: { persona: Persona }) {
       <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4, lineHeight: '18px' }}>
         {persona.narrative.tagline}
       </p>
+      <div
+        style={{
+          marginTop: 14,
+          padding: '12px 14px',
+          borderRadius: 14,
+          border: '1px solid color-mix(in srgb, var(--accent) 24%, transparent)',
+          background: 'rgba(255,255,255,0.03)',
+        }}
+      >
+        <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.12em', margin: 0, fontFamily: 'var(--font-hand)' }}>
+          Margin note
+        </p>
+        <p style={{ fontSize: 12, color: 'var(--text)', lineHeight: '18px', margin: '6px 0 0', fontFamily: 'var(--font-hand)' }}>
+          {note.annotation}
+        </p>
+      </div>
       <button
         onClick={() => router.push('/onboarding')}
         style={{

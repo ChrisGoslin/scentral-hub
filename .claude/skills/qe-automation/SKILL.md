@@ -36,10 +36,14 @@ Every confirmed bug:
 ## CI state & staging (update this section when it changes)
 
 - **Stage 1 (live):** `.github/workflows/ci.yml` — tsc + lint on PR/push to main. Zero secrets, cannot flake.
-- **Stage 2 (pending repo secrets):** build job — YAML ready in 06 §1.2.
-- **Stage 3 (pending test user):** chromium e2e — YAML ready in 06 §1.2.
-- Also live: `security-audit.yml` (npm audit, high+).
-- Deploy gate remains manual `npx vercel --prod` after local green (L14) until Stage 2/3 are stable, then flip branch protection to require CI.
+- **Stage 2 (live):** build job — runs `npm run build` with `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` from repo secrets.
+- **Stage 3 (pending test user):** chromium e2e — YAML ready in 06 §1.2, not yet added to `ci.yml`.
+- Also live: `security-audit.yml`, `smoke-test-scheduled.yml` (scheduled prod smoke test).
+- Deploy gate remains manual `npx vercel --prod` after local green (L14) until Stage 3 is stable, then flip branch protection to require CI.
+
+### Corrections (2026-07-05)
+- Stage 2 (build) went live in `.github/workflows/ci.yml` on 2026-07-05 (repo secrets were set the same day) — the "pending repo secrets" status above is stale as of that date. Re-verify: `cat .github/workflows/ci.yml` and check for a `build:` job.
+- `.github/workflows/` also contains `smoke-test-scheduled.yml`, not mentioned in the original list. Re-verify: `ls .github/workflows/`.
 
 ## Automation rules
 
@@ -56,3 +60,23 @@ Every confirmed bug:
 ```
 
 Append after every bug fix, CI change, or flake investigation. Newest at the bottom of `LESSONS.md`.
+
+## When NOT to use this skill
+
+For raw Playwright/smoke-test setup mechanics (config, selector syntax, mobile emulation), use `testing-framework` instead — this skill only covers the policy layer (what gets tested, at which layer, how CI stages roll out). For rate-limit/abuse-posture testing, see `resilience-abuse`. For RLS/GDPR/secrets checks, see `security-hardening`.
+
+## See also
+
+- `nota-architecture-contract` — canonical route/table/API surface this skill's test-layer decisions apply to.
+- `nota-run-and-operate` — how to actually invoke `npm run build`/`test:e2e`/CI locally day to day.
+- `nota-failure-archaeology` — past incidents (e.g. the CI-audit-only gap that produced QE-5) in narrative form.
+
+## Provenance and maintenance
+
+Derived from: `docs/nota/06-testing-security-abuse.md` §1, `.github/workflows/ci.yml`, `package.json` scripts, `LESSONS.md` in this directory.
+
+Re-verify when picking this skill back up:
+- CI stages live: `cat .github/workflows/ci.yml` — check which jobs exist (`typecheck`, `lint`, `build`, and whether an e2e job has been added).
+- Workflow files present: `ls .github/workflows/`.
+- npm scripts still match: `cat package.json | grep -A1 '"test:'`.
+- Companion doc still at stated path: `ls docs/nota/06-testing-security-abuse.md`.

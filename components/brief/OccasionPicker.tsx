@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
 import { getFamilyGradient } from '@/lib/familyGradients'
+import { SafeFragranceImage } from '@/components/fragrance/SafeFragranceImage'
 
 const OCCASIONS = [
   { id: 'work',    label: 'Work',    glyph: '◻', vibes: ['Fresh','Citrus','Aquatic','Aromatic'],           projections: ['Weak','Medium','Moderate'] },
@@ -179,9 +179,15 @@ export default function OccasionPicker({ isOpen, onClose, onWear }: Props) {
                   marginBottom: 16,
                 }}
               >
-                {current.image_url && (
-                  <Image src={current.image_url} alt={current.name} fill style={{ objectFit: 'cover' }} />
-                )}
+                <SafeFragranceImage
+                  imageUrl={current.image_url}
+                  brand={current.brand}
+                  name={current.name}
+                  family={current.family}
+                  sizes="100vw"
+                  wrapperStyle={{ position: 'absolute', inset: 0 }}
+                  imageStyle={{ objectFit: 'cover' }}
+                />
                 <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 60%)', padding: '16px 14px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
                   <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.12em', margin: 0 }}>{current.brand}</p>
                   <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 22, color: '#fff', margin: '4px 0' }}>{current.name}</p>

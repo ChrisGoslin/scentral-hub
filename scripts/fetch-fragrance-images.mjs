@@ -8,6 +8,7 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseKey = process.env.SUPABASE_SERVICE_KEY
 const googleApiKey = process.env.GOOGLE_CUSTOM_SEARCH_API_KEY
 const customSearchEngineId = process.env.GOOGLE_CUSTOM_SEARCH_ENGINE_ID
+const IMAGE_EXTENSION_PATTERN = /\.(?:avif|bmp|gif|ico|jpe?g|png|svg|webp)(?:[?#].*)?$/i
 
 if (!supabaseUrl || !supabaseKey) {
   console.error('❌ Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_KEY in .env.local')
@@ -27,6 +28,21 @@ const args = process.argv.slice(2)
 const isDryRun = args.includes('--dry-run')
 const limitArg = args.find(arg => arg.startsWith('--limit='))
 const limit = limitArg ? parseInt(limitArg.split('=')[1]) : null
+
+function normalizeFragranceImageUrl(imageUrl) {
+  if (typeof imageUrl !== 'string') return null
+  const trimmed = imageUrl.trim()
+  if (!trimmed) return null
+
+  const isFragranticaPage = /fragrantica\.com\/.+\.html(?:[?#].*)?$/i.test(trimmed)
+  const isParfumoPage =
+    /parfumo\.com\/Perfumes\/[^?#]+$/i.test(trimmed) && !IMAGE_EXTENSION_PATTERN.test(trimmed)
+  const isFragranticaPerfumePage =
+    /fragrantica\.com\/perfume\/[^?#]+$/i.test(trimmed) && !IMAGE_EXTENSION_PATTERN.test(trimmed)
+
+  if (isFragranticaPage || isParfumoPage || isFragranticaPerfumePage) return null
+  return trimmed
+}
 
 async function fetchFromDuckDuckGo(query) {
   try {
@@ -136,7 +152,7 @@ async function main() {
 
       process.stdout.write(`\r${progress} Fetching: ${frag.brand} — ${frag.name}...`)
 
-      const imageUrl = await fetchFragranceImage(frag.brand, frag.name)
+      const imageUrl = normalizeFragranceImageUrl(await fetchFragranceImage(frag.brand, frag.name))
 
       if (imageUrl) {
         if (!isDryRun) {

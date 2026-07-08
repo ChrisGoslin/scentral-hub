@@ -37,6 +37,10 @@ console.log(`Key: ${supabaseKey.substring(0, 10)}...`);  // ❌ Still exposes pa
 console.log('✅ Connecting to Supabase...');  // ✅ No secrets revealed
 ```
 
+The same rule applies to `FIRECRAWL_API_KEY`: never print it and never pass it
+on the CLI. Prefer `.env.local`; for local operator flows, reusing the stored
+Firecrawl CLI credential file is also acceptable.
+
 ## URL Validation: Beyond HTTP Status
 
 **Rule:** Don't trust HTTP status codes alone. Check redirects and final URLs.
@@ -104,6 +108,11 @@ npx vercel --prod  # Deploy (if needed for server-side scripts)
 3. **Trusting HTTP 200 on external sites:** → Check final URL for soft-404s ✅
 4. **Running full script without dry-run:** → Always `--limit=5 --dry-run` first ✅
 5. **Forgetting to commit before pushing:** → Commit script + example before running ✅
+6. **Adding web-enrichment logic to the live request path:** → keep Firecrawl in
+   offline/operator scripts only; card rendering should stay DB-backed ✅
+7. **Letting runtime and script host allowlists drift:** → keep external image
+   hosts in one shared source (`lib/fragranceImageHosts.js`) and make both the
+   UI and scripts read from it ✅
 
 ## Incident: enrich-images.mjs (2026-06-25)
 

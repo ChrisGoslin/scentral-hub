@@ -9,13 +9,12 @@ type Theme = 'light' | 'dark'
  * Get the current theme from localStorage or system preference
  */
 export function getTheme(): Theme {
-  if (typeof window === 'undefined') return 'light'
+  if (typeof window === 'undefined') return 'dark'
 
   const stored = localStorage.getItem('scentral_theme') as Theme | null
   if (stored) return stored
 
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-  return prefersDark ? 'dark' : 'light'
+  return 'dark'
 }
 
 /**

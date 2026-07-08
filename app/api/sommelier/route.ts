@@ -2,9 +2,16 @@ import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createClient } from '@/utils/supabase/server'
 import Anthropic from '@anthropic-ai/sdk'
+import { clientIp, enforce, makeLimiter } from '@/lib/rate-limit'
+
+const sommelierLimiter = makeLimiter('sommelier', 20, '1 m')
 
 export async function POST(req: Request) {
   try {
+    if (!(await enforce(sommelierLimiter, clientIp(req)))) {
+      return NextResponse.json({ error: 'Too many sommelier requests. Try again in a minute.' }, { status: 429 })
+    }
+
     const { mode, lat, lon, time_of_day = 'evening', occasion } = await req.json()
     
     const cookieStore = await cookies()

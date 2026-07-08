@@ -1,8 +1,14 @@
+import type { Metadata } from 'next'
 import { cookies, headers } from 'next/headers'
 import TracesClient from './TracesClient'
 import type { Trace } from '@/components/traces/TraceCard'
 
 const PAGE_SIZE = 20
+
+export const metadata: Metadata = {
+  title: 'Traces | nota.',
+  description: 'Browse and write scent traces in nota. Capture what a fragrance actually smells like in plain language.',
+}
 
 async function getInitialTraces(): Promise<{ traces: Trace[]; hasMore: boolean }> {
   const headerList = await headers()

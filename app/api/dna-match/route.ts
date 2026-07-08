@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { createClient } from '@/utils/supabase/server';
+import { clientIp, enforce, makeLimiter } from '@/lib/rate-limit';
 
+const dnaMatchLimiter = makeLimiter('dna-match', 20, '1 m');
 
 const SYSTEM_INSTRUCTION = `
 You are the Alchemist, the master of Olfactory Resonance.
@@ -18,6 +20,10 @@ Your tone is "Milan Scents"—highly evocative, cinematic, and technical.
 
 export async function POST(req: Request) {
   try {
+    if (!(await enforce(dnaMatchLimiter, clientIp(req)))) {
+      return NextResponse.json({ error: 'Too many match requests. Try again in a minute.' }, { status: 429 });
+    }
+
     const { fragrance_a_id, fragrance_b_id } = await req.json();
     if (!fragrance_a_id || !fragrance_b_id) {
       return NextResponse.json({ error: 'Both fragrance IDs are required.' }, { status: 400 });

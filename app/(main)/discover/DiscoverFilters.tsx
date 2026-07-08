@@ -52,7 +52,7 @@ function FilterCarousel({
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 4, paddingLeft: 16, marginBottom: 6, position: 'relative' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, paddingLeft: 16, marginBottom: 10, position: 'relative' }}>
         <p
           style={{
             fontSize: 10,
@@ -71,13 +71,19 @@ function FilterCarousel({
               onClick={() => setShowTooltip(prev => !prev)}
               aria-label={`What is ${title}?`}
               style={{
-                background: 'none',
-                border: 'none',
+                background: 'color-mix(in srgb, var(--accent) 8%, transparent)',
+                border: '1px solid color-mix(in srgb, var(--accent) 18%, transparent)',
                 padding: 0,
                 cursor: 'pointer',
                 color: 'var(--text-muted)',
-                fontSize: 12,
+                fontSize: 11,
                 lineHeight: 1,
+                width: 18,
+                height: 18,
+                borderRadius: '50%',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
             >
               ⓘ
@@ -121,9 +127,14 @@ function FilterCarousel({
               onClick={() => onToggle(v)}
               style={{
                 flexShrink: 0,
-                minHeight: 44,
+                minHeight: 40,
                 scrollSnapAlign: 'start',
-                boxShadow: active ? '0 0 0 2px var(--accent)' : 'none',
+                borderRadius: 999,
+                paddingLeft: 16,
+                paddingRight: 16,
+                background: active ? 'color-mix(in srgb, var(--accent) 12%, transparent)' : 'color-mix(in srgb, var(--surface) 88%, transparent)',
+                borderColor: active ? 'color-mix(in srgb, var(--accent) 44%, transparent)' : 'var(--line)',
+                boxShadow: active ? '0 10px 24px rgba(224,181,108,0.12)' : 'none',
               }}
             >
               {v}
@@ -191,7 +202,14 @@ export function DiscoverFilters({
   }
 
   return (
-    <div style={{ padding: '16px 0 24px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+    <div
+      style={{
+        padding: '16px 0 24px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 12,
+      }}
+    >
       {/* Scent DNA Search Card */}
       <div
         onClick={() => {
@@ -200,15 +218,18 @@ export function DiscoverFilters({
         }}
         style={{
           margin: '0 16px',
-          padding: '12px 14px',
-          background: smellsLikeMode ? 'color-mix(in srgb, var(--accent) 12%, transparent)' : 'var(--surface)',
-          border: smellsLikeMode ? '1px solid var(--accent)' : '1px solid var(--line)',
-          borderRadius: 'var(--r-card)',
+          padding: '14px 16px',
+          background: smellsLikeMode
+            ? 'linear-gradient(135deg, color-mix(in srgb, var(--accent) 18%, transparent), color-mix(in srgb, var(--accent) 6%, transparent))'
+            : 'rgba(255,255,255,0.03)',
+          border: smellsLikeMode ? '1px solid color-mix(in srgb, var(--accent) 38%, transparent)' : '1px solid color-mix(in srgb, var(--line) 70%, transparent)',
+          borderRadius: 20,
           cursor: 'pointer',
           transition: 'all 0.15s',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
+          boxShadow: smellsLikeMode ? '0 18px 30px rgba(224,181,108,0.08)' : '0 12px 28px rgba(0,0,0,0.14)',
         }}
       >
         <p
@@ -228,6 +249,7 @@ export function DiscoverFilters({
             fontSize: 12,
             color: smellsLikeMode ? 'var(--accent)' : 'var(--text-muted)',
             fontWeight: 500,
+            fontFamily: 'var(--font-hand)',
           }}
         >
           {smellsLikeMode ? '✓ Active' : 'Describe a scent →'}
@@ -258,15 +280,16 @@ export function DiscoverFilters({
               onBlur={() => onSearchFocus(false)}
               style={{
                 width: '100%',
-                padding: '10px 40px 10px 14px',
+                padding: '14px 46px 14px 16px',
                 fontSize: 14,
-                background: 'var(--surface)',
-                border: searchFocused ? '1px solid var(--accent)' : '1px solid var(--line)',
-                borderRadius: 'var(--r-card)',
+                background: 'rgba(255,255,255,0.04)',
+                border: searchFocused ? '1px solid color-mix(in srgb, var(--accent) 55%, transparent)' : '1px solid color-mix(in srgb, var(--line) 72%, transparent)',
+                borderRadius: 18,
                 color: 'var(--text)',
                 fontFamily: 'var(--font-body)',
                 transition: 'border-color 0.15s',
                 boxSizing: 'border-box',
+                boxShadow: searchFocused ? '0 0 0 4px color-mix(in srgb, var(--accent) 10%, transparent)' : 'none',
               }}
             />
             {canScan && <Link
@@ -294,7 +317,15 @@ export function DiscoverFilters({
         <Chip
           selected={showSaved}
           onClick={() => onShowSavedToggle(!showSaved)}
-          style={{ minHeight: 44 }}
+          style={{
+            minHeight: 40,
+            borderRadius: 999,
+            paddingLeft: 14,
+            paddingRight: 14,
+            background: showSaved ? 'color-mix(in srgb, var(--accent) 12%, transparent)' : 'rgba(255,255,255,0.03)',
+            borderColor: showSaved ? 'color-mix(in srgb, var(--accent) 40%, transparent)' : 'var(--line)',
+            boxShadow: showSaved ? '0 10px 22px rgba(224,181,108,0.12)' : 'none',
+          }}
         >
           ❤ Saved
         </Chip>
@@ -348,9 +379,14 @@ export function DiscoverFilters({
                 onClick={() => toggleBrand(v)}
                 style={{
                   flexShrink: 0,
-                  minHeight: 44,
+                  minHeight: 40,
                   scrollSnapAlign: 'start',
-                  boxShadow: active ? '0 0 0 2px var(--accent)' : 'none',
+                  borderRadius: 999,
+                  paddingLeft: 16,
+                  paddingRight: 16,
+                  background: active ? 'color-mix(in srgb, var(--accent) 12%, transparent)' : 'rgba(255,255,255,0.03)',
+                  borderColor: active ? 'color-mix(in srgb, var(--accent) 44%, transparent)' : 'var(--line)',
+                  boxShadow: active ? '0 10px 24px rgba(224,181,108,0.12)' : 'none',
                 }}
               >
                 {v}
@@ -380,7 +416,16 @@ export function DiscoverFilters({
               key={v}
               selected={sort === v}
               onClick={() => handleSortChange(v)}
-              style={{ flexShrink: 0, minHeight: 44, scrollSnapAlign: 'start' }}
+              style={{
+                flexShrink: 0,
+                minHeight: 40,
+                scrollSnapAlign: 'start',
+                borderRadius: 999,
+                paddingLeft: 16,
+                paddingRight: 16,
+                background: sort === v ? 'color-mix(in srgb, var(--accent) 12%, transparent)' : 'rgba(255,255,255,0.03)',
+                borderColor: sort === v ? 'color-mix(in srgb, var(--accent) 44%, transparent)' : 'var(--line)',
+              }}
             >
               {v}
             </Chip>

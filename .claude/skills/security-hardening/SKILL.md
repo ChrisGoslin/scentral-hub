@@ -62,3 +62,23 @@ After **any** security finding — a vuln, a bad advisor result, a leaked key, a
 ```
 
 Then, if the guard is a rule an agent must follow, add one line to the relevant checklist above. Keep entries factual — no narrative.
+
+## When NOT to use this skill
+
+For rate-limiting/scraping/bot/DDoS posture, use `resilience-abuse` instead — this skill covers data/auth/secrets/GDPR safety, not traffic abuse. For test-layer policy (what gets a unit vs e2e test), use `qe-automation`. For merge/deploy/migration approval gating itself (not the security content of a migration), see the cross-project `portfolio-change-control` skill.
+
+## See also
+
+- `nota-architecture-contract` — canonical table list and RLS status this skill assumes.
+- `nota-config-and-flags` — the authoritative env var list (which ones are secrets, which are `NEXT_PUBLIC_*`).
+- `nota-identity-consolidation-campaign` — the dual auth.uid()/anon_id model this skill's "anon_id is legacy/terminal" rule refers to; that campaign is where the model actually gets resolved.
+
+## Provenance and maintenance
+
+Derived from: `docs/nota/06-testing-security-abuse.md` §2, live Supabase schema (37 tables, all RLS), `.husky/pre-push`, `LESSONS.md` in this directory.
+
+Re-verify when picking this skill back up:
+- RLS still on every public table: Supabase MCP `list_tables` (check no table shows `rls_enabled: false`).
+- No module-scope Supabase clients slipped back into `app/api`: `.husky/pre-push` still checks this — `cat .husky/pre-push`.
+- No service-role key leaked client-side: `grep -rn "SERVICE_ROLE" app/` (must be empty).
+- GDPR consent gate still live: `grep -rn "ConsentBanner\|consent" app/components/AnalyticsProvider.tsx components/ConsentBanner.tsx 2>/dev/null`.

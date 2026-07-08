@@ -46,12 +46,24 @@ Run: `ls <path>` or `Read <path>` before citing it.
 ### S4 — No scope/feature invention
 Build only what the source-of-truth docs specify. If you have an idea beyond scope: **propose it, don't build it.**
 
-Source-of-truth docs for Scentral — **verify these paths still exist before trusting them,
-they have moved before** (`docs/SCENTRAL-BASELINE.md`, `-HANDOVER.md`, `-CLAUDE-CODE-PACK.md`
-were the old names and no longer exist as of 2026-06-24):
-- `AGENTS.md` (this repo, root — always read first)
-- `docs/AnotherSense_Execution_Brief.md`
-- `docs/specs/AnotherSense_Final_UX_Overhaul.md`
+Source-of-truth docs for nota. (repo `scentral-hub`) — **verify these paths still exist before
+trusting them, they have moved before** (`docs/SCENTRAL-BASELINE.md`, `-HANDOVER.md`,
+`-CLAUDE-CODE-PACK.md` were the old names and no longer exist as of 2026-06-24):
+- `CLAUDE.md` (this repo, root — living memory, supersedes contradictions in older docs; read first)
+- `AGENTS.md` (this repo, root — binding operational rules + lessons L1–L17)
+- `docs/HANDOVER.md`
+- `docs/nota/01-cx-journey-audit.md` through `07-engineering-handover.md` (7 phase docs)
+
+#### Corrections (2026-07-05)
+`docs/AnotherSense_Execution_Brief.md` and `docs/specs/AnotherSense_Final_UX_Overhaul.md` (the two
+paths previously listed here) **no longer exist** — `docs/specs/` is now an empty directory and the
+brief file is gone. This is itself an instance of the "docs move" pattern this section warns about.
+The project's binding-docs order is now, per `CLAUDE.md` itself: `CLAUDE.md` (wins on contradiction)
+> `AGENTS.md` (operational rules L1–L17, git hygiene, deploy — still binding) > `README.md` >
+`docs/HANDOVER.md` > `docs/nota/` phase docs. `docs/PRODUCT_TRUTH.md` still exists on disk but is
+explicitly flagged stale in `CLAUDE.md` §1 (wrong brand name, wrong fragrance count) — don't cite it
+as source-of-truth. Re-verify: `ls docs/AnotherSense_Execution_Brief.md docs/specs/ CLAUDE.md
+AGENTS.md docs/HANDOVER.md docs/nota/*.md`.
 
 ### S5 — Flag confidence honestly
 No hype framing. No "MASTERPIECE", "breakthrough", "elite", or certainty-inflating language.
@@ -85,8 +97,9 @@ These were invented by prior agents and must never appear again:
 - "Resonance Engine / pgvector" (unless referring to the real `/dna-match` route)
 - "Alchemist Knowledge Base / dossiers"
 - Any specific fragrance count stated from memory — this number has changed multiple times
-  (76 → 282 → 127,195 after the 2026-06-24 Kaggle bulk import) and will change again. Always
-  run `SELECT count(*) FROM fragrances` instead of citing a number from a prior session.
+  (76 → 282 → 127,595 after the 2026-07-03 bulk import — corrected from an earlier 127,195 typo,
+  see Corrections below) and will change again. Always run `SELECT count(*) FROM fragrances`
+  instead of citing a number from a prior session.
 - "Next.js 16" asserted without checking (always verify from package.json)
 - "Agent Luna / Sovereign Focus Group"
 - "Hegemony / Sovereignty / Shadow Branching / autopilot-shadow" as *product/feature* framing
@@ -134,3 +147,29 @@ parallel, uncoordinated. Expect to find work already done, done differently than
 `AGENTS.md` edits reverted right after you save them. Always verify current file/DB/route
 state directly — never trust a doc's claim about what exists. See `safe-commit-shared-repo`
 for the git-specific consequence of this.
+
+## When NOT to use this skill
+
+This is the always-on, session-start safeguard layer — it doesn't replace task-specific skills.
+For the git-commit-safety mechanics of concurrent editing, use `safe-commit-shared-repo`. For
+verifying a *specific* agent's "done" summary against the repo (a one-time audit, not a standing
+checklist), use `verify-cli-claims`. For security-specific ground truth (RLS, secrets, GDPR), see
+`security-hardening`.
+
+## See also
+
+- `nota-architecture-contract` — the canonical, re-verifiable route/table/API list this skill's S1/S3 verification steps should check against first, instead of re-deriving it from scratch each session.
+- `nota-failure-archaeology` — full narrative history of past fabrication incidents (Morocco Marketplace Demo, Agent Luna, etc.) referenced tersely in "Known Fabrications" above.
+- `fragrance-domain-reference` — canonical domain vocabulary (personas, projection enum, note pyramid) to check invented-sounding domain terms against before assuming they're fabrications or accepting them as real.
+- `verify-cli-claims` — the concrete verification technique for S1, applied to a specific agent session's claims.
+
+## Provenance and maintenance
+
+Derived from: `AGENTS.md` (this repo, root), `CLAUDE.md` §1 (rebrand/doctrine history), direct
+filesystem checks of every path cited in S4, live Supabase schema.
+
+Re-verify when picking this skill back up:
+- Source-of-truth doc paths still exist: `ls CLAUDE.md AGENTS.md docs/HANDOVER.md docs/nota/*.md`.
+- Fragrance count (never hardcode): Supabase MCP `execute_sql: SELECT count(*) FROM fragrances`.
+- Next.js/React/Supabase versions: `cat package.json | grep -E '"next"|"react"|"@supabase'`.
+- No new fabricated-lore name has appeared: `grep -rn "agent.luna\|shadow.*branch\|autopilot-shadow\|hegemony\|olfactory.*nft\|invisible.commerce\|morocco.*marketplace\|resonance.engine\|alchemist.*knowledge.*base" app/ docs/ --include="*.tsx" --include="*.ts" --include="*.md" -il`.

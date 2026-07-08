@@ -37,6 +37,7 @@ loadEnv()
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY
+const IMAGE_EXTENSION_PATTERN = /\.(?:avif|bmp|gif|ico|jpe?g|png|svg|webp)(?:[?#].*)?$/i
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
   console.error('❌ Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_KEY')
@@ -44,6 +45,21 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
 }
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
+
+function normalizeFragranceImageUrl(imageUrl) {
+  if (typeof imageUrl !== 'string') return null
+  const trimmed = imageUrl.trim()
+  if (!trimmed) return null
+
+  const isFragranticaPage = /fragrantica\.com\/.+\.html(?:[?#].*)?$/i.test(trimmed)
+  const isParfumoPage =
+    /parfumo\.com\/Perfumes\/[^?#]+$/i.test(trimmed) && !IMAGE_EXTENSION_PATTERN.test(trimmed)
+  const isFragranticaPerfumePage =
+    /fragrantica\.com\/perfume\/[^?#]+$/i.test(trimmed) && !IMAGE_EXTENSION_PATTERN.test(trimmed)
+
+  if (isFragranticaPage || isParfumoPage || isFragranticaPerfumePage) return null
+  return trimmed
+}
 
 // ─── Main ────────────────────────────────────────────────────────────────────
 
@@ -107,9 +123,16 @@ async function main() {
     const url = input.trim()
 
     if (url) {
+      const safeUrl = normalizeFragranceImageUrl(url)
+      if (!safeUrl) {
+        console.log('  ✗ Refusing to save a page URL — paste a direct image URL instead')
+        skipped++
+        continue
+      }
+
       const { error: updateError } = await supabase
         .from('fragrances')
-        .update({ image_url: url })
+        .update({ image_url: safeUrl })
         .eq('id', f.id)
 
       if (updateError) {

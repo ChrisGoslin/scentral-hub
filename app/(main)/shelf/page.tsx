@@ -1,9 +1,14 @@
+import type { Metadata } from 'next'
 import { cookies } from 'next/headers'
 import { createClient } from '@/utils/supabase/server'
 import ShelfClient from './ShelfClient'
 import type { ShelfSlot, ShelfFragrance, ShelfSource } from './types'
 
 export const dynamic = 'force-dynamic'
+export const metadata: Metadata = {
+  title: 'My Shelf | nota.',
+  description: 'Your personal fragrance shelf in nota. Track bottles, tiers, and what is ready to wear next.',
+}
 
 const SHELF_SIZE = 20
 

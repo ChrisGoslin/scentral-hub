@@ -164,3 +164,23 @@ Phase 7 - Vercel: Ready / ⚠️ Missing env vars: [list]
 
 Overall: READY TO MERGE / NEEDS WORK
 ```
+
+## When NOT to use this skill
+
+For verifying a specific agent's session claims (not a general repo sweep), use `verify-cli-claims` directly — Phase 6 here calls back to it. For the git-safety mechanics of committing in a concurrently-edited repo, use `safe-commit-shared-repo`. For security-specific findings (RLS, secrets, GDPR), use `security-hardening` — Phase 2 here is a quick secrets grep, not a full security pass.
+
+## See also
+
+- `verify-cli-claims` — Phase 6 (git log sanity) is a direct application of this skill.
+- `safe-commit-shared-repo` — read before Phase 1's branch cleanup, since a concurrent session may own an open branch.
+- `nota-architecture-contract` — the canonical route/component inventory to check Phase 5's scope-purge against, instead of re-reading AGENTS.md §1 from scratch each time.
+- `nota-failure-archaeology` — background on why the fabricated-lore names in Phase 5 exist at all.
+
+## Provenance and maintenance
+
+Derived from: direct testing of each phase's commands against this repo, `.gitignore`, `AGENTS.md` §1.
+
+Re-verify when picking this skill back up:
+- `.env.local` still gitignored and not committed: `cat .gitignore | grep env` and `git ls-files | grep ".env"` (second command must return nothing).
+- `app/components` and `components/` both still exist as valid scan roots for Phase 3: `ls app/components components`.
+- Current in/out-of-scope routes: re-read `AGENTS.md` §1 fresh each run — do not reuse a prior repo-tidy's scope snapshot (this is called out explicitly in Phase 5, but bears repeating here).

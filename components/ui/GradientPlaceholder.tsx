@@ -22,6 +22,8 @@ export function GradientPlaceholder({ brand, name, family, compact = false, styl
         padding: compact ? '14px 12px' : '18px 14px',
         overflow: 'hidden',
         borderRadius: 'inherit',
+        border: '1px solid color-mix(in srgb, var(--line) 70%, transparent)',
+        boxShadow: '0 18px 32px rgba(0,0,0,0.22)',
         ...style
       }}
     >
@@ -36,6 +38,7 @@ export function GradientPlaceholder({ brand, name, family, compact = false, styl
             margin: 0,
             opacity: 0.9,
             textShadow: '0 1px 2px rgba(0,0,0,0.4)',
+            fontFamily: 'var(--font-hand)',
           }}
         >
           {brand}
@@ -46,7 +49,7 @@ export function GradientPlaceholder({ brand, name, family, compact = false, styl
             fontFamily: 'var(--font-display)',
             fontSize: compact ? 40 : 52,
             lineHeight: 0.9,
-            color: 'rgba(255,255,255,0.12)',
+            color: 'rgba(255,255,255,0.10)',
             fontStyle: 'italic',
             userSelect: 'none',
             letterSpacing: '-0.02em',
@@ -62,8 +65,8 @@ export function GradientPlaceholder({ brand, name, family, compact = false, styl
         <div
           style={{
             height: 1,
-            background: 'linear-gradient(to right, var(--accent), transparent)',
-            opacity: 0.6,
+            background: 'linear-gradient(to right, var(--accent), rgba(255,255,255,0.12), transparent)',
+            opacity: 0.68,
           }}
         />
         <p
@@ -90,7 +93,7 @@ export function GradientPlaceholder({ brand, name, family, compact = false, styl
         style={{
           position: 'absolute',
           inset: 0,
-          background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.15) 45%, transparent 70%)',
+          background: 'radial-gradient(circle at 20% 20%, rgba(255,255,255,0.04) 0, transparent 24%), linear-gradient(to top, rgba(0,0,0,0.74) 0%, rgba(0,0,0,0.18) 45%, transparent 70%)',
           zIndex: 1,
         }}
       />

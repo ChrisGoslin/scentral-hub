@@ -1,11 +1,17 @@
 import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { clientIp, enforce, makeLimiter } from '@/lib/rate-limit'
 
 export const revalidate = 300 // Cache revalidation of 5 minutes
+const socialProofLimiter = makeLimiter('social-proof', 60, '1 m')
 
 export async function POST(request: Request) {
   try {
+    if (!(await enforce(socialProofLimiter, clientIp(request)))) {
+      return NextResponse.json({ error: 'Too many social proof requests. Try again in a minute.' }, { status: 429 })
+    }
+
     const { fragrance_ids } = await request.json()
 
     if (!fragrance_ids || !Array.isArray(fragrance_ids)) {

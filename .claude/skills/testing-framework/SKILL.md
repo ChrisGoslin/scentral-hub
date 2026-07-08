@@ -324,3 +324,22 @@ jobs:
 - **CI/CD Pipeline Setup** — Integrating tests into deployment
 - **Performance Optimization** — Improving Core Web Vitals
 - **Accessibility Review** — WCAG 2.1 AA compliance
+
+## When NOT to use this skill
+
+This skill is generic Playwright/smoke-test mechanics — HOW to write and run tests. For the scentral-hub-specific POLICY of what gets tested at which layer, when a bug fix requires a new test, and how CI stages are rolled out, use `qe-automation` instead (it defers back to this skill for the raw mechanics). For rate-limit/abuse test scenarios specifically, see `resilience-abuse`. For RLS adversarial testing, see `security-hardening`.
+
+### Corrections (2026-07-05)
+- The npm scripts in "Quick Reference" match `package.json` as of this date, with one addition not listed here: `npm run sanity-check` (`scripts/sanity-check.mjs`) also exists as a pre-flight check. Re-verify: `cat package.json | grep -A1 '"scripts"'` or `python3 -c "import json;print(json.load(open('package.json'))['scripts'])"`.
+- The `e2e/` file structure example (`onboarding.spec.ts`, `discover.spec.ts`, `collection.spec.ts`, `user-profile.spec.ts`, `critical-paths.spec.ts`) is illustrative, not the real current file list. Actual specs as of this date: `collection-drag-drop.spec.ts`, `collection.spec.ts`, `discover.spec.ts`, `fragrance-detail.spec.ts`, `layering-lab.spec.ts`, `layering-save.spec.ts`, `onboarding.spec.ts`, `you-tab.spec.ts`. Re-verify: `ls e2e/*.spec.ts`.
+- There is no `e2e/security/` directory yet (the RLS adversarial suite referenced by `security-hardening` is planned, not shipped). Re-verify: `ls e2e/`.
+
+## Provenance and maintenance
+
+Derived from: `package.json` scripts, `e2e/` directory listing, `.github/workflows/ci.yml`.
+
+Re-verify when picking this skill back up:
+- Scripts still match: `cat package.json | grep -A1 '"scripts"'`.
+- Current e2e spec list: `ls e2e/*.spec.ts`.
+- CI workflow shape: `cat .github/workflows/ci.yml`.
+- Playwright browsers/projects configured: `cat playwright.config.ts | grep -A1 "projects:"`.

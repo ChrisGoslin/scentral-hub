@@ -51,6 +51,7 @@ loadEnv()
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY
+const IMAGE_EXTENSION_PATTERN = /\.(?:avif|bmp|gif|ico|jpe?g|png|svg|webp)(?:[?#].*)?$/i
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
   console.error('❌ Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_KEY')
@@ -62,6 +63,21 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
 // ─── Sleep ────────────────────────────────────────────────────────────────────
 
 const sleep = (ms) => new Promise(r => setTimeout(r, ms))
+
+function normalizeFragranceImageUrl(imageUrl) {
+  if (typeof imageUrl !== 'string') return null
+  const trimmed = imageUrl.trim()
+  if (!trimmed) return null
+
+  const isFragranticaPage = /fragrantica\.com\/.+\.html(?:[?#].*)?$/i.test(trimmed)
+  const isParfumoPage =
+    /parfumo\.com\/Perfumes\/[^?#]+$/i.test(trimmed) && !IMAGE_EXTENSION_PATTERN.test(trimmed)
+  const isFragranticaPerfumePage =
+    /fragrantica\.com\/perfume\/[^?#]+$/i.test(trimmed) && !IMAGE_EXTENSION_PATTERN.test(trimmed)
+
+  if (isFragranticaPage || isParfumoPage || isFragranticaPerfumePage) return null
+  return trimmed
+}
 
 // ─── Source 1: Parfumo ───────────────────────────────────────────────────────
 
@@ -350,7 +366,7 @@ async function main() {
   let page = await browser.newPage()
   await page.setExtraHTTPHeaders({ 'Accept-Language': 'en-US,en;q=0.9' })
 
-  const results = { updated: 0, failed: 0 }
+const results = { updated: 0, failed: 0 }
   const failures = []
 
   try {
@@ -358,19 +374,25 @@ async function main() {
       const result = await fetchImage(browser, page, brand, name)
       page = result.page  // may be a new page after crash recovery
       const { url, reason, source, sourceUrl } = result
+      const safeUrl = normalizeFragranceImageUrl(url)
 
       if (!url) {
         console.log(`  ✗ ${brand} — ${name}`)
         console.log(`    ${reason}`)
         results.failed++
         failures.push({ brand, name, reason })
+      } else if (!safeUrl) {
+        console.log(`  ✗ ${brand} — ${name}`)
+        console.log('    Refusing to persist a page URL from the scraper')
+        results.failed++
+        failures.push({ brand, name, reason: 'page URL rejected by validator' })
       } else if (DRY_RUN) {
         console.log(`  ✓ ${brand} — ${name}  [${source}]`)
-        console.log(`    ${url}`)
+        console.log(`    ${safeUrl}`)
         results.updated++
       } else {
         const { error: updateError } = await supabase
-          .from('fragrances').update({ image_url: url }).eq('id', id)
+          .from('fragrances').update({ image_url: safeUrl }).eq('id', id)
         if (updateError) {
           console.log(`  ✗ ${brand} — ${name} (DB: ${updateError.message})`)
           results.failed++

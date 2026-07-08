@@ -69,6 +69,7 @@ const brandArg = process.argv.find(a => a.startsWith('--brand='))
 const brandFilter = brandArg ? brandArg.split('=')[1] : null
 const retailerArg = process.argv.find(a => a.startsWith('--retailer='))
 const retailerFilter = retailerArg ? retailerArg.split('=')[1] : null
+const IMAGE_EXTENSION_PATTERN = /\.(?:avif|bmp|gif|ico|jpe?g|png|svg|webp)(?:[?#].*)?$/i
 
 // ─── Brand → Shopify store map (confirmed working 2026-06-28) ─────────────────
 // Re-verify via .claude/skills/shopify-image-enrichment/SKILL.md curl procedure
@@ -194,6 +195,21 @@ function normalizeTitle(s) {
   // Previous version used replace(/[^a-z0-9]+/g, ' ') which kept spaces,
   // causing "9pm" ≠ "9 pm" and missing those catalog matches.
   return t.replace(/[^a-z0-9]/g, '').trim()
+}
+
+function normalizeFragranceImageUrl(imageUrl) {
+  if (typeof imageUrl !== 'string') return null
+  const trimmed = imageUrl.trim()
+  if (!trimmed) return null
+
+  const isFragranticaPage = /fragrantica\.com\/.+\.html(?:[?#].*)?$/i.test(trimmed)
+  const isParfumoPage =
+    /parfumo\.com\/Perfumes\/[^?#]+$/i.test(trimmed) && !IMAGE_EXTENSION_PATTERN.test(trimmed)
+  const isFragranticaPerfumePage =
+    /fragrantica\.com\/perfume\/[^?#]+$/i.test(trimmed) && !IMAGE_EXTENSION_PATTERN.test(trimmed)
+
+  if (isFragranticaPage || isParfumoPage || isFragranticaPerfumePage) return null
+  return trimmed
 }
 
 function levenshtein(a, b) {
@@ -562,10 +578,19 @@ async function runRetailerMode() {
     const match = matchInCatalog(vendorProducts, frag.name, brandKey)
 
     if (match) {
+      const safeImageUrl = normalizeFragranceImageUrl(match.imageUrl)
+      if (!safeImageUrl) {
+        console.log(`  ⚠️  Skipping page URL for ${frag.brand} / ${frag.name}`)
+        misses++
+        missLog.push(`PAGE_URL\t${retailerName}\t${frag.brand}\t${frag.name}`)
+        rows.push({ status: '⚠️ page url', brand: frag.brand, name: frag.name, detail: `"${match.title}" rejected by validator` })
+        continue
+      }
+
       if (!isDryRun) {
         const { error: updateError } = await supabase
           .from('fragrances')
-          .update({ image_url: match.imageUrl }) // image_url ONLY — never description/price
+          .update({ image_url: safeImageUrl }) // image_url ONLY — never description/price
           .eq('id', frag.id)
           .is('image_url', null) // belt-and-braces: never overwrite a concurrent fill
 
@@ -693,10 +718,18 @@ async function main() {
     const match = catalog ? matchInCatalog(catalog, searchName) : null
 
     if (match) {
+      const safeImageUrl = normalizeFragranceImageUrl(match.imageUrl)
+      if (!safeImageUrl) {
+        console.log(`  ⚠️  Skipping page URL for ${frag.brand} / ${frag.name}`)
+        misses++
+        missLog.push(`PAGE_URL\t${frag.brand}\t${frag.name}`)
+        continue
+      }
+
       if (!isDryRun) {
         const { error: updateError } = await supabase
           .from('fragrances')
-          .update({ image_url: match.imageUrl })
+          .update({ image_url: safeImageUrl })
           .eq('id', frag.id)
 
         if (updateError) {

@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import Image from 'next/image'
 import { getFamilyGradient } from '@/lib/familyGradients'
+import { getSafeFragranceImageUrl } from '@/lib/fragranceImageUrl'
 import { getRarityBadge } from '@/lib/rarity'
 import { GradientPlaceholder } from '@/components/ui/GradientPlaceholder'
 
@@ -14,18 +15,20 @@ type Props = {
   rating?: number | null
   ownerCount?: number | null
   compact?: boolean
+  priority?: boolean
   /** Borderless glass square for the Collector's Wall grid: full-bleed image,
    * no permanent ombre/caption — brand+name reveal on hover instead. */
   wall?: boolean
 }
 
-export function FragranceCardMedia({ imageUrl, brand, name, family, rating, ownerCount, compact = false, wall = false }: Props) {
+export function FragranceCardMedia({ imageUrl, brand, name, family, rating, ownerCount, compact = false, priority = false, wall = false }: Props) {
   const rarity = getRarityBadge(ownerCount)
   const [hovered, setHovered] = useState(false)
   const [pressed, setPressed] = useState(false)
   const [imgError, setImgError] = useState(false)
   const opacity = pressed ? 0.9 : hovered ? 0.8 : 1
-  const showImage = imageUrl && !imgError
+  const safeImageUrl = useMemo(() => getSafeFragranceImageUrl(imageUrl), [imageUrl])
+  const showImage = Boolean(safeImageUrl) && !imgError
 
   if (wall) {
     return (
@@ -41,18 +44,21 @@ export function FragranceCardMedia({ imageUrl, brand, name, family, rating, owne
           overflow: 'hidden',
           borderRadius: 'var(--r-card)',
           backgroundImage: showImage ? undefined : getFamilyGradient(family),
+          border: '1px solid color-mix(in srgb, var(--line) 70%, transparent)',
+          boxShadow: '0 18px 32px rgba(0,0,0,0.22)',
           transition: 'transform 200ms ease-out',
           transform: hovered ? 'scale(1.03)' : 'scale(1)',
         }}
       >
         {showImage ? (
           <Image
-            src={imageUrl}
+            src={safeImageUrl as string}
             alt={`${brand} ${name}`}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             style={{ objectFit: 'cover' }}
             onError={() => setImgError(true)}
+            priority={priority}
           />
         ) : (
           <div
@@ -69,7 +75,7 @@ export function FragranceCardMedia({ imageUrl, brand, name, family, rating, owne
             {rarity.level !== 'none' && rarity.level !== 'popular' ? (
               <p style={{
                 fontSize: 8,
-                color: rarity.level === 'cult' ? 'rgba(184,145,58,0.7)' : 'var(--accent)',
+                color: rarity.level === 'cult' ? 'rgba(224,181,108,0.82)' : 'var(--accent)',
                 textTransform: 'uppercase',
                 letterSpacing: '0.1em',
                 margin: 0,
@@ -118,7 +124,7 @@ export function FragranceCardMedia({ imageUrl, brand, name, family, rating, owne
                   style={{
                     fontSize: 8,
                     fontFamily: 'var(--font-ui)',
-                    color: 'rgba(107,99,90,0.85)',
+                    color: 'rgba(245,238,230,0.56)',
                     letterSpacing: '0.08em',
                     textTransform: 'uppercase',
                   }}
@@ -127,7 +133,7 @@ export function FragranceCardMedia({ imageUrl, brand, name, family, rating, owne
                 </span>
                 {rating != null && (
                   <span style={{ fontSize: 8, color: 'var(--accent)', fontWeight: 600 }}>
-                    {'★'.repeat(Math.round(rating / 2))}
+                    {'✦'.repeat(Math.round(rating / 2))}
                   </span>
                 )}
               </div>
@@ -141,7 +147,7 @@ export function FragranceCardMedia({ imageUrl, brand, name, family, rating, owne
             right: 0,
             bottom: 0,
             padding: '6px 8px',
-            background: 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 100%)',
+            background: 'linear-gradient(to top, rgba(4,3,5,0.82) 0%, transparent 100%)',
             opacity: hovered ? 1 : 0.7,
             transition: 'opacity 150ms ease-out',
           }}
@@ -149,7 +155,7 @@ export function FragranceCardMedia({ imageUrl, brand, name, family, rating, owne
           <p
             style={{
               fontSize: 8,
-              color: 'rgba(255,255,255,0.85)',
+              color: 'rgba(255,255,255,0.82)',
               textTransform: 'uppercase',
               letterSpacing: '0.08em',
               textShadow: '0 1px 2px rgba(0,0,0,0.4)',
@@ -194,31 +200,34 @@ export function FragranceCardMedia({ imageUrl, brand, name, family, rating, owne
         transition: 'opacity 150ms ease-out',
         borderRadius: 'var(--r-card)',
         overflow: 'hidden',
+        border: '1px solid color-mix(in srgb, var(--line) 70%, transparent)',
+        boxShadow: '0 18px 32px rgba(0,0,0,0.22)',
       }}
     >
       {showImage ? (
         <>
           <Image
-            src={imageUrl}
+            src={safeImageUrl as string}
             alt={`${brand} ${name}`}
             fill
             sizes="(max-width: 768px) 50vw, 25vw"
             style={{ objectFit: 'cover' }}
             onError={() => setImgError(true)}
+            priority={priority}
           />
           {/* Ombre overlay for text readability */}
           <div
             style={{
               position: 'absolute',
               inset: 0,
-              background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.15) 45%, transparent 70%)',
+              background: 'linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.16) 45%, transparent 70%)',
             }}
           />
           <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: compact ? 8 : 10 }}>
             <p
               style={{
                 fontSize: 9,
-                color: 'rgba(255,255,255,0.85)',
+                color: 'rgba(255,255,255,0.82)',
                 textTransform: 'uppercase',
                 letterSpacing: '0.1em',
                 textShadow: '0 1px 2px rgba(0,0,0,0.4)',

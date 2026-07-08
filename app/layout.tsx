@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Unbounded } from "next/font/google";
+import { Caveat, Fraunces, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import "../lib/design/tokens.css";
 import PWARegistration from "./components/PWARegistration";
@@ -12,10 +12,24 @@ import CompareBar from "@/components/ui/CompareBar";
 import TemptationProvider from "@/components/temptations/TemptationProvider";
 import ConsentBanner from "@/components/ConsentBanner";
 
-const unbounded = Unbounded({
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+  variable: "--font-space",
+  display: "swap",
+});
+
+const fraunces = Fraunces({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
-  variable: "--font-unbounded",
+  variable: "--font-fraunces",
+  display: "swap",
+});
+
+const caveat = Caveat({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-caveat",
   display: "swap",
 });
 
@@ -72,12 +86,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-theme="dark" style={{ "--font-cormorant": "Cormorant Garamond" } as React.CSSProperties} className={`h-[100dvh] antialiased ${unbounded.variable}`}>
+    <html
+      lang="en"
+      data-theme="dark"
+      data-scroll-behavior="smooth"
+      className={`h-[100dvh] antialiased ${spaceGrotesk.variable} ${fraunces.variable} ${caveat.variable}`}
+    >
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
-        <link rel="preload" href="/fonts/cormorant-garamond-v21-latin-italic.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <DeferredFontLink />
       </head>
       <body className="min-h-[100dvh] flex flex-col" style={{ background: "var(--bg)", color: "var(--text)", fontFamily: "var(--font-ui)" }}>

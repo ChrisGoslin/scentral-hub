@@ -78,9 +78,12 @@ Verdict: **Verified** if build exits 0 with no error lines. **False** if build f
 
 ### "Tests pass"
 ```bash
-npm run test 2>&1 | tail -20
-# or
-npm run typecheck 2>&1 | tail -20
+npx tsc --noEmit 2>&1 | tail -20
+# no `npm run test` or `npm run typecheck` script exists in this repo (verified against
+# package.json 2026-07-05) — use tsc directly for typecheck, and one of the commands
+# below for actual test suites:
+npm run test:e2e 2>&1 | tail -20
+node scripts/smoke-test.mjs 2>&1 | tail -20
 ```
 Verdict: **Verified** if exit 0. **False** if failures.
 
@@ -147,3 +150,25 @@ This skill is **read-only**. It does not:
 - Run deployments
 
 It only inspects and reports. All fixes are the human's (or next agent session's) responsibility.
+
+### Corrections (2026-07-05)
+`npm run test` and `npm run typecheck` do not exist in `package.json` (verified: `cat package.json | grep -A1 '"scripts"'`) — the "Tests pass" section above has been fixed to use `npx tsc --noEmit` for typecheck and `npm run test:e2e` / `node scripts/smoke-test.mjs` for actual test runs. There is no unit-test runner (Vitest/Jest) configured in this repo as of this date, despite `qe-automation` describing a Vitest unit layer as the target state — treat "unit tests pass" claims as unverifiable until a unit runner actually exists; check with `grep -n '"vitest"\|"jest"' package.json`.
+
+## When NOT to use this skill
+
+This is a generic, cross-project claim-verification technique — it works the same in scentral-hub, household-finance, or any repo. For scentral-hub-specific "what changed and does it match the session summary" cleanup, pair it with `repo-tidy` (Phase 6 explicitly calls back to this skill). For verifying an agent's claims about a live Supabase/Vercel deploy specifically (not just the repo), also check `nota-run-and-operate`.
+
+## See also
+
+- `repo-tidy` — Phase 6 (git log sanity) uses this skill directly; run them together after a multi-session sprint.
+- `nota-run-and-operate` — the actual day-to-day commands (build/deploy/smoke) this skill verifies claims about.
+- `ai-orchestration-playbook` (cross-project) — the broader discipline of not trusting a subagent's "done" without independent verification; this skill is one concrete technique within that discipline.
+
+## Provenance and maintenance
+
+Derived from: `package.json` scripts, direct testing of each verification command against this repo.
+
+Re-verify when picking this skill back up:
+- Available scripts: `cat package.json | grep -A1 '"scripts"'`.
+- Whether a unit-test runner has been added since: `grep -n '"vitest"\|"jest"' package.json`.
+- Build command still `npm run build`: confirm in `package.json`.

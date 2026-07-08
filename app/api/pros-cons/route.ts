@@ -2,9 +2,16 @@ import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createClient } from '@/utils/supabase/server'
 import Anthropic from '@anthropic-ai/sdk'
+import { clientIp, enforce, makeLimiter } from '@/lib/rate-limit'
+
+const prosConsLimiter = makeLimiter('pros-cons', 20, '1 m')
 
 export async function POST(req: Request) {
   try {
+    if (!(await enforce(prosConsLimiter, clientIp(req)))) {
+      return NextResponse.json({ error: 'Too many pros and cons requests. Try again in a minute.' }, { status: 429 })
+    }
+
     const { fragranceId, brand, name, description } = await req.json()
 
     if (!fragranceId) {

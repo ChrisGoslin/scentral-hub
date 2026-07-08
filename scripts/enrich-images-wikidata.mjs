@@ -25,6 +25,7 @@ if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
 const missesFile = path.join(dataDir, 'image-misses-wikidata.txt');
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
+const IMAGE_EXTENSION_PATTERN = /\.(?:avif|bmp|gif|ico|jpe?g|png|svg|webp)(?:[?#].*)?$/i;
 
 if (!supabaseUrl || !supabaseKey) {
   console.error('❌ Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_KEY in .env.local');
@@ -39,6 +40,21 @@ const limitArg = process.argv.find(arg => arg.startsWith('--limit='));
 const limit = limitArg ? parseInt(limitArg.split('=')[1], 10) : 0; // 0 = no limit
 
 const UA = 'BaseNoteFragranceApp/1.0 (contact: christophergoslin@outlook.com)';
+
+function normalizeFragranceImageUrl(imageUrl) {
+  if (typeof imageUrl !== 'string') return null;
+  const trimmed = imageUrl.trim();
+  if (!trimmed) return null;
+
+  const isFragranticaPage = /fragrantica\.com\/.+\.html(?:[?#].*)?$/i.test(trimmed);
+  const isParfumoPage =
+    /parfumo\.com\/Perfumes\/[^?#]+$/i.test(trimmed) && !IMAGE_EXTENSION_PATTERN.test(trimmed);
+  const isFragranticaPerfumePage =
+    /fragrantica\.com\/perfume\/[^?#]+$/i.test(trimmed) && !IMAGE_EXTENSION_PATTERN.test(trimmed);
+
+  if (isFragranticaPage || isParfumoPage || isFragranticaPerfumePage) return null;
+  return trimmed;
+}
 
 function toSlug(str) {
   return str
@@ -180,7 +196,7 @@ async function processBatch(fragrances) {
     await Promise.all(
       group.map(async (frag) => {
         try {
-          const imageUrl = await findWikidataImage(frag.brand, frag.name);
+          const imageUrl = normalizeFragranceImageUrl(await findWikidataImage(frag.brand, frag.name));
           if (imageUrl) {
             hits++;
             if (!isDryRun) {

@@ -12,6 +12,7 @@ import { DiscoverFilters } from './DiscoverFilters'
 import { DiscoverGrid } from './DiscoverGrid'
 import { useFragranceSearch, type DiscoverFragrance } from '@/lib/useFragranceSearch'
 import { SmellsLikeResults, type SmellsLikeResult } from '@/components/discover/SmellsLikeResults'
+import { buildPersonalNote } from '@/lib/personalization'
 
 export type { DiscoverFragrance }
 import {
@@ -65,6 +66,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
   const [personaVisible, setPersonaVisible] = useState(false)
   const [showPersonaBanner, setShowPersonaBanner] = useState(true)
   const [personaCopy, setPersonaCopy] = useState(() => getPersonaCopy(null))
+  const [rememberedPersonaName, setRememberedPersonaName] = useState<string | null>(null)
 
   // Use search hook
   const {
@@ -145,6 +147,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
 
     const urlPersona = params.get('persona')
     const personaId = urlPersona ?? localStorage.getItem('scentral_persona')
+    setRememberedPersonaName(localStorage.getItem('scentral_persona_name'))
     let defaultPersonaVibes: string[] = []
 
     if (personaId) {
@@ -299,6 +302,10 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
     if (showSaved) return `${base} • Saved`
     return base
   })()
+  const discoverNote = buildPersonalNote({
+    personaId: activePersonaId,
+    personaName: activePersona?.name ?? rememberedPersonaName,
+  })
 
   const handleSignatureFinderComplete = (answer: SignatureAnswer) => {
     setVibe(answer.vibe)
@@ -426,18 +433,81 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
   }
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div
+      style={{
+        position: 'relative',
+        background:
+          'radial-gradient(circle at 20% 0%, rgba(224,181,108,0.09), transparent 30%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.04), transparent 24%), linear-gradient(180deg, #120d0a 0%, #0b0807 38%, #0b0807 100%)',
+        color: 'var(--text)',
+      }}
+    >
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          pointerEvents: 'none',
+          backgroundImage:
+            'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 320 320\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.85\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\' opacity=\'0.055\'/%3E%3C/svg%3E")',
+          mixBlendMode: 'soft-light',
+        }}
+      />
       <div
         style={{
           position: 'relative',
           zIndex: 1,
           minHeight: '100dvh',
           paddingTop: 'calc(44px + env(safe-area-inset-top, 0px))',
-          background: 'var(--bg)',
+          paddingBottom: 'calc(128px + env(safe-area-inset-bottom, 0px))',
+          background: 'transparent',
           backgroundImage: activePersona && personaVisible ? activePersona.ui_theme.bgGradient : undefined,
           transition: 'background-image 0.4s ease',
         }}
       >
+        <div style={{ padding: '16px 16px 12px' }}>
+          <div
+            style={{
+              borderRadius: 20,
+              border: '1px solid color-mix(in srgb, var(--accent) 28%, transparent)',
+              background: 'rgba(255,255,255,0.03)',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.22)',
+              padding: '16px',
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+          >
+            <div
+              aria-hidden="true"
+              style={{
+                position: 'absolute',
+                inset: 0,
+                background:
+                  'radial-gradient(circle at 12% 20%, rgba(224,181,108,0.08), transparent 28%), radial-gradient(circle at 90% 8%, rgba(255,255,255,0.04), transparent 22%)',
+                pointerEvents: 'none',
+              }}
+            />
+            <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--text-muted)', margin: 0, fontFamily: 'var(--font-hand)' }}>
+                {discoverNote.label}
+              </p>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'clamp(24px, 4vw, 34px)', lineHeight: 1.05, margin: 0 }}>
+                {activePersona ? `Discover for ${activePersona.name}` : 'Discover with a little more of you in it'}
+              </h2>
+              <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.65, margin: 0, maxWidth: 760 }}>
+                {discoverNote.note}
+              </p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
+                <span style={{ fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '5px 9px', borderRadius: 999, border: '1px solid color-mix(in srgb, var(--accent) 24%, transparent)', background: 'rgba(255,255,255,0.02)', color: 'var(--accent)' }}>
+                  {discoverNote.annotation.split('. ')[0]}
+                </span>
+                <span style={{ fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '5px 9px', borderRadius: 999, border: '1px solid var(--line)', background: 'rgba(255,255,255,0.02)', color: 'var(--text-muted)' }}>
+                  {activePersona ? 'Personalized' : 'Curated'}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Persona headline — shown when persona is set */}
         {activePersonaId && personaVisible && (
           <div style={{ padding: '16px 16px 0', opacity: personaVisible ? 1 : 0, transition: 'opacity 0.3s ease' }}>
@@ -470,7 +540,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
         )}
 
         {/* Filters — sticky edge-to-edge carousels */}
-        <div style={{ position: 'sticky', top: 0, zIndex: 40, background: 'var(--bg)' }}>
+        <div style={{ position: 'sticky', top: 0, zIndex: 40, background: 'transparent', backdropFilter: 'blur(18px)' }}>
           <DiscoverFilters
             vibe={vibe}
             longevity={longevity}

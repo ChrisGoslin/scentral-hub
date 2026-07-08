@@ -81,3 +81,34 @@ future session than "fixed the search bug."
   index or an O(n)-per-call pattern, not a platform issue.
 - Applying a DB migration without showing the SQL and getting explicit approval first (see
   AGENTS.md §3) — even when you're confident, this is a hard-to-reverse shared-system change.
+
+### Corrections (2026-07-05)
+Confirmed still accurate: `app/api/search/route.ts` still calls `search_by_note_similarity` and
+still carries an in-code comment about the full-table-scan cost this skill describes (`grep -n
+"search_by_note_similarity\|full sequential scan" app/api/search/route.ts`), and the index
+migration (`supabase/migrations/20260624_index_note_similarity.sql`) is present. No drift found.
+
+## When NOT to use this skill
+
+For a slow batch/enrichment script (not a live API route), use the yield circuit-breaker
+guidance in `ai-orchestration-playbook` instead — that's a different failure mode (runaway low-yield
+loop, not a missing index). For general repo hygiene/regression checks, see `repo-tidy`.
+
+## See also
+
+- `nota-architecture-contract` — the full API route + table inventory this runbook's step 3 (grep
+  for repeated calls) and step 2 (EXPLAIN ANALYZE target) draw from.
+- `nota-failure-archaeology` — the `/api/search` timeout incident in full narrative form, plus
+  other resolved production incidents.
+- `resilience-abuse` — if the "slowdown" turns out to be scraping/abuse traffic rather than a
+  missing index, hand off there.
+
+## Provenance and maintenance
+
+Derived from: `app/api/search/route.ts`, `supabase/migrations/20260624_index_note_similarity.sql`,
+direct Supabase MCP verification of the original incident.
+
+Re-verify when picking this skill back up:
+- The fix is still in place: `grep -n "search_by_note_similarity" app/api/search/route.ts`.
+- Index migration still applied: Supabase MCP `list_migrations` (look for `20260624_index_note_similarity`).
+- Whether new N+1/parallel-call patterns have appeared elsewhere: `grep -rn "Promise.all" app/api/*/route.ts | grep -i "supabase\|rpc"`.

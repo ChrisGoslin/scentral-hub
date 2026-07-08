@@ -121,3 +121,30 @@ The failure mode this skill addresses: Claude Code runs a task, creates a branch
 - Confusion about which implementation is canonical
 
 The rule is simple: **main is always the source of truth. Branches are temporary and must be cleaned up in the same session.**
+
+### Corrections (2026-07-05)
+`npm run build` and `npm run test:e2e -- --project=chromium` (Step 4) both still exist and run as
+described — verified against `package.json` scripts. No drift found.
+
+## When NOT to use this skill
+
+For the git-mechanics of the commit itself (avoiding sweeping in a concurrent session's staged
+files), see `safe-commit-shared-repo` — this skill covers the session-level branch/duplicate-work
+checklist, that one covers the commit-level git safety. For post-sprint cleanup across multiple
+sessions (dead code, stale branches at scale, secrets scan), see `repo-tidy`. For verifying a prior
+agent's claims before trusting them, see `verify-cli-claims`.
+
+## See also
+
+- `safe-commit-shared-repo` — the detailed procedure Step 4 here summarizes; read it in full before your first commit of the session.
+- `repo-tidy` — the heavier multi-phase cleanup this skill's lightweight Step 2/3 checks feed into.
+- `nota-architecture-contract` — canonical route/component inventory for Step 2's "does this already exist" check, instead of re-deriving it from `find`/`ls` each session.
+
+## Provenance and maintenance
+
+Derived from: `package.json` scripts, direct verification of `git config core.hooksPath`, AGENTS.md and project memory references to concurrent-session editing.
+
+Re-verify when picking this skill back up:
+- Build/e2e commands still match: `cat package.json | grep -A1 '"scripts"'`.
+- Hooks path still `.husky` (affects whether local hooks fire): `git config --get core.hooksPath`.
+- Current branch/remote state: `git branch -a && git status --short` (run fresh every session — never trust a prior session's branch list).

@@ -90,6 +90,11 @@ FROM shelf_items si WHERE si.fragrance_id IS NOT NULL ...
 supabase migration list --project-id lrkdwobnemczvhpixpky
 ```
 
+### Image URL Guardrail
+
+- `fragrances.image_url` now has a DB trigger guardrail that nulls Fragrantica and Parfumo perfume page URLs so the UI falls back to the family gradient placeholder instead of rendering broken images.
+- Verify the live cleanup with `npm run audit:image-urls`; it should report `Suspect rows: 0`.
+
 ---
 
 ## Code Changes (Commit: fdbab61)

@@ -20,6 +20,13 @@ Companion doc: `docs/nota/06-testing-security-abuse.md` §3 (threat model, code 
 
 1. **Vercel Firewall (dashboard, zero code):** managed rulesets + bot-challenge rules; per-path rate rules on `/api/search`, `/discover`. Check it's still enabled before writing any code defence.
 2. **Per-route rate limits** via the shared Upstash pattern (`lib/rate-limit.ts`, spec in 06 §3.1; live example: `app/api/formulate/route.ts`). Identity = `user.id` if signed in, else client IP. Graceful allow-all when Upstash env is absent (local dev). Budgets: read/generate 2 per 24h/user; search 30/min/IP; list endpoints 60/min/IP; og/* 20/min/IP; auth 10/min/IP. **Never rate-limit globally in `proxy.ts`** — Redis on every navigation is self-inflicted latency.
+
+### Corrections (2026-07-05)
+The budgets line above states the *target* posture, not what's wired up everywhere yet. Verified adoption:
+- `app/api/formulate/route.ts` — inline limiter, 10/min (not via the `lib/rate-limit.ts` helper).
+- `app/api/og/noseprint/route.tsx` — uses `lib/rate-limit.ts` (`makeLimiter`/`enforce`/`clientIp`), 20/min/IP — matches its budget exactly.
+- `app/api/read/generate`, `app/api/search`, `/api/dna-match`, `/api/sommelier`, `/api/chemist` — **no rate-limit import found**. The read/generate 2-per-24h and search 30/min budgets are backlog, not shipped guards, as of this date.
+Re-verify per route: `grep -n "rate-limit\|Ratelimit" app/api/<route>/route.ts`.
 3. **Query shaping:** no dump-all endpoints; server-enforced `limit ≤ 50`; enriched fields (plain_description, inspired_by, projection/season metadata) require a session — anonymous search gets name/brand/family/image only.
 4. **Escalation for a confirmed abuser:** tighten that route's limit → Firewall challenge for IP/ASN → block. Never jump straight to block. Log every escalation as a `RES-n` lesson.
 
@@ -48,3 +55,23 @@ After any abuse event, outage, spike, or degradation incident, append to `LESSON
 ```
 
 If the incident revealed a missing defence class, add it to the ladder or runbook above.
+
+## When NOT to use this skill
+
+For RLS, secrets, GDPR, and migration-safety checks (not abuse/traffic), use `security-hardening`. For test-layer/CI policy, use `qe-automation`. For batch-script yield circuit-breakers specifically, see `ai-orchestration-playbook` (cross-project) — this skill covers the *product endpoint* defence ladder, not one-off enrichment scripts.
+
+## See also
+
+- `nota-architecture-contract` — the 54-ish API route inventory this skill's per-route budgets apply to.
+- `nota-config-and-flags` — where `UPSTASH_REDIS_REST_URL`/`TOKEN` and other env gates live.
+- `nota-failure-archaeology` — the 53k-row/0.09%-yield batch incident referenced in the yield circuit-breaker rule, in full narrative form.
+
+## Provenance and maintenance
+
+Derived from: `docs/nota/06-testing-security-abuse.md` §3, `lib/rate-limit.ts`, `app/api/formulate/route.ts`, `app/api/og/noseprint/route.tsx`, `LESSONS.md` in this directory.
+
+Re-verify when picking this skill back up:
+- Which routes actually rate-limit: `grep -rln "rate-limit\|Ratelimit" app/api/*/route.ts app/api/*/route.tsx`.
+- Shared limiter helper still shaped the same way: `cat lib/rate-limit.ts`.
+- Catalogue row count (context for "why this table matters"): ask Supabase MCP `execute_sql: SELECT count(*) FROM fragrances` — do not hardcode a number here, it has changed multiple times.
+- Vercel Firewall still enabled: check the Vercel dashboard directly (not verifiable from the repo).

@@ -99,3 +99,30 @@ was never the problem; it simply never ran.
 Don't silently ignore them and don't silently commit them either. Briefly investigate what
 they are (read the diff, it's usually obvious — a dependency bump, a new script, a doc edit),
 then mention it to the user in your summary. They're tracking two sessions; you're not.
+
+### Corrections (2026-07-05)
+`git config --get core.hooksPath` still returns `.husky` (confirmed) — the pre-push hook
+mechanics described above are still accurate. No drift found in this skill's git-level claims.
+
+## When NOT to use this skill
+
+This is the git-commit-mechanics layer only. For the session-start "does this feature already
+exist / is main clean" checklist that should run before you get to a commit at all, see
+`branch-hygiene` (which this skill is the detailed companion to). For a full multi-phase
+cleanup pass (secrets scan, dead code, branch audit) after a sprint, see `repo-tidy`. For
+verifying what a prior session actually claimed to have done, see `verify-cli-claims`.
+
+## See also
+
+- `branch-hygiene` — the lighter session-level checklist; its Step 4 summarizes this skill and links back here.
+- `repo-tidy` — heavier post-sprint cleanup; Phase 1 (branch audit) assumes you've already been committing safely per this skill.
+- `verify-cli-claims` — run after committing, to confirm the commit actually contains what you meant it to (`git show --stat HEAD`).
+
+## Provenance and maintenance
+
+Derived from: direct git history (`git log`) of the 2026-06-24 and 2026-06-25 incidents this skill documents, `git config --get core.hooksPath`, `.husky/pre-push`.
+
+Re-verify when picking this skill back up:
+- Hooks still routed through husky: `git config --get core.hooksPath` (expect `.husky`).
+- Pre-push hook still exists and is executable: `ls -la .husky/pre-push`.
+- No foreign staged changes before you start: `git status --short` (run this every session, not just once).

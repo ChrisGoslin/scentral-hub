@@ -10,7 +10,8 @@ Read in this order:
 2. [CLAUDE.md](../CLAUDE.md) - current nota. product memory, doctrine, and implementation context.
 3. [docs/HANDOVER.md](./HANDOVER.md) - latest launch handover and delivered state.
 4. [docs/nota/07-engineering-handover.md](./nota/07-engineering-handover.md) - engineering context, known rough edges, and source-of-truth order.
-5. [docs/nota/](./nota/) - active audit suite, design notes, architecture, backlog, and testing/security docs.
+5. [docs/nota/08-release-research-pipeline.md](./nota/08-release-research-pipeline.md) - nota-first fork/tooling plan for source-backed enrichment and App Store release work.
+6. [docs/nota/](./nota/) - active audit suite, design notes, architecture, backlog, and testing/security docs.
 
 Older Scentral, AnotherSense, and BaseNote docs may be useful history, but treat them as stale unless one of the files above points to them.
 

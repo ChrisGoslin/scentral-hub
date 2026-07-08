@@ -134,3 +134,45 @@ node scripts/enrich-fragrances.mjs
 - Verify descriptions in `/discover` UI
 - Manually fix outliers in Supabase SQL editor if needed
 - Backfill images: `node scripts/backfill-parfumo-images.mjs`
+
+## Image Enrichment: Firecrawl
+
+Use Firecrawl only as a back-office image research tool, never in the live app
+render path. The script below searches for direct bottle-image URLs, rejects
+unapproved hosts, and defaults to dry-run:
+
+```bash
+# Preview top 15 curated/visible rows only
+npm run enrich:images:firecrawl
+
+# Narrow to one brand
+npm run enrich:images:firecrawl -- --brand=Armaf --limit=5
+
+# Apply validated results
+npm run enrich:images:firecrawl -- --apply --limit=10
+```
+
+Rules:
+- Uses `FIRECRAWL_API_KEY` from `.env.local`, or reuses the local Firecrawl CLI login
+- Writes only when `--apply` is passed
+- Never overwrites an existing `image_url`
+- Rejects hosts not already present in `lib/fragranceImageHosts.js`
+
+## Image URL Audit / Cleanup
+
+Use the audit to find stale `image_url` values that should fall back to the
+family gradient instead of crashing `next/image`:
+
+```bash
+# Dry-run inventory of page URLs, invalid URLs, and unapproved hosts
+npm run audit:image-urls
+
+# Apply cleanup by nulling suspect rows
+npm run audit:image-urls -- --apply
+```
+
+Rules:
+- Flags Fragrantica/Parfumo page URLs, invalid URLs, non-HTTPS URLs, and hosts
+  missing from `lib/fragranceImageHosts.js`
+- Writes a JSON report under `scripts/data/`
+- In `--apply` mode, only nulls suspect `image_url` values; it does not guess replacements

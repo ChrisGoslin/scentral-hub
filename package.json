@@ -6,11 +6,16 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "start:e2e": "next start --hostname 127.0.0.1 --port 3000",
     "lint": "eslint",
     "sanity-check": "node scripts/sanity-check.mjs",
+    "audit:image-urls": "node scripts/audit-fragrance-image-urls.mjs",
+    "enrich:images:firecrawl": "node scripts/enrich-images-firecrawl.mjs",
     "test:smoke": "node scripts/smoke-test.mjs",
     "test:smoke:prod": "BASE_URL=https://nota.vercel.app node scripts/smoke-test.mjs",
+    "pretest:e2e": "npm run build",
     "test:e2e": "playwright test",
+    "pretest:e2e:headed": "npm run build",
     "test:e2e:headed": "playwright test --headed",
     "audit": "npm audit --audit-level=high"
   },
@@ -35,8 +40,8 @@
     "next": "^16.2.9",
     "posthog-js": "^1.393.5",
     "qrcode.react": "^4.2.0",
-    "react": "19.2.7",
-    "react-dom": "19.2.7",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
     "web-push": "^3.6.7"
   },
   "overrides": {

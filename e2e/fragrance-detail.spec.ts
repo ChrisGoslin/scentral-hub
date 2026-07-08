@@ -4,6 +4,7 @@ test.describe('Fragrance Detail Page', () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(() => {
       localStorage.setItem('scentral_onboarded', 'true');
+      localStorage.setItem('nota_consent', JSON.stringify({ analytics: true, errorTracking: true, timestamp: Date.now() }));
     });
   });
 
@@ -29,7 +30,7 @@ test.describe('Fragrance Detail Page', () => {
     await page.goto('/discover');
 
     // Look for a heart/wishlist button (generic role-based selector)
-    const wishlistBtn = page.getByRole('button').first();
+    const wishlistBtn = page.locator('button[aria-label="Add to wishlist"]').first();
     if (await wishlistBtn.isVisible()) {
       // This test just verifies no errors on interaction
       const initialColor = await wishlistBtn.evaluate((el) => window.getComputedStyle(el).color);

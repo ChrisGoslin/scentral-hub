@@ -61,20 +61,19 @@ test('shows wishlist if not empty', async ({ page }) => {
 
   // Inject a wishlist item
   const testId = '0b84f3c0-379e-4b77-834c-20e3636f018e'; // Lattafa Asad ID
+  const appUrl = 'http://127.0.0.1:3000'
 
   // Set mock Supabase SSR cookie to simulate being signed in on the server
   await page.context().addCookies([
     {
       name: 'sb-lrkdwobnemczvhpixpky-auth-token',
       value: JSON.stringify(['fake-access-token', 'fake-refresh-token', null, null]),
-      domain: 'localhost',
-      path: '/'
+      url: appUrl,
     },
     {
       name: 'fake-session',
       value: 'true',
-      domain: 'localhost',
-      path: '/'
+      url: appUrl,
     }
   ]);
 

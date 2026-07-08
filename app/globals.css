@@ -11,18 +11,18 @@
 
 :root {
   /* Brand Design Tokens */
-  --color-primary: #B8913A;
-  --color-bg: #F7F3EE;
-  --color-surface: #FAF7F2;
-  --color-surface-2: #FDFCF9;
-  --color-surface-offset: #EDE9E2;
-  --color-text: #1E1714;
-  --color-text-muted: #6B635A;
-  --color-text-faint: #B5AFA8;
-  --color-gold: #C49A3C;
-  --color-border: #D8D2CA;
-  --color-success: #4A7A50;
-  --color-error: #A03050;
+  --color-primary: #D6A356;
+  --color-bg: #0d0a0b;
+  --color-surface: rgba(255, 246, 240, 0.04);
+  --color-surface-2: rgba(255, 246, 240, 0.08);
+  --color-surface-offset: rgba(255, 246, 240, 0.12);
+  --color-text: #f5ede5;
+  --color-text-muted: #c0b2a4;
+  --color-text-faint: #8f7f73;
+  --color-gold: #e2bc71;
+  --color-border: rgba(245, 235, 225, 0.12);
+  --color-success: #89c49a;
+  --color-error: #e27786;
   
   /* Shadows */
   --shadow-sm: 0 1px 3px oklch(0.2 0.02 60 / 0.08);
@@ -31,8 +31,9 @@
   --shadow-card: 0 2px 8px oklch(0.2 0.02 60 / 0.08), 0 8px 24px oklch(0.2 0.02 60 / 0.06);
   
   /* Typography */
-  --font-display: var(--font-cormorant), Georgia, serif;
-  --font-body: var(--font-unbounded), 'Unbounded', sans-serif;
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-body: var(--font-space), 'Space Grotesk', sans-serif;
+  --font-hand: var(--font-caveat), 'Caveat', cursive;
 
   /* M3 type scale — fluid clamp() roles (Sprint 1-A) */
   --text-display: clamp(2rem, 1.5rem + 2.5vw, 3.5rem);
@@ -41,8 +42,8 @@
   --text-body: clamp(0.875rem, 0.8rem + 0.25vw, 1rem);
 
   /* Glassmorphism — frosted surface composite (light default, overridden in dark) */
-  --glass-bg: rgba(255, 255, 255, 0.5);
-  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-bg: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.10);
   --glass-blur: blur(16px) saturate(1.4);
 
   /* Legacy Bridge — maps old tokens to new system */
@@ -66,8 +67,8 @@
   --color-faint: var(--color-text-faint);
 
   /* Ambient body gradient stops */
-  --bg-gradient-start: #fffaf3;
-  --bg-gradient-end: #ece3d7;
+  --bg-gradient-start: #251414;
+  --bg-gradient-end: #09070a;
 
 
   /* Motion scale */
@@ -85,28 +86,28 @@
 }
 
 [data-theme="dark"] {
-  /* Dark Ambient Material (Sprint 1-A) — cool slate base, frosted glass surfaces */
-  --color-bg: #0F172A;
-  --color-surface: rgba(255, 255, 255, 0.03);
-  --color-surface-2: rgba(255, 255, 255, 0.05);
-  --color-surface-offset: rgba(255, 255, 255, 0.07);
-  --color-primary: #B8913A;
-  --color-text: #F1F5F9;
-  --color-text-muted: #94A3B8;
-  --color-text-faint: #64748B;
-  --color-gold: #E8C060;
-  --color-border: rgba(255, 255, 255, 0.10);
-  --color-success: #66B36F;
-  --color-error: #F87171;
+  /* Dark atelier material — ink, clay, brass, and smoked glass */
+  --color-bg: #0b0809;
+  --color-surface: rgba(255, 239, 226, 0.05);
+  --color-surface-2: rgba(255, 239, 226, 0.09);
+  --color-surface-offset: rgba(255, 239, 226, 0.13);
+  --color-primary: #e0b56c;
+  --color-text: #f7eee6;
+  --color-text-muted: #c3b2a5;
+  --color-text-faint: #8b7a71;
+  --color-gold: #e6c479;
+  --color-border: rgba(247, 238, 230, 0.12);
+  --color-success: #89c49a;
+  --color-error: #f08a9a;
 
   /* Glassmorphism — frosted surface composite over the slate-blue ambient bg */
-  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-bg: rgba(255, 255, 255, 0.06);
   --glass-border: rgba(255, 255, 255, 0.10);
   --glass-blur: blur(16px) saturate(1.4);
 
-  /* Ambient body gradient stops — cool slate, no warm undertone */
-  --bg-gradient-start: #16213a;
-  --bg-gradient-end: #060a14;
+  /* Ambient body gradient stops — warm smoke, ink, and clay */
+  --bg-gradient-start: #2a1718;
+  --bg-gradient-end: #060508;
 
   /* Dark mode shadows (higher opacity, cool ambient tone) */
   --shadow-sm: 0 1px 3px oklch(0 0 0 / 0.24);
@@ -126,8 +127,9 @@
 @theme inline {
   --color-background: var(--color-bg);
   --color-foreground: var(--color-text);
-  --font-sans: Arial, Helvetica, sans-serif;
+  --font-sans: var(--font-body);
   --font-mono: "SFMono-Regular", Consolas, monospace;
+  --font-handwritten: var(--font-hand);
 }
 
 * {
@@ -162,11 +164,38 @@ html {
 
 body {
   margin: 0;
-  background: radial-gradient(circle at top left, var(--bg-gradient-start) 0, var(--color-bg) 38%, var(--bg-gradient-end) 100%);
+  background:
+    radial-gradient(circle at 20% 0%, color-mix(in srgb, var(--color-primary) 18%, transparent) 0, transparent 30%),
+    radial-gradient(circle at 80% 10%, rgba(126, 88, 98, 0.2) 0, transparent 28%),
+    radial-gradient(circle at 50% 110%, rgba(59, 37, 39, 0.65) 0, transparent 38%),
+    linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--color-bg) 42%, var(--bg-gradient-end) 100%);
   color: var(--color-text);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body);
   letter-spacing: 0;
   overscroll-behavior-y: contain;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.05) 0, transparent 22%),
+    radial-gradient(circle at 80% 15%, rgba(214, 163, 86, 0.05) 0, transparent 20%),
+    repeating-linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.015) 0 1px,
+      transparent 1px 6px
+    );
+  opacity: 0.4;
+  mix-blend-mode: soft-light;
+  z-index: 0;
+}
+
+body > * {
+  position: relative;
+  z-index: 1;
 }
 
 /* Glassmorphism — frosted surface utility (Sprint 1-A) */
@@ -1051,12 +1080,7 @@ blockquote {
   }
 }
 
-/* Quiet Luxury Editorial Standards */
-@layer base {
-  body {
-    @apply bg-stone-50 text-stone-900 selection:bg-amber-100 selection:text-amber-900;
-  }
-}
+/* Removed conflicting light-mode body styles */
 
 .editorial-title {
   font-family: var(--font-geist-sans);

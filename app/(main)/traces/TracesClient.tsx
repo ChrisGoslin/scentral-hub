@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import TraceComposer from '@/components/traces/TraceComposer'
 import TraceCard, { type Trace } from '@/components/traces/TraceCard'
 import EmptyState from '@/components/ui/EmptyState'
@@ -15,6 +15,10 @@ export default function TracesClient({ initialTraces, initialHasMore, pageSize }
   const [traces, setTraces] = useState(initialTraces)
   const [hasMore, setHasMore] = useState(initialHasMore)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
+
+  useEffect(() => {
+    document.title = 'Traces | nota.'
+  }, [])
 
   const refresh = useCallback(async () => {
     try {

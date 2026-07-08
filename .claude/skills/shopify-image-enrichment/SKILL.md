@@ -190,3 +190,33 @@ Also note: `scripts/data/shopify-misses.txt` is written with `fs.appendFileSync`
 across every run (dry-run included) — its line count is not "misses from the last run," it's
 cumulative. Use `sort -u` and check brand totals against the catalog size logged per miss line, not
 raw line counts, when sizing up how much work remains.
+
+### Corrections (2026-07-05)
+Confirmed still present and unchanged in structure: `scripts/enrich-images-shopify.mjs`
+(`SHOPIFY_BRANDS` and `RETAILER_STORES` maps both still defined), `scripts/data/shopify-misses.txt`,
+`scripts/data/image-misses.txt`. No drift found in script existence or shape. Re-verify:
+`ls scripts/enrich-images-shopify.mjs scripts/data/*.txt` and `grep -n "SHOPIFY_BRANDS\s*=\|RETAILER_STORES\s*=" scripts/enrich-images-shopify.mjs`.
+
+## When NOT to use this skill
+
+For the general "don't run a low-yield batch script unsupervised" circuit-breaker rule (applies to
+any bulk script, not just Shopify image enrichment), see `ai-orchestration-playbook`. For adding a
+brand new external image *host* to `next.config.ts` (the L16 rule), see `nota-config-and-flags`.
+This skill is specifically about Shopify/retailer storefront verification and title-matching — not
+about image hosting config or general script hygiene.
+
+## See also
+
+- `nota-config-and-flags` — where `next.config.ts` remotePatterns and other config-surface facts live; every new image host from this script needs an entry there.
+- `nota-failure-archaeology` — the 53k-row/0.09%-yield incident referenced by the yield circuit-breaker principle, and other resolved incidents, in full narrative form.
+- `ai-orchestration-playbook` — cross-project batch-script yield discipline this skill's "don't trust self-reported hit counts" rule is one concrete instance of.
+
+## Provenance and maintenance
+
+Derived from: `scripts/enrich-images-shopify.mjs`, `scripts/data/shopify-misses.txt`, `scripts/data/image-misses.txt`, live Supabase `fragrances` table, direct curl verification of each brand domain.
+
+Re-verify when picking this skill back up:
+- Script and data files still exist: `ls scripts/enrich-images-shopify.mjs scripts/data/*.txt`.
+- Brand/retailer maps still shaped as described: `grep -n "SHOPIFY_BRANDS\s*=\|RETAILER_STORES\s*=" scripts/enrich-images-shopify.mjs`.
+- Any brand's domain status before trusting the table above — domains and WAFs change without warning; re-run the verification procedure in this file, don't trust the table past ~3 months old.
+- Current hit counts — never trust a session summary; query Supabase directly per the script in this file's "Never trust an agent's self-reported hit/miss numbers" section.

@@ -1,11 +1,10 @@
 'use client'
 
 import React, { useState, useEffect, useCallback, useRef } from 'react'
-import Image from 'next/image'
+import Link from 'next/link'
 import {
   DndContext,
   DragEndEvent,
-  DragStartEvent,
   PointerSensor,
   closestCorners,
   useSensor,
@@ -15,8 +14,8 @@ import {
 import { SortableContext, useSortable, rectSortingStrategy, arrayMove } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import Button from '@/components/ui/Button'
-import AuthSheet from '@/components/auth/AuthSheet'
 import AuraShelfAdvisory from '@/components/aura/AuraShelfAdvisory'
+import { SafeFragranceImage } from '@/components/fragrance/SafeFragranceImage'
 import type { ShelfSlot, ShelfFragrance } from './types'
 
 // Spec calls for a 300ms "drift/settle" drag animation. There is no 300ms token in
@@ -35,6 +34,20 @@ type SearchResult = {
   fragrance: ShelfFragrance & Record<string, unknown>
 }
 
+type ShelfMutationPayload = Record<string, unknown>
+
+class ShelfMutationError extends Error {
+  code?: string
+  canMarkTested?: boolean
+
+  constructor(message: string, details: { code?: string; canMarkTested?: boolean } = {}) {
+    super(message)
+    this.name = 'ShelfMutationError'
+    this.code = details.code
+    this.canMarkTested = details.canMarkTested
+  }
+}
+
 async function postShelfMutation(payload: Record<string, unknown>) {
   const res = await fetch('/api/shelf', {
     method: 'POST',
@@ -43,7 +56,10 @@ async function postShelfMutation(payload: Record<string, unknown>) {
   })
   if (!res.ok) {
     const body = await res.json().catch(() => ({}))
-    throw new Error(body?.error || 'Shelf request failed')
+    throw new ShelfMutationError(body?.error || 'Shelf request failed', {
+      code: body?.code,
+      canMarkTested: body?.canMarkTested,
+    })
   }
   return res.json()
 }
@@ -51,39 +67,34 @@ async function postShelfMutation(payload: Record<string, unknown>) {
 // ─── Bottle thumbnail ────────────────────────────────────────────────────────
 
 function BottleThumb({ fragrance }: { fragrance: ShelfFragrance }) {
-  const [failed, setFailed] = useState(false)
-  if (!fragrance.image_url || failed) {
-    return (
-      <div
-        style={{
-          width: '100%',
-          aspectRatio: '2/3',
-          borderRadius: 8,
-          background: 'var(--surface-2)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: 10,
-          color: 'var(--text-muted)',
-          textAlign: 'center',
-          padding: 6,
-        }}
-      >
-        {fragrance.brand}
-      </div>
-    )
-  }
   return (
-    <div style={{ width: '100%', aspectRatio: '2/3', position: 'relative', borderRadius: 8, overflow: 'hidden' }}>
-      <Image
-        src={fragrance.image_url}
-        alt={`${fragrance.brand} ${fragrance.name}`}
-        fill
-        sizes="(max-width: 480px) 30vw, 160px"
-        style={{ objectFit: 'contain', background: 'var(--surface-2)' }}
-        onError={() => setFailed(true)}
-      />
-    </div>
+    <SafeFragranceImage
+      imageUrl={fragrance.image_url}
+      brand={fragrance.brand}
+      name={fragrance.name}
+      family={fragrance.family}
+      sizes="(max-width: 480px) 30vw, 160px"
+      wrapperStyle={{ width: '100%', aspectRatio: '2/3', borderRadius: 8, background: 'var(--surface-2)' }}
+      imageStyle={{ objectFit: 'contain', background: 'var(--surface-2)' }}
+      fallback={
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 10,
+            color: 'var(--text-muted)',
+            textAlign: 'center',
+            padding: 6,
+            background: 'var(--surface-2)',
+          }}
+        >
+          {fragrance.brand}
+        </div>
+      }
+    />
   )
 }
 
@@ -262,9 +273,15 @@ function FilledSlot({
 function SearchSheet({
   onClose,
   onSelect,
+  pendingEligibility,
+  onConfirmTested,
+  mutationError,
 }: {
   onClose: () => void
   onSelect: (fragrance: ShelfFragrance) => void
+  pendingEligibility: ShelfFragrance | null
+  onConfirmTested: () => void
+  mutationError: string | null
 }) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<ShelfFragrance[]>([])
@@ -332,6 +349,30 @@ function SearchSheet({
         <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 18, color: 'var(--text)' }}>
           Find a replacement
         </p>
+        {pendingEligibility && (
+          <div
+            style={{
+              border: '1px solid var(--line)',
+              borderRadius: 8,
+              background: 'var(--surface-2)',
+              padding: 12,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 8,
+            }}
+          >
+            <p style={{ fontSize: 13, color: 'var(--text)', fontFamily: 'var(--font-display)', lineHeight: '18px' }}>
+              Add {pendingEligibility.name} after marking it tested?
+            </p>
+            <p style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: '17px' }}>
+              Shelf bottles need to be owned, tested, or remembered from a past purchase. This will mark it as tested first.
+            </p>
+            <Button onClick={onConfirmTested}>Mark tested and add</Button>
+          </div>
+        )}
+        {mutationError && !pendingEligibility && (
+          <p style={{ fontSize: 12, color: 'var(--danger, #c0392b)', padding: 8 }}>{mutationError}</p>
+        )}
         <input
           autoFocus
           value={query}
@@ -370,9 +411,15 @@ function SearchSheet({
               }}
             >
               <div style={{ width: 36, height: 48, position: 'relative', flexShrink: 0, borderRadius: 4, overflow: 'hidden', background: 'var(--surface-2)' }}>
-                {f.image_url && (
-                  <Image src={f.image_url} alt={f.name} fill sizes="36px" style={{ objectFit: 'contain' }} />
-                )}
+                <SafeFragranceImage
+                  imageUrl={f.image_url}
+                  brand={f.brand}
+                  name={f.name}
+                  family={f.family}
+                  sizes="36px"
+                  wrapperStyle={{ position: 'absolute', inset: 0, background: 'var(--surface-2)' }}
+                  imageStyle={{ objectFit: 'contain' }}
+                />
               </div>
               <div>
                 <p style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'var(--font-ui)' }}>{f.brand}</p>
@@ -391,9 +438,15 @@ function SearchSheet({
 
 export default function ShelfClient({ slots: initialSlots, isSignedIn, topThree }: ShelfClientProps) {
   const [slots, setSlots] = useState<ShelfSlot[]>(initialSlots)
-  const [activeId, setActiveId] = useState<string | null>(null)
   const [searchTargetRank, setSearchTargetRank] = useState<number | null>(null)
+  const [pendingEligibility, setPendingEligibility] = useState<{ fragrance: ShelfFragrance; payload: ShelfMutationPayload; previousSlots: ShelfSlot[] } | null>(null)
+  const [mutationError, setMutationError] = useState<string | null>(null)
   const slotsRef = useRef(slots)
+
+  useEffect(() => {
+    document.title = 'My Shelf | nota.'
+  }, [])
+
   useEffect(() => {
     slotsRef.current = slots
   }, [slots])
@@ -403,12 +456,7 @@ export default function ShelfClient({ slots: initialSlots, isSignedIn, topThree 
   const filledSlots = slots.filter(s => s.itemId !== null)
   const sortableIds = filledSlots.map(s => s.itemId!)
 
-  function onDragStart({ active }: DragStartEvent) {
-    setActiveId(String(active.id))
-  }
-
   const onDragEnd = useCallback(async ({ active, over }: DragEndEvent) => {
-    setActiveId(null)
     if (!over) return
     const activeId = String(active.id)
     const overId = String(over.id)
@@ -461,12 +509,13 @@ export default function ShelfClient({ slots: initialSlots, isSignedIn, topThree 
   }, [])
 
   const openReplace = useCallback((rank: number) => {
+    setMutationError(null)
+    setPendingEligibility(null)
     setSearchTargetRank(rank)
   }, [])
 
-  const handleSelectFragrance = useCallback(async (fragrance: ShelfFragrance) => {
+  const handleSelectFragrance = useCallback(async (fragrance: ShelfFragrance, options: { markAsTested?: boolean } = {}) => {
     const rank = searchTargetRank
-    setSearchTargetRank(null)
     if (rank === null) return
 
     const current = slotsRef.current
@@ -483,25 +532,81 @@ export default function ShelfClient({ slots: initialSlots, isSignedIn, topThree 
     const next = current.map(s => (s.rank === rank ? optimisticSlot : s))
     setSlots(next)
     slotsRef.current = next
+    setMutationError(null)
+    setPendingEligibility(null)
 
     try {
+      const payload: ShelfMutationPayload = targetSlot.itemId
+        ? { action: 'replace', itemId: targetSlot.itemId, fragranceId: fragrance.id, markAsTested: options.markAsTested }
+        : { action: 'add', fragranceId: fragrance.id, rank, markAsTested: options.markAsTested }
+
       if (targetSlot.itemId) {
-        await postShelfMutation({ action: 'replace', itemId: targetSlot.itemId, fragranceId: fragrance.id })
+        await postShelfMutation(payload)
       } else {
-        const result = await postShelfMutation({ action: 'add', fragranceId: fragrance.id, rank })
+        const result = await postShelfMutation(payload)
         const reconciled = slotsRef.current.map(s =>
           s.rank === rank ? { ...s, itemId: result.itemId } : s
         )
         setSlots(reconciled)
         slotsRef.current = reconciled
       }
-    } catch {
+      setSearchTargetRank(null)
+    } catch (error) {
       setSlots(current)
       slotsRef.current = current
+      if (error instanceof ShelfMutationError && error.code === 'shelf_eligibility_required' && error.canMarkTested) {
+        setPendingEligibility({
+          fragrance,
+          payload: targetSlot.itemId
+            ? { action: 'replace', itemId: targetSlot.itemId, fragranceId: fragrance.id }
+            : { action: 'add', fragranceId: fragrance.id, rank },
+          previousSlots: current,
+        })
+        return
+      }
+      setMutationError(error instanceof Error ? error.message : 'Shelf update failed')
     }
   }, [searchTargetRank])
 
-  const [authSheetOpen, setAuthSheetOpen] = useState(false)
+  const handleConfirmTested = useCallback(async () => {
+    if (!pendingEligibility) return
+    const rank = searchTargetRank
+    if (rank === null) return
+
+    const { fragrance, payload, previousSlots } = pendingEligibility
+    const optimistic = previousSlots.map(s =>
+      s.rank === rank
+        ? {
+            itemId: s.itemId ?? `pending-${rank}`,
+            rank,
+            source: 'manual' as const,
+            locked: false,
+            fragrance,
+          }
+        : s
+    )
+
+    setSlots(optimistic)
+    slotsRef.current = optimistic
+    setPendingEligibility(null)
+    setMutationError(null)
+
+    try {
+      const result = await postShelfMutation({ ...payload, markAsTested: true })
+      if (!('itemId' in payload) && result.itemId) {
+        const reconciled = slotsRef.current.map(s =>
+          s.rank === rank ? { ...s, itemId: result.itemId } : s
+        )
+        setSlots(reconciled)
+        slotsRef.current = reconciled
+      }
+      setSearchTargetRank(null)
+    } catch (error) {
+      setSlots(previousSlots)
+      slotsRef.current = previousSlots
+      setMutationError(error instanceof Error ? error.message : 'Shelf update failed')
+    }
+  }, [pendingEligibility, searchTargetRank])
 
   if (!isSignedIn) {
     return (
@@ -511,15 +616,26 @@ export default function ShelfClient({ slots: initialSlots, isSignedIn, topThree 
             Your shelf is waiting.
           </p>
           <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 16 }}>
-            Sign in to build your Top 10 — pre-filled from your Noseprint matches, freely editable.
+            Sign in to build your Top 20 — pre-filled from your Noseprint matches, freely editable.
           </p>
-          <Button onClick={() => setAuthSheetOpen(true)}>Sign in</Button>
+          <Link
+            href="/login?next=/shelf"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minHeight: 48,
+              padding: '0 24px',
+              borderRadius: 'var(--r-btn)',
+              background: 'var(--accent)',
+              color: 'var(--bg)',
+              fontSize: 14,
+              fontWeight: 600,
+            }}
+          >
+            Sign in
+          </Link>
         </div>
-        <AuthSheet
-          open={authSheetOpen}
-          onClose={() => setAuthSheetOpen(false)}
-          redirectTo={typeof window !== 'undefined' ? `${window.location.origin}/auth/confirm?next=/shelf` : '/auth/confirm?next=/shelf'}
-        />
       </div>
     )
   }
@@ -531,13 +647,13 @@ export default function ShelfClient({ slots: initialSlots, isSignedIn, topThree 
           My Shelf
         </h1>
         <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>
-          Your top ten, ranked. Drag to reorder, remove what's wrong, replace what's missing.
+          Your top twenty, ranked. Drag to reorder, remove what&apos;s wrong, replace what&apos;s missing.
         </p>
       </div>
 
       <AuraShelfAdvisory topThree={topThree} className="mb-4" />
 
-      <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={onDragStart} onDragEnd={onDragEnd}>
+      <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={onDragEnd}>
         <SortableContext items={sortableIds} strategy={rectSortingStrategy}>
           <div
             style={{
@@ -563,7 +679,17 @@ export default function ShelfClient({ slots: initialSlots, isSignedIn, topThree 
       </DndContext>
 
       {searchTargetRank !== null && (
-        <SearchSheet onClose={() => setSearchTargetRank(null)} onSelect={handleSelectFragrance} />
+        <SearchSheet
+          onClose={() => {
+            setSearchTargetRank(null)
+            setPendingEligibility(null)
+            setMutationError(null)
+          }}
+          onSelect={handleSelectFragrance}
+          pendingEligibility={pendingEligibility?.fragrance ?? null}
+          onConfirmTested={handleConfirmTested}
+          mutationError={mutationError}
+        />
       )}
     </div>
   )

@@ -7,6 +7,9 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createClient } from '@/utils/supabase/server'
+import { clientIp, enforce, makeLimiter } from '@/lib/rate-limit'
+
+const auraLimiter = makeLimiter('aura', 30, '1 m')
 
 // Use-case → phase preference + family affinities
 const USE_CASE_PROFILE: Record<string, {
@@ -121,6 +124,10 @@ function scoreCandidate(
 
 export async function POST(req: Request) {
   try {
+    if (!(await enforce(auraLimiter, clientIp(req)))) {
+      return NextResponse.json({ error: 'Too many AURA requests. Try again in a minute.' }, { status: 429 })
+    }
+
     const cookieStore = await cookies()
     const supabase = await createClient(cookieStore)
 

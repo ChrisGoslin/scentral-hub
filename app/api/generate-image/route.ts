@@ -41,6 +41,7 @@ const BUCKET_NAME = 'fragrance-images';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+const IMAGE_EXTENSION_PATTERN = /\.(?:avif|bmp|gif|ico|jpe?g|png|svg|webp)(?:[?#].*)?$/i;
 
 // ── Validation ─────────────────────────────────────────────────────────────────
 function validateEnvironment(): { valid: boolean; error?: string } {
@@ -51,6 +52,34 @@ function validateEnvironment(): { valid: boolean; error?: string } {
     return { valid: false, error: 'Missing NEXT_PUBLIC_SUPABASE_URL in environment variables' };
   }
   return { valid: true };
+}
+
+function normalizeFragranceImageUrl(imageUrl: string | null | undefined): string | null {
+  if (typeof imageUrl !== 'string') return null;
+
+  const trimmed = imageUrl.trim();
+  if (!trimmed) return null;
+
+  try {
+    const parsed = new URL(trimmed);
+    const host = parsed.hostname.toLowerCase();
+    const pathname = parsed.pathname.toLowerCase();
+
+    const isFragranticaNonImage =
+      host.includes('fragrantica.com') && !IMAGE_EXTENSION_PATTERN.test(trimmed);
+    const isParfumoNonImage =
+      host.includes('parfumo.com') &&
+      (pathname.includes('/perfumes/') || pathname === '/' || pathname === '/perfumes') &&
+      !IMAGE_EXTENSION_PATTERN.test(trimmed);
+
+    if (isFragranticaNonImage || isParfumoNonImage) {
+      return null;
+    }
+  } catch {
+    return null;
+  }
+
+  return trimmed;
 }
 
 // ── Fragrance Fetching ─────────────────────────────────────────────────────────
@@ -169,10 +198,15 @@ async function uploadToSupabase(
 // ── Database Update ────────────────────────────────────────────────────────────
 async function updateFragranceImageUrl(fragranceId: string, imageUrl: string): Promise<void> {
   try {
+    const safeImageUrl = normalizeFragranceImageUrl(imageUrl);
+    if (!safeImageUrl) {
+      throw new Error('Refusing to persist a page URL where a direct image URL is required');
+    }
+
     const supabase = await createClient();
     const { error } = await supabase
       .from('fragrances')
-      .update({ image_url: imageUrl })
+      .update({ image_url: safeImageUrl })
       .eq('id', fragranceId);
 
     if (error) throw new Error(`Database update failed: ${error.message}`);

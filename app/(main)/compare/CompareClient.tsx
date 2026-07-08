@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useCompare } from '@/hooks/useCompare';
+import { SafeFragranceImage } from '@/components/fragrance/SafeFragranceImage';
 import EmptyState from '@/components/ui/EmptyState';
 import LoadingShimmer from '@/components/ui/LoadingShimmer';
 import Button from '@/components/ui/Button';
@@ -209,24 +209,15 @@ export default function CompareClient() {
               }}
             >
               {/* Image */}
-              {frag.image_url && (
-                <div
-                  style={{
-                    position: 'relative',
-                    width: '100%',
-                    aspectRatio: '3/4',
-                    background: 'var(--surface-2)',
-                  }}
-                >
-                  <Image
-                    src={frag.image_url}
-                    alt={`${frag.brand} ${frag.name}`}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 400px"
-                    style={{ objectFit: 'cover' }}
-                  />
-                </div>
-              )}
+              <SafeFragranceImage
+                imageUrl={frag.image_url}
+                brand={frag.brand}
+                name={frag.name}
+                family={frag.family}
+                sizes="(max-width: 768px) 100vw, 400px"
+                wrapperStyle={{ width: '100%', aspectRatio: '3/4', background: 'var(--surface-2)' }}
+                imageStyle={{ objectFit: 'cover' }}
+              />
 
               {/* Info */}
               <div style={{ padding: '16px' }}>

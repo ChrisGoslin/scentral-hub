@@ -5,12 +5,16 @@ import { createClient } from '@/utils/supabase/server'
 type ShelfAction = 'add' | 'remove' | 'reorder' | 'replace'
 
 type ShelfRequest =
-  | { action: 'add'; fragranceId: string; rank: number }
+  | { action: 'add'; fragranceId: string; rank: number; markAsTested?: boolean }
   | { action: 'remove'; itemId: string }
   | { action: 'reorder'; order: { itemId: string; rank: number }[] }
-  | { action: 'replace'; itemId: string; fragranceId: string }
+  | { action: 'replace'; itemId: string; fragranceId: string; markAsTested?: boolean }
 
 const SHELF_SIZE = 20
+
+function isShelfRequest(body: unknown): body is ShelfRequest {
+  return typeof body === 'object' && body !== null && 'action' in body
+}
 
 export async function POST(req: Request) {
   const cookieStore = await cookies()
@@ -21,12 +25,16 @@ export async function POST(req: Request) {
 
   let body: ShelfRequest
   try {
-    body = await req.json()
+    const parsed = await req.json()
+    if (!isShelfRequest(parsed)) {
+      return NextResponse.json({ error: 'Missing action' }, { status: 400 })
+    }
+    body = parsed
   } catch {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
 
-  const action: ShelfAction | undefined = (body as any)?.action
+  const action: ShelfAction | undefined = body.action
   if (!action) return NextResponse.json({ error: 'Missing action' }, { status: 400 })
 
   try {
@@ -42,13 +50,45 @@ export async function POST(req: Request) {
       default:
         return NextResponse.json({ error: 'Unknown action' }, { status: 400 })
     }
-  } catch (error: any) {
-    console.error('[/api/shelf] error:', error?.message || error)
+  } catch (error: unknown) {
+    if (isShelfEligibilityError(error)) {
+      return NextResponse.json(
+        {
+          code: 'shelf_eligibility_required',
+          error: 'Mark this fragrance as tested before it can live on your Shelf.',
+          canMarkTested: true,
+        },
+        { status: 409 }
+      )
+    }
+    console.error('[/api/shelf] error:', error instanceof Error ? error.message : error)
     return NextResponse.json({ error: 'Shelf mutation failed' }, { status: 500 })
   }
 }
 
 type SupabaseClient = Awaited<ReturnType<typeof createClient>>
+
+function isShelfEligibilityError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error ?? '')
+  return /not eligible for shelf|eligible for shelf|shelf eligibility/i.test(message)
+}
+
+async function markFragranceTested(
+  supabase: SupabaseClient,
+  userId: string,
+  fragranceId: string
+) {
+  const { error } = await supabase.from('collections').upsert(
+    {
+      user_id: userId,
+      fragrance_id: fragranceId,
+      status: 'tested',
+    },
+    { onConflict: 'user_id,fragrance_id' }
+  )
+
+  if (error) throw error
+}
 
 async function logEvent(
   supabase: SupabaseClient,
@@ -88,9 +128,9 @@ async function handleAdd(
   userId: string,
   body: Extract<ShelfRequest, { action: 'add' }>
 ) {
-  const { fragranceId, rank } = body
+  const { fragranceId, rank, markAsTested } = body
   if (!fragranceId || !rank || rank < 1 || rank > SHELF_SIZE) {
-    return NextResponse.json({ error: 'fragranceId and a rank 1-10 are required' }, { status: 400 })
+    return NextResponse.json({ error: `fragranceId and a rank 1-${SHELF_SIZE} are required` }, { status: 400 })
   }
 
   // Slot must be empty — the client drives "replace" as its own action when a slot is occupied.
@@ -103,6 +143,10 @@ async function handleAdd(
 
   if (existing) {
     return NextResponse.json({ error: 'Slot occupied — use replace' }, { status: 409 })
+  }
+
+  if (markAsTested) {
+    await markFragranceTested(supabase, userId, fragranceId)
   }
 
   const { data: inserted, error } = await supabase
@@ -167,7 +211,7 @@ async function handleReorder(
   }
   for (const entry of order) {
     if (!entry.itemId || !entry.rank || entry.rank < 1 || entry.rank > SHELF_SIZE) {
-      return NextResponse.json({ error: 'Each order entry needs itemId and rank 1-10' }, { status: 400 })
+      return NextResponse.json({ error: `Each order entry needs itemId and rank 1-${SHELF_SIZE}` }, { status: 400 })
     }
   }
 
@@ -227,7 +271,7 @@ async function handleReplace(
   userId: string,
   body: Extract<ShelfRequest, { action: 'replace' }>
 ) {
-  const { itemId, fragranceId } = body
+  const { itemId, fragranceId, markAsTested } = body
   if (!itemId || !fragranceId) {
     return NextResponse.json({ error: 'itemId and fragranceId are required' }, { status: 400 })
   }
@@ -244,6 +288,10 @@ async function handleReplace(
   }
 
   const outgoingFragranceId = item.fragrance_id
+
+  if (markAsTested) {
+    await markFragranceTested(supabase, userId, fragranceId)
+  }
 
   const { error: updateError } = await supabase
     .from('shelf_items')
