@@ -50,8 +50,7 @@ DECLARED_HOSTS=$(grep -rh "@image-domains:" scripts/ --include="*.mjs" --include
   grep -v '^$' |
   sort -u)
 if [ -n "$DECLARED_HOSTS" ]; then
-  CONFIG_HOSTS=$(grep -oE "hostname: '[^']+'" next.config.ts 2>/dev/null |
-    sed "s/hostname: '//;s/'//")
+  CONFIG_HOSTS=$(grep -oE "'[^']+'" lib/fragranceImageHosts.* 2>/dev/null | sed "s/'//g")
   for host in $DECLARED_HOSTS; do
     if ! echo "$CONFIG_HOSTS" | grep -qF "$host"; then
       echo "❌ Image hostname '$host' is declared in a script @image-domains comment but missing from next.config.ts remotePatterns."
