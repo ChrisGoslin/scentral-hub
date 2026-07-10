@@ -75,7 +75,7 @@
 
 ## Delivery structure
 
-```
+```text
 public/brand/assets/
   sheets/      (brief 01)
   figures/     (brief 02)
