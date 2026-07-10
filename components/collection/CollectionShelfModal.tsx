@@ -207,7 +207,7 @@ export function CollectionShelfModal({
                 style={{ color: 'var(--text-muted)' }}
               >
                 To seat <strong>{newBottle.full_name}</strong> on your Top 20
-                shelf, another bottle must step down. Your cabinet's legacy
+                shelf, another bottle must step down. Your cabinet&apos;s legacy
                 will preserve its historical reign.
               </p>
 

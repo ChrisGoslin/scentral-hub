@@ -114,7 +114,7 @@ export default function GiftThis({ fragranceId, brand, name, family, optimalSeas
             </p>
             {plainDescription && (
               <p style={{ fontSize: 13, fontStyle: 'italic', color: 'rgba(255,255,255,0.55)', marginTop: 14, lineHeight: '20px' }}>
-                "{truncate(plainDescription, 100)}"
+                &quot;{truncate(plainDescription, 100)}&quot;
               </p>
             )}
             <div style={{ height: 1, background: 'rgba(255,255,255,0.1)', margin: '20px 0' }} />

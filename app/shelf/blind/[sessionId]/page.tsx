@@ -7,7 +7,7 @@ type PageProps = {
   params: Promise<{ sessionId: string }>
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata(_props: PageProps): Promise<Metadata> {
   return {
     title: "That's what I prefer? — nota. Blind Ranking",
     description: 'A blind Top 10, ranked on notes and accords alone — no brand, no bottle, no bias.',
@@ -34,7 +34,7 @@ export default async function BlindRankingSharePage({ params }: PageProps) {
     return (
       <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
         <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 20, color: 'var(--text)', textAlign: 'center' }}>
-          This blind ranking hasn't been revealed yet.
+          This blind ranking hasn&apos;t been revealed yet.
         </p>
       </div>
     )
@@ -62,7 +62,7 @@ export default async function BlindRankingSharePage({ params }: PageProps) {
   return (
     <div style={{ padding: '32px 16px calc(5rem + env(safe-area-inset-bottom, 0px))', maxWidth: 480, margin: '0 auto' }}>
       <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 28, color: 'var(--text)', textAlign: 'center', marginBottom: 24 }}>
-        That's what I prefer?
+        That&apos;s what I prefer?
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {revealed.map(f => (

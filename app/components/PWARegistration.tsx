@@ -7,7 +7,8 @@ export default function PWARegistration() {
     if (
       typeof window !== "undefined" &&
       "serviceWorker" in navigator &&
-      (window as any).serviceWorkerRegistration === undefined
+      (window as unknown as { serviceWorkerRegistration?: ServiceWorkerRegistration })
+        .serviceWorkerRegistration === undefined
     ) {
       navigator.serviceWorker
         .register("/sw.js")

@@ -1,5 +1,5 @@
 "use client"
-import { createContext, useContext, useMemo, useState } from 'react'
+import { createContext, useMemo, useState } from 'react'
 
 export type ToastVariant = 'default' | 'success' | 'error'
 export type ToastMessage = { id: string; text: string; variant: ToastVariant }

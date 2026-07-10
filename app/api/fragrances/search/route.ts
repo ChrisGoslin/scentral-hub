@@ -26,11 +26,11 @@ export async function GET(request: NextRequest) {
 
     // Fetch owner counts for all returned fragrances (batched)
     const fragrances = data ?? [];
-    let ownerCounts: Record<string, number> = {};
+    const ownerCounts: Record<string, number> = {};
 
     if (fragrances.length > 0) {
       try {
-        const fragIds = fragrances.map((f: any) => f.id);
+        const fragIds = fragrances.map((f: { id: string }) => f.id);
         const { data: socialProof, error: spError } = await supabase.rpc(
           'get_fragrance_social_proof',
           { fragrance_ids: fragIds }
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Merge owner counts into fragrance data
-    const enriched = fragrances.map((f: any) => ({
+    const enriched = fragrances.map((f: { id: string }) => ({
       ...f,
       owner_count: ownerCounts[f.id] ?? 0
     }));

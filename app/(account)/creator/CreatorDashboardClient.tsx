@@ -18,7 +18,7 @@ interface Props {
   creatorId: string
 }
 
-export default function CreatorDashboardClient({ reels, creatorId }: Props) {
+export default function CreatorDashboardClient({ reels, creatorId: _creatorId }: Props) {
   const [isUploading, setIsUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [formData, setFormData] = useState({

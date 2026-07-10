@@ -39,13 +39,13 @@ export async function POST(request: Request) {
       yesterday.setDate(yesterday.getDate() - 1)
       const yesterdayStr = yesterday.toISOString().split('T')[0]
 
-      let checkDateStr = uniqueDates[0]
+      const checkDateStr = uniqueDates[0]
 
       if (checkDateStr === todayStr || checkDateStr === yesterdayStr) {
         current_streak = 1
         
         // Parse the start date to iterate backwards
-        let currentIterDate = new Date(checkDateStr)
+        const currentIterDate = new Date(checkDateStr)
 
         for (let i = 1; i < uniqueDates.length; i++) {
           currentIterDate.setDate(currentIterDate.getDate() - 1)

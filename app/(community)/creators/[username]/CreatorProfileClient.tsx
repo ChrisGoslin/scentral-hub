@@ -8,7 +8,7 @@ interface Props {
   currentUserId?: string
 }
 
-export default function CreatorProfileClient({ creatorId, currentUserId }: Props) {
+export default function CreatorProfileClient({ creatorId: _creatorId, currentUserId }: Props) {
   const [isFollowing, setIsFollowing] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -21,7 +21,6 @@ export default function CreatorProfileClient({ creatorId, currentUserId }: Props
 
     setIsLoading(true)
     try {
-      const action = isFollowing ? 'unfollow' : 'follow'
       // API call would go here for follow/unfollow
       // For v1, just toggle locally
       setIsFollowing(!isFollowing)

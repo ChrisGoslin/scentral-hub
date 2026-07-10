@@ -45,7 +45,7 @@ export default async function BlindRankingOpengraphImage({
           }}
         >
           <div style={{ fontSize: 64, fontFamily: 'Georgia, serif', letterSpacing: '-0.02em' }}>
-            That's what I prefer?
+            That&apos;s what I prefer?
           </div>
           <div style={{ marginTop: 16, fontSize: 24, color: GOLD, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             A blind Top 10 on nota.
@@ -92,7 +92,7 @@ export default async function BlindRankingOpengraphImage({
         }}
       >
         <div style={{ fontSize: 56, fontFamily: 'Georgia, serif', letterSpacing: '-0.02em', marginBottom: 36 }}>
-          That's what I prefer?
+          That&apos;s what I prefer?
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18, width: '100%', maxWidth: 820 }}>
           {topThree.map(f => (

@@ -5,8 +5,6 @@ import Link from 'next/link'
 import { createClient } from '@/utils/supabase/client'
 import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
-import Chip from '@/components/ui/Chip'
-import LoadingShimmer from '@/components/ui/LoadingShimmer'
 import ErrorInline from '@/components/ui/ErrorInline'
 import { ArrowRight, MapPin, Wind, Thermometer, Droplets, Info } from 'lucide-react'
 
@@ -21,7 +19,7 @@ type Fragrance = {
   optimal_season: string
   heart_notes: string[]
   rating: number | null
-  embedding: any
+  embedding: number[] | null
   has_embedding: boolean
 }
 
@@ -254,7 +252,7 @@ function ResonanceMap({ fragrances, activeFamily }: { fragrances: Fragrance[], a
           })
         }
 
-        res.data?.forEach((m: any) => {
+        res.data?.forEach((m: { id: string; name: string; brand: string; similarity?: number }) => {
           if (!uniqueIds.has(m.id)) {
             uniqueIds.add(m.id)
             const frag = fragrances.find(f => f.id === m.id)
@@ -427,10 +425,21 @@ function SeasonalPlanner({ fragrances }: { fragrances: Fragrance[] }) {
 
 // ── SECTION 5: DAILY BRIEF ────────────────────────────────────────────────────
 
+type WeatherData = {
+  current: { temperature_2m: number; relative_humidity_2m: number }
+}
+
+type AuraRecommendation = {
+  id: string
+  brand: string
+  name: string
+  similarity_score: number
+}
+
 function DailyBrief() {
-  const [weather, setWeather] = useState<any>(null)
+  const [weather, setWeather] = useState<WeatherData | null>(null)
   const [loading, setLoading] = useState(true)
-  const [recommendation, setRecommendation] = useState<any>(null)
+  const [recommendation, setRecommendation] = useState<AuraRecommendation | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -446,11 +455,10 @@ function DailyBrief() {
 
         // 2. Weather
         const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m&timezone=auto`)
-        const weatherData = await weatherRes.json()
+        const weatherData: WeatherData = await weatherRes.json()
         setWeather(weatherData)
 
         // 3. Preferences
-        const env = localStorage.getItem('scentral-environment') || 'Casual'
         const useCases = JSON.parse(localStorage.getItem('scentral-use-cases') || '["Daily wear"]')
 
         // 4. AURA API
@@ -469,8 +477,8 @@ function DailyBrief() {
         if (auraData.results?.[0]) {
           setRecommendation(auraData.results[0])
         }
-      } catch (err: any) {
-        setError(err.message || 'Brief generation failed')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Brief generation failed')
       } finally {
         setLoading(false)
       }

@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createClient } from '@/utils/supabase/server'
 
-const VALID_STATUSES = ['shown', 'viewed', 'wishlisted', 'blind_buy', 'maybe_later', 'dismissed'] as const
-type Status = (typeof VALID_STATUSES)[number]
+type Status = 'shown' | 'viewed' | 'wishlisted' | 'blind_buy' | 'maybe_later' | 'dismissed'
 
 // Client-facing action names map onto the temptations.status check constraint.
 const ACTION_TO_STATUS: Record<string, Status> = {

@@ -45,7 +45,7 @@ export function initDeferred() {
   if (typeof window === 'undefined' || !process.env.NEXT_PUBLIC_POSTHOG_KEY) return
   const schedule = (cb: () => void) =>
     'requestIdleCallback' in window
-      ? (window as any).requestIdleCallback(cb, { timeout: 4000 })
+      ? window.requestIdleCallback(cb, { timeout: 4000 })
       : setTimeout(cb, 1)
   schedule(() => { void loadClient() })
 }
@@ -65,7 +65,12 @@ export function track(
 const lazyPosthog = new Proxy({} as PostHogClient, {
   get(_target, prop) {
     return (...args: unknown[]) => {
-      void loadClient().then((posthog) => (posthog as any)[prop](...args))
+      void loadClient().then((posthog) => {
+        const method = (posthog as unknown as Record<string, (...a: unknown[]) => unknown>)[
+          prop as string
+        ]
+        return method?.apply(posthog, args)
+      })
     }
   },
 })

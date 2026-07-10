@@ -1,5 +1,5 @@
 import { Metadata } from 'next'
-import { cookies, headers } from 'next/headers'
+import { cookies } from 'next/headers'
 import { createClient } from '@/utils/supabase/server'
 import InsightsClient from './InsightsClient'
 
@@ -41,7 +41,6 @@ interface CachedInsights {
 
 export default async function InsightsPage() {
   const cookieStore = await cookies()
-  const headerList = await headers()
 
   // Get anon_id from localStorage bridge via cookie
   // In a real implementation, this would be read from the request

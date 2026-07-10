@@ -19,6 +19,19 @@ function getSeason(): string {
   return 'Winter'
 }
 
+type RawScheduleRow = {
+  id: string
+  name: string
+  occasion: string | null
+  created_at: string
+  morning_sprays: number | null
+  midday_sprays: number | null
+  evening_sprays: number | null
+  morning_frag: ScheduleFragrance | ScheduleFragrance[] | null
+  midday_frag: ScheduleFragrance | ScheduleFragrance[] | null
+  evening_frag: ScheduleFragrance | ScheduleFragrance[] | null
+}
+
 async function fetchSchedule(id: string): Promise<SavedSchedule | null> {
   const { data, error } = await getPublicSupabase()
     .from('spritz_schedules')
@@ -34,23 +47,25 @@ async function fetchSchedule(id: string): Promise<SavedSchedule | null> {
 
   if (error || !data) return null
 
-  const normalize = (v: unknown): ScheduleFragrance | null => {
+  const row = data as unknown as RawScheduleRow
+
+  const normalize = (v: ScheduleFragrance | ScheduleFragrance[] | null): ScheduleFragrance | null => {
     if (!v) return null
-    if (Array.isArray(v)) return (v[0] as ScheduleFragrance) ?? null
-    return v as ScheduleFragrance
+    if (Array.isArray(v)) return v[0] ?? null
+    return v
   }
 
   return {
-    id: (data as any).id,
-    name: (data as any).name,
-    occasion: (data as any).occasion,
-    created_at: (data as any).created_at,
-    morning_sprays: (data as any).morning_sprays,
-    midday_sprays: (data as any).midday_sprays,
-    evening_sprays: (data as any).evening_sprays,
-    morning_frag: normalize((data as any).morning_frag),
-    midday_frag: normalize((data as any).midday_frag),
-    evening_frag: normalize((data as any).evening_frag),
+    id: row.id,
+    name: row.name,
+    occasion: row.occasion,
+    created_at: row.created_at,
+    morning_sprays: row.morning_sprays,
+    midday_sprays: row.midday_sprays,
+    evening_sprays: row.evening_sprays,
+    morning_frag: normalize(row.morning_frag),
+    midday_frag: normalize(row.midday_frag),
+    evening_frag: normalize(row.evening_frag),
   }
 }
 

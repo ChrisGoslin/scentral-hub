@@ -27,7 +27,9 @@ export default function AudioChord() {
 
   function ensureContext() {
     if (ctxRef.current) return ctxRef.current
-    const Ctx = window.AudioContext || (window as any).webkitAudioContext
+    const Ctx =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
     if (!Ctx) return null
     const ctx = new Ctx()
     ctxRef.current = ctx

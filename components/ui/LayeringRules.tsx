@@ -53,7 +53,7 @@ export default function LayeringRules() {
           </div>
           <div>
             <p style={{ fontSize: 10, fontWeight: 700, color: '#b45309', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>
-              Don't
+              Don&apos;t
             </p>
             <div style={{ display: 'grid', gap: 12 }}>
               {rules.shuffledDonts.map((r, i) => (

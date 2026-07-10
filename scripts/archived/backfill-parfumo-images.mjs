@@ -373,7 +373,7 @@ const results = { updated: 0, failed: 0 }
     for (const { id, brand, name } of toProcess) {
       const result = await fetchImage(browser, page, brand, name)
       page = result.page  // may be a new page after crash recovery
-      const { url, reason, source, sourceUrl } = result
+      const { url, reason, source } = result
       const safeUrl = normalizeFragranceImageUrl(url)
 
       if (!url) {

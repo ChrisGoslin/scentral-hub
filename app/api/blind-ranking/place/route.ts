@@ -83,8 +83,8 @@ export async function POST(req: Request) {
     const complete = totalPlaced >= RANKS_TOTAL
 
     return NextResponse.json({ choiceId: choice.id, placedCount: totalPlaced, complete })
-  } catch (error: any) {
-    console.error('[/api/blind-ranking/place] error:', error?.message || error)
+  } catch (error) {
+    console.error('[/api/blind-ranking/place] error:', error instanceof Error ? error.message : error)
     return NextResponse.json({ error: 'Failed to record placement' }, { status: 500 })
   }
 }

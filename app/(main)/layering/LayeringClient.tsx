@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { Search, X, ArrowLeft } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Chip from '@/components/ui/Chip'
@@ -44,7 +44,6 @@ function StepDots({ current }: { current: 1 | 2 | 3 }) {
 }
 
 export default function LayeringClient({ fragrances }: { fragrances: LayeringFragrance[] }) {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const wizard = useLayeringWizard(fragrances)
   const [backLink, setBackLink] = useState<{ href: string; label: string; useHistory: boolean } | null>(null)

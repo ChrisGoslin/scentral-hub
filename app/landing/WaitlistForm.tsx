@@ -29,7 +29,7 @@ export default function WaitlistForm() {
   if (status === 'success') {
     return (
       <p style={{ fontSize: 14, color: 'var(--accent)', fontWeight: 600 }}>
-        You're on the list ✓
+        You&apos;re on the list ✓
       </p>
     )
   }

@@ -1,5 +1,4 @@
 import fs from 'node:fs';
-import path from 'node:path';
 import { execSync } from 'node:child_process';
 import dotenv from 'dotenv';
 
@@ -107,7 +106,7 @@ async function runCheck() {
     } else {
       console.log(`${COLORS.yellow}⚠️  No build detected. Run 'npm run build' to verify production readiness.${COLORS.reset}`);
     }
-  } catch (err) {
+  } catch {
     // ignore
   }
 

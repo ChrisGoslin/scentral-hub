@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test } from '@playwright/test'
 
 test.describe('Layering Lab save flow (mocked)', () => {
   test.beforeEach(async ({ page }) => {
@@ -36,11 +36,11 @@ test.describe('Layering Lab save flow (mocked)', () => {
           currentSession: { access_token: 'fake-test-token' },
           user: { id: 'test-user-id', email: 'test@example.com' }
         }))
-      } catch (e) {}
+      } catch {}
     })
   })
 
-  test('formulate and save combo', async ({ page }) => {
+  test('formulate and save combo', async () => {
     test.skip(true, 'Layering Lab has been upgraded to a multi-step Aura Intelligence wizard');
   })
 })

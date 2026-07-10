@@ -106,11 +106,13 @@ export async function getShopifyProduct(productId: string): Promise<ShopifyProdu
       handle: product.handle,
       description: product.description,
       priceRange: product.priceRange,
-      images: product.images.edges.map((edge: any) => ({
+      images: product.images.edges.map((edge: { node: { src: string; altText: string | null } }) => ({
         src: edge.node.src,
         altText: edge.node.altText,
       })),
-      variants: product.variants.edges.map((edge: any) => ({
+      variants: product.variants.edges.map((edge: {
+        node: { id: string; title: string; price: { amount: string; currencyCode: string }; available: boolean }
+      }) => ({
         id: edge.node.id,
         title: edge.node.title,
         price: edge.node.price,
@@ -135,11 +137,6 @@ export function buildShopifyCheckoutUrl(variantId: string, quantity: number = 1)
     console.warn('NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN not set');
     return '';
   }
-
-  const params = new URLSearchParams({
-    variant: variantId,
-    quantity: String(quantity),
-  });
 
   return `https://${storeDomain}/cart/${variantId}:${quantity}`;
 }

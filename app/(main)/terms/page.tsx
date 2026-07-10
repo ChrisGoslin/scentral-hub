@@ -17,11 +17,11 @@ export default function TermsPage() {
       <section style={{ marginBottom: 32 }}>
         <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>1. Acceptance of Terms</h2>
         <p>
-          By accessing, downloading, or using nota. (the "App"), you agree to be bound by these
-          Terms of Service ("Terms"). If you do not agree to these Terms, do not use the App.
+          By accessing, downloading, or using nota. (the &quot;App&quot;), you agree to be bound by these
+          Terms of Service (&quot;Terms&quot;). If you do not agree to these Terms, do not use the App.
         </p>
         <p style={{ marginTop: 12 }}>
-          nota. is provided "as is" and "as available" without warranty. We reserve the right to
+          nota. is provided &quot;as is&quot; and &quot;as available&quot; without warranty. We reserve the right to
           modify these Terms at any time. Your continued use of the App after changes constitutes acceptance
           of the updated Terms.
         </p>
@@ -63,7 +63,7 @@ export default function TermsPage() {
       <section style={{ marginBottom: 32 }}>
         <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>5. Fragrance Content &amp; Disclaimer</h2>
         <p style={{ marginBottom: 12 }}>
-          nota. contains fragrance descriptions, "inspired-by" mappings, and recommendations
+          nota. contains fragrance descriptions, &quot;inspired-by&quot; mappings, and recommendations
           based on community feedback and olfactory analysis. These are provided for informational
           purposes only and:
         </p>
@@ -120,7 +120,7 @@ export default function TermsPage() {
         <ul style={{ marginLeft: 20, marginTop: 8 }}>
           <li style={{ marginBottom: 6 }}>Allergic reactions or skin sensitivities from fragrances recommended by the App</li>
           <li style={{ marginBottom: 6 }}>Financial losses or overpayment resulting from fragrance purchases</li>
-          <li style={{ marginBottom: 6 }}>Inaccurate fragrance descriptions or "inspired-by" mappings</li>
+          <li style={{ marginBottom: 6 }}>Inaccurate fragrance descriptions or &quot;inspired-by&quot; mappings</li>
           <li style={{ marginBottom: 6 }}>Loss of data, service interruptions, or unavailability of the App</li>
           <li style={{ marginBottom: 6 }}>Any indirect, incidental, special, or consequential damages</li>
           <li>Third-party disputes arising from purchases made through affiliate links</li>
@@ -159,7 +159,7 @@ export default function TermsPage() {
       <section style={{ marginBottom: 32 }}>
         <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>11. No Warranty</h2>
         <p>
-          THE APP IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED.
+          THE APP IS PROVIDED &quot;AS IS&quot; AND &quot;AS AVAILABLE&quot; WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED.
           WE DISCLAIM ALL WARRANTIES INCLUDING MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE,
           AND NON-INFRINGEMENT. WE DO NOT GUARANTEE THAT THE APP WILL BE ERROR-FREE, SECURE, OR
           UNINTERRUPTED.

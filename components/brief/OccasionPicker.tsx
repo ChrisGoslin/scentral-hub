@@ -124,7 +124,7 @@ export default function OccasionPicker({ isOpen, onClose, onWear }: Props) {
           {!selectedOccasion ? (
             <>
               <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 20, color: 'var(--text)', marginBottom: 20 }}>
-                What's the occasion?
+                What&apos;s the occasion?
               </p>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
                 {OCCASIONS.map(o => (

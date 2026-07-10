@@ -9,11 +9,8 @@ import { cookies } from 'next/headers'
  * In production, this would be called by a scheduled cron job or Edge Function timer.
  */
 
-export async function POST(request: Request) {
+export async function POST() {
   try {
-    const { searchParams } = new URL(request.url)
-    const testLimit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!, 10) : undefined
-
     const cookieStore = await cookies()
     const supabase = await createClient(cookieStore)
 

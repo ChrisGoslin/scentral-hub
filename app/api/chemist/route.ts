@@ -33,7 +33,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Fragrance not found' }, { status: 404 })
     }
 
-    const result: any = {}
+    const result: {
+      similarity?: { score: number; label: string; explanation: string }
+      phaseCancellation?: { warning: boolean; message: string }
+      dryDown?: {
+        topPeakMins: number
+        heartPeakMins: number
+        baseSettleMins: number
+        timeline: Array<{ minute: number; dominantClass: string }>
+      }
+    } = {}
 
     // 1. SIMILARITY (if layerId provided)
     if (layerId) {
@@ -178,8 +187,8 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json(result)
-  } catch (error: any) {
+  } catch (error) {
     console.error('Chemist API Error:', error)
-    return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Internal server error' }, { status: 500 })
   }
 }

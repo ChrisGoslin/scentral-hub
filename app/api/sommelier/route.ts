@@ -12,7 +12,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Too many sommelier requests. Try again in a minute.' }, { status: 429 })
     }
 
-    const { mode, lat, lon, time_of_day = 'evening', occasion } = await req.json()
+    const { mode, lat, lon, time_of_day = 'evening' } = await req.json()
     
     const cookieStore = await cookies()
     const supabase = await createClient(cookieStore)
@@ -166,7 +166,11 @@ export async function POST(req: Request) {
         .not('rating', 'is', null)
 
       const occasions = ['Work', 'Date', 'Gym', 'Formal', 'Casual', 'Evening']
-      const coverage: any = {}
+      const coverage: Record<string, {
+        count: number
+        top: Array<{ id: string; brand: string; name: string; use_case: string | null; rating: number | null }>
+        gap: boolean
+      }> = {}
 
       occasions.forEach(occ => {
         const matches = (frags || [])
@@ -185,8 +189,8 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ error: 'Invalid mode' }, { status: 400 })
 
-  } catch (error: any) {
+  } catch (error) {
     console.error('Sommelier API Error:', error)
-    return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Internal server error' }, { status: 500 })
   }
 }

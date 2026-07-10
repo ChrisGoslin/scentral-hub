@@ -55,7 +55,7 @@ export function EvolutionCard({
             margin: '0 0 8px 0',
           }}
         >
-          Something's shifted
+          Something&apos;s shifted
         </p>
         <p
           style={{

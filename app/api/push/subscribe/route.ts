@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     const { endpoint, keys } = subscription;
     const { p256dh, auth } = keys;
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('push_subscriptions')
       .upsert(
         { 
