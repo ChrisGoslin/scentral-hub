@@ -1,9 +1,9 @@
 // Generates PWA icons for Scentral: amber resin-drop on parchment.
 // Run locally: node scripts/generate-icons.mjs
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 import sharp from 'sharp';
-import { fileURLToPath } from 'url';
+import { fileURLToPath } from 'node:url';
 
 const PARCHMENT = '#F7F3EE';
 const AMBER_LIGHT = '#C98A4B';

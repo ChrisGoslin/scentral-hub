@@ -1,15 +1,15 @@
 import { createClient } from '@supabase/supabase-js';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const envPath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../.env.local');
 const envContent = fs.readFileSync(envPath, 'utf8');
 const env = {};
 envContent.split('\n').forEach(line => {
-  const match = line.match(/^\s*([\w\.\-]+)\s*=\s*(.*)?\s*$/);
+  const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)$/);
   if (match) {
-    let value = match[2] || '';
+    let value = match[2].trim();
     if (value.startsWith('"') && value.endsWith('"')) value = value.slice(1, -1);
     env[match[1]] = value;
   }
