@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import { track } from '@/lib/posthog'
 import { FragranceCardMedia } from '@/components/discover/FragranceCardMedia'
+import { SafeFragranceImage } from '@/components/fragrance/SafeFragranceImage'
+import { getSafeFragranceImageUrl } from '@/lib/fragranceImageUrl'
 import type { ShopifyProduct } from '@/lib/shopify'
 
 type Props = {
@@ -29,6 +31,7 @@ type Props = {
 }
 
 export default function BoxDetailClient({ box, fragrances, shopifyProduct }: Props) {
+  const safeBoxImageUrl = getSafeFragranceImageUrl(box.image_url)
   const price = shopifyProduct?.priceRange?.minVariantPrice?.amount
     ? `$${parseFloat(shopifyProduct.priceRange.minVariantPrice.amount).toFixed(2)}`
     : null
@@ -49,14 +52,24 @@ export default function BoxDetailClient({ box, fragrances, shopifyProduct }: Pro
     <div style={{ minHeight: '100dvh', background: 'var(--bg)', paddingBottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }}>
 
       {/* Hero section with image */}
-      {box.image_url && (
+      {safeBoxImageUrl && (
         <div style={{
           width: '100%',
           height: 'clamp(280px, 50vh, 400px)',
-          background: `url(${box.image_url})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }} />
+          position: 'relative',
+          background: 'linear-gradient(180deg, color-mix(in srgb, var(--surface) 92%, transparent), var(--bg))',
+        }}>
+          <SafeFragranceImage
+            imageUrl={safeBoxImageUrl}
+            brand={box.name}
+            name={box.name}
+            sizes="100vw"
+            priority
+            wrapperStyle={{ position: 'absolute', inset: 0 }}
+            imageStyle={{ objectFit: 'cover' }}
+            fallback={null}
+          />
+        </div>
       )}
 
       {/* Info section */}
@@ -125,7 +138,7 @@ export default function BoxDetailClient({ box, fragrances, shopifyProduct }: Pro
           {fragrances.map((f) => (
             <Link
               key={f.id}
-              href={`/collection/${f.id}?from=boxes`}
+              href={`/cabinet/${f.id}?from=boxes`}
               style={{ textDecoration: 'none' }}
             >
               <div style={{

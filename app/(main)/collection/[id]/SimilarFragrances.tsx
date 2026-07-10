@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/utils/supabase/client'
 import { getBrandEmoji } from '@/lib/brandEmoji'
+import { getSafeFragranceImageUrl } from '@/lib/fragranceImageUrl'
 
 type SimilarResult = {
   id: string
@@ -102,56 +103,59 @@ export default function SimilarFragrances({ fragranceId }: { fragranceId: string
         className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
       >
-        {results.map(r => (
-          <Link
-            key={r.id}
-            href={`/collection/${r.id}`}
-            style={{ 
-              flexShrink: 0,
-              width: 140,
-              background: 'var(--surface)',
-              border: '1px solid var(--line)',
-              borderRadius: 'var(--r-card)',
-              padding: '12px',
-              textDecoration: 'none'
-            }}
-          >
-            <div style={{ 
-              width: '100%',
-              aspectRatio: '3/4',
-              margin: '0 auto 8px',
-              position: 'relative',
-              background: 'var(--surface-2)',
-              borderRadius: 8,
-            }}>
-              {r.image_url ? (
-                <Image
-                  src={r.image_url}
-                  alt={r.name}
-                  fill
-                  sizes="120px"
-                  style={{ objectFit: 'contain' }}
-                />
-              ) : (
-                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>
-                  {getBrandEmoji(r.brand)}
-                </div>
-              )}
-            </div>
-            
-            <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {r.brand}
-            </p>
-            <p style={{ fontSize: 13, color: 'var(--text)', fontFamily: 'var(--font-display)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: 2 }}>
-              {r.name}
-            </p>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 6 }}>
-              <span style={{ fontSize: 10, color: 'var(--accent)', fontWeight: 700 }}>
-                {Math.round(r.similarity * 100)}% Match
-              </span>
-            </div>
-          </Link>
-        ))}
+        {results.map(r => {
+          const safeImageUrl = getSafeFragranceImageUrl(r.image_url)
+          return (
+            <Link
+              key={r.id}
+              href={`/cabinet/${r.id}?from=cabinet`}
+              style={{ 
+                flexShrink: 0,
+                width: 140,
+                background: 'var(--surface)',
+                border: '1px solid var(--line)',
+                borderRadius: 'var(--r-card)',
+                padding: '12px',
+                textDecoration: 'none'
+              }}
+            >
+              <div style={{ 
+                width: '100%',
+                aspectRatio: '3/4',
+                margin: '0 auto 8px',
+                position: 'relative',
+                background: 'var(--surface-2)',
+                borderRadius: 8,
+              }}>
+                {safeImageUrl ? (
+                  <Image
+                    src={safeImageUrl}
+                    alt={r.name}
+                    fill
+                    sizes="120px"
+                    style={{ objectFit: 'contain' }}
+                  />
+                ) : (
+                  <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>
+                    {getBrandEmoji(r.brand)}
+                  </div>
+                )}
+              </div>
+              
+              <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {r.brand}
+              </p>
+              <p style={{ fontSize: 13, color: 'var(--text)', fontFamily: 'var(--font-display)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: 2 }}>
+                {r.name}
+              </p>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 6 }}>
+                <span style={{ fontSize: 10, color: 'var(--accent)', fontWeight: 700 }}>
+                  {Math.round(r.similarity * 100)}% Match
+                </span>
+              </div>
+            </Link>
+          )
+        })}
         <div style={{ flexShrink: 0, width: 16 }} />
       </div>
     </div>

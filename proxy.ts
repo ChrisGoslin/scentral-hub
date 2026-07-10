@@ -1,7 +1,23 @@
-import { type NextRequest } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@/utils/supabase/middleware'
 
+const LEGACY_ROUTE_REDIRECTS: Record<string, string> = {
+  '/discover': '/study',
+  '/collection': '/cabinet',
+  '/you': '/archive',
+  '/layering': '/lab',
+  '/spritz': '/ritual',
+  '/profile': '/archive',
+}
+
 export async function proxy(request: NextRequest) {
+  const redirectTarget = LEGACY_ROUTE_REDIRECTS[request.nextUrl.pathname]
+  if (redirectTarget) {
+    const url = request.nextUrl.clone()
+    url.pathname = redirectTarget
+    return NextResponse.redirect(url, 308)
+  }
+
   return await createClient(request)
 }
 

@@ -11,7 +11,7 @@ function LoginForm() {
   const [error, setError] = useState('')
   const searchParams = useSearchParams()
   const next = searchParams.get('next') || '/noseprint'
-  const fromWelcome = next === '/read'
+  const fromWelcome = next === '/read' || next === '/welcome'
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()

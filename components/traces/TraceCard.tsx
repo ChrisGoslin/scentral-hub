@@ -127,7 +127,7 @@ export default function TraceCard({ trace, showFragranceLink = true }: TraceCard
         </span>
         {showFragranceLink && trace.fragrance && (
           <Link
-            href={`/collection/${trace.fragrance.id}`}
+            href={`/cabinet/${trace.fragrance.id}?from=traces`}
             style={{ fontSize: 12, color: 'var(--text-muted)', textDecoration: 'underline', textUnderlineOffset: 2 }}
           >
             {trace.fragrance.brand} {trace.fragrance.name}

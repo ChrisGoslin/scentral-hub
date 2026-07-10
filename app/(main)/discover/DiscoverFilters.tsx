@@ -267,7 +267,7 @@ export function DiscoverFilters({
             marginBottom: 6,
           }}
         >
-          Discover Fragrances
+          The Study
         </p>
         <div style={{ display: 'flex', gap: 8 }}>
           <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
@@ -293,7 +293,7 @@ export function DiscoverFilters({
               }}
             />
             {canScan && <Link
-              href="/scanner?from=discover"
+              href="/scanner?from=study"
               aria-label="Scan a bottle"
               style={{
                 position: 'absolute',

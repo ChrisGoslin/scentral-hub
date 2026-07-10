@@ -240,7 +240,15 @@ export default function SpritzClient() {
       }}
     >
       <div style={{ width: '100%', maxWidth: 360, display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 24, color: 'var(--text)' }}>{copy.briefTitle}</h1>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--text-muted)', margin: 0, fontFamily: 'var(--font-hand)' }}>
+            Ritual
+          </p>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 24, color: 'var(--text)', margin: 0 }}>{copy.briefTitle}</h1>
+          <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>
+            A pulse-point rhythm for the day ahead.
+          </p>
+        </div>
         {streak > 0 && (
           <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent)' }}>🔥 {streak}-day streak</span>
         )}
@@ -356,10 +364,10 @@ export default function SpritzClient() {
                   {copy.briefEmpty}
                 </p>
                 <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 24 }}>
-                  Add fragrances to your collection to start your daily ritual.
+                  Add fragrances to your cabinet to begin a daily ritual.
                 </p>
-                <Link href="/discover" style={{ fontSize: 13, color: 'var(--accent)', fontWeight: 600 }}>
-                  Explore Fragrances →
+                <Link href="/study" style={{ fontSize: 13, color: 'var(--accent)', fontWeight: 600 }}>
+                  Enter The Study →
                 </Link>
               </>
             ) : (
@@ -367,8 +375,8 @@ export default function SpritzClient() {
                 <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 20, color: 'var(--text)', marginBottom: 8 }}>
                   {copy.briefDone}
                 </p>
-                <Link href="/collection" style={{ fontSize: 13, color: 'var(--accent)', fontWeight: 600 }}>
-                  Back to your wardrobe →
+                <Link href="/cabinet" style={{ fontSize: 13, color: 'var(--accent)', fontWeight: 600 }}>
+                  Back to The Cabinet →
                 </Link>
               </>
             )}

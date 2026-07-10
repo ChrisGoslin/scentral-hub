@@ -4,7 +4,7 @@ import { createClient } from '@/utils/supabase/server'
 import ReadClient from './ReadClient'
 
 export const metadata = {
-  title: 'nota. — Your Noseprint',
+  title: 'nota. — The Read',
 }
 
 export default async function ReadPage() {
@@ -12,7 +12,7 @@ export default async function ReadPage() {
   const supabase = await createClient(cookieStore)
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) redirect('/login?next=/read')
+  if (!user) redirect('/login?next=/welcome')
 
   // If they already have a current noseprint, skip to /noseprint
   const { data: existing } = await supabase

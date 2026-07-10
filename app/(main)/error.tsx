@@ -69,7 +69,7 @@ export default function MainError({
           >
             Try again
           </button>
-          <Link href="/discover" style={{ textDecoration: 'none' }}>
+          <Link href="/study" style={{ textDecoration: 'none' }}>
             <button
               style={{
                 background: 'var(--surface)',
@@ -84,7 +84,7 @@ export default function MainError({
               onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'var(--accent)')}
               onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--line)')}
             >
-              Explore Fragrances
+              Enter The Study
             </button>
           </Link>
         </div>

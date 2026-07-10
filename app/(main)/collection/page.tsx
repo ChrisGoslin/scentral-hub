@@ -1,13 +1,13 @@
-import { Metadata } from 'next'
-import CollectionClientWrapper from './CollectionClientWrapper'
-
-export const metadata: Metadata = {
-  title: 'My Bottles | nota.',
-  description: 'Your personal fragrance wardrobe. Track your collection, manage bottle levels, and organize your scents on virtual walnut shelves.',
-}
+import { permanentRedirect } from 'next/navigation'
+import { mapSearchParamsToString } from '@/lib/rebrand'
 
 export const dynamic = 'force-dynamic'
 
-export default function CollectionPage() {
-  return <CollectionClientWrapper />
+export default async function CollectionPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}) {
+  const resolvedSearchParams = await searchParams
+  permanentRedirect(`/cabinet${mapSearchParamsToString(resolvedSearchParams)}`)
 }

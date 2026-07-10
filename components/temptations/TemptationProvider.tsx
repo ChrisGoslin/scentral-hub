@@ -8,7 +8,7 @@ import { useTemptations } from '@/hooks/useTemptations'
 /**
  * TemptationProvider
  *
- * Mounts a floating temptation card on eligible routes (/discover, /collection, /you).
+ * Mounts a floating temptation card on eligible routes (/study, /cabinet, /archive).
  * Hard-wired to NOT render on /traces or /trails routes (see allowlist).
  * Uses CSS variables for styling. Fetches fragrance data on demand.
  */
@@ -21,7 +21,7 @@ interface Fragrance {
   family?: string
 }
 
-const ALLOWED_ROUTES = ['/discover', '/collection', '/you']
+const ALLOWED_ROUTES = ['/study', '/cabinet', '/archive', '/discover', '/collection', '/you']
 const BLOCKED_ROUTES = ['/traces', '/trails', '/read', '/shelf']
 
 export default function TemptationProvider() {

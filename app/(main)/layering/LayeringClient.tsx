@@ -53,12 +53,12 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
 
   useEffect(() => {
     const from = searchParams.get('from')
-    if (from === 'discover') {
-      setBackLink({ href: '/discover', label: 'Discover', useHistory: true })
-    } else if (from === 'collection') {
-      setBackLink({ href: '/collection', label: 'Collection', useHistory: true })
+    if (from === 'discover' || from === 'study') {
+      setBackLink({ href: '/study', label: 'The Study', useHistory: true })
+    } else if (from === 'collection' || from === 'cabinet') {
+      setBackLink({ href: '/cabinet', label: 'The Cabinet', useHistory: true })
     } else {
-      setBackLink({ href: '/collection', label: 'Wardrobe', useHistory: false })
+      setBackLink({ href: '/cabinet', label: 'The Cabinet', useHistory: false })
     }
   }, [searchParams])
 
@@ -122,10 +122,10 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
             lineHeight: '34px',
           }}
         >
-          Layer Builder
+          nota.Lab
         </h1>
         <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
-          Find two scents that work together
+          Build an accord on the workbench, then test how it settles.
         </p>
         <LayeringRules />
       </div>
@@ -581,10 +581,10 @@ export default function LayeringClient({ fragrances }: { fragrances: LayeringFra
               wizard.pickerQuery.trim() === '' ? (
                 <div className="px-4 py-4 flex flex-col gap-3">
                   <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-                    Your wardrobe is empty. Add fragrances from Discover first.
+                    Your cabinet is empty. Add fragrances from The Study first.
                   </p>
-                  <Link href="/discover" style={{ fontSize: 13, color: 'var(--accent)', fontWeight: 500 }}>
-                    Go to Discover →
+                  <Link href="/study" style={{ fontSize: 13, color: 'var(--accent)', fontWeight: 500 }}>
+                    Go to The Study →
                   </Link>
                 </div>
               ) : (

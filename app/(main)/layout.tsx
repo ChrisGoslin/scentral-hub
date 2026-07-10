@@ -8,7 +8,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       <OnboardingGate />
       <main
         className="flex-1 fade-up main-content-wrapper min-h-[100dvh] flex flex-col"
-        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 72px)' }}
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 112px)' }}
       >
         {children}
         <Footer />

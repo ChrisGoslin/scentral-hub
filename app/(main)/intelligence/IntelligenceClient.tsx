@@ -529,7 +529,7 @@ function DailyBrief() {
               </div>
               
               <Link 
-                href={`/layering?anchor=${recommendation.id}`}
+                href={`/lab?anchor=${recommendation.id}`}
                 className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-[var(--accent)] hover:translate-x-1 transition-transform"
               >
                 Send to Atelier <ArrowRight size={14} />

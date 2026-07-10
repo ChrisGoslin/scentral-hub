@@ -1,13 +1,15 @@
 import type { Metadata } from 'next'
 import { cookies } from 'next/headers'
+import Link from 'next/link'
 import { createClient } from '@/utils/supabase/server'
+import Button from '@/components/ui/Button'
 import ShelfClient from './ShelfClient'
 import type { ShelfSlot, ShelfFragrance, ShelfSource } from './types'
 
 export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {
-  title: 'My Shelf | nota.',
-  description: 'Your personal fragrance shelf in nota. Track bottles, tiers, and what is ready to wear next.',
+  title: 'Shelf | nota.',
+  description: 'Arrange your physical scent shelf in nota. with patina, memory, and what is ready to wear next.',
 }
 
 const SHELF_SIZE = 20
@@ -138,7 +140,39 @@ export default async function ShelfPage() {
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    return <ShelfClient slots={[]} isSignedIn={false} topThree={[]} />
+    return (
+      <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+        <div
+          style={{
+            textAlign: 'center',
+            maxWidth: 380,
+            width: '100%',
+            padding: 24,
+            borderRadius: 20,
+            border: '1px solid color-mix(in srgb, var(--accent) 20%, var(--line))',
+            background: 'linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%)',
+          }}
+        >
+          <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--text-muted)', margin: '0 0 10px' }}>
+            Shelf
+          </p>
+          <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 24, color: 'var(--text)', marginBottom: 8 }}>
+            Your bottles are waiting.
+          </p>
+          <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: '22px', marginBottom: 16 }}>
+            Sign in to arrange your Top 20. The first row is seeded from your scent identity and can be edited at any time.
+          </p>
+          <div style={{ display: 'grid', gap: 10 }}>
+            <Link href="/login?next=/shelf" style={{ width: '100%' }}>
+              <Button fullWidth>Sign in</Button>
+            </Link>
+            <Link href="/study" style={{ width: '100%' }}>
+              <Button fullWidth variant="secondary">Enter The Study first</Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   const { count } = await supabase
@@ -177,5 +211,5 @@ export default async function ShelfPage() {
       family: s.fragrance!.family,
     }))
 
-  return <ShelfClient slots={slots} isSignedIn={true} topThree={topThree} />
+  return <ShelfClient slots={slots} topThree={topThree} />
 }

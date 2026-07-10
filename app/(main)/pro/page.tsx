@@ -8,7 +8,7 @@ export default function ProPage() {
   return (
     <div style={{ padding: 24, minHeight: '100dvh', background: 'var(--bg)', color: 'var(--text)' }}>
       <header style={{ marginBottom: 32 }}>
-        <Link href="/you" style={{ fontSize: 13, color: 'var(--text-muted)', textDecoration: 'none' }}>
+        <Link href="/archive" style={{ fontSize: 13, color: 'var(--text-muted)', textDecoration: 'none' }}>
           ← Back
         </Link>
       </header>
@@ -18,7 +18,7 @@ export default function ProPage() {
           nota. pro
         </h1>
         <p style={{ fontSize: 16, color: 'var(--text-muted)', marginBottom: 40, lineHeight: 1.5 }}>
-          Unlock the full potential of your fragrance wardrobe with advanced intelligence and limitless layering formulas.
+          Unlock the full potential of your scent cabinet with advanced intelligence and limitless nota.Lab formulas.
         </p>
 
         <div style={{ background: 'var(--surface)', borderRadius: 16, padding: 24, border: '1px solid var(--accent)', textAlign: 'left', marginBottom: 40 }}>
@@ -42,7 +42,7 @@ export default function ProPage() {
               <span style={{ color: 'var(--accent)' }}>✦</span>
               <div>
                 <strong style={{ display: 'block', fontSize: 14 }}>Wear Scheduling</strong>
-                <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>Plan your wardrobe week by week.</span>
+                <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>Plan your rituals week by week.</span>
               </div>
             </li>
           </ul>

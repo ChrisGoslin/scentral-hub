@@ -51,7 +51,7 @@ export default function InsightsClient({ state, anonId, insights, computedAt }: 
     <div style={{ minHeight: '100dvh', background: 'var(--bg)', color: 'var(--text)' }}>
       <div className="px-4 pt-6 pb-2">
         <h1 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 28, color: 'var(--text)' }}>
-          Your Insights
+          Archive Intelligence
         </h1>
         <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 6, lineHeight: '20px' }}>
           How your scent identity unfolds over time.
@@ -312,11 +312,11 @@ function EmptyState() {
         Interact with scents, describe traces, and build your collection to see your evolving scent identity.
       </p>
       <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
-        <Link href="/discover">
-          <Button>Explore Scents</Button>
+        <Link href="/study">
+          <Button>Enter The Study</Button>
         </Link>
-        <Link href="/collection">
-          <Button variant="secondary">My Collection</Button>
+        <Link href="/cabinet">
+          <Button variant="secondary">Open The Cabinet</Button>
         </Link>
       </div>
     </Card>

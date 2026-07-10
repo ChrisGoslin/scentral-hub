@@ -158,8 +158,8 @@ export default function OccasionPicker({ isOpen, onClose, onWear }: Props) {
               <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 16, color: 'var(--text)', marginBottom: 8 }}>
                 None of your bottles match {occasion?.label?.toLowerCase()} perfectly.
               </p>
-              <a href={`/discover?vibe=${occasion?.vibes.join(',')}`} style={{ fontSize: 12, color: 'var(--accent)' }}>
-                Discover {occasion?.label} fragrances →
+              <a href={`/study?vibe=${occasion?.vibes.join(',')}`} style={{ fontSize: 12, color: 'var(--accent)' }}>
+                Study {occasion?.label} fragrances →
               </a>
               <br />
               <button onClick={() => setSelectedOccasion(null)} style={{ marginTop: 16, fontSize: 12, color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}>

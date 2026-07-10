@@ -198,7 +198,7 @@ before writing scoring logic or copy.
 | Term | Meaning | Where it lives |
 |---|---|---|
 | Noseprint | The user's personalised scent-identity artefact | `noseprints` table, `/noseprint` route |
-| The Read | Feeling-chip quiz → one-time Haiku-generated identity reveal | `/read`, `app/api/read/generate` (rate-limited 1/hour — the only rate-limited LLM route) |
+| The Read | Feeling-chip quiz → one-time Haiku-generated identity reveal | `/read`, `app/api/read/generate` (rate-limited 1/hour via a DB count query, not Upstash). **Not the only rate-limited LLM route** — see `nota-config-and-flags` §5 for the current, corrected rate-limit table across all LLM routes. |
 | Traces | Community-posted scent descriptions/reactions | `traces` + `trace_reactions` tables, `/traces` |
 | Trails | Guided multi-step scent-discovery journeys | `trails` + `trail_steps` + `trail_progress`, `/trails` |
 | Aura | The advisory "character" giving scent guidance | `supabase/functions/aura-advisory/`, `aura_cache` (24h TTL) |

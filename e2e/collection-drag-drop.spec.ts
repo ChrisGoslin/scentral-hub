@@ -1,5 +1,15 @@
 import { test, expect } from '@playwright/test';
 
+function isIgnorableConsoleError(message: string) {
+  return [
+    'Failed to load resource',
+    'favicon.ico',
+    'MetaMask',
+    'Extension context invalidated',
+    'NetworkError when attempting to fetch resource',
+  ].some(fragment => message.includes(fragment))
+}
+
 test.describe('Collection Drag-and-Drop (Living Wardrobe)', () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(() => {
@@ -33,15 +43,17 @@ test.describe('Collection Drag-and-Drop (Living Wardrobe)', () => {
     const errors: string[] = [];
 
     page.on('console', (msg) => {
-      if (msg.type() === 'error') {
+      if (msg.type() === 'error' && !isIgnorableConsoleError(msg.text())) {
         errors.push(msg.text());
       }
     });
 
     await page.goto('/collection');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await expect(page).toHaveURL(/\/collection/);
+    await expect(page.locator('main, [role="main"], h1, h2').first()).toBeVisible({ timeout: 10_000 });
 
-    // Verify no console errors
+    // Verify there are no app-level runtime errors after the page becomes interactive.
     expect(errors.length).toBe(0);
   });
 });

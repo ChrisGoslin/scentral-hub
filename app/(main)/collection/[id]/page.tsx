@@ -26,6 +26,7 @@ import CommunityDepth from './CommunityDepth'
 import FragranceTraces from './FragranceTraces'
 import { GradientPlaceholder } from '@/components/ui/GradientPlaceholder'
 import AuraAdvisory from '@/components/aura/AuraAdvisory'
+import { getSafeFragranceImageUrl } from '@/lib/fragranceImageUrl'
 
 const PHASE_LABEL: Record<number, string> = {
   1: 'Anchor',
@@ -85,6 +86,7 @@ export default async function FragranceDetailPage({
   }
 
   const f = data
+  const safeImageUrl = getSafeFragranceImageUrl(f.image_url)
 
   // Look up the reference fragrance this clone is inspired by
   let inspiredByRef: { id: string; brand: string; name: string } | null = null
@@ -172,23 +174,23 @@ export default async function FragranceDetailPage({
     : null
 
   return (
-    <div style={{ minHeight: '100dvh', background: 'var(--bg)', color: 'var(--text)' }}>
+    <div style={{ minHeight: '100dvh', background: 'var(--bg)', color: 'var(--text)', paddingBottom: '6rem' }}>
       {/* Back nav */}
       <div className="px-4 pt-6 pb-2">
         <Link
-          href={from === 'discover' ? "/discover" : "/collection"}
+          href={from === 'discover' || from === 'study' ? '/study' : '/cabinet'}
           style={{ fontSize: 14, color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: 4 }}
         >
-          ‹ {from === 'discover' ? 'Discover' : 'My Bottles'}
+          ‹ {from === 'discover' || from === 'study' ? 'The Study' : 'The Cabinet'}
         </Link>
       </div>
 
       {/* Bottle image */}
       <div className="px-8 py-6 flex justify-center">
-        {f.image_url ? (
+        {safeImageUrl ? (
           <div style={{ width: 'min(45vw, 200px)', height: 'min(45vw, 200px)', borderRadius: 'var(--r-card)', overflow: 'hidden', background: 'var(--surface-2)', position: 'relative' }}>
             <Image
-              src={f.image_url}
+              src={safeImageUrl}
               alt={`${f.brand} ${f.name}`}
               fill
               priority
@@ -231,7 +233,8 @@ export default async function FragranceDetailPage({
           ) : ownerCount > 0 ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '13px', color: 'var(--text-muted)', marginTop: 6 }}>
               <Users size={14} style={{ color: 'var(--accent)' }} />
-              <span>{ownerCount} {ownerCount === 1 ? 'person' : 'people'} in the nota. community own this</span>
+              <span className="social-count-exact">{ownerCount} {ownerCount === 1 ? 'person' : 'people'} in the nota. community own this</span>
+              <span className="social-count-soft">quietly circulating through curator shelves</span>
             </div>
           ) : null}
           {f.plain_description && (
@@ -409,7 +412,7 @@ export default async function FragranceDetailPage({
               Smells like
             </p>
             {inspiredByRef ? (
-              <Link href={`/collection/${inspiredByRef.id}`} style={{ textDecoration: 'none' }}>
+              <Link href={`/cabinet/${inspiredByRef.id}?from=cabinet`} style={{ textDecoration: 'none' }}>
                 <div style={{ marginTop: 6, lineHeight: '24px' }}>
                   <span style={{ fontSize: 13, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block' }}>
                     {inspiredByRef.brand}
@@ -474,7 +477,7 @@ export default async function FragranceDetailPage({
         </div>
 
         {/* CTA */}
-        <Link href="/layering">
+        <Link href="/lab">
           <Button fullWidth>Try layering this →</Button>
         </Link>
         <GiftThis
@@ -508,10 +511,10 @@ export default async function FragranceDetailPage({
           />
         )}
         <Link
-          href="/discover"
+          href="/study"
           style={{ fontSize: 13, color: 'var(--text-muted)', textAlign: 'center', display: 'block', padding: 8 }}
         >
-          Back to Discover
+          Back to The Study
         </Link>
       </div>
       <FirstDiscoveryToast fragranceId={f.id} ownerCount={ownerCount} />

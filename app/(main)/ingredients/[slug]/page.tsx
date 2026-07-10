@@ -230,10 +230,10 @@ export default async function IngredientsPage({ params }: Props) {
           }
         `}</style>
         <Link
-          href={`/discover?family=${encodeURIComponent(familyName)}`}
+          href={`/study?family=${encodeURIComponent(familyName)}`}
           className="ingredients-cta"
         >
-          Explore in Discover →
+          Explore in The Study →
         </Link>
       </section>
 
@@ -250,7 +250,7 @@ export default async function IngredientsPage({ params }: Props) {
             {fragrances.map(frag => (
               <Link
                 key={frag.id}
-                href={`/collection/${frag.id}?from=notes`}
+                href={`/cabinet/${frag.id}?from=notes`}
                 style={{
                   textDecoration: 'none',
                   aspectRatio: '3/4',

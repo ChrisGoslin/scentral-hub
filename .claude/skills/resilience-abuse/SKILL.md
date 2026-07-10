@@ -21,12 +21,16 @@ Companion doc: `docs/nota/06-testing-security-abuse.md` §3 (threat model, code 
 1. **Vercel Firewall (dashboard, zero code):** managed rulesets + bot-challenge rules; per-path rate rules on `/api/search`, `/discover`. Check it's still enabled before writing any code defence.
 2. **Per-route rate limits** via the shared Upstash pattern (`lib/rate-limit.ts`, spec in 06 §3.1; live example: `app/api/formulate/route.ts`). Identity = `user.id` if signed in, else client IP. Graceful allow-all when Upstash env is absent (local dev). Budgets: read/generate 2 per 24h/user; search 30/min/IP; list endpoints 60/min/IP; og/* 20/min/IP; auth 10/min/IP. **Never rate-limit globally in `proxy.ts`** — Redis on every navigation is self-inflicted latency.
 
-### Corrections (2026-07-05)
+### Corrections (2026-07-09)
 The budgets line above states the *target* posture, not what's wired up everywhere yet. Verified adoption:
 - `app/api/formulate/route.ts` — inline limiter, 10/min (not via the `lib/rate-limit.ts` helper).
 - `app/api/og/noseprint/route.tsx` — uses `lib/rate-limit.ts` (`makeLimiter`/`enforce`/`clientIp`), 20/min/IP — matches its budget exactly.
-- `app/api/read/generate`, `app/api/search`, `/api/dna-match`, `/api/sommelier`, `/api/chemist` — **no rate-limit import found**. The read/generate 2-per-24h and search 30/min budgets are backlog, not shipped guards, as of this date.
-Re-verify per route: `grep -n "rate-limit\|Ratelimit" app/api/<route>/route.ts`.
+- `app/api/search/route.ts` — uses `lib/rate-limit.ts`, 60/min/IP (budget said 30/min — route is stricter than spec, not a gap; update one or the other if it matters).
+- `app/api/read/generate/route.ts` — **capped, but not via `lib/rate-limit.ts` or Upstash at all.** It counts `interactions` rows (`event_type='read_generated'`, `user_id`, last 1h) and 429s at ≥1/hour/user — an interactions-table cap, exactly the mechanism the original spec named ("you already plan an interactions-based rate cap"). The 2026-07-05 note below claiming this route had "no rate-limit import found" was a false negative: it only grepped for `rate-limit\|Ratelimit`, which this DB-count approach doesn't match. **Lesson: verify rate-limit coverage by reading the route, not by grepping for one implementation's import name** — Upstash isn't the only valid mechanism here.
+- `/api/dna-match`, `/api/sommelier` — use `lib/rate-limit.ts`, already guarded (both 429 via `enforce`/`makeLimiter`).
+- `/api/chemist` — **no rate limit, and it doesn't need one**: it's pure Jaccard-similarity math over already-fetched note rows, zero LLM calls. Not in scope for the LLM-cost threat model; would only need a cap if it later becomes a dump-all vector (it isn't — single fragranceId/layerId per call).
+Every route named in the original security brief is now accounted for. The only route that ever lacked a real guard was the one this correction covers above (read/generate — false negative, not an actual gap).
+Re-verify per route: read the route, don't just `grep -n "rate-limit\|Ratelimit"` — that pattern misses DB/count-based caps like read/generate's.
 3. **Query shaping:** no dump-all endpoints; server-enforced `limit ≤ 50`; enriched fields (plain_description, inspired_by, projection/season metadata) require a session — anonymous search gets name/brand/family/image only.
 4. **Escalation for a confirmed abuser:** tighten that route's limit → Firewall challenge for IP/ASN → block. Never jump straight to block. Log every escalation as a `RES-n` lesson.
 

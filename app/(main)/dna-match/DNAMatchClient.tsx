@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import AudioChord from '@/app/components/AudioChord';
 import dynamic from 'next/dynamic';
 import { track } from '@/lib/posthog';
+import { getSafeFragranceImageUrl } from '@/lib/fragranceImageUrl';
 
 const ChemistPanel = dynamic(() => import('@/components/ChemistPanel'), { ssr: false });
 
@@ -172,7 +173,7 @@ export default function CompareScentsClient({ fragrances }: { fragrances: Fragra
             <ScoreRing score={result.score} />
 
             <button
-              onClick={() => router.push(`/layering?anchor=${fragA.id}&top=${fragB.id}`)}
+              onClick={() => router.push(`/lab?anchor=${fragA.id}&top=${fragB.id}`)}
               className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full font-semibold text-sm transition-all hover:opacity-80 active:scale-95"
               style={{ background: 'var(--accent)', color: 'var(--bg)' }}
             >
@@ -228,6 +229,7 @@ function FragrancePicker({
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const selectedImageUrl = getSafeFragranceImageUrl(selected?.image_url);
 
   useEffect(() => {
     if (!open) return;
@@ -254,8 +256,8 @@ function FragrancePicker({
         />
       ) : (
         <div className="flex items-center gap-4 rounded-2xl p-4 shadow-sm group" style={{ background: 'var(--surface)', border: '1px solid var(--accent)' }}>
-          {selected.image_url && (
-            <img src={selected.image_url} alt="" className="w-12 h-12 object-contain rounded-lg" />
+          {selectedImageUrl && (
+            <img src={selectedImageUrl} alt="" className="w-12 h-12 object-contain rounded-lg" />
           )}
           <div className="flex-1 min-w-0">
             <p className="text-[10px] uppercase font-bold tracking-widest" style={{ color: 'var(--text-muted)' }}>{selected.brand}</p>
@@ -267,20 +269,23 @@ function FragrancePicker({
 
       {open && !selected && filtered.length > 0 && (
         <div className="absolute top-full left-0 right-0 mt-2 rounded-2xl shadow-xl z-50 overflow-hidden" style={{ background: 'var(--surface)', border: '1px solid var(--line)' }}>
-          {filtered.slice(0, 8).map((f) => (
-            <div
-              key={f.id}
-              onClick={() => { onSelect(f); onSearchChange(''); setOpen(false); }}
-              className="px-5 py-4 cursor-pointer transition flex items-center gap-4"
-              style={{ borderBottom: '1px solid var(--line)' }}
-            >
-              {f.image_url && <img src={f.image_url} alt="" className="w-8 h-8 object-contain opacity-70" />}
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] uppercase font-bold" style={{ color: 'var(--text-muted)' }}>{f.brand}</p>
-                <p className="text-sm truncate" style={{ color: 'var(--text)' }}>{f.name}</p>
+          {filtered.slice(0, 8).map((f) => {
+            const optionImageUrl = getSafeFragranceImageUrl(f.image_url);
+            return (
+              <div
+                key={f.id}
+                onClick={() => { onSelect(f); onSearchChange(''); setOpen(false); }}
+                className="px-5 py-4 cursor-pointer transition flex items-center gap-4"
+                style={{ borderBottom: '1px solid var(--line)' }}
+              >
+                {optionImageUrl && <img src={optionImageUrl} alt="" className="w-8 h-8 object-contain opacity-70" />}
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] uppercase font-bold" style={{ color: 'var(--text-muted)' }}>{f.brand}</p>
+                  <p className="text-sm truncate" style={{ color: 'var(--text)' }}>{f.name}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

@@ -236,7 +236,7 @@ function PolarChart({
         🌸
       </text>
       <text x={cx} y={cy + 14} textAnchor="middle" fontSize={9} fill="var(--text-muted)" fontFamily="var(--font-body)">
-        Your collection
+        The Cabinet
       </text>
     </svg>
   )
@@ -440,11 +440,11 @@ export default function WheelClient() {
     return (
       <div style={{ minHeight: '100dvh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', paddingTop: 'calc(44px + env(safe-area-inset-top, 0px) + 20px)' }}>
         <EmptyState
-          headline="Build your collection first"
-          caption="Add fragrances to your collection to see your fragrance wheel."
+          headline="Build your cabinet first"
+          caption="Add fragrances to your cabinet to see your fragrance wheel."
           action={
-            <a href="/discover" style={{ fontSize: 13, color: 'var(--accent)', textDecoration: 'none' }}>
-              Explore fragrances
+            <a href="/study" style={{ fontSize: 13, color: 'var(--accent)', textDecoration: 'none' }}>
+              Enter The Study
             </a>
           }
         />
@@ -489,7 +489,7 @@ export default function WheelClient() {
                 {activeData.axis}
               </p>
               <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                {activeData.count} fragrances · {Math.round((activeData.count / state.total) * 100)}% of your collection
+                {activeData.count} fragrances · {Math.round((activeData.count / state.total) * 100)}% of your cabinet
               </p>
             </div>
           </div>
@@ -530,7 +530,7 @@ export default function WheelClient() {
       {/* All axes breakdown */}
       <div style={{ padding: '20px 16px 0' }}>
         <p style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 14 }}>
-          Collection breakdown
+          Cabinet breakdown
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {[...state.wheelData].sort((a, b) => b.count - a.count).map(d => {
@@ -602,17 +602,17 @@ export default function WheelClient() {
         </Button>
       </div>
 
-      {/* CTA to discover */}
+      {/* CTA to study */}
       <div style={{ padding: '12px 16px 0', textAlign: 'center' }}>
         <Link
-          href="/discover"
+          href="/study"
           style={{
             display: 'inline-flex',
             alignItems: 'center',
             gap: 8,
             padding: '12px 28px',
             background: 'var(--accent)',
-            color: '#fff',
+            color: 'var(--ivory)',
             borderRadius: 'var(--r-btn)',
             fontSize: 13,
             fontWeight: 600,
@@ -620,7 +620,7 @@ export default function WheelClient() {
             letterSpacing: '0.04em',
           }}
         >
-          Explore more →
+          Enter The Study →
         </Link>
       </div>
     </div>
@@ -632,7 +632,7 @@ function GapAnalysis({ wheelData }: { wheelData: WheelData[] }) {
   const strong = sorted.slice(0, 2).filter(d => d.count > 0)
   const weak = sorted.slice(-2).filter(d => d.count === 0)
 
-  let message = 'Your collection is diverse across scent families.'
+  let message = 'Your cabinet is diverse across scent families.'
 
   if (strong.length > 0 && weak.length > 0) {
     const strongText = strong.map(d => d.axis).join(' & ')
@@ -640,7 +640,7 @@ function GapAnalysis({ wheelData }: { wheelData: WheelData[] }) {
     message = `You're strong in ${strongText}, but haven't explored ${weakText} yet.`
   } else if (strong.length > 0) {
     const strongText = strong.map(d => d.axis).join(' & ')
-    message = `Your collection leans heavily toward ${strongText}.`
+    message = `Your cabinet leans heavily toward ${strongText}.`
   }
 
   return (

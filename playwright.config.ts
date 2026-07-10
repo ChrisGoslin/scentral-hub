@@ -8,7 +8,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: 'list',
   use: {
-    baseURL: 'http://127.0.0.1:3000',
+    baseURL: 'http://127.0.0.1:3100',
     trace: 'on-first-retry',
   },
   projects: [
@@ -31,7 +31,7 @@ export default defineConfig({
   ],
   webServer: {
     command: 'env -u FORCE_COLOR npm run start:e2e',
-    url: 'http://127.0.0.1:3000',
-    reuseExistingServer: !process.env.CI,
+    url: 'http://127.0.0.1:3100',
+    reuseExistingServer: process.env.PW_REUSE_SERVER === '1',
   },
 });

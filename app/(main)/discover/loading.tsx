@@ -4,7 +4,7 @@ export default function DiscoverLoading() {
       {/* Header */}
       <div style={{ marginBottom: 24 }}>
         <p style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>
-          Discover Fragrances
+          The Study
         </p>
         <div
           style={{

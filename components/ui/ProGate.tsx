@@ -129,7 +129,7 @@ export default function ProGate({ featureName, description, preview }: ProGatePr
           </button>
 
           <Link
-            href="/collection"
+            href="/cabinet"
             style={{
               fontSize: 12,
               color: 'var(--text-muted)',
@@ -139,7 +139,7 @@ export default function ProGate({ featureName, description, preview }: ProGatePr
               alignSelf: 'center',
             }}
           >
-            Back to My Bottles
+            Back to The Cabinet
           </Link>
         </div>
 

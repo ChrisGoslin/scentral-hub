@@ -125,11 +125,8 @@ export function DiscoverGrid({
   onRetrySearch,
 }: Props) {
   const [clientPersona, setClientPersona] = useState<Persona | null>(null)
-  const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsMounted(true)
     const personaId = localStorage.getItem('scentral_persona')
     if (personaId) {
       const p = getPersonaById(personaId)
@@ -214,7 +211,7 @@ export function DiscoverGrid({
                 />
 
                 <Link
-                  href={`/collection/${f.id}?from=discover`}
+                  href={`/cabinet/${f.id}?from=study`}
                   style={{ textDecoration: 'none', display: 'block', position: 'relative' }}
                 >
                   <FragranceCardMedia imageUrl={f.image_url} brand={f.brand} name={f.name} family={f.family} rating={f.rating} ownerCount={f.owner_count} priority={idx < 4} wall />
@@ -274,75 +271,71 @@ export function DiscoverGrid({
                     />
                   )}
                 </Link>
-                {isMounted && (
-                  <>
-                    <button
-                      onClick={e => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        toggleCompare(f.id)
-                      }}
-                      aria-label={compareIds.includes(f.id) ? 'Remove from compare' : 'Add to compare'}
-                      style={{
-                        position: 'absolute',
-                        top: 4,
-                        right: 28,
-                        width: 20,
-                        height: 20,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        background: compareIds.includes(f.id) ? 'var(--accent)' : 'color-mix(in srgb, var(--bg) 70%, transparent)',
-                        border: 'none',
-                        borderRadius: '50%',
-                        cursor: 'pointer',
-                        padding: 0,
-                        color: compareIds.includes(f.id) ? 'rgba(0,0,0,0.85)' : 'var(--text-muted)',
-                        zIndex: 25,
-                      }}
-                    >
-                      <Scale size={11} />
-                    </button>
-                    <button
-                      onClick={e => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        onWishlistToggle(f.id)
-                      }}
-                      aria-label={wishlist.includes(f.id) ? 'Remove from wishlist' : 'Add to wishlist'}
-                      style={{
-                        position: 'absolute',
-                        top: 4,
-                        right: 4,
-                        width: 20,
-                        height: 20,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        background: 'color-mix(in srgb, var(--bg) 70%, transparent)',
-                        border: 'none',
-                        borderRadius: '50%',
-                        cursor: 'pointer',
-                        padding: 0,
-                        color: wishlist.includes(f.id) ? 'var(--accent)' : 'var(--text-muted)',
-                        zIndex: 25,
-                      }}
-                    >
-                      <svg
-                        width={12}
-                        height={12}
-                        viewBox="0 0 24 24"
-                        fill={wishlist.includes(f.id) ? 'var(--accent)' : 'none'}
-                        stroke={wishlist.includes(f.id) ? 'var(--accent)' : 'currentColor'}
-                        strokeWidth={2}
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                      </svg>
-                    </button>
-                  </>
-                )}
+                <button
+                  onClick={e => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    toggleCompare(f.id)
+                  }}
+                  aria-label={compareIds.includes(f.id) ? 'Remove from compare' : 'Add to compare'}
+                  style={{
+                    position: 'absolute',
+                    top: 4,
+                    right: 28,
+                    width: 20,
+                    height: 20,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: compareIds.includes(f.id) ? 'var(--accent)' : 'color-mix(in srgb, var(--bg) 70%, transparent)',
+                    border: 'none',
+                    borderRadius: '50%',
+                    cursor: 'pointer',
+                    padding: 0,
+                    color: compareIds.includes(f.id) ? 'rgba(0,0,0,0.85)' : 'var(--text-muted)',
+                    zIndex: 25,
+                  }}
+                >
+                  <Scale size={11} />
+                </button>
+                <button
+                  onClick={e => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    onWishlistToggle(f.id)
+                  }}
+                  aria-label={wishlist.includes(f.id) ? 'Remove from wishlist' : 'Add to wishlist'}
+                  style={{
+                    position: 'absolute',
+                    top: 4,
+                    right: 4,
+                    width: 20,
+                    height: 20,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'color-mix(in srgb, var(--bg) 70%, transparent)',
+                    border: 'none',
+                    borderRadius: '50%',
+                    cursor: 'pointer',
+                    padding: 0,
+                    color: wishlist.includes(f.id) ? 'var(--accent)' : 'var(--text-muted)',
+                    zIndex: 25,
+                  }}
+                >
+                  <svg
+                    width={12}
+                    height={12}
+                    viewBox="0 0 24 24"
+                    fill={wishlist.includes(f.id) ? 'var(--accent)' : 'none'}
+                    stroke={wishlist.includes(f.id) ? 'var(--accent)' : 'currentColor'}
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                  </svg>
+                </button>
               </div>
               {(idx + 1) % 6 === 0 && (
                 <PostItNote

@@ -170,7 +170,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
   }, [])
 
   useEffect(() => {
-    document.title = activePersona ? `Discover · For ${activePersona.name}` : 'Discover | nota.'
+    document.title = activePersona ? `The Study · For ${activePersona.name}` : 'The Study | nota.'
   }, [activePersona])
 
   // Track search usage
@@ -491,7 +491,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
                 {discoverNote.label}
               </p>
               <h2 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'clamp(24px, 4vw, 34px)', lineHeight: 1.05, margin: 0 }}>
-                {activePersona ? `Discover for ${activePersona.name}` : 'Discover with a little more of you in it'}
+                {activePersona ? `The Study, tuned for ${activePersona.name}` : 'The Study, arranged around your instincts'}
               </h2>
               <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.65, margin: 0, maxWidth: 760 }}>
                 {discoverNote.note}
@@ -534,7 +534,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
                 cursor: 'pointer',
               }}
             >
-              ✦ Find your signature scent — 3 quick questions
+              ✦ Let the study sketch a signature trail in 3 questions
             </button>
           </div>
         )}
@@ -594,7 +594,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
                 {unseen.map(f => (
                   <Link
                     key={f.id}
-                    href={`/collection/${f.id}?from=discover`}
+                    href={`/cabinet/${f.id}?from=study`}
                     style={{ textDecoration: 'none', flexShrink: 0, width: 120 }}
                   >
                     <div

@@ -36,7 +36,7 @@ function ResultGrid({ results, showBadge }: { results: SmellsLikeResult[]; showB
       {results.map((result) => (
         <Link
           key={result.fragrance.id}
-          href={`/collection/${result.fragrance.id}?from=discover`}
+          href={`/cabinet/${result.fragrance.id}?from=study`}
           style={{ textDecoration: 'none', display: 'block', position: 'relative' }}
         >
           <FragranceCardMedia

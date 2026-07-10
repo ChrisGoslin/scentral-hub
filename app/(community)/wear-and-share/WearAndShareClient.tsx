@@ -89,7 +89,7 @@ export default function WearAndShareClient({
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       {posts.map((post) => {
         // Extract persona from user profile or default to empty
         const personaId = post.profiles?.[0]?.persona || null
@@ -103,15 +103,25 @@ export default function WearAndShareClient({
         return (
           <div
             key={post.id}
+            className="surface-glass surface-patina"
+            data-patina="rested"
             style={{
-              borderTop: '1px solid var(--accent)',
-              paddingTop: '12px',
-              paddingBottom: '12px',
-              paddingLeft: '12px',
-              paddingRight: '12px',
+              borderRadius: 24,
+              padding: '16px',
             }}
           >
-            {/* Persona name · Brand (9px uppercase) */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: '8px' }}>
+              <div>
+                <span style={{ fontSize: '9px', color: 'var(--text-muted)', letterSpacing: '0.16em', textTransform: 'uppercase' }}>
+                  shared trace
+                </span>
+              </div>
+              <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                <span className="social-count-exact">{new Date(post.created_at).toLocaleDateString('en-IE', { day: 'numeric', month: 'short' })}</span>
+                <span className="social-count-soft">recently pinned</span>
+              </span>
+            </div>
+
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '6px' }}>
               {personaName && (
                 <>
@@ -143,7 +153,7 @@ export default function WearAndShareClient({
 
             {/* Fragrance name (Cormorant Garamond italic, 16px) */}
             {post.fragrances?.[0] && (
-              <Link href={`/collection/${post.fragrance_id}`}>
+              <Link href={`/cabinet/${post.fragrance_id}?from=wear-and-share`}>
                 <h3
                   style={{
                     fontSize: '16px',
@@ -180,7 +190,6 @@ export default function WearAndShareClient({
               </p>
             )}
 
-            {/* Bottom actions: heart, comment, share (12px muted) */}
             <div
               style={{
                 display: 'flex',
@@ -207,7 +216,8 @@ export default function WearAndShareClient({
                 }}
               >
                 <span>{likedPostIds.has(post.id) ? '❤' : '🤍'}</span>
-                {post.likes}
+                <span className="social-count-exact">{post.likes}</span>
+                <span className="social-count-soft">{likedPostIds.has(post.id) ? 'saved into your journal' : 'leave a soft mark'}</span>
               </button>
 
               <button
@@ -224,7 +234,8 @@ export default function WearAndShareClient({
                 }}
               >
                 <span>💬</span>
-                0
+                <span className="social-count-exact">0</span>
+                <span className="social-count-soft">quiet replies</span>
               </button>
 
               <button
@@ -241,6 +252,7 @@ export default function WearAndShareClient({
                 }}
               >
                 <span>↗</span>
+                <span>stamp</span>
               </button>
             </div>
           </div>

@@ -83,7 +83,7 @@ export default function CloneCard({ clone }: Props) {
 
   return (
     <div style={{ flexShrink: 0, width: 120 }}>
-      <Link href={`/collection/${clone.id}?from=clones`} style={{ textDecoration: 'none' }}>
+      <Link href={`/cabinet/${clone.id}?from=clones`} style={{ textDecoration: 'none' }}>
         <div
           style={{
             border: '1px solid var(--line)',

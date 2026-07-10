@@ -44,7 +44,7 @@ export default function FormulaCard({ open, onClose, base, top, third }: Props) 
     const params = new URLSearchParams()
     params.set('f1', base.id)
     params.set('f2', top.id)
-    setDeepLink(`${window.location.origin}/layering?${params.toString()}`)
+    setDeepLink(`${window.location.origin}/lab?${params.toString()}`)
   }, [open, base, top])
 
   if (!open || !base || !top) return null

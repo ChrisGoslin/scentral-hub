@@ -38,7 +38,7 @@ export default function ScannerPage() {
 function ScannerPageInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const fromDiscover = searchParams.get('from') === 'discover'
+  const fromDiscover = ['discover', 'study'].includes(searchParams.get('from') ?? '')
   const videoRef = useRef<HTMLVideoElement>(null)
   const [cameraState, setCameraState] = useState<'idle' | 'requesting' | 'active' | 'error'>('idle')
   const [cameraError, setCameraError] = useState<string>('')
@@ -296,15 +296,15 @@ function ScannerPageInner() {
         throw new Error('Failed to add to collection')
       }
 
-      // Navigate back to collection — or to Discover with a scan-to-search prefill
+      // Navigate back to the cabinet — or to The Study with a scan-to-search prefill
       if (fromDiscover) {
-        router.push(`/discover?q=${encodeURIComponent(scannedFragrance.name)}`)
+        router.push(`/study?q=${encodeURIComponent(scannedFragrance.name)}`)
       } else {
-        router.push('/collection')
+        router.push('/cabinet')
       }
     } catch (error) {
-      setScanMessage('Error adding to collection. Please try again.')
-      console.error('Add to collection error:', error)
+      setScanMessage('Error adding to the cabinet. Please try again.')
+      console.error('Add to cabinet error:', error)
     }
   }
 
@@ -357,7 +357,7 @@ function ScannerPageInner() {
         aspectRatio: '1/1',
         borderRadius: '16px',
         overflow: 'hidden',
-        background: '#000',
+        background: 'var(--charcoal)',
         position: 'relative',
         marginBottom: '24px',
       }}>
@@ -368,7 +368,7 @@ function ScannerPageInner() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            background: 'rgba(0,0,0,0.9)',
+            background: 'rgba(43, 41, 38, 0.92)',
             zIndex: 10,
           }}>
             <Button onClick={initCamera} variant="primary" style={{ padding: '16px 24px', fontSize: '16px' }}>
@@ -384,10 +384,10 @@ function ScannerPageInner() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            background: 'rgba(0,0,0,0.9)',
+            background: 'rgba(43, 41, 38, 0.92)',
             zIndex: 10,
           }}>
-            <div style={{ color: '#fff', fontSize: '14px', textAlign: 'center' }}>
+            <div style={{ color: 'var(--ivory)', fontSize: '14px', textAlign: 'center' }}>
               Requesting camera access...
             </div>
           </div>
@@ -400,13 +400,13 @@ function ScannerPageInner() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            background: 'rgba(0,0,0,0.9)',
+            background: 'rgba(43, 41, 38, 0.92)',
             zIndex: 10,
             padding: '16px',
           }}>
-            <div style={{ color: '#fff', fontSize: '14px', textAlign: 'center' }}>
+            <div style={{ color: 'var(--ivory)', fontSize: '14px', textAlign: 'center' }}>
               <p style={{ marginBottom: '12px' }}>Camera Error</p>
-              <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '13px', marginBottom: '16px' }}>
+              <p style={{ color: 'rgba(247,244,238,0.72)', fontSize: '13px', marginBottom: '16px' }}>
                 {cameraError}
               </p>
               <Button onClick={initCamera} variant="primary">
@@ -562,7 +562,7 @@ function ScannerPageInner() {
               variant="primary"
               style={{ flex: 1 }}
             >
-              Add to Collection
+              Add to Cabinet
             </Button>
             <Button
               onClick={scanAgain}
@@ -594,7 +594,7 @@ function ScannerPageInner() {
           </p>
           <div style={{ display: 'flex', gap: '12px' }}>
             <Button
-              onClick={() => router.push(`/discover?q=${encodeURIComponent(`${visionMatch.brand} ${visionMatch.name}`.trim())}`)}
+              onClick={() => router.push(`/study?q=${encodeURIComponent(`${visionMatch.brand} ${visionMatch.name}`.trim())}`)}
               variant="primary"
               style={{ flex: 1 }}
             >
@@ -623,7 +623,7 @@ function ScannerPageInner() {
           <p style={{ fontSize: '14px', color: 'var(--text)', marginBottom: 12 }}>
             Couldn&apos;t read this bottle —
           </p>
-          <Link href="/discover" style={{ fontSize: 13, color: 'var(--accent)', fontWeight: 600 }}>
+          <Link href="/study" style={{ fontSize: 13, color: 'var(--accent)', fontWeight: 600 }}>
             search by name?
           </Link>
         </div>
@@ -683,7 +683,7 @@ function ScannerPageInner() {
             <>
               <p style={{ marginBottom: '8px' }}>📱 Scanner Ready</p>
               <p style={{ fontSize: '13px' }}>
-                Point your camera at a fragrance barcode to add bottles to your collection.
+                Point your camera at a fragrance barcode to add bottles to your cabinet.
               </p>
             </>
           )}
@@ -706,7 +706,7 @@ function ScannerPageInner() {
 
       {/* Help Link */}
       <Link
-        href="/collection"
+        href="/cabinet"
         style={{
           fontSize: '13px',
           color: 'var(--text-muted)',
@@ -714,7 +714,7 @@ function ScannerPageInner() {
           borderBottom: '1px solid currentColor',
         }}
       >
-        Back to Collection
+        Back to The Cabinet
       </Link>
     </div>
   )

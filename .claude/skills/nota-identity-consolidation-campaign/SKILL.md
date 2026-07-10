@@ -25,9 +25,9 @@ Read `nota-architecture-contract` first if you have not already — it explains 
 | A partial migration already exists — do not re-do it, extend it | `cat supabase/migrations/20260704_db006_identity_model_migration.sql` — this migration already added a nullable `user_id uuid` column + dual-mode RLS (`auth.uid() = user_id OR anon_id = current_setting(...)`) to `temptations`, `shelf_events`, `evolution_events`, `noseprint_history`. It explicitly did **not** touch `insights_cache`, `trace_reactions`, `collections`, `traces`, `user_xp`, `user_streaks`. |
 | A claim function already exists but is incomplete | `cat lib/auth/claimLegacyData.ts` — claims `temptations`, `shelf_events`, `evolution_events`, `noseprint_history` by `UPDATE ... SET user_id WHERE anon_id = ? AND user_id IS NULL`. The `user_xp` block (lines ~46-56) is a stub — it reads the anon_id row but explicitly does nothing ("this just marks it claimed" — it does not). **This stub is Phase 2's starting point, not a finished migration.** |
 | Where `claimLegacyData` is called from | `grep -rn "claimLegacyData\|claimLegacyWishlist" app/ --include="*.tsx" --include="*.ts"` — confirm it is actually wired into the sign-in flow before assuming claiming happens automatically. If the grep returns only the definition file, it is dead code and Phase 2 must wire it in, not just extend it. |
-| The friendly-409 UX fix is NOT done | `grep -n "catch (error" -A3 app/api/shelf/route.ts` — the outer handler catches all errors (including the `enforce_shelf_eligibility` trigger's `RAISE EXCEPTION`) and returns a flat `{error: 'Shelf mutation failed'}` at **500**. There is no `error.code === 'P0001'` or message-sniffing branch anywhere in the file. This is real, open, and is a named acceptance check in Phase 4. |
+| The friendly-409 UX fix **shipped 2026-07-08** (commit `aeea36e`) — but not the way this campaign sketched | `grep -n "409\|isShelfEligibilityError" app/api/shelf/route.ts` — an `isShelfEligibilityError(error)` helper (regex message-sniffing: `/not eligible for shelf|eligible for shelf|shelf eligibility/i`, **not** `error.code === 'P0001'`) is checked in the catch block and returns `{code:'shelf_eligibility_required', error:'Mark this fragrance as tested before it can live on your Shelf.', canMarkTested:true}` at 409 before falling through to the generic 500. Phase 4's code sketch (P0001 SQLSTATE check) is now historical context, not a to-do — the acceptance *gate* (an automated test asserting exactly 409) is still the real remaining gap, see Phase 4 below. |
 | Stale in-repo comments to fix opportunistically, not treat as spec | `app/(main)/shelf/page.tsx` line ~42-43 comment says "Remaining slots (up to 10)" and `app/api/shelf/route.ts` line ~93 error string says `'fragranceId and a rank 1-10 are required'` — both are leftovers from the pre-fdbab61 10-slot era. Cosmetic, but fix in the same PR that touches those lines so they don't mislead the next session. |
-| No RLS adversarial suite or shelf e2e spec exists yet | `ls e2e/*.spec.ts` — no `shelf*.spec.ts`, no `e2e/security/rls.spec.ts` (the path `security-hardening`'s SKILL.md references as aspirational). Phase 4's acceptance check must create the first one, it cannot "re-run" one. |
+| `e2e/shelf.spec.ts` now exists (added 2026-07-08, same commit as the 409 fix) but does NOT cover eligibility-rejection | `cat e2e/shelf.spec.ts` — only 2 tests: signed-out shelf empty-state, and bottom-nav routing to login. No test posts to `/api/shelf` with an ineligible fragrance and asserts 409. No `e2e/security/rls.spec.ts` exists either (the path `security-hardening`'s SKILL.md references as aspirational). Phase 4's acceptance check (the eligibility-rejection 409 test) must still be created — the blanket "no shelf e2e spec at all" claim this row used to make is stale, but the specific test Phase 4 needs is still missing. |
 
 If any row above no longer matches what you observe, **stop and re-derive the phase you're in** — do not proceed on stale assumptions from this table.
 
@@ -183,32 +183,38 @@ CREATE INDEX idx_user_streaks_user_id ON user_streaks(user_id);
 
 ### Phase 4 — Fix the friendly-409 UX gap for trigger rejections
 
+**STATUS: the code fix shipped 2026-07-08 (commit `aeea36e`). Only the acceptance-gate test below is still open.**
+
 **Goal:** an ineligible shelf add (fragrance not in `collections` with status owned/tested/past_purchase) returns a calm, specific 409, not a generic 500.
 
-**Current state (verified, see §0):** `app/api/shelf/route.ts`'s `handleAdd` lets a Postgres exception from `enforce_shelf_eligibility` propagate to the outer `catch (error: any)` block, which always returns `{error: 'Shelf mutation failed'}` at 500 regardless of cause.
-
-**Fix sketch:**
+**Current state (re-verified 2026-07-10):** `app/api/shelf/route.ts` now has an `isShelfEligibilityError(error)` helper, checked in the outer catch block before the generic 500:
 
 ```ts
-// Postgres RAISE EXCEPTION without a custom SQLSTATE surfaces as code 'P0001' via postgrest-js.
-// Verify this code value against the actual error shape before shipping —
-// log `JSON.stringify(error)` in a local test and confirm `error.code` before trusting 'P0001' blind.
+function isShelfEligibilityError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error ?? '')
+  return /not eligible for shelf|eligible for shelf|shelf eligibility/i.test(message)
+}
+```
+
+catch block returns `{ code: 'shelf_eligibility_required', error: 'Mark this fragrance as tested before it can live on your Shelf.', canMarkTested: true }` at **409**. This is **message-sniffing on the Postgres exception text**, not the `error.code === 'P0001'` SQLSTATE check this campaign originally sketched (kept below as historical context — do not re-implement it, the shipped approach works and is simpler):
+
+<details><summary>Original fix sketch (superseded, do not re-apply)</summary>
+
+```ts
+// Superseded 2026-07-08 — shipped code uses message-sniffing instead, see above.
 if (error.code === 'P0001' && /not eligible for shelf/.test(error.message ?? '')) {
   return NextResponse.json(
     { error: 'Add this fragrance to your collection as tested, owned, or a past purchase before shelving it.' },
     { status: 409 }
   )
 }
-throw error // fall through to the existing generic 500 for anything unrecognised
+throw error
 ```
+</details>
 
-Add this branch inside `handleAdd`'s own try/catch (or check `error.code` in the outer catch before the generic response) — do not swallow other error types into the same 409.
+**Expected observation:** POST `/api/shelf` with `action:'add'` for a `fragranceId` that has no eligible `collections` row for that user returns **409** with the friendly message, not 500. Verify: `grep -n "409\|isShelfEligibilityError" app/api/shelf/route.ts`.
 
-**Expected observation:** POST `/api/shelf` with `action:'add'` for a `fragranceId` that has no eligible `collections` row for that user returns **409** with the friendly message, not 500.
-
-**If you see** `error.code` is `undefined` or a different value than `'P0001'` **→** the postgrest-js error shape differs from assumption; inspect the actual error object (`console.error(JSON.stringify(error))` in a local/staging test) before hardcoding a code check — do not guess a second time.
-
-**Acceptance gate (routed through `qe-automation`, not eyeballed):** an API-layer test asserts `POST /api/shelf {action:'add', fragranceId: <ineligible id>}` returns exactly 409 with a message that does not contain the word "failed" or leak the raw Postgres exception text (per `security-hardening`'s "never leak stack traces or SQL" rule). Add this to the coverage map this skill's Phase 3 also touches (`e2e` or API test directory — match whichever layer `qe-automation`'s "layer decision rule" assigns to route-status-code behaviour: API/integration, not e2e).
+**Acceptance gate — STILL OPEN (routed through `qe-automation`, not eyeballed):** an API-layer test asserts `POST /api/shelf {action:'add', fragranceId: <ineligible id>}` returns exactly 409 with a message that does not contain the word "failed" or leak the raw Postgres exception text (per `security-hardening`'s "never leak stack traces or SQL" rule). `e2e/shelf.spec.ts` exists (added in the same commit as the fix) but only covers signed-out UX — it does NOT test the eligibility-rejection path. Add this to the coverage map this skill's Phase 3 also touches (`e2e` or API test directory — match whichever layer `qe-automation`'s "layer decision rule" assigns to route-status-code behaviour: API/integration, not e2e). This is the one concrete deliverable remaining in this phase.
 
 ---
 
@@ -283,14 +289,14 @@ grep -rln "anon_id" app/api/ --include="*.ts"
 grep -n "user_id" supabase/migrations/20260704_db006_identity_model_migration.sql
 ls supabase/migrations/ | grep -i "identity\|anon" # any newer migration continuing this work?
 
-# Whether the friendly-409 fix has since landed
-grep -n "P0001\|409" app/api/shelf/route.ts
+# Friendly-409 fix: shipped 2026-07-08 via isShelfEligibilityError (message-sniffing, not P0001) — confirm still shipped:
+grep -n "409\|isShelfEligibilityError" app/api/shelf/route.ts
 
 # Whether claimLegacyData is wired into the sign-in path yet
 grep -rn "claimLegacyData" app/ components/ --include="*.ts" --include="*.tsx"
 
-# Whether shelf e2e coverage now exists
-ls e2e/ | grep -i shelf
+# e2e/shelf.spec.ts exists (2026-07-08) but doesn't cover eligibility-rejection — confirm whether it's been extended:
+cat e2e/shelf.spec.ts | grep -n "409\|eligib\|ineligible"
 ```
 
 **Last verified:** 2026-07-05, by direct Read/Grep against `/Users/christophergoslin/Projects/scentral-hub` (no live DB query — all row-count SQL in this file is labelled "measure first," not stated as fact).

@@ -220,7 +220,7 @@ export default function NoseprintClient({
               {matches.map(f => (
                 <Link
                   key={f.id}
-                  href={`/collection/${f.id}`}
+                  href={`/cabinet/${f.id}?from=archive`}
                   style={{
                     display: 'flex',
                     justifyContent: 'space-between',

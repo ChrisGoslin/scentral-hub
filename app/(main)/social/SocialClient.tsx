@@ -230,14 +230,14 @@ export default function SocialClient() {
       {/* Header */}
       <div className="px-4" style={{ marginBottom: 24 }}>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 26, color: 'var(--text)', lineHeight: '32px' }}>
-          The Strip
+          Wear & Share
         </h1>
         <p style={{ fontSize: 14, color: 'var(--text-muted)', marginTop: 4 }}>
-          What the fragrance world is wearing
+          Tear-sheets, field notes, and what the room is quietly wearing.
         </p>
       </div>
 
-      {/* The Strip Feed */}
+      {/* Wear & Share Feed */}
       <div style={{ marginBottom: 40 }}>
         {stripOfTheWeek && (
           <div style={{ marginBottom: 16 }}>
@@ -372,10 +372,10 @@ export default function SocialClient() {
       <Sheet open={!!activeQueueItem} onClose={handleSkipQueue}>
         <div style={{ padding: '0 16px 16px' }}>
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontStyle: 'italic', color: 'var(--text)', marginBottom: 8 }}>
-            Post to The Strip?
+            Pin this to Wear & Share?
           </h2>
           <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 24 }}>
-            Share your wear with the community.
+            Let another curator discover the note you left behind.
           </p>
           
           {activeQueueItem && (
@@ -415,7 +415,7 @@ export default function SocialClient() {
               disabled={isPosting}
               style={{ flex: 1, padding: 14, background: 'var(--accent)', border: 'none', borderRadius: 999, color: 'var(--bg)', fontWeight: 600, cursor: isPosting ? 'not-allowed' : 'pointer', opacity: isPosting ? 0.7 : 1 }}
             >
-              {isPosting ? 'Posting...' : 'Add to The Strip →'}
+              {isPosting ? 'Pinning...' : 'Pin to Wear & Share →'}
             </button>
           </div>
         </div>
@@ -518,7 +518,7 @@ function TrendingSection() {
           )
 
           return id ? (
-            <Link key={tf.name} href={`/collection/${id}?from=social`} style={{ textDecoration: 'none', color: 'inherit' }}>
+            <Link key={tf.name} href={`/cabinet/${id}?from=wear-and-share`} style={{ textDecoration: 'none', color: 'inherit' }}>
               {CardContent}
             </Link>
           ) : (

@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { track } from '@/lib/posthog'
+import { getSafeFragranceImageUrl } from '@/lib/fragranceImageUrl'
 import EmptyState from '@/components/ui/EmptyState'
 import type { DiscoveryBox } from './page'
 
@@ -66,13 +67,13 @@ export default function BoxesClient({ boxes, error }: Props) {
         background: 'linear-gradient(135deg, var(--color-surface) 0%, var(--bg) 100%)',
       }}>
         <p style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: 6 }}>
-          Discovery Boxes
+          Field Cases
         </p>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.75rem, 5vw, 2.5rem)', color: 'var(--text)', fontStyle: 'italic', lineHeight: 1.1, marginBottom: 10 }}>
-          Curated sample<br />collections
+          Curated sample<br />cases
         </h1>
         <p style={{ fontSize: 13, color: 'var(--text-muted)', maxWidth: 340, lineHeight: 1.5 }}>
-          Explore thoughtfully assembled sets. Perfect for discovery or gifting.
+          Thoughtfully assembled edits for discovery, gifting, or a particular mood board.
         </p>
       </div>
 
@@ -173,6 +174,7 @@ export default function BoxesClient({ boxes, error }: Props) {
         <div style={{ padding: '16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12 }}>
           {filtered.map(box => {
             const hasShopifyId = !!box.shopify_product_id
+            const safeBoxImageUrl = getSafeFragranceImageUrl(box.image_url)
 
             return hasShopifyId ? (
               <Link
@@ -201,14 +203,14 @@ export default function BoxesClient({ boxes, error }: Props) {
                   <div style={{
                     flex: 1,
                     background: 'var(--color-surface)',
-                    backgroundImage: box.image_url ? `url(${box.image_url})` : undefined,
+                    backgroundImage: safeBoxImageUrl ? `url(${safeBoxImageUrl})` : undefined,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}>
-                    {!box.image_url && (
+                    {!safeBoxImageUrl && (
                       <span style={{ fontSize: 32 }}>📦</span>
                     )}
                   </div>

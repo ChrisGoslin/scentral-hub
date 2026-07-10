@@ -37,7 +37,7 @@ export default async function InspiredByClones({ fragranceName, fragranceId, fro
       {clones.map(c => (
         <Link
           key={c.id}
-          href={`/collection/${c.id}${from ? `?from=${from}` : ''}`}
+          href={`/cabinet/${c.id}${from ? `?from=${from}` : '?from=cabinet'}`}
           className="flex items-center justify-between px-3 py-2 rounded-[var(--r-card)] transition-colors hover:border-[var(--accent)]"
           style={{ background: 'var(--surface)', border: '1px solid var(--line)' }}
         >

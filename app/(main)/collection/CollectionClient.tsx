@@ -122,7 +122,7 @@ function FragranceCard({ f }: { f: CollectionFragrance }) {
 
   return (
     <Card className="flex flex-col gap-2 transition-colors h-full group">
-      <Link href={`/collection/${f.id}`} className="flex flex-col gap-2 flex-1">
+      <Link href={`/cabinet/${f.id}?from=cabinet`} className="flex flex-col gap-2 flex-1">
         <FragranceImage imageUrl={f.image_url} brand={f.brand} name={f.name} />
         <div className="flex-1">
           <p style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', lineHeight: '14px' }}>
@@ -307,13 +307,13 @@ export default function CollectionClient({ fragrances, totalCount }: { fragrance
       <div className="px-4 pt-8 pb-4" style={{ borderBottom: '1px solid var(--line)' }}>
         <div className="flex items-center justify-between">
           <div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 28, color: 'var(--text)', lineHeight: '34px' }}>
-              {personaCopy.collectionHeadline}
-            </h1>
-            <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
-              {filtered.length} of {totalCount ?? fragrances.length} scents
-            </p>
-          </div>
+                <h1 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 28, color: 'var(--text)', lineHeight: '34px' }}>
+                  {personaCopy.collectionHeadline}
+                </h1>
+                <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
+              {filtered.length} of {totalCount ?? fragrances.length} bottles and studies
+                </p>
+              </div>
           <div className="flex items-center gap-3">
             {/* Add bottle button */}
             <button
@@ -339,7 +339,7 @@ export default function CollectionClient({ fragrances, totalCount }: { fragrance
                 fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em',
               }}
             >
-              {wardrobeMode ? '⬛ Wardrobe' : '⬜ Wardrobe'}
+              {wardrobeMode ? '⬛ Cabinet' : '⬜ Cabinet'}
             </button>
             {/* Owned toggle — hidden in wardrobe mode */}
             {!wardrobeMode && (
@@ -416,11 +416,11 @@ export default function CollectionClient({ fragrances, totalCount }: { fragrance
                   {personaCopy.collectionEmpty}
                 </p>
                 <p style={{ fontSize: 14, lineHeight: '22px', color: 'var(--text-muted)', marginTop: 12, fontWeight: 300 }}>
-                  Add your first bottle to unlock personalised layering combinations, inspired-by alternatives, and curation insights.
+                  Add your first bottle to unlock personalised accords, inspired-by trails, and cabinet intelligence.
                 </p>
                 <div className="mt-7 w-full">
-                  <Link href="/discover" className="block w-full">
-                    <Button fullWidth>Explore the Catalogue</Button>
+                  <Link href="/study" className="block w-full">
+                    <Button fullWidth>Enter The Study</Button>
                   </Link>
                 </div>
                 <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 16 }}>

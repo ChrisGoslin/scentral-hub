@@ -1,12 +1,16 @@
 import { Metadata } from 'next'
 import { cookies } from 'next/headers'
+import Link from 'next/link'
+import { permanentRedirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
+import Button from '@/components/ui/Button'
 import YouClient, { type SavedCombination, type WeekWearEntry } from './YouClient'
+import { mapSearchParamsToString } from '@/lib/rebrand'
 
 export const metadata: Metadata = {
-  title: 'Your Profile | nota.',
-  description: 'Track what you wear, save your favourite layering combinations, and see the patterns in your scent collection.',
-  alternates: { canonical: '/you' },
+  title: 'Archive | nota.',
+  description: 'Review what you wear, save favourite layering combinations, and watch your scent archive gather patina.',
+  alternates: { canonical: '/archive' },
 }
 
 export const dynamic = 'force-dynamic'
@@ -21,7 +25,7 @@ interface RawWearLogRow {
   } | null
 }
 
-export default async function YouPage() {
+export async function ArchivePageContent() {
   const cookieStore = await cookies()
   const supabase = await createClient(cookieStore)
 
@@ -36,7 +40,54 @@ export default async function YouPage() {
   }
 
   if (!session) {
-    return <YouClient state="signed-out" />
+    return (
+      <div style={{ background: 'var(--bg)', minHeight: '100dvh', paddingTop: 'calc(44px + env(safe-area-inset-top, 0px))' }}>
+        <div className="px-4 pt-8 pb-4 flex items-center justify-between" style={{ borderBottom: '1px solid var(--line)' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--text)', lineHeight: '34px' }}>Archive</h1>
+        </div>
+        <div className="px-4 py-8">
+          <div
+            style={{
+              maxWidth: 420,
+              margin: '0 auto',
+              minHeight: '60vh',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              gap: 16,
+              padding: 24,
+              borderRadius: 20,
+              border: '1px solid color-mix(in srgb, var(--accent) 20%, var(--line))',
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%)',
+              textAlign: 'center',
+            }}
+          >
+              <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--text-muted)', margin: 0 }}>
+                Archive
+              </p>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--text)', lineHeight: '34px', fontStyle: 'italic', margin: 0 }}>
+                Your dossier is waiting.
+              </h2>
+              <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: '22px', margin: 0 }}>
+                Take the read, then keep your scent identity, saved artifacts, and wearing rhythm together.
+              </p>
+            <div style={{ display: 'grid', gap: 8, textAlign: 'left', fontSize: 13, color: 'var(--text-muted)' }}>
+              <div>• Save your scent identity</div>
+              <div>• See your evolving taste profile</div>
+              <div>• Keep your wishlist and rituals together</div>
+            </div>
+            <div style={{ display: 'grid', gap: 10, marginTop: 8 }}>
+              <Link href="/onboarding" style={{ width: '100%' }}>
+                <Button fullWidth>Find Your Base Note</Button>
+              </Link>
+              <Link href="/login?next=/archive" style={{ width: '100%' }}>
+                <Button fullWidth variant="secondary">Sign in to continue</Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
@@ -118,4 +169,13 @@ export default async function YouPage() {
       ownedCount={ownedCount ?? 0}
     />
   )
+}
+
+export default async function YouPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}) {
+  const resolvedSearchParams = await searchParams
+  permanentRedirect(`/archive${mapSearchParamsToString(resolvedSearchParams)}`)
 }

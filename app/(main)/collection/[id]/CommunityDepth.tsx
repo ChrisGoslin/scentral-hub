@@ -5,6 +5,7 @@ import { getBrandEmoji } from '@/lib/brandEmoji'
 import Image from 'next/image'
 import { getPersonaById } from '@/lib/personas'
 import { formatDistanceToNow } from 'date-fns'
+import { getSafeFragranceImageUrl } from '@/lib/fragranceImageUrl'
 
 export default async function CommunityDepth({ fragranceId }: { fragranceId: string }) {
   const cookieStore = await cookies()
@@ -120,7 +121,7 @@ export default async function CommunityDepth({ fragranceId }: { fragranceId: str
       {/* Recent Strip Posts */}
       {recentPosts.length > 0 && (
         <div style={{ marginBottom: 24 }}>
-          <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>Recent on The Strip:</p>
+          <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>Recently pinned in Wear & Share:</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {recentPosts.map((post: any, i: number) => {
               const p = post.persona_id ? getPersonaById(post.persona_id) : null
@@ -146,21 +147,24 @@ export default async function CommunityDepth({ fragranceId }: { fragranceId: str
             Members who own this also own:
           </p>
           <div style={{ display: 'flex', gap: 10, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 8 }}>
-            {alsoOwnFragrances.map((f: any) => (
-              <Link key={f.id} href={`/collection/${f.id}`} style={{ textDecoration: 'none', flexShrink: 0, width: 90 }}>
-                <div style={{ border: '1px solid var(--line)', borderRadius: 'var(--r-card)', overflow: 'hidden', background: 'var(--bg)', height: 120, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 8 }}>
-                  {f.image_url ? (
-                    <div style={{ position: 'relative', width: 60, height: 60, marginBottom: 8 }}>
-                      <Image src={f.image_url} alt={f.name} fill style={{ objectFit: 'contain' }} sizes="60px" />
-                    </div>
-                  ) : (
-                    <span style={{ fontSize: 24, marginBottom: 8 }}>{getBrandEmoji(f.brand)}</span>
-                  )}
-                  <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', width: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textAlign: 'center', marginTop: 'auto' }}>{f.brand}</p>
-                  <p style={{ fontFamily: 'var(--font-display)', fontSize: 12, color: 'var(--text)', fontStyle: 'italic', width: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textAlign: 'center' }}>{f.name}</p>
-                </div>
-              </Link>
-            ))}
+            {alsoOwnFragrances.map((f: any) => {
+              const safeImageUrl = getSafeFragranceImageUrl(f.image_url)
+              return (
+                <Link key={f.id} href={`/cabinet/${f.id}?from=cabinet`} style={{ textDecoration: 'none', flexShrink: 0, width: 90 }}>
+                  <div style={{ border: '1px solid var(--line)', borderRadius: 'var(--r-card)', overflow: 'hidden', background: 'var(--bg)', height: 120, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 8 }}>
+                    {safeImageUrl ? (
+                      <div style={{ position: 'relative', width: 60, height: 60, marginBottom: 8 }}>
+                        <Image src={safeImageUrl} alt={f.name} fill style={{ objectFit: 'contain' }} sizes="60px" />
+                      </div>
+                    ) : (
+                      <span style={{ fontSize: 24, marginBottom: 8 }}>{getBrandEmoji(f.brand)}</span>
+                    )}
+                    <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', width: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textAlign: 'center', marginTop: 'auto' }}>{f.brand}</p>
+                    <p style={{ fontFamily: 'var(--font-display)', fontSize: 12, color: 'var(--text)', fontStyle: 'italic', width: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textAlign: 'center' }}>{f.name}</p>
+                  </div>
+                </Link>
+              )
+            })}
           </div>
         </div>
       )}

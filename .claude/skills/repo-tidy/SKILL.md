@@ -107,10 +107,13 @@ would have deleted real, shipped, intentional work). Re-read AGENTS.md §1 every
 this phase; never reuse a scope snapshot from a previous repo-tidy run.
 
 What stays a hard purge regardless of how scope evolves — these are fabricated lore, not
-product features, and have never legitimately shipped:
-- Any "Agent Luna / Hegemony / Shadow Branching / autopilot-shadow" named component
-- "Olfactory NFTs / Invisible Commerce"
-- "Morocco Marketplace Demo" / "Alchemist Knowledge Base"
+product features, and have never legitimately shipped. **`grounded-agent-guardrails`'s "Known
+Fabrications — Never Reintroduce" section is the canonical, single-maintained list — check
+there for the current names** (it explicitly says "add to this list the moment you catch a new
+one," so it's the one that gets kept current). As of this writing that list includes: "Agent
+Luna / Hegemony / Shadow Branching / autopilot-shadow" named components, "Olfactory NFTs /
+Invisible Commerce", "Morocco Marketplace Demo" / "Alchemist Knowledge Base" — but re-check the
+source skill rather than trusting this copy, which can drift.
 
 ```bash
 # Search for the lore-fabrication patterns above (NOT a general scope check —

@@ -359,13 +359,13 @@ export default function OnboardingPage() {
     localStorage.setItem('scentral_onboarded', 'true')
     localStorage.setItem('scentral_persona', persona.id)
     localStorage.setItem('scentral_persona_name', persona.name)
-    track('persona_to_discover', { persona_id: persona.id })
-    router.push(`/discover?persona=${persona.id}`)
+    track('persona_to_study', { persona_id: persona.id })
+    router.push(`/study?persona=${persona.id}`)
   }
 
   const handleSkip = () => {
     localStorage.setItem('scentral_onboarded', 'true')
-    router.push('/discover')
+    router.push('/study')
   }
 
   const toggleContext = (c: string) => {

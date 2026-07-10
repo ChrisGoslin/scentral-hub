@@ -37,7 +37,7 @@ export default function CoherenceCard({ owned }: { owned: CollectionFragrance[] 
   if (owned.length < 5) {
     return (
       <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 16px 16px', fontStyle: 'italic' }}>
-        Add {5 - owned.length} more {owned.length === 4 ? 'fragrance' : 'fragrances'} to unlock your collection reading.
+        Add {5 - owned.length} more {owned.length === 4 ? 'fragrance' : 'fragrances'} to unlock your cabinet reading.
       </p>
     )
   }
@@ -46,17 +46,17 @@ export default function CoherenceCard({ owned }: { owned: CollectionFragrance[] 
 
   return (
     <div style={{ margin: '0 16px 16px', padding: '16px', borderLeft: '2px solid var(--accent)', background: 'var(--surface)', borderRadius: 'var(--r-card)' }}>
-      <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 8 }}>Your collection</p>
+      <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 8 }}>The Cabinet</p>
       <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 16, color: 'var(--text)', lineHeight: 1.5 }}>
         {coherenceReading.reading}
       </p>
       {coherenceReading.missing.length > 0 && (
         <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--line)' }}>
           <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>
-            Your collection doesn't have a {coherenceReading.missing[0].toLowerCase()} note yet.
+            The cabinet doesn't have a {coherenceReading.missing[0].toLowerCase()} note yet.
           </p>
-          <a href={`/discover?family=${encodeURIComponent(coherenceReading.missing[0])}`} style={{ fontSize: 11, color: 'var(--accent)', textDecoration: 'none' }}>
-            Find one → {coherenceReading.missing[0]} fragrances
+          <a href={`/study?family=${encodeURIComponent(coherenceReading.missing[0])}`} style={{ fontSize: 11, color: 'var(--accent)', textDecoration: 'none' }}>
+            Study a lead → {coherenceReading.missing[0]} fragrances
           </a>
         </div>
       )}

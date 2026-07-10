@@ -489,11 +489,11 @@ export default function WardrobeShelf({ fragrances }: WardrobeShelfProps) {
     return (
       <div style={{ minHeight: '100dvh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
         <EmptyState
-          headline="Your wardrobe is waiting"
-          caption="Add your first bottle from Discover to start building your collection."
+          headline="Your cabinet is waiting"
+          caption="Add your first bottle from The Study to begin arranging your archive."
           action={
-            <Link href="/discover" style={{ textDecoration: 'none' }}>
-              <Button>Explore Fragrances</Button>
+            <Link href="/study" style={{ textDecoration: 'none' }}>
+              <Button>Enter The Study</Button>
             </Link>
           }
         />
@@ -611,7 +611,7 @@ export default function WardrobeShelf({ fragrances }: WardrobeShelfProps) {
             ) : (
               <>
                 <SketchAnnotation color="clay" arrowDirection="down-right" arrowPlacement="before">
-                  Discover Your Persona
+                  Continue the read
                 </SketchAnnotation>
                 
                 <PostItNote variant="clay" rotation="slight-left" style={{ maxWidth: 400, width: '100%' }}>
@@ -623,7 +623,7 @@ export default function WardrobeShelf({ fragrances }: WardrobeShelfProps) {
                   </p>
                   <div style={{ fontSize: 12 }}>
                     <p style={{ margin: 0 }}>
-                      Visit the <strong>You</strong> tab to take the scent identity quiz and unlock personalized layering tips here!
+                      Visit <strong>The Archive</strong> to take the read and unlock personalised notes for this cabinet.
                     </p>
                   </div>
                 </PostItNote>

@@ -3,8 +3,8 @@ import { createClient } from '@/utils/supabase/server'
 import BoxesClient from './BoxesClient'
 
 export const metadata: Metadata = {
-  title: 'Discovery Boxes | nota.',
-  description: 'Curated fragrance sample sets. Explore, discover, and expand your scent wardrobe.',
+  title: 'Field Cases | nota.',
+  description: 'Curated fragrance sample sets and field cases for studying a mood, house, or scent trail.',
 }
 
 export const dynamic = 'force-dynamic'

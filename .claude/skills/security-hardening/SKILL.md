@@ -21,7 +21,7 @@ Companion doc with full rationale and code snippets: `docs/nota/06-testing-secur
 ## Fixed facts (verify before assuming they changed)
 
 - All 37 public tables are RLS-enabled; user-scoped tables key on `user_id uuid → auth.users`. `auth.uid()` is canonical; `scentral_anon_id` is legacy/terminal — never store new personal data keyed by anon_id.
-- Service-role key is server-scripts/Edge-Functions only. Gate: `grep -r "SERVICE_ROLE" app/` must be empty.
+- Service-role key usage is expected inside `app/api/*/route.ts` server handlers (10+ routes read `process.env.SUPABASE_SERVICE_ROLE_KEY` server-side, e.g. `app/api/strip/post/route.ts`, `app/api/spritz/log-wear/route.ts`, `app/api/admin/enrichment/*`) — that is not a leak. The real gate is: **never in a client component or `NEXT_PUBLIC_*` var.** Gate: `grep -rln "SERVICE_ROLE" app/ | xargs grep -l "'use client'"` must be empty (checks client-bundle exposure specifically, not the whole `app/` tree which legitimately includes server-only routes).
 - No module-scope Supabase clients in API routes (husky-enforced, L15).
 - LLM rules: no PII in prompts; every LLM route needs a server-side rate cap; no per-request LLM in UI paths; enrichment text reaches prompts only via `/admin/enrichment` human review.
 
@@ -80,5 +80,5 @@ Derived from: `docs/nota/06-testing-security-abuse.md` §2, live Supabase schema
 Re-verify when picking this skill back up:
 - RLS still on every public table: Supabase MCP `list_tables` (check no table shows `rls_enabled: false`).
 - No module-scope Supabase clients slipped back into `app/api`: `.husky/pre-push` still checks this — `cat .husky/pre-push`.
-- No service-role key leaked client-side: `grep -rn "SERVICE_ROLE" app/` (must be empty).
+- No service-role key leaked client-side: `grep -rln "SERVICE_ROLE" app/ | xargs grep -l "'use client'"` (must be empty — server-route usage in `app/api/*/route.ts` is expected and fine).
 - GDPR consent gate still live: `grep -rn "ConsentBanner\|consent" app/components/AnalyticsProvider.tsx components/ConsentBanner.tsx 2>/dev/null`.

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Caveat, Fraunces, Space_Grotesk } from "next/font/google";
+import { Caveat, Instrument_Serif, Space_Grotesk, Unbounded } from "next/font/google";
 import "./globals.css";
 import "../lib/design/tokens.css";
 import PWARegistration from "./components/PWARegistration";
@@ -11,6 +11,7 @@ import FeedbackWidget from "@/components/feedback/FeedbackWidget";
 import CompareBar from "@/components/ui/CompareBar";
 import TemptationProvider from "@/components/temptations/TemptationProvider";
 import ConsentBanner from "@/components/ConsentBanner";
+import AmbientModeController from "./components/AmbientModeController";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -19,10 +20,10 @@ const spaceGrotesk = Space_Grotesk({
   display: "swap",
 });
 
-const fraunces = Fraunces({
+const unbounded = Unbounded({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-fraunces",
+  weight: ["400", "500", "700"],
+  variable: "--font-unbounded",
   display: "swap",
 });
 
@@ -30,6 +31,14 @@ const caveat = Caveat({
   subsets: ["latin"],
   weight: ["400", "700"],
   variable: "--font-caveat",
+  display: "swap",
+});
+
+const instrumentSerif = Instrument_Serif({
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
+  variable: "--font-instrument-serif",
   display: "swap",
 });
 
@@ -72,7 +81,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0F172A",
+  themeColor: "#2B2926",
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
@@ -90,7 +99,7 @@ export default function RootLayout({
       lang="en"
       data-theme="dark"
       data-scroll-behavior="smooth"
-      className={`h-[100dvh] antialiased ${spaceGrotesk.variable} ${fraunces.variable} ${caveat.variable}`}
+      className={`h-[100dvh] antialiased ${spaceGrotesk.variable} ${unbounded.variable} ${caveat.variable} ${instrumentSerif.variable}`}
     >
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -100,6 +109,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-[100dvh] flex flex-col" style={{ background: "var(--bg)", color: "var(--text)", fontFamily: "var(--font-ui)" }}>
         <Providers>
+          <AmbientModeController />
           <PageTracker />
           <AnalyticsProvider>
             <PWARegistration />

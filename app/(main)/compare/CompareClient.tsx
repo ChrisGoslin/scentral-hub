@@ -95,10 +95,10 @@ export default function CompareClient() {
       <div style={{ padding: '48px 16px', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <EmptyState
           headline="No fragrances to compare"
-          caption="Select up to 2 fragrances from Discover or your Collection to compare."
+          caption="Select up to 2 fragrances from The Study or The Cabinet to compare."
           action={
-            <Link href="/discover" style={{ textDecoration: 'none' }}>
-              <Button>Go to Discover</Button>
+            <Link href="/study" style={{ textDecoration: 'none' }}>
+              <Button>Go to The Study</Button>
             </Link>
           }
         />
@@ -186,7 +186,7 @@ export default function CompareClient() {
         {[f1, f2].filter(Boolean).map((frag) => (
           <Link
             key={frag.id}
-            href={`/collection/${frag.id}`}
+            href={`/cabinet/${frag.id}?from=cabinet`}
             style={{
               textDecoration: 'none',
               color: 'inherit',

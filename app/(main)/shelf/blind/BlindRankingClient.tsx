@@ -1,9 +1,9 @@
 'use client'
 
 import React, { useCallback, useEffect, useState } from 'react'
-import Image from 'next/image'
 import Button from '@/components/ui/Button'
 import AuthSheet from '@/components/auth/AuthSheet'
+import { SafeFragranceImage } from '@/components/fragrance/SafeFragranceImage'
 
 type BlindFragrance = {
   id: string
@@ -316,7 +316,15 @@ function RevealScreen({ sessionId, revealed }: { sessionId: string; revealed: Re
               </div>
               <div style={{ width: 44, height: 58, position: 'relative', flexShrink: 0, borderRadius: 6, overflow: 'hidden', background: 'var(--surface-2)' }}>
                 {f.image_url && isVisible && (
-                  <Image src={f.image_url} alt={f.name} fill sizes="44px" style={{ objectFit: 'contain' }} />
+                  <SafeFragranceImage
+                    imageUrl={f.image_url}
+                    brand={f.brand}
+                    name={f.name}
+                    family={f.family}
+                    sizes="44px"
+                    wrapperStyle={{ position: 'absolute', inset: 0 }}
+                    imageStyle={{ objectFit: 'contain' }}
+                  />
                 )}
               </div>
               <div style={{ minWidth: 0 }}>

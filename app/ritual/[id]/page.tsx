@@ -318,13 +318,13 @@ export default async function RitualPage({ params }: { params: Promise<{ id: str
             Inspired? Compose your own.
           </p>
           <Link
-            href="/layering"
+            href="/lab"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
               background: 'var(--accent)',
-              color: '#fff',
+              color: 'var(--ivory)',
               padding: '14px 36px',
               borderRadius: 'var(--r-btn)',
               fontWeight: 700,

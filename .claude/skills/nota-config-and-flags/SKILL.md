@@ -45,7 +45,7 @@ Re-run that grep before trusting this table — it drifts.
 | `NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN` | experimental/partial | `lib/shopify.ts`, `app/(main)/boxes/[slug]/BoxDetailClient.tsx` | see §4 | `/boxes` product data and cart links break gracefully to null/console.warn, not a crash. |
 | `SHOPIFY_STOREFRONT_API_KEY` | experimental/partial | `lib/shopify.ts` | see §4 | Same as above. |
 | `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | production for the routes that use it | `lib/rate-limit.ts`, `app/api/formulate/route.ts`, `app/api/og/noseprint/route.tsx` | `lib/rate-limit.ts` returns `null` limiter (allow-all) if either is unset — explicit designed fallback for local dev | In production, if these are unset, rate limiting on `/api/formulate` and `/api/og/noseprint` silently disables (no error, just unlimited requests). See §5 — do not assume "rate limited" applies repo-wide. |
-| `ANTHROPIC_API_KEY` | production | every Haiku call site (`app/api/read/generate/route.ts`, chemist, sommelier, dna-match, smells-like, clone-confidence, pros-cons) | none — required per route, will throw on the Anthropic SDK call | Those routes 500 when called. |
+| `ANTHROPIC_API_KEY` | production | every Haiku call site (`app/api/read/generate/route.ts`, sommelier, dna-match, smells-like, clone-confidence, pros-cons, proscons, scan, formulate) — **not `chemist`**, which has no Anthropic import (pure DB/analytical route, see §5) | none — required per route, will throw on the Anthropic SDK call | Those routes 500 when called. |
 | `GEMINI_API_KEY` | legacy/experimental | `@google/genai` call sites — grep before trusting any route still uses it; most LLM routes migrated to Haiku per incident #8 in project history | — | Whatever legacy route still reads it fails; low blast radius since migration mostly done. |
 | `NEXT_PUBLIC_BETA_MODE` | production but see §3 (footgun) | `app/page.tsx:44`, `lib/subscription.ts:8` | `=== 'true'` string check, else Pro off | Currently `false` in the live dossier snapshot — Pro features gated off for everyone. See §3 before touching this. |
 | `GOOGLE_CSE_API_KEY` / `GOOGLE_CSE_CX` | disabled (service closed) | `scripts/enrich-images-google.mjs` | script exits with a console error if unset | Script only — not a runtime app path. Google Custom Search closed to new projects 2026-01-20 (see repo incident history); DuckDuckGo fallback already exists in `scripts/fetch-fragrance-images.mjs` — use that script, not this env var, for new work. |
@@ -151,12 +151,8 @@ directly in code and confirmed by the repo's own `CLAUDE.md` §7/§12
   limiters like the one still in `/api/formulate`. As of this verification
   only `app/api/og/noseprint/route.tsx` uses it — `/api/formulate` has not
   yet been migrated to it (still has its own inline `Ratelimit` instance).
-- **Unguarded LLM routes** (per repo `CLAUDE.md` §7 open-problems and the
-  dossier): `dna-match`, `sommelier`, `chemist`, `smells-like`,
-  `clone-confidence`, `pros-cons` call Anthropic directly with no rate limit
-  of any kind. This is a known, named cost-exposure gap, not an oversight
-  you need to "discover" — but also not yet fixed. If asked to add
-  protection to one of these, prefer `lib/rate-limit.ts` (the shared module)
+- **Unguarded LLM routes — corrected 2026-07-10, this list was stale in two ways.** `chemist` was never an Anthropic-calling route at all (no `@anthropic-ai/sdk` import — it's pure DB/analytical math; `nota-architecture-contract` §7 verified this and flagged the dossier as wrong here — don't reintroduce the error). Separately, `dna-match`, `sommelier`, `pros-cons`, and `clone-confidence` **were** unguarded as of 2026-07-05 but got rate limiters added in commit `aeea36e` (2026-07-08, `lib/rate-limit.ts`'s `makeLimiter`, 20/min/IP each). **Only `smells-like` and `scan` remain genuinely unguarded now.** `resilience-abuse/SKILL.md` and `nota-architecture-contract` §7 are the canonical, most-current sources for this table — cross-check there before trusting this bullet, which can drift. If asked to add
+  protection to `smells-like` or `scan`, prefer `lib/rate-limit.ts` (the shared module)
   over another inline `Ratelimit` instance, to avoid a third bespoke pattern.
 - Local dev without Upstash env vars: `lib/rate-limit.ts`'s `redis` is `null`,
   `makeLimiter` returns `null`, `enforce()` returns `true` unconditionally —

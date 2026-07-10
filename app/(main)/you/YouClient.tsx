@@ -8,7 +8,6 @@ import { calculateEngagement, formatDate as formatRelativeDate } from '@/lib/eng
 import { useSavedCombinations } from '@/hooks/useSavedCombinations'
 import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
-import LoadingShimmer from '@/components/ui/LoadingShimmer'
 import AuthSheet from '@/components/auth/AuthSheet'
 import ProfileCard from './ProfileCard'
 import InsightsPanel, { type WeekWearEntry, type SavedCombination } from './InsightsPanel'
@@ -39,7 +38,6 @@ export default function YouClient(props: YouClientProps) {
   const [signingOut, startSignOut] = useTransition()
 
   // Persona & Engagement
-  const [mounted, setMounted] = useState(false)
   const [vibe, setVibe] = useState<string | null>(null)
   const [engagement, setEngagement] = useState({ isWornToday: false, isAtRisk: false, streak: 0 })
 
@@ -63,7 +61,6 @@ export default function YouClient(props: YouClientProps) {
   useEffect(() => {
     setVibe(localStorage.getItem('scentral_vibe'))
     setEngagement(calculateEngagement())
-    setMounted(true)
 
     const personaId = localStorage.getItem('scentral_persona')
     if (personaId) {
@@ -256,42 +253,59 @@ export default function YouClient(props: YouClientProps) {
     setVibe(newVibe)
   }
 
-  if (!mounted) {
-    return (
-      <div style={{ background: 'var(--bg)', minHeight: '100dvh', paddingTop: 'calc(44px + env(safe-area-inset-top, 0px))' }}>
-        <div className="px-4 pt-8 pb-4" style={{ borderBottom: '1px solid var(--line)' }}>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--text)', lineHeight: '34px' }}>You</h1>
-        </div>
-        <div className="px-4 py-6">
-          <LoadingShimmer variant="card" />
-        </div>
-      </div>
-    )
-  }
-
   if (props.state === 'signed-out') {
     return (
       <div style={{ background: 'var(--bg)', minHeight: '100dvh', paddingTop: 'calc(44px + env(safe-area-inset-top, 0px))' }}>
         <div className="px-4 pt-8 pb-4 flex items-center justify-between" style={{ borderBottom: '1px solid var(--line)' }}>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--text)', lineHeight: '34px' }}>You</h1>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--text)', lineHeight: '34px' }}>Archive</h1>
           {auraStreak > 0 && (
-            <Link href="/spritz" style={{ fontSize: 13, fontWeight: 700, color: 'var(--xp-color)' }}>
+            <Link href="/ritual" style={{ fontSize: 13, fontWeight: 700, color: 'var(--xp-color)' }}>
               🔥 {auraStreak}-day streak
             </Link>
           )}
         </div>
 
         {!localPersona ? (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', padding: 32, textAlign: 'center' }}>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--text)', lineHeight: '34px', fontStyle: 'italic', marginBottom: 16 }}>
-              Your identity is waiting.
-            </h2>
-            <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: '20px', maxWidth: 320, marginBottom: 32 }}>
-              Take the 2-minute quiz to discover your scent identity.
-            </p>
-            <Link href="/onboarding" style={{ width: '100%', maxWidth: 280 }}>
-              <Button fullWidth>Find Your Base Note →</Button>
-            </Link>
+          <div className="px-4 py-8">
+            <div
+              style={{
+                maxWidth: 420,
+                margin: '0 auto',
+                minHeight: '60vh',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                gap: 16,
+                padding: 24,
+                borderRadius: 20,
+                border: '1px solid color-mix(in srgb, var(--accent) 20%, var(--line))',
+                background: 'linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%)',
+                textAlign: 'center',
+              }}
+            >
+              <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--text-muted)', margin: 0 }}>
+                Archive
+              </p>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--text)', lineHeight: '34px', fontStyle: 'italic', margin: 0 }}>
+                Your dossier is waiting.
+              </h2>
+              <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: '22px', margin: 0 }}>
+                Take the read, then keep your scent identity, shelf, and ritual history together.
+              </p>
+              <div style={{ display: 'grid', gap: 8, textAlign: 'left', fontSize: 13, color: 'var(--text-muted)' }}>
+                <div>• Save your scent identity</div>
+                <div>• See your evolving taste profile</div>
+                <div>• Keep your wishlist and rituals together</div>
+              </div>
+              <div style={{ display: 'grid', gap: 10, marginTop: 8 }}>
+                <Link href="/onboarding" style={{ width: '100%' }}>
+                  <Button fullWidth>Begin the read</Button>
+                </Link>
+                <Link href="/login?next=/archive" style={{ width: '100%' }}>
+                  <Button fullWidth variant="secondary">Sign in to continue</Button>
+                </Link>
+              </div>
+            </div>
           </div>
         ) : (
           <div className="px-4 py-6 flex flex-col gap-6">
@@ -304,7 +318,7 @@ export default function YouClient(props: YouClientProps) {
               }}
             >
               <p style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.12em', fontWeight: 700 }}>
-                Your Scent Identity
+                Current dossier
               </p>
               <p style={{ fontSize: 26, fontFamily: 'var(--font-display)', fontStyle: 'italic', color: localPersona.ui_theme.accentColor, marginTop: 4 }}>
                 {localPersona.name}
@@ -320,7 +334,7 @@ export default function YouClient(props: YouClientProps) {
                 ))}
               </div>
               <div style={{ display: 'flex', gap: 16, marginTop: 16, fontSize: 12, color: 'var(--text-muted)' }}>
-                <span>{localCollectionCount} in collection</span>
+                <span>{localCollectionCount} in the cabinet</span>
                 {auraStreak > 0 && <span>🔥 {auraStreak}-day streak</span>}
                 {localScentHistory[0] && <span>Last worn {formatRelativeDate(localScentHistory[0].loggedAt)}</span>}
               </div>
@@ -350,7 +364,7 @@ export default function YouClient(props: YouClientProps) {
                   <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 16, color: 'var(--text)', lineHeight: 1.4, marginBottom: 8 }}>
                     {identityScore.topPercent}% {identityScore.topPersona.name.replace('The ', '')}, {identityScore.secondPercent}% {identityScore.secondPersona.name.replace('The ', '')}.
                   </p>
-                  <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>Based on {identityScore.collectionCount} fragrances in your collection.</p>
+                  <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>Based on {identityScore.collectionCount} fragrances in your cabinet.</p>
 
                   <button style={{ marginTop: 12, fontSize: 11, color: 'var(--accent)', background: 'none', border: 'none', textDecoration: 'underline', cursor: 'pointer', padding: 0 }}>
                     Share your identity →
@@ -359,10 +373,10 @@ export default function YouClient(props: YouClientProps) {
               )}
 
               <Link
-                href={`/discover?persona=${localPersona.id}`}
+                href={`/study?persona=${localPersona.id}`}
                 style={{ display: 'inline-block', marginTop: 16, fontSize: 13, fontWeight: 600, color: localPersona.ui_theme.accentColor }}
               >
-                Explore your {localPersona.name} fragrances →
+                Study fragrances for {localPersona.name} →
               </Link>
             </div>
 
@@ -385,6 +399,27 @@ export default function YouClient(props: YouClientProps) {
                 </div>
               </div>
             )}
+
+            <Card>
+              <div style={{ display: 'grid', gap: 12 }}>
+                <div>
+                  <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--text-muted)', margin: 0 }}>
+                    Keep this with you
+                  </p>
+                  <p style={{ fontSize: 16, color: 'var(--text)', margin: '6px 0 0' }}>
+                    Sign in to keep your identity, shelf, and ritual history synced across devices.
+                  </p>
+                </div>
+                <div style={{ display: 'grid', gap: 10 }}>
+                  <Link href="/login?next=/archive" style={{ width: '100%' }}>
+                    <Button fullWidth>Sign in to save progress</Button>
+                  </Link>
+                  <Link href="/study" style={{ width: '100%' }}>
+                    <Button fullWidth variant="secondary">Enter The Study</Button>
+                  </Link>
+                </div>
+              </div>
+            </Card>
           </div>
         )}
 
@@ -395,7 +430,7 @@ export default function YouClient(props: YouClientProps) {
         <AuthSheet
           open={authSheetOpen}
           onClose={() => setAuthSheetOpen(false)}
-          redirectTo={typeof window !== 'undefined' ? `${window.location.origin}/auth/confirm?next=/you` : '/auth/confirm?next=/you'}
+          redirectTo={typeof window !== 'undefined' ? `${window.location.origin}/auth/confirm?next=/archive` : '/auth/confirm?next=/archive'}
         />
       </div>
     )
@@ -407,9 +442,9 @@ export default function YouClient(props: YouClientProps) {
     <div style={{ background: 'var(--bg)', minHeight: '100dvh', paddingTop: 'calc(44px + env(safe-area-inset-top, 0px))', color: 'var(--text)', overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}>
       {/* Header */}
       <div className="px-4 pt-8 pb-4 flex items-center justify-between" style={{ borderBottom: '1px solid var(--line)' }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--text)', lineHeight: '34px' }}>You</h1>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--text)', lineHeight: '34px' }}>Archive</h1>
         {auraStreak > 0 && (
-          <Link href="/spritz" style={{ fontSize: 13, fontWeight: 700, color: 'var(--xp-color)' }}>
+          <Link href="/ritual" style={{ fontSize: 13, fontWeight: 700, color: 'var(--xp-color)' }}>
             🔥 {auraStreak}-day streak
           </Link>
         )}
@@ -418,7 +453,7 @@ export default function YouClient(props: YouClientProps) {
       {/* Nav Links */}
       <div className="px-4 py-3 flex gap-4" style={{ borderBottom: '1px solid var(--line)' }}>
         <Link href="/wear-and-share" style={{ fontSize: 13, color: 'var(--accent)', fontWeight: 600 }} className="hover:opacity-75 transition-opacity">
-          The Strip
+          Wear & Share
         </Link>
         <Link href="/creator" style={{ fontSize: 13, color: 'var(--accent)', fontWeight: 600 }} className="hover:opacity-75 transition-opacity">
           Creator Studio

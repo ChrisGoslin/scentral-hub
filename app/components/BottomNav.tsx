@@ -1,111 +1,145 @@
 'use client'
 
-import { useSyncExternalStore } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { NoseprintInkIcon, ReadInkIcon, ShelfInkIcon, TracesInkIcon, YouInkIcon } from '@/components/ui/InkIcons'
+import { getRouteExperienceMeta } from '@/lib/experience'
 
-const NAV_ITEMS = [
-  { label: 'Read',      href: '/read',      Icon: ReadInkIcon },
-  { label: 'Noseprint', href: '/noseprint', Icon: NoseprintInkIcon },
-  { label: 'My Shelf',  href: '/shelf',     Icon: ShelfInkIcon },
-  { label: 'Traces',    href: '/traces',    Icon: TracesInkIcon },
-  { label: 'You',       href: '/you',       Icon: YouInkIcon },
+type NavItem = {
+  label: string
+  href: string
+  Icon: typeof ReadInkIcon
+}
+
+const NAV_ITEMS: NavItem[] = [
+  { label: 'The Read', href: '/welcome', Icon: ReadInkIcon },
+  { label: 'Identity', href: '/noseprint', Icon: NoseprintInkIcon },
+  { label: 'Shelf', href: '/shelf', Icon: ShelfInkIcon },
+  { label: 'Traces', href: '/traces', Icon: TracesInkIcon },
+  { label: 'Archive', href: '/archive', Icon: YouInkIcon },
 ]
 
 export default function BottomNav() {
   const pathname = usePathname()
-  const isStandalone = useSyncExternalStore(
-    (onStoreChange) => {
-      const media = window.matchMedia('(display-mode: standalone)')
-      media.addEventListener('change', onStoreChange)
-      return () => media.removeEventListener('change', onStoreChange)
-    },
-    () => window.matchMedia('(display-mode: standalone)').matches,
-    () => false
-  )
+  const [expanded, setExpanded] = useState(false)
+  const routeMeta = useMemo(() => getRouteExperienceMeta(pathname), [pathname])
 
-  const currentNavItem = NAV_ITEMS.find(item => 
-    pathname === item.href || pathname.startsWith(`${item.href}/`)
-  )
-  const pageTitle = currentNavItem ? currentNavItem.label : 'nota.'
+  useEffect(() => {
+    setExpanded(false)
+  }, [pathname])
+
+  useEffect(() => {
+    if (!expanded) return
+    const timeout = window.setTimeout(() => setExpanded(false), 4200)
+    return () => window.clearTimeout(timeout)
+  }, [expanded])
+
+  if (!routeMeta.shellVisible) return null
+
+  const activeItem = NAV_ITEMS.find((item) => pathname === item.href || pathname.startsWith(`${item.href}/`)) ?? NAV_ITEMS[0]
 
   return (
-    <>
-      {!isStandalone && (
-        <header
-          className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center px-4 safe-top"
-          style={{
-            height: '44px',
-            background: 'color-mix(in srgb, var(--surface) 88%, transparent)',
-            borderBottom: '1px solid color-mix(in srgb, var(--line) 76%, transparent)',
-            backdropFilter: 'blur(18px) saturate(1.4)',
-            WebkitBackdropFilter: 'blur(18px) saturate(1.4)',
-          }}
-        >
-          <h1 style={{
-            fontSize: 11,
-            fontWeight: 700,
-            textTransform: 'uppercase',
-            letterSpacing: '0.28em',
-            color: 'var(--text)'
-          }}>
-            {pageTitle}
-          </h1>
-        </header>
-      )}
-
-      <nav
-        className="fixed bottom-0 left-0 right-0 z-50"
+    <div
+      className="fixed inset-x-0 bottom-0 z-50 pointer-events-none flex justify-center px-4"
+      style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 16px)' }}
+    >
+      <div
+        className="pointer-events-auto surface-glass"
         style={{
-          background: 'color-mix(in srgb, var(--surface) 88%, transparent)',
-          borderTop: '1px solid color-mix(in srgb, var(--line) 76%, transparent)',
-          backdropFilter: 'blur(20px) saturate(1.3)',
-          WebkitBackdropFilter: 'blur(20px) saturate(1.3)',
-          paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))',
-          opacity: isStandalone ? 1 : 0.85,
+          width: expanded ? 'min(92vw, 760px)' : 'min(92vw, 260px)',
+          borderRadius: 999,
+          padding: expanded ? '10px 12px' : '10px 14px',
+          transition: 'width var(--motion-ceremonial), padding var(--motion-ceremonial), opacity var(--motion-responsive)',
+          opacity: 0.98,
         }}
       >
-        <div
-          className="mx-auto grid h-14 max-w-md items-center"
-          style={{ gridTemplateColumns: 'repeat(5, 1fr)' }}
-        >
-          {NAV_ITEMS.map(({ label, href, Icon }) => {
-            const isActive = pathname === href || pathname.startsWith(`${href}/`)
-            return (
-              <Link
-                key={label}
-                href={href}
-                className="flex flex-col items-center justify-center gap-0.5 py-1 min-h-[44px]"
-                aria-current={isActive ? 'page' : undefined}
-              >
-                <Icon
-                  size={22}
-                  color={isActive ? 'var(--accent)' : 'var(--text-muted)'}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button
+            type="button"
+            onClick={() => setExpanded((value) => !value)}
+            aria-expanded={expanded}
+            aria-label={expanded ? 'Collapse presence navigation' : 'Expand presence navigation'}
+            style={{
+              minWidth: expanded ? 170 : 0,
+              flex: expanded ? '0 0 170px' : '1 1 auto',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              padding: '10px 14px',
+              borderRadius: 999,
+              background: 'rgba(247, 244, 238, 0.08)',
+              color: 'var(--text)',
+              border: '1px solid rgba(229, 224, 214, 0.12)',
+            }}
+          >
+            <activeItem.Icon size={20} />
+            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', minWidth: 0 }}>
+              <span style={{ fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>nota.</span>
+              <span style={{ fontSize: 13, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{routeMeta.label}</span>
+            </span>
+          </button>
+
+          <div
+            aria-hidden={!expanded}
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
+              gap: expanded ? 8 : 0,
+              flex: 1,
+              overflow: 'hidden',
+              maxWidth: expanded ? '100%' : 0,
+              opacity: expanded ? 1 : 0,
+              transition: 'max-width var(--motion-ceremonial), gap var(--motion-ceremonial), opacity var(--motion-responsive)',
+            }}
+          >
+            {NAV_ITEMS.map(({ label, href, Icon }) => {
+              const isActive = pathname === href || pathname.startsWith(`${href}/`)
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  aria-current={isActive ? 'page' : undefined}
                   style={{
-                    transform: isActive ? 'scale(1.08) rotate(-2deg)' : 'scale(1)',
-                    transition: `color var(--motion-fast), transform var(--motion-fast), opacity var(--motion-fast)`,
-                    opacity: isActive ? 1 : 0.85,
-                  }}
-                />
-                <span
-                  style={{
-                    fontSize: 10,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.08em',
-                    fontWeight: 700,
-                    color: isActive ? 'var(--accent)' : 'var(--text-muted)',
-                    transition: `color var(--motion-fast)`,
-                    textAlign: 'center',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    justifyContent: 'center',
+                    minHeight: 48,
+                    borderRadius: 999,
+                    padding: '10px 12px',
+                    textDecoration: 'none',
+                    background: isActive ? 'rgba(247, 244, 238, 0.12)' : 'transparent',
+                    color: isActive ? 'var(--ivory)' : 'var(--text-muted)',
+                    transition: 'background var(--motion-responsive), color var(--motion-responsive), transform var(--motion-responsive)',
                   }}
                 >
-                  {label}
-                </span>
-              </Link>
-            )
-          })}
+                  <Icon size={18} />
+                  <span style={{ fontSize: 12 }}>{label}</span>
+                </Link>
+              )
+            })}
+          </div>
         </div>
-      </nav>
-    </>
+
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingTop: expanded ? 8 : 6,
+            opacity: expanded ? 1 : 0.78,
+            transition: 'opacity var(--motion-responsive)',
+          }}
+        >
+          <span style={{ fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+            {routeMeta.dominantAction}
+          </span>
+          <span style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 14, color: 'var(--accent)' }}>
+            {expanded ? 'presence open' : 'swipe the studio open'}
+          </span>
+        </div>
+      </div>
+    </div>
   )
 }

@@ -11,9 +11,10 @@ description: >
   each holds, and where they are currently weak or contradicted by other docs.
   Does NOT cover: RLS/GDPR checklists for new routes or migrations (use
   security-hardening), the identity/shelf consolidation execution plan itself
-  — no such skill exists yet, this skill only states the contract it must
-  satisfy (use CLAUDE.md §3/§6 and AGENTS.md in the meantime), abuse/rate-limit
-  defence ladder (use resilience-abuse), or bug→test lessons (use
+  — use nota-identity-consolidation-campaign (sibling skill, now exists) for
+  execution steps; this skill only states the contract it must satisfy,
+  abuse/rate-limit defence ladder (use resilience-abuse — canonical, most
+  current source for per-route rate-limit adoption), or bug→test lessons (use
   qe-automation).
 ---
 
@@ -75,7 +76,7 @@ Both files agree on 20. There is no remaining hardcoded-10 reference anywhere in
 
 **Why:** this is the founder-brief spec ("only Tested/Own/Past-Purchase fragrances can be shelved") enforced at the data layer so no application code path can bypass it — verified in `security-hardening/SKILL.md` ("`enforce_shelf_eligibility` trigger live" is listed as a fixed fact).
 
-**Known-weak point (confirmed, still true 2026-07-05):** the trigger's `RAISE EXCEPTION` currently surfaces to the client as a generic Postgres error → the API route returns a bare 500, not a friendly 409. CLAUDE.md §6 flags this as a "known live rough edge." UNVERIFIED whether this has since been fixed — check with: `grep -n "409\|catch" app/api/shelf/route.ts`.
+**Known-weak point (was confirmed 2026-07-05, FIXED 2026-07-08 in commit `aeea36e`):** the trigger's `RAISE EXCEPTION` used to surface to the client as a generic Postgres error → bare 500. As of `aeea36e`, `app/api/shelf/route.ts` has an `isShelfEligibilityError(error)` helper checked in the catch block, returning `{ code: 'shelf_eligibility_required', error: 'Mark this fragrance as tested before it can live on your Shelf.', canMarkTested: true }` at **409** before falling through to the generic 500. Verified this session: `grep -n "409\|isShelfEligibilityError" app/api/shelf/route.ts`. Re-verify with the same command before relying on this.
 
 **`collections.status` enum** — verify before assuming which values exist: `20260704_db001_collections_status_enum.sql` widens the CHECK constraint to `('owned','tested','past_purchase','wishlist')`. CLAUDE.md's Phase-0 note ("only owned/wishlist") was corrected in the same doc's "Migrations approved & applied" log entry: the wider constraint pre-existed in the live DB before this migration merely mirrored it into `supabase/migrations/`. Trust the migration file, not the Phase-0 paragraph, if the two ever disagree again.
 
@@ -103,24 +104,27 @@ There is no `app/(read)` or similar for the core "The Read" flow — `/read` and
 
 ## 7. LLM route architecture — corrected against dossier
 
-The dossier for this library states "/api/read/generate is rate-limited via Upstash... the ONLY rate-limited route" and lists `/api/chemist` as an Haiku route. **Both claims are wrong as verified in code on 2026-07-05:**
+The dossier for this library states "/api/read/generate is rate-limited via Upstash... the ONLY rate-limited route" and lists `/api/chemist` as an Haiku route. **Both claims were wrong as verified in code on 2026-07-05.** Since then, rate limiters were added to several more routes in commit `aeea36e` (2026-07-08). **`resilience-abuse/SKILL.md` is the canonical, most-current source for per-route rate-limit adoption — cross-check there before trusting the table below, which can drift.**
 
 | Route | Calls Anthropic? | Rate limit | Cache |
 |---|---|---|---|
 | `/api/read/generate` | Yes (Haiku) | Yes — but **DB-query based**, not Upstash: counts `interactions` rows with `event_type='read_generated'` in the last hour per `user_id`, caps at 1. Not the Upstash sliding-window mechanism. | none needed (1×/user/hour by design) |
-| `/api/formulate` | Yes (Haiku) | Yes — **this is the actual Upstash route**: `Ratelimit.slidingWindow(10, '1 m')` per `user.id`, falls open (allows requests) if Upstash env vars are absent | none |
-| `/api/pros-cons` | Yes (Haiku) | No | `chemist_cache` table, upserted |
-| `/api/sommelier` | Yes (Haiku) | No | `sommelier_cache` table |
-| `/api/smells-like` | Yes (Haiku) | No | UNVERIFIED — check route file |
-| `/api/clone-confidence` | Yes (Haiku) | No | UNVERIFIED — check route file |
-| `/api/dna-match` | Yes (Haiku) | No | UNVERIFIED — check route file |
-| `/api/scan` | Yes (Haiku) | No | UNVERIFIED — check route file |
+| `/api/formulate` | Yes (Haiku) | Yes — **Upstash route**: `Ratelimit.slidingWindow(10, '1 m')` per `user.id`, falls open (allows requests) if Upstash env vars are absent | none |
+| `/api/pros-cons` | Yes (Haiku) | **Yes — added 2026-07-08** (`lib/rate-limit.ts`, `makeLimiter('pros-cons', 20, '1 m')`) | `chemist_cache` table, upserted |
+| `/api/proscons` (no hyphen) | Yes (Haiku) | **Yes — added 2026-07-08** (`makeLimiter('proscons', 20, '1 m')`) | `sommelier_cache` table (wrong table for its purpose — see note below) |
+| `/api/sommelier` | Yes (Haiku) | **Yes — added 2026-07-08** (`makeLimiter('sommelier', 20, '1 m')`) | `sommelier_cache` table |
+| `/api/clone-confidence` | Yes (Haiku) | **Yes — added 2026-07-08** (`makeLimiter('clone-confidence', 20, '1 m')`) | UNVERIFIED — check route file |
+| `/api/dna-match` | Yes (Haiku) | **Yes — added 2026-07-08** (`makeLimiter('dna-match', 20, '1 m')`) | UNVERIFIED — check route file |
+| `/api/smells-like` | Yes (Haiku) | **No — still unguarded** | UNVERIFIED — check route file |
+| `/api/scan` | Yes (Haiku) | **No — still unguarded** | UNVERIFIED — check route file |
 | `/api/chemist` | **No** — pure DB/analytical route (fetches `fragrances.notes`, computes overlap). No `Anthropic` import. Dossier is wrong on this route. | n/a | n/a |
 | `/api/generate-image` | Was Vertex AI Imagen | DISABLED 2026-06-28 to stop Google billing (per dossier incident log; not re-verified live) | n/a |
 
+Re-verify: `for f in dna-match sommelier pros-cons proscons clone-confidence smells-like scan; do grep -n "makeLimiter\|Ratelimit" app/api/$f/route.ts; done`.
+
 **Previously-undocumented finding:** `/api/proscons` (no hyphen) is a **near-duplicate** of `/api/pros-cons` — both call Anthropic, but `/api/proscons` writes to `sommelier_cache` (wrong cache table for its purpose — likely copy-paste drift from `/api/sommelier`) while `/api/pros-cons` correctly uses `chemist_cache`. The only frontend caller (`app/(main)/collection/[id]/ProsCons.tsx`) fetches `/api/pros-cons` (hyphenated). `/api/proscons` appears to be dead/orphaned code — grep confirmed zero callers in `app/`. Confirm before deleting; do not delete without explicit approval per the repo's own migration/change-control norms.
 
-**Why this matters:** `security-hardening/SKILL.md` requires "every LLM route needs a server-side rate cap." By that bar, `/api/pros-cons`, `/api/sommelier`, `/api/smells-like`, `/api/clone-confidence`, `/api/dna-match`, and `/api/scan` currently have **no rate cap of their own** — they rely entirely on their cache tables to suppress repeat cost, which does not protect against many distinct uncached inputs. This matches the dossier's open-problems note ("LLM cost surface... unguarded") even though the specific route list needed correcting.
+**Why this matters:** `security-hardening/SKILL.md` requires "every LLM route needs a server-side rate cap." By that bar, only `/api/smells-like` and `/api/scan` now lack one — the 2026-07-08 commit closed the gap for pros-cons/proscons/sommelier/clone-confidence/dna-match. This narrows, but doesn't close, the dossier's open-problems note ("LLM cost surface... unguarded").
 
 ## 8. Design tokens, motion, theme
 
@@ -133,7 +137,7 @@ The dossier for this library states "/api/read/generate is rate-limited via Upst
 ## 9. What NOT to use this skill for
 
 - Writing/reviewing an RLS policy, GDPR check, or new-route security checklist → **security-hardening** (has the checklist + LESSONS.md).
-- Actually executing the identity/shelf consolidation → no dedicated skill exists yet as of 2026-07-05. This skill states the contract (what must remain true); CLAUDE.md §3/§6 and AGENTS.md carry the founder-approved scope. If a `nota-identity-consolidation-campaign` skill is created later, prefer it for execution steps and defer to it.
+- Actually executing the identity/shelf consolidation → **nota-identity-consolidation-campaign** (sibling skill, now exists — 8-phase executable campaign). This skill states the contract (what must remain true); the campaign skill carries execution steps, gates, and rollback logic.
 - Rate-limit/abuse defence patterns beyond "does this route have one" → **resilience-abuse**.
 - Bug-fix-to-regression-test loop → **qe-automation**.
 - Deploy mechanics, pre-push hook internals → AGENTS.md L15–L17 directly; not duplicated here.

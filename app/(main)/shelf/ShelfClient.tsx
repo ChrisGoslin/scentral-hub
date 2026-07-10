@@ -26,7 +26,6 @@ const DRIFT_SETTLE = '300ms cubic-bezier(0.34, 1.56, 0.64, 1)'
 
 interface ShelfClientProps {
   slots: ShelfSlot[]
-  isSignedIn: boolean
   topThree: Array<{ id: string; name: string; brand: string; family: string | null }>
 }
 
@@ -436,7 +435,7 @@ function SearchSheet({
 
 // ─── Main component ──────────────────────────────────────────────────────────
 
-export default function ShelfClient({ slots: initialSlots, isSignedIn, topThree }: ShelfClientProps) {
+export default function ShelfClient({ slots: initialSlots, topThree }: ShelfClientProps) {
   const [slots, setSlots] = useState<ShelfSlot[]>(initialSlots)
   const [searchTargetRank, setSearchTargetRank] = useState<number | null>(null)
   const [pendingEligibility, setPendingEligibility] = useState<{ fragrance: ShelfFragrance; payload: ShelfMutationPayload; previousSlots: ShelfSlot[] } | null>(null)
@@ -607,38 +606,6 @@ export default function ShelfClient({ slots: initialSlots, isSignedIn, topThree 
       setMutationError(error instanceof Error ? error.message : 'Shelf update failed')
     }
   }, [pendingEligibility, searchTargetRank])
-
-  if (!isSignedIn) {
-    return (
-      <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-        <div style={{ textAlign: 'center', maxWidth: 320 }}>
-          <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 22, color: 'var(--text)', marginBottom: 8 }}>
-            Your shelf is waiting.
-          </p>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 16 }}>
-            Sign in to build your Top 20 — pre-filled from your Noseprint matches, freely editable.
-          </p>
-          <Link
-            href="/login?next=/shelf"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              minHeight: 48,
-              padding: '0 24px',
-              borderRadius: 'var(--r-btn)',
-              background: 'var(--accent)',
-              color: 'var(--bg)',
-              fontSize: 14,
-              fontWeight: 600,
-            }}
-          >
-            Sign in
-          </Link>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div style={{ padding: '20px 16px calc(5rem + env(safe-area-inset-bottom, 0px))' }}>

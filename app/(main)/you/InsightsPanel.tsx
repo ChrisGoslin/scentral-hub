@@ -348,14 +348,14 @@ export default function InsightsPanel({
             <EmptyState
               headline="Your wishlist is empty"
               caption="Heart a fragrance in the catalogue to save it for later."
-              action={<Button variant="secondary" onClick={() => router.push('/discover')}>Explore Catalogue</Button>}
+              action={<Button variant="secondary" onClick={() => router.push('/study')}>Enter The Study</Button>}
             />
           ) : (
             <div className="flex flex-col">
               {wishlistItems.map((item) => (
                 <Link
                   key={item.id}
-                  href={`/collection/${item.id}`}
+                  href={`/cabinet/${item.id}?from=archive`}
                   style={{
                     display: 'flex',
                     alignItems: 'center',

@@ -1,12 +1,13 @@
-import { Metadata } from 'next'
-import SpritzClient from './SpritzClient'
+import { permanentRedirect } from 'next/navigation'
+import { mapSearchParamsToString } from '@/lib/rebrand'
 
 export const dynamic = 'force-dynamic'
 
-export const metadata: Metadata = {
-  title: 'Your Brief | nota.',
-}
-
-export default function SpritzPage() {
-  return <SpritzClient />
+export default async function SpritzPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}) {
+  const resolvedSearchParams = await searchParams
+  permanentRedirect(`/ritual${mapSearchParamsToString(resolvedSearchParams)}`)
 }

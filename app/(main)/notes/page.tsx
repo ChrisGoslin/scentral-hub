@@ -231,7 +231,7 @@ export default async function NotesPage() {
         )
       })}
 
-      {/* Browse by individual note — cross-links into Discover */}
+      {/* Browse by individual note — cross-links into The Study */}
       {noteResults.size > 0 && (
         <section style={{ padding: '8px 16px 0', borderTop: '1px solid var(--line)' }}>
           <h2
@@ -242,7 +242,7 @@ export default async function NotesPage() {
               margin: '32px 0 24px',
             }}
           >
-            Browse by Note
+            Study by Note
           </h2>
 
           {FEATURED_NOTES.map(note => {
@@ -274,7 +274,7 @@ export default async function NotesPage() {
                   {fragrances.map(frag => (
                     <Link
                       key={frag.id}
-                      href={`/discover?q=${encodeURIComponent(frag.name)}`}
+                      href={`/study?q=${encodeURIComponent(frag.name)}`}
                       style={{
                         flex: '0 0 auto',
                         minWidth: '160px',
