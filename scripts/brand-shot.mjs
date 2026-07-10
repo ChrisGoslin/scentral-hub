@@ -4,7 +4,7 @@ import { mkdirSync } from 'node:fs'
 const routes = process.argv.slice(2)
 const targets = routes.length ? routes : ['/study', '/cabinet', '/archive', '/lab', '/ritual', '/welcome', '/read']
 const base = process.env.SHOT_BASE || 'http://localhost:3000'
-const stamp = new Date().toISOString().slice(0, 10)
+const stamp = new Date().toISOString().slice(0, 19).replace(/[T:]/g, '-')
 mkdirSync('.brand-review', { recursive: true })
 
 const browser = await chromium.launch()
@@ -14,8 +14,8 @@ for (const route of targets) {
   const name = route.replace(/\//g, '_').replace(/^_/, '') || 'root'
   try {
     const response = await page.goto(base + route, { waitUntil: 'networkidle', timeout: 30000 })
-    if (response && response.status() >= 500) {
-      throw new Error(`server responded ${response.status()}`)
+    if (response && !response.ok()) {
+      throw new Error(`server responded ${response.status()} at ${page.url()}`)
     }
     await page.waitForTimeout(2500)
     await page.screenshot({ path: `.brand-review/${stamp}-${name}.png`, fullPage: false })
