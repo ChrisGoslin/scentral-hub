@@ -71,11 +71,17 @@ export async function startBarcodeScanner(
  * Parse barcode from video frame using BarcodeDetector API
  * Fallback: simple UPC/EAN detection with pattern matching
  */
+type BarcodeDetectorConstructor = new (options: { formats: string[] }) => {
+  detect(source: HTMLVideoElement): Promise<{ rawValue: string }[]>
+}
+
 export async function parseBarcodeFromVideo(
   videoElement: HTMLVideoElement
 ): Promise<string | null> {
   // Try native BarcodeDetector API (Chrome/Edge)
-  const barcodeDetector = ('BarcodeDetector' in window) ? (window as any).BarcodeDetector : null
+  const barcodeDetector = ('BarcodeDetector' in window)
+    ? (window as unknown as { BarcodeDetector: BarcodeDetectorConstructor }).BarcodeDetector
+    : null
 
   if (barcodeDetector) {
     try {
@@ -83,7 +89,7 @@ export async function parseBarcodeFromVideo(
         formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39'],
       })
 
-      const barcodes = await detector.detect(videoElement as any)
+      const barcodes = await detector.detect(videoElement)
       if (barcodes && barcodes.length > 0) {
         return barcodes[0].rawValue
       }

@@ -120,8 +120,8 @@ export async function POST() {
       sessionId: session.id,
       pool: (fragrances ?? []) as BlindFragrance[],
     })
-  } catch (error: any) {
-    console.error('[/api/blind-ranking/session] error:', error?.message || error)
+  } catch (error) {
+    console.error('[/api/blind-ranking/session] error:', error instanceof Error ? error.message : error)
     return NextResponse.json({ error: 'Failed to start blind ranking session' }, { status: 500 })
   }
 }

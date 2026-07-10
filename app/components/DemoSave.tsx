@@ -15,7 +15,7 @@ export default function DemoSave() {
       } else {
         toast?.push('Save failed', 'error')
       }
-    } catch (e) {
+    } catch {
       toast?.push('Network error', 'error')
     } finally {
       setBusy(false)

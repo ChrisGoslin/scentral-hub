@@ -49,8 +49,8 @@ export function useSavedCombinations(userId: string | null) {
         if (error) throw error
         setSaves((data || []) as unknown as SavedCombination[])
         setFetchError(null)
-      } catch (e: any) {
-        setFetchError(e.message || 'Failed to load saved combinations')
+      } catch (e) {
+        setFetchError(e instanceof Error ? e.message : 'Failed to load saved combinations')
         setSaves([])
       } finally {
         setLoading(false)

@@ -20,8 +20,8 @@ export interface TemptationTrigger {
  * Uses wear_logs or view tracking if available; fallback to collection access patterns.
  */
 export async function checkRepeatRevisit(
-  supabase: ReturnType<typeof createClient>,
-  userId: string
+  _supabase: ReturnType<typeof createClient>,
+  _userId: string
 ): Promise<TemptationTrigger[]> {
   // TODO: Implement wear_logs analysis or view-tracking RPC
   // For now, this is a placeholder. In production, query wear_logs for
@@ -71,8 +71,8 @@ export async function checkWishlistAge(
  * This requires blind ranking data to be stored somewhere (likely in profiles or a new table).
  */
 export async function checkBlindRankMatch(
-  supabase: ReturnType<typeof createClient>,
-  userId: string
+  _supabase: ReturnType<typeof createClient>,
+  _userId: string
 ): Promise<TemptationTrigger[]> {
   // TODO: Implement blind ranking matching
   // Query user's blind_rank_top_picks (if stored in profiles.metadata or separate table)

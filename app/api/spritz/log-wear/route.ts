@@ -129,8 +129,8 @@ export async function POST(req: NextRequest) {
       streak: { current: currentStreak, longest: longestStreak },
       wearLogId,
     })
-  } catch (error: any) {
+  } catch (error) {
     console.error('Spritz Log Wear API Error:', error)
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 })
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Internal Server Error' }, { status: 500 })
   }
 }

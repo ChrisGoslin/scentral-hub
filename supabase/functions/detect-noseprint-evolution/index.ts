@@ -18,17 +18,9 @@ interface DescriptorPattern {
   frequency: number
 }
 
-// Persona reference (sync with lib/personas.ts)
-const PERSONAS = [
-  'velvet_intellectual',
-  'solar_minimalist',
-  'dark_alchemist',
-  'ritual_keeper',
-  'rebel_experimentalist',
-  'comfort_seeker'
-]
+type SupabaseClient = ReturnType<typeof createClient>
 
-Deno.serve(async (_req: Request) => {
+Deno.serve(async () => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
@@ -53,7 +45,7 @@ Deno.serve(async (_req: Request) => {
       .then((res) => {
         if (res.error) return res
         return {
-          data: Array.from(new Set(res.data?.map((r: any) => r.anon_id) || [])),
+          data: Array.from(new Set(res.data?.map((r: { anon_id: string }) => r.anon_id) || [])),
           error: null
         }
       })
@@ -166,8 +158,14 @@ Deno.serve(async (_req: Request) => {
   }
 })
 
+type CollectionRow = {
+  fragrance_id: string
+  affinity_score: number | null
+  scent_memory: string | null
+}
+
 async function analyzeUserInteractions(
-  supabase: any,
+  supabase: SupabaseClient,
   anon_id: string
 ): Promise<{
   detected: boolean
@@ -191,7 +189,7 @@ async function analyzeUserInteractions(
   }
 
   // Get fragrance families for recent interactions
-  const fragranceIds = recentCollections.map((c: any) => c.fragrance_id)
+  const fragranceIds = recentCollections.map((c: CollectionRow) => c.fragrance_id)
   const { data: fragrances } = await supabase
     .from('fragrances')
     .select('id, family')
@@ -206,7 +204,7 @@ async function analyzeUserInteractions(
 
   // Analyze descriptor patterns in scent_memory
   const scent_memories = recentCollections
-    .map((c: any) => c.scent_memory)
+    .map((c: CollectionRow) => c.scent_memory)
     .filter(Boolean)
 
   const descriptors = extractDescriptors(scent_memories)
@@ -233,7 +231,7 @@ async function analyzeUserInteractions(
   return { detected: false }
 }
 
-function calculateFamilyDistribution(fragrances: any[]): FamilyDistribution {
+function calculateFamilyDistribution(fragrances: Array<{ id: string; family: string | null }>): FamilyDistribution {
   const dist: FamilyDistribution = {}
   for (const f of fragrances) {
     if (f.family) {
@@ -301,7 +299,7 @@ function mapAnalysisToPersona(topFamilies: string[], descriptors: DescriptorPatt
 }
 
 async function checkFullCircle(
-  supabase: any,
+  supabase: SupabaseClient,
   anon_id: string,
   new_persona: string
 ): Promise<string | null> {

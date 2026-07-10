@@ -13,8 +13,8 @@ export async function POST(req: Request) {
     const embedding = result.embedding.values
 
     return NextResponse.json({ embedding })
-  } catch (error: any) {
+  } catch (error) {
     console.error('Embedding error:', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 })
   }
 }

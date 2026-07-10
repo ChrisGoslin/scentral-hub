@@ -25,7 +25,7 @@ export const initAnalytics = () => {
   }
 }
 
-export const trackEvent = (eventName: string, properties?: Record<string, any>) => {
+export const trackEvent = (eventName: string, properties?: Record<string, unknown>) => {
   // Privacy guardrail: remove potential PII from properties
   const safeProperties = { ...properties }
   if (safeProperties.email) delete safeProperties.email
@@ -37,6 +37,6 @@ export const trackEvent = (eventName: string, properties?: Record<string, any>) 
   posthog.capture(eventName, safeProperties)
 }
 
-export const identifyPersona = (personaId: string, traits?: Record<string, any>) => {
+export const identifyPersona = (personaId: string, traits?: Record<string, unknown>) => {
   posthog.identify(personaId, traits)
 }

@@ -62,7 +62,20 @@ export default async function SchedulePage() {
       .order('created_at', { ascending: false })
       .limit(10)
 
-    savedSchedules = (data ?? []).map((row: any) => ({
+    type SpritzScheduleRow = {
+      id: string
+      name: string
+      occasion: string | null
+      created_at: string | null
+      morning_sprays: number | null
+      midday_sprays: number | null
+      evening_sprays: number | null
+      morning_frag: ScheduleFragrance | ScheduleFragrance[] | null
+      midday_frag: ScheduleFragrance | ScheduleFragrance[] | null
+      evening_frag: ScheduleFragrance | ScheduleFragrance[] | null
+    }
+
+    savedSchedules = ((data ?? []) as SpritzScheduleRow[]).map((row) => ({
       id: row.id,
       name: row.name,
       occasion: row.occasion,

@@ -2,8 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import Button from '@/components/ui/Button'
-import WearLogModal, { type WearLogModalProps } from '../WearLogModal'
-import { createClient } from '@/utils/supabase/client'
+import WearLogModal from '../WearLogModal'
 
 interface NotesPyramidProps {
   pyramid: {

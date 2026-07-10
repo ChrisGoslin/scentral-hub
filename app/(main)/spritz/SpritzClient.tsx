@@ -18,14 +18,6 @@ type Fragrance = {
   family: string | null
 }
 
-type RandomizerFragrance = {
-  id: string
-  brand: string
-  name: string
-  family: string | null
-  affinity_score: number
-}
-
 function getOrCreateAnonId(): string {
   try {
     const existing = localStorage.getItem('scentral_anon_id')
@@ -175,7 +167,7 @@ export default function SpritzClient() {
     setCurrentCardIndex(i => i + 1)
   }, [])
 
-  const logWear = useCallback(async (fragranceId: string, fragranceName?: string) => {
+  const logWear = useCallback(async (fragranceId: string) => {
     try {
       const anonId = getOrCreateAnonId()
       const res = await fetch('/api/spritz/log-wear', {

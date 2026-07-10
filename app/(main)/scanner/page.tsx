@@ -4,7 +4,7 @@ import React, { Suspense, useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Button from '@/components/ui/Button'
 import { startBarcodeScanner, parseBarcodeFromVideo, isValidBarcode } from '@/lib/barcode'
-import { lookupFragranceByBarcode } from '@/lib/barcode-db'
+import { lookupFragranceByBarcode, type BarcodeEntry } from '@/lib/barcode-db'
 import Link from 'next/link'
 import AddFragranceForm from './AddFragranceForm'
 
@@ -44,7 +44,7 @@ function ScannerPageInner() {
   const [cameraError, setCameraError] = useState<string>('')
   const [scannedFragrance, setScannedFragrance] = useState<ScannedFragrance | null>(null)
   const [noMatchBarcode, setNoMatchBarcode] = useState<string | null>(null)
-  const [isScanning, setIsScanning] = useState(false)
+  const [, setIsScanning] = useState(false)
   const [scanMessage, setScanMessage] = useState('Point at barcode to scan')
   const [visionState, setVisionState] = useState<'idle' | 'reading' | 'failed'>('idle')
   const [visionMatch, setVisionMatch] = useState<{ brand: string; name: string } | null>(null)
@@ -130,7 +130,7 @@ function ScannerPageInner() {
   /**
    * Handle successful barcode detection
    */
-  function handleBarcodeDetected(barcode: string, entry: any) {
+  function handleBarcodeDetected(barcode: string, entry: BarcodeEntry) {
     setIsScanning(false)
     if (scanIntervalRef.current) clearInterval(scanIntervalRef.current)
 

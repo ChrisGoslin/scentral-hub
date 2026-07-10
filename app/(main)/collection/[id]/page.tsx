@@ -12,7 +12,6 @@ import AffinityRater from './AffinityRater'
 import RateProjection from './RateProjection'
 import { NotesPyramid, WearLogButton, ScentJournal } from './FragranceDetailClient'
 import ProsCons from './ProsCons'
-import { getBrandEmoji } from '@/lib/brandEmoji'
 import { cookies } from 'next/headers'
 import { Users } from 'lucide-react'
 import { getSimilarityExplanation } from '@/lib/similarity'
@@ -77,7 +76,7 @@ export default async function FragranceDetailPage({
       .maybeSingle()
   ])
 
-  const proof = proofData as any
+  const proof = proofData as { owner_count?: number | string } | null
   const ownerCount = proof?.owner_count ? Number(proof.owner_count) : 0
   const rarity = getRarityBadge(ownerCount)
 
@@ -239,7 +238,7 @@ export default async function FragranceDetailPage({
           ) : null}
           {f.plain_description && (
             <p style={{ fontSize: 15, fontStyle: 'italic', color: 'var(--text)', marginTop: 12, lineHeight: '22px' }}>
-              "{f.plain_description}"
+              &quot;{f.plain_description}&quot;
             </p>
           )}
         </div>

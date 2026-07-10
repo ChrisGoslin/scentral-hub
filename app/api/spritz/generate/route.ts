@@ -35,8 +35,10 @@ export async function POST(req: NextRequest) {
         .limit(20)
 
       pool = (data ?? [])
-        .map((row: any) => (Array.isArray(row.fragrances) ? row.fragrances[0] : row.fragrances))
-        .filter(Boolean)
+        .map((row: { fragrances: SpritzFragrance | SpritzFragrance[] | null }) =>
+          Array.isArray(row.fragrances) ? row.fragrances[0] : row.fragrances
+        )
+        .filter(Boolean) as SpritzFragrance[]
     }
 
     // Anonymous (or empty collection): fall back to persona-matched public fragrances.
@@ -59,8 +61,8 @@ export async function POST(req: NextRequest) {
 
     const schedule = generateSpritzSchedule(pool)
     return NextResponse.json({ schedule })
-  } catch (error: any) {
+  } catch (error) {
     console.error('Spritz Generate API Error:', error)
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 })
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Internal Server Error' }, { status: 500 })
   }
 }

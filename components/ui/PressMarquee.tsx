@@ -32,7 +32,7 @@ export default function PressMarquee() {
       `}} />
 
       <p className="text-center font-serif italic text-white/40 tracking-wide text-xs sm:text-sm max-w-2xl mx-auto mb-8 px-6 leading-relaxed">
-        "The invisible architecture of identity. Radically democratized."
+        &quot;The invisible architecture of identity. Radically democratized.&quot;
       </p>
 
       <div

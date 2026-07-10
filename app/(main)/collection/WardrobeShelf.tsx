@@ -25,7 +25,7 @@ import Button from '@/components/ui/Button'
 import { SafeFragranceImage } from '@/components/fragrance/SafeFragranceImage'
 import PostItNote from '@/components/ui/PostItNote'
 import SketchAnnotation from '@/components/ui/SketchAnnotation'
-import { getPersonaById, PERSONAS, type Persona } from '@/lib/personas'
+import { getPersonaById, type Persona } from '@/lib/personas'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -273,14 +273,14 @@ export default function WardrobeShelf({ fragrances }: WardrobeShelfProps) {
     setIsMounted(true)
     try {
       const stored = localStorage.getItem('scentral_wishlist')
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+       
       if (stored) setWishlistIds(JSON.parse(stored))
     } catch { /* ignore */ }
     try {
       const personaId = localStorage.getItem('scentral_persona')
       if (personaId) {
         const p = getPersonaById(personaId)
-        // eslint-disable-next-line react-hooks/set-state-in-effect
+         
         if (p) setClientPersona(p)
       }
     } catch { /* ignore */ }

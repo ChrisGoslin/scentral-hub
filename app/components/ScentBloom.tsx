@@ -22,7 +22,7 @@ export default function ScentBloom({ children }: { children: React.ReactNode }) 
       // Emit a global event so other UX systems (audio) can react without tight coupling
       try {
         window.dispatchEvent(new CustomEvent('scent:move', { detail: { x, y } }))
-      } catch (err) {
+      } catch {
         // ignore in non-browser environments
       }
     }

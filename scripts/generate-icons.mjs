@@ -1,8 +1,9 @@
 // Generates PWA icons for Scentral: amber resin-drop on parchment.
-// Run locally: node scripts/generate-icons.js
-const fs = require('fs');
-const path = require('path');
-const sharp = require('sharp');
+// Run locally: node scripts/generate-icons.mjs
+import fs from 'node:fs';
+import path from 'node:path';
+import sharp from 'sharp';
+import { fileURLToPath } from 'node:url';
 
 const PARCHMENT = '#F7F3EE';
 const AMBER_LIGHT = '#C98A4B';
@@ -62,7 +63,7 @@ function buildSplashSvg(w, h) {
 }
 
 async function main() {
-  const iconsDir = path.join(__dirname, '../public/icons');
+  const iconsDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../public/icons');
   const splashDir = path.join(iconsDir, 'splash');
   fs.mkdirSync(splashDir, { recursive: true });
 

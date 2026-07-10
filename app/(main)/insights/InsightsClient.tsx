@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useMemo } from 'react'
+import React from 'react'
 import Link from 'next/link'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
@@ -40,7 +40,7 @@ interface InsightsClientProps {
   computedAt: string | null
 }
 
-export default function InsightsClient({ state, anonId, insights, computedAt }: InsightsClientProps) {
+export default function InsightsClient({ state, insights, computedAt }: InsightsClientProps) {
   const notEmpty = insights && (
     (insights.your_impact?.interactions_count ?? 0) > 0 ||
     (insights.best_traces?.length ?? 0) > 0 ||
@@ -115,7 +115,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   )
 }
 
-function YourImpactSection({ impact }: { impact?: any }) {
+function YourImpactSection({ impact }: { impact?: CachedInsights['your_impact'] }) {
   if (!impact) {
     return (
       <Card style={{ padding: 16, textAlign: 'center', color: 'var(--text-muted)' }}>
@@ -140,7 +140,7 @@ function YourImpactSection({ impact }: { impact?: any }) {
   )
 }
 
-function BestTracesSection({ traces }: { traces: any[] }) {
+function BestTracesSection({ traces }: { traces: NonNullable<CachedInsights['best_traces']> }) {
   if (!traces || traces.length === 0) {
     return (
       <Card style={{ padding: 16, textAlign: 'center', color: 'var(--text-muted)' }}>
@@ -165,7 +165,7 @@ function BestTracesSection({ traces }: { traces: any[] }) {
   )
 }
 
-function ScentimentVisionSection({ vision }: { vision?: any }) {
+function ScentimentVisionSection({ vision }: { vision?: CachedInsights['scentiment_vision'] }) {
   if (!vision) {
     return (
       <Card style={{ padding: 16, textAlign: 'center', color: 'var(--text-muted)' }}>
@@ -199,7 +199,7 @@ function ScentimentVisionSection({ vision }: { vision?: any }) {
   )
 }
 
-function TasteEvolutionSection({ evolution }: { evolution?: any[] }) {
+function TasteEvolutionSection({ evolution }: { evolution?: CachedInsights['taste_evolution'] }) {
   if (!evolution || evolution.length === 0) {
     return (
       <Card style={{ padding: 16, textAlign: 'center', color: 'var(--text-muted)' }}>
@@ -239,7 +239,7 @@ function TasteEvolutionSection({ evolution }: { evolution?: any[] }) {
   )
 }
 
-function TrajectorySection({ trajectory }: { trajectory?: any }) {
+function TrajectorySection({ trajectory }: { trajectory?: CachedInsights['trajectory'] }) {
   if (!trajectory?.current_families || trajectory.current_families.length === 0) {
     return (
       <Card style={{ padding: 16, textAlign: 'center', color: 'var(--text-muted)' }}>

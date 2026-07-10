@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
@@ -11,8 +11,7 @@ import Button from '@/components/ui/Button'
 import Sheet from '@/components/ui/Sheet'
 import ErrorInline from '@/components/ui/ErrorInline'
 import LoadingShimmer from '@/components/ui/LoadingShimmer'
-import { getBrandEmoji } from '@/lib/brandEmoji'
-import { useFragranceSearch } from '@/app/hooks/useFragranceSearch'
+import { useFragranceSearch, type FragranceResult } from '@/app/hooks/useFragranceSearch'
 import { track } from '@/lib/posthog'
 import { getAffinityTier } from '@/lib/affinity'
 import WardrobeShelf from './WardrobeShelf'
@@ -189,12 +188,12 @@ export default function CollectionClient({ fragrances, totalCount }: { fragrance
   const [pickerSearch, setPickerSearch] = useState('')
   const { results: searchResults, loading: isLoadingPicker, error: pickerErrorHook } = useFragranceSearch(pickerSearch)
   
-  const [selectedToConfirm, setSelectedToConfirm] = useState<any | null>(null)
+  const [selectedToConfirm, setSelectedToConfirm] = useState<FragranceResult | null>(null)
   const [isAdding, setIsAdding] = useState(false)
   const [addSuccess, setAddSuccess] = useState(false)
   const [localPickerError, setLocalPickerError] = useState<string | null>(null)
   const [isShelfModalOpen, setIsShelfModalOpen] = useState(false)
-  const [pendingBottleForModal, setPendingBottleForModal] = useState<any | null>(null)
+  const [pendingBottleForModal, setPendingBottleForModal] = useState<FragranceResult | null>(null)
 
   const pickerError = pickerErrorHook || localPickerError
 

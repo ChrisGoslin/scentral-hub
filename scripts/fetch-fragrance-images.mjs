@@ -74,7 +74,7 @@ async function fetchFromDuckDuckGo(query) {
     }
 
     return null
-  } catch (err) {
+  } catch {
     return null
   }
 }

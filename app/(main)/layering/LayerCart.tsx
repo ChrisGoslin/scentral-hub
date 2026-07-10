@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { Share2 } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import ErrorInline from '@/components/ui/ErrorInline'
-import AuraShareCard, { type AuraShareData } from '@/app/components/AuraShareCard'
+import AuraShareCard from '@/app/components/AuraShareCard'
 import { track } from '@/lib/posthog'
 import type { AuraResultItem, LayeringFragrance, UseCase } from './useLayeringWizard'
 
@@ -28,12 +28,12 @@ export function LayerCart({
   onSaveCombination,
   onShare,
 }: LayerCartProps) {
-  const [isSaving, setIsSaving] = useState(false)
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle')
+  const [, setIsSaving] = useState(false)
+  const [, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [saveError, setSaveError] = useState<string | null>(null)
   const [lastSavedId, setLastSavedId] = useState<string | null>(null)
-  const [sharedId, setSharedId] = useState<string | null>(null)
-  const [usedLayers, setUsedLayers] = useState<Set<string>>(new Set())
+  const [sharedId] = useState<string | null>(null)
+  const [, setUsedLayers] = useState<Set<string>>(new Set())
 
   async function handleSaveClick(item: AuraResultItem, e: React.MouseEvent) {
     e.stopPropagation()
@@ -80,7 +80,7 @@ export function LayerCart({
         <div key={item.id} className="flex flex-col gap-3">
           {/* Render via parent — LayerCart is a composition container */}
           {saveError && lastSavedId === item.id && (
-            <ErrorInline message={saveError} onRetry={() => handleSaveClick(item, {} as any)} />
+            <ErrorInline message={saveError} onRetry={() => handleSaveClick(item, { stopPropagation: () => {} } as unknown as React.MouseEvent)} />
           )}
 
           <Button

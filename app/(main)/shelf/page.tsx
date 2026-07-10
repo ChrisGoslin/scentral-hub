@@ -190,7 +190,7 @@ export default async function ShelfPage() {
     .eq('user_id', user.id)
     .order('rank', { ascending: true })
 
-  const normalized = (rows ?? []).map((r: any) => ({
+  const normalized = ((rows ?? []) as ShelfItemRow[]).map((r) => ({
     id: r.id,
     rank: r.rank,
     source: r.source as ShelfSource,

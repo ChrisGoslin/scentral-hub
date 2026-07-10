@@ -145,7 +145,7 @@ export default function NoseprintClient({
           borderTop: '1px solid rgba(255,255,255,0.06)',
           paddingTop: '1rem',
         }}>
-          "{noseprint.read_text}"
+          &quot;{noseprint.read_text}&quot;
         </p>
 
         {/* Share button */}

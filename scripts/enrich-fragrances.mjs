@@ -120,7 +120,7 @@ for (let i = 0; i < fragrances.length; i++) {
     }
 
     await sleep(delayMs)
-  } catch (err) {
+  } catch {
     console.error(`❌ API error: ${frag.brand} ${frag.name}`)
     failed++
     await sleep(delayMs)

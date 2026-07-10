@@ -91,7 +91,7 @@ async function seed() {
   console.log(`📦 Seeding ${boxes.length} discovery boxes...`)
 
   try {
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('discovery_boxes')
       .upsert(boxes, { onConflict: 'slug' })
 

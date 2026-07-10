@@ -158,7 +158,7 @@ async function run() {
         }
       }
     }
-  } catch (err) {
+  } catch {
     // Silently skip this test if search fails — it's an enhancement, not a critical path
   }
 

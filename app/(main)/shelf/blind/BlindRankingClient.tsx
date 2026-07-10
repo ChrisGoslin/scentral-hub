@@ -193,8 +193,8 @@ function PlacingScreen({
         if (result.complete) {
           onComplete()
         }
-      } catch (e: any) {
-        setError(e?.message || 'Could not record placement — try again.')
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'Could not record placement — try again.')
       } finally {
         setSubmitting(false)
         setPendingRank(null)
@@ -209,7 +209,7 @@ function PlacingScreen({
     return (
       <div style={{ padding: '40px 16px', textAlign: 'center' }}>
         <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 18, color: 'var(--text)' }}>
-          Pool exhausted before your Top 10 filled — that shouldn't happen. Refresh to start a new session.
+          Pool exhausted before your Top 10 filled — that shouldn&apos;t happen. Refresh to start a new session.
         </p>
       </div>
     )
@@ -230,7 +230,7 @@ function PlacingScreen({
 
       <div>
         <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>
-          Tap a rank to place it. Once placed, it's locked.
+          Tap a rank to place it. Once placed, it&apos;s locked.
         </p>
         <RankPicker placedByRank={placedByRank} onPick={handlePick} />
       </div>
@@ -271,7 +271,7 @@ function RevealScreen({ sessionId, revealed }: { sessionId: string; revealed: Re
           marginBottom: 8,
         }}
       >
-        That's what you prefer?
+        That&apos;s what you prefer?
       </p>
       <p style={{ fontSize: 13, color: 'var(--text-muted)', textAlign: 'center', marginBottom: 28 }}>
         No brand names. No bottles. Just what you actually chose.
@@ -401,7 +401,7 @@ function IntroScreen({ onStart, starting }: { onStart: () => void; starting: boo
         </p>
         <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 24, lineHeight: '21px' }}>
           No brand. No name. No image. Just notes and accords &mdash; place each into your real Top 10.
-          Once placed, it's locked. No undo. The reveal only happens after all ten.
+          Once placed, it&apos;s locked. No undo. The reveal only happens after all ten.
         </p>
         <Button onClick={onStart} disabled={starting}>
           {starting ? 'Building your pool…' : 'Begin blind ranking'}
@@ -429,8 +429,8 @@ export default function BlindRankingClient({ isSignedIn }: { isSignedIn: boolean
       setSessionId(data.sessionId)
       setPool(data.pool)
       setPhase('placing')
-    } catch (e: any) {
-      setError(e?.message || 'Could not start a session — try again.')
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not start a session — try again.')
       setPhase('error')
     }
   }, [])
@@ -442,8 +442,8 @@ export default function BlindRankingClient({ isSignedIn }: { isSignedIn: boolean
       const data = await postJSON('/api/blind-ranking/reveal', { sessionId })
       setRevealed(data.revealed)
       setPhase('revealed')
-    } catch (e: any) {
-      setError(e?.message || 'Could not reveal your results — try again.')
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not reveal your results — try again.')
       setPhase('error')
     }
   }, [sessionId])

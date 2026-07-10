@@ -50,8 +50,8 @@ export default function SaveSheet({ open, onClose, slots, sprays, onSuccess }: S
 
       onSuccess(data.id, name, occasion)
       onClose()
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save schedule')
     } finally {
       setSaving(false)
     }

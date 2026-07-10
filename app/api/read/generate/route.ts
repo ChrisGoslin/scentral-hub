@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json()
-  const { feelings = [], ownedIds = [], ownedFamilies = [], signals = [] } = body
+  const { feelings = [], ownedFamilies = [], signals = [] } = body
 
   // Derive archetypes and families from chosen feelings
   const archetypes = feelings.map((id: string) => FEELINGS_META[id]?.archetype).filter(Boolean)

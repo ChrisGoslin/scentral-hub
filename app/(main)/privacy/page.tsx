@@ -22,7 +22,7 @@ export default function PrivacyPage() {
         </p>
         <p>
           Your fragrance collection, ratings, layering combinations, and wear logs are stored locally on
-          your device using your browser's <code style={{ background: 'var(--surface-2)', padding: '2px 4px', borderRadius: 2 }}>localStorage</code>.
+          your device using your browser&apos;s <code style={{ background: 'var(--surface-2)', padding: '2px 4px', borderRadius: 2 }}>localStorage</code>.
           This data never leaves your device unless you explicitly choose to sync it.
         </p>
       </section>
@@ -50,7 +50,7 @@ export default function PrivacyPage() {
         </p>
         <ul style={{ marginLeft: 20, marginTop: 8 }}>
           <li style={{ marginBottom: 6 }}>Your <strong>wear logs</strong> (fragrances you logged as worn today)</li>
-          <li style={{ marginBottom: 6 }}>Your <strong>collection</strong> (fragrances you've added, with affinity scores)</li>
+          <li style={{ marginBottom: 6 }}>Your <strong>collection</strong> (fragrances you&apos;ve added, with affinity scores)</li>
           <li style={{ marginBottom: 6 }}>Your <strong>streak data</strong> (consecutive days worn)</li>
           <li>Your <strong>XP progress</strong> (engagement level)</li>
         </ul>
@@ -68,7 +68,7 @@ export default function PrivacyPage() {
         <ul style={{ marginLeft: 20, marginTop: 8 }}>
           <li style={{ marginBottom: 6 }}>App events (page views, button clicks, feature usage)</li>
           <li style={{ marginBottom: 6 }}>Device type and browser (to ensure compatibility)</li>
-          <li style={{ marginBottom: 6 }}>Aggregated usage patterns (e.g., "50% of users visit /discover first")</li>
+          <li style={{ marginBottom: 6 }}>Aggregated usage patterns (e.g., &quot;50% of users visit /discover first&quot;)</li>
         </ul>
         <p style={{ marginTop: 12 }}>
           We do <strong>not</strong> collect:
@@ -80,7 +80,7 @@ export default function PrivacyPage() {
           <li style={{ marginBottom: 6 }}>Geolocation data</li>
         </ul>
         <p style={{ marginTop: 12 }}>
-          We respect the "Do Not Track" (DNT) header in your browser. If you enable DNT, we do not log events.
+          We respect the &quot;Do Not Track&quot; (DNT) header in your browser. If you enable DNT, we do not log events.
         </p>
       </section>
 
@@ -138,7 +138,7 @@ export default function PrivacyPage() {
         <ul style={{ marginLeft: 20, marginTop: 8 }}>
           <li style={{ marginBottom: 6 }}><strong>Right to Access:</strong> Request a copy of your personal data</li>
           <li style={{ marginBottom: 6 }}><strong>Right to Rectification:</strong> Correct inaccurate data</li>
-          <li style={{ marginBottom: 6 }}><strong>Right to Erasure:</strong> Request deletion of your data ("right to be forgotten")</li>
+          <li style={{ marginBottom: 6 }}><strong>Right to Erasure:</strong> Request deletion of your data (&quot;right to be forgotten&quot;)</li>
           <li style={{ marginBottom: 6 }}><strong>Right to Restrict Processing:</strong> Limit how we use your data</li>
           <li style={{ marginBottom: 6 }}><strong>Right to Portability:</strong> Request your data in a portable format</li>
           <li><strong>Right to Object:</strong> Opt out of analytics and processing</li>
@@ -154,7 +154,7 @@ export default function PrivacyPage() {
           To delete your nota. data:
         </p>
         <ul style={{ marginLeft: 20, marginTop: 8 }}>
-          <li style={{ marginBottom: 6 }}>Clear your browser's localStorage and cookies</li>
+          <li style={{ marginBottom: 6 }}>Clear your browser&apos;s localStorage and cookies</li>
           <li style={{ marginBottom: 6 }}>This removes your local collection, preferences, and anonymous UUID</li>
           <li>Email us at <a href="mailto:christophergoslin@outlook.com" style={{ color: 'var(--accent)', textDecoration: 'none' }}>christophergoslin@outlook.com</a> to delete your server-stored data</li>
         </ul>

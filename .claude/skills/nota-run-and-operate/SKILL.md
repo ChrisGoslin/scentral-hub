@@ -93,13 +93,13 @@ node scripts/<script-name>.mjs [--dry-run] [--limit=N]
 | `phase1-plain-descriptions.mjs`, `phase2-backfill-inspired-by-v2.mjs` | Named enrichment phases (check git log/commit messages for what phase means before assuming currency) |
 | `fetch-fragrance-images.mjs` | Has a DuckDuckGo fallback already built in — Google CSE closed to new projects 2026-01-20, don't waste time on Google billing/API config, check script implementation first |
 | `import-fragrances.mjs`, `build-import-csv.mjs` | Bulk data import |
-| `check-brands.mjs`, `check-collections-schema.js`, `rank-image-gaps.mjs` | Read-only diagnostics |
+| `check-brands.mjs`, `check-collections-schema.mjs`, `rank-image-gaps.mjs` | Read-only diagnostics |
 | `dsar-delete-user.mjs` | GDPR data-subject deletion — irreversible, treat as a migration-class action (show what it will do, get sign-off) |
 | `ops-health-check.sh`, `ops-migrations-verify.sh`, `ops-claim-legacy-data.sh`, `ops-troubleshoot.sh` | Ops runbook scripts, documented in `scripts/OPS_SCRIPTS_README.md` |
 | `seed-discovery-boxes.mjs` / `-new.mjs`, `seed-trails.mjs` | Seed data |
 | `populate-buy-urls.mjs` | Affiliate/buy-link population |
 | `test-enrichment.mjs`, `verify_seed.js` | Test/verification helpers |
-| `manual-image-helper.mjs`, `capture-app-store-screenshots.mjs`, `generate-icons.js`, `generate-placeholder-icons.js`, `launch-orchestrator.sh`, `create-pr.sh` | Misc tooling |
+| `manual-image-helper.mjs`, `capture-app-store-screenshots.mjs`, `generate-icons.mjs`, `generate-placeholder-icons.mjs`, `launch-orchestrator.sh`, `create-pr.sh` | Misc tooling |
 | `extend-library.ts.unused` | Explicitly marked unused — do not run, do not treat as current |
 
 For Shopify-sourced image enrichment specifically (`enrich-images-shopify.mjs`), use the dedicated `shopify-image-enrichment` skill first — it covers storefront verification and name-matching pitfalls this skill does not duplicate.

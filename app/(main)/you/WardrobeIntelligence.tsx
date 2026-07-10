@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Chip from '@/components/ui/Chip'
-import { Sparkles, TrendingDown, CheckCircle, ArrowRight, ShieldAlert } from 'lucide-react'
+import { Sparkles, ArrowRight } from 'lucide-react'
 
 type Gap = {
   gap: string
@@ -39,18 +39,10 @@ export default function WardrobeIntelligence() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Audit failed')
       setResult(data)
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Audit failed')
     } finally {
       setLoading(false)
-    }
-  }
-
-  const getSeverityColor = (sev: string) => {
-    switch (sev) {
-      case 'critical': return 'text-red-500 bg-red-500/10'
-      case 'moderate': return 'text-orange-500 bg-orange-500/10'
-      default: return 'text-yellow-500 bg-yellow-500/10'
     }
   }
 

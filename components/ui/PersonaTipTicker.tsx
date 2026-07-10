@@ -20,7 +20,7 @@ export default function PersonaTipTicker({ personaId }: { personaId: string | nu
   return (
     <div style={{ padding: '4px 16px 12px', textAlign: 'center' }}>
       <p style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic', lineHeight: '16px' }}>
-        "{tip}"
+        &quot;{tip}&quot;
       </p>
     </div>
   )

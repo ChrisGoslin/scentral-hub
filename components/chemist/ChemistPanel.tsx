@@ -41,9 +41,9 @@ const similarityColours: Record<'Clone' | 'Close' | 'Complementary' | 'Contrasti
 export default function ChemistPanel({
   fragranceAId,
   fragranceBId,
-  fragranceAName,
-  fragranceBName,
-  useCase,
+  fragranceAName: _fragranceAName,
+  fragranceBName: _fragranceBName,
+  useCase: _useCase,
 }: ChemistPanelProps) {
   const [data, setData] = useState<ChemistResponse | null>(null)
   const [loading, setLoading] = useState(true)

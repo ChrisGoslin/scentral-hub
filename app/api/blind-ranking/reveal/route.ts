@@ -158,8 +158,8 @@ export async function POST(req: Request) {
       .sort((a, b) => a.placedRank - b.placedRank)
 
     return NextResponse.json({ revealed })
-  } catch (error: any) {
-    console.error('[/api/blind-ranking/reveal] error:', error?.message || error)
+  } catch (error) {
+    console.error('[/api/blind-ranking/reveal] error:', error instanceof Error ? error.message : error)
     return NextResponse.json({ error: 'Failed to reveal blind ranking session' }, { status: 500 })
   }
 }

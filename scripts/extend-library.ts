@@ -1,7 +1,5 @@
-import * as cheerio from 'cheerio';
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
-import fetch from 'node-fetch';
 
 dotenv.config({ path: '.env.local' });
 
