@@ -98,7 +98,7 @@ async function findValidUrl(url, maxRetries = 2) {
 
       // Any other status (404, 403, 500, etc.) → doesn't exist
       return null;
-    } catch (err) {
+    } catch {
       if (attempt < maxRetries - 1) {
         await new Promise(resolve => setTimeout(resolve, 1000)); // Retry delay
         continue;
@@ -136,7 +136,7 @@ async function sleep(ms) {
 }
 
 // Process fragrances with 6 concurrent workers for speed
-async function processBatch(fragrances, batchIndex) {
+async function processBatch(fragrances, _batchIndex) {
   let processed = 0;
   let hits = 0;
   let misses = 0;

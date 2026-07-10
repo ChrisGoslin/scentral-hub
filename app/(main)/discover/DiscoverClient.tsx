@@ -4,7 +4,6 @@ import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import EmptyState from '@/components/ui/EmptyState'
 import PersonaTipTicker from '@/components/ui/PersonaTipTicker'
-import Button from '@/components/ui/Button'
 import { createClient } from '@/utils/supabase/client'
 import { getPersonaById } from '@/lib/personas'
 import { track } from '@/lib/posthog'
@@ -36,7 +35,7 @@ type Props = {
   totalCount: number
 }
 
-export default function DiscoverClient({ fragrances, error, hasMore: initialHasMore, totalCount }: Props) {
+export default function DiscoverClient({ fragrances, error, hasMore: initialHasMore }: Props) {
   const [localFragrances, setLocalFragrances] = useState<DiscoverFragrance[]>(fragrances)
   const [hasMore, setHasMore] = useState(initialHasMore)
   const [loadingMore, setLoadingMore] = useState(false)
@@ -712,7 +711,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
         {/* Scan result context banner */}
         {isScanResult && (
           <div style={{ background: 'var(--surface)', padding: '10px 16px', borderBottom: '1px solid var(--line)', fontSize: 12, color: 'var(--text-muted)' }}>
-            ⊡ Scanned: "{searchTerm}" ·{' '}
+            ⊡ Scanned: &quot;{searchTerm}&quot; ·{' '}
             <button onClick={clearScan} style={{ color: 'var(--accent)', background: 'none', border: 'none', fontSize: 12, cursor: 'pointer', padding: 0 }}>
               Clear
             </button>

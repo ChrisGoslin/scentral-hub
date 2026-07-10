@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useEffect, useState } from 'react'
+import { useRef, useState } from 'react'
 import Sheet from '@/components/ui/Sheet'
 import { getPersonaById } from '@/lib/personas'
 
@@ -94,7 +94,7 @@ export default function NoseReportSheet({ isOpen, onClose, monthYear, wornsThisM
             {unwornName && (
               <div>
                 <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
-                  A fragrance you haven't worn yet:
+                  A fragrance you haven&apos;t worn yet:
                 </p>
                 <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 24, color: '#fff', margin: 0 }}>
                   {unwornName}.

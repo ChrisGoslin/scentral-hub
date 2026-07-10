@@ -28,7 +28,7 @@ export default function CloneCard({ clone }: Props) {
       try {
         setVerdict(JSON.parse(cached))
         setShowVerdict(true)
-      } catch (e) {
+      } catch {
         // Invalid cached data, ignore
       }
     }

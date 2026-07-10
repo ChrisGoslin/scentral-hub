@@ -39,13 +39,13 @@ export async function POST(request: Request) {
     let subscriptions = [];
 
     if (targetEndpoint) {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('push_subscriptions')
         .select('*')
         .eq('endpoint', targetEndpoint);
       if (data) subscriptions = data;
     } else {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('push_subscriptions')
         .select('*');
       if (data) subscriptions = data;

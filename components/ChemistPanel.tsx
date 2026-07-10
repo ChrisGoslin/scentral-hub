@@ -2,9 +2,8 @@
 
 import React, { useState } from 'react'
 import Button from '@/components/ui/Button'
-import Card from '@/components/ui/Card'
 import Chip from '@/components/ui/Chip'
-import { Beaker, AlertTriangle, CheckCircle2, FlaskConical, Activity } from 'lucide-react'
+import { Beaker, AlertTriangle, FlaskConical, Activity } from 'lucide-react'
 
 type ChemistResult = {
   chemist_score: number
@@ -46,11 +45,11 @@ function ScoreBar({ label, value }: { label: string, value: number }) {
 }
 
 export default function ChemistPanel({ 
-  fragranceAId, 
-  fragranceBId, 
-  fragranceAName, 
-  fragranceBName,
-  useCase 
+  fragranceAId,
+  fragranceBId,
+  fragranceAName: _fragranceAName,
+  fragranceBName: _fragranceBName,
+  useCase
 }: ChemistPanelProps) {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<ChemistResult | null>(null)
@@ -68,8 +67,8 @@ export default function ChemistPanel({
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed to analyze')
       setResult(data)
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err))
     } finally {
       setLoading(false)
     }

@@ -21,7 +21,7 @@ interface TemptationCardProps {
 export default function TemptationCard({
   fragrance,
   onView,
-  onBlindBuy,
+  onBlindBuy: _onBlindBuy,
   onWishlist,
   onDismiss,
   isLoading = false,

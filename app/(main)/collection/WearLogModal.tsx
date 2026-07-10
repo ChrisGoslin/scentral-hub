@@ -1,8 +1,7 @@
 'use client'
 
 import React, { useCallback, useEffect, useRef } from 'react'
-import { createClient } from '@/utils/supabase/client'
-import { useTemporalCurve, sliderToVector } from './hooks/useTemporalCurve'
+import { useTemporalCurve } from './hooks/useTemporalCurve'
 import { useWearLogForm } from './hooks/useWearLogForm'
 import { Stage1, Stage2, Stage3 } from './WearLogStages'
 import { StageDots, ChipGroup } from './WearLogDatePicker'

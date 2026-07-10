@@ -87,9 +87,25 @@ function weatherModifier(temp_c: number, humidity: number) {
   return { boost_phases: [2], penalise_families: [] }
 }
 
+type FragranceRow = {
+  id: string
+  brand: string
+  name: string
+  family: string | null
+  phase: number | null
+  phase_label: string | null
+  projection: string | null
+  anosmia_risk: string | null
+  lean: string | null
+  rating: number | null
+  use_case: string | null
+  image_url?: string | null
+  embedding?: number[] | null
+}
+
 // Score a candidate fragrance against context
 function scoreCandidate(
-  frag: Record<string, any>,
+  frag: FragranceRow,
   profile: typeof USE_CASE_PROFILE[string],
   weather: { boost_phases: number[]; penalise_families: string[] },
   basePhase: number | null
@@ -106,9 +122,10 @@ function scoreCandidate(
   if (basePhase === 1 && frag.phase === 2) score += 10
 
   // Family affinity
-  if (frag.family && profile.prefer_families.some((f: string) => frag.family.includes(f))) score += 15
-  if (frag.family && profile.avoid_families.some((f: string) => frag.family.includes(f))) score -= 25
-  if (frag.family && weather.penalise_families.some((f: string) => frag.family.includes(f))) score -= 15
+  const family = frag.family
+  if (family && profile.prefer_families.some((f: string) => family.includes(f))) score += 15
+  if (family && profile.avoid_families.some((f: string) => family.includes(f))) score -= 25
+  if (family && weather.penalise_families.some((f: string) => family.includes(f))) score -= 15
 
   // Projection fit
   if (frag.projection && profile.max_projection.includes(frag.projection)) score += 10
@@ -149,7 +166,7 @@ export async function POST(req: Request) {
     const profile = USE_CASE_PROFILE[use_case] ?? USE_CASE_PROFILE.casual
 
     // Fetch base fragrance if provided
-    let baseFrag: Record<string, any> | null = null
+    let baseFrag: FragranceRow | null = null
     if (base_fragrance_id) {
       const { data } = await supabase
         .from('fragrances')
@@ -168,7 +185,7 @@ export async function POST(req: Request) {
         match_count: 20,
       })
       if (resonance) {
-        resonanceResults = resonance.filter((r: any) => r.id !== base_fragrance_id)
+        resonanceResults = resonance.filter((r: { id: string; similarity: number }) => r.id !== base_fragrance_id)
       }
     }
 

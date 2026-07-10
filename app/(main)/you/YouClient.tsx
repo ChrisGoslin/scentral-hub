@@ -21,6 +21,16 @@ import { EvolutionCard } from './components/EvolutionCard'
 export type { WeekWearEntry, SavedCombination }
 import { track } from '@/lib/posthog'
 
+type NoseReportData = {
+  monthYear: string
+  wornsThisMonth: number
+  mostWornName: string
+  mostWornBrand: string
+  dominantPersonaId: string
+  longestStreak: number
+  unwornName: string | null
+}
+
 export type YouClientProps =
   | { state: 'signed-out' }
   | {
@@ -51,7 +61,7 @@ export default function YouClient(props: YouClientProps) {
   const [identityScore, setIdentityScore] = useState<IdentityScore | null>(null)
   
   // Nose Report
-  const [noseReportData, setNoseReportData] = useState<any>(null)
+  const [noseReportData, setNoseReportData] = useState<NoseReportData | null>(null)
 
   // Fetch saved combinations
   const userId = props.state === 'signed-in' ? (props.email ? 'user-id' : null) : null
@@ -98,15 +108,21 @@ export default function YouClient(props: YouClientProps) {
             .maybeSingle()
           setAuraStreak(streakData?.current_streak ?? 0)
 
-          const { data: logs } = await supabase
+          const { data: logsData } = await supabase
             .from('wear_logs')
             .select('fragrance_id, logged_at, fragrances ( brand, name )')
             .eq('user_id', anonId)
             .order('logged_at', { ascending: false })
-            
+
+          const logs = logsData as {
+            fragrance_id: string
+            logged_at: string
+            fragrances: { brand: string; name: string } | null
+          }[] | null
+
           if (logs && logs.length > 0) {
             setLocalScentHistory(
-              logs.slice(0, 7).map((log: any) => ({
+              logs.slice(0, 7).map((log) => ({
                 fragranceId: log.fragrance_id,
                 brand: log.fragrances?.brand ?? 'Unknown',
                 name: log.fragrances?.name ?? 'Unknown',
@@ -122,15 +138,15 @@ export default function YouClient(props: YouClientProps) {
           
           if (lastReport !== currentMonthYear && logs && logs.length > 0) {
             // Check if they have wears *this month*
-            const thisMonthLogs = logs.filter((l: any) => new Date(l.logged_at).getMonth() === date.getMonth())
+            const thisMonthLogs = logs.filter((l) => new Date(l.logged_at).getMonth() === date.getMonth())
             if (thisMonthLogs.length > 0) {
               const countMap = new Map<string, { count: number, name: string, brand: string }>()
-              thisMonthLogs.forEach((l: any) => {
+              thisMonthLogs.forEach((l) => {
                 const existing = countMap.get(l.fragrance_id)
                 if (existing) {
                   existing.count++
                 } else {
-                  countMap.set(l.fragrance_id, { count: 1, name: l.fragrances?.name, brand: l.fragrances?.brand })
+                  countMap.set(l.fragrance_id, { count: 1, name: l.fragrances?.name ?? 'Unknown', brand: l.fragrances?.brand ?? 'Unknown' })
                 }
               })
               let mostWorn = { count: 0, name: '', brand: '' }
@@ -140,7 +156,7 @@ export default function YouClient(props: YouClientProps) {
               let unwornName = null
               try {
                 const col: string[] = JSON.parse(localStorage.getItem('scentral_collection') ?? '[]')
-                const wornIds = new Set(logs.map((l: any) => l.fragrance_id))
+                const wornIds = new Set(logs.map((l) => l.fragrance_id))
                 const unwornIds = col.filter(id => !wornIds.has(id))
                 if (unwornIds.length > 0) {
                   const { data: unwornData } = await supabase.from('fragrances').select('name').eq('id', unwornIds[0]).single()
@@ -153,7 +169,7 @@ export default function YouClient(props: YouClientProps) {
                 wornsThisMonth: thisMonthLogs.length,
                 mostWornName: mostWorn.name,
                 mostWornBrand: mostWorn.brand,
-                dominantPersonaId: personaId,
+                dominantPersonaId: personaId ?? '',
                 longestStreak: streakData?.longest_streak ?? streakData?.current_streak ?? 0,
                 unwornName
               })
@@ -191,7 +207,7 @@ export default function YouClient(props: YouClientProps) {
       const sevenDaysAgo = new Date()
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
 
-      const { data: logs } = await supabase
+      const { data: weekLogsData } = await supabase
         .from('wear_logs')
         .select(`
           id,
@@ -205,15 +221,21 @@ export default function YouClient(props: YouClientProps) {
         .gte('logged_at', sevenDaysAgo.toISOString())
         .order('logged_at', { ascending: false })
 
+      const logs = weekLogsData as {
+        id: string
+        logged_at: string
+        collections: { fragrance_id: string; fragrances: { brand: string; name: string } | null } | null
+      }[] | null
+
       if (logs) {
         const counts: Record<string, { brand: string; name: string; count: number }> = {}
-        logs.forEach((log: any) => {
+        logs.forEach((log) => {
           const fid = log.collections?.fragrance_id
           if (!fid) return
           if (!counts[fid]) {
             counts[fid] = {
-              brand: log.collections.fragrances?.brand ?? 'Unknown',
-              name: log.collections.fragrances?.name ?? 'Unknown',
+              brand: log.collections?.fragrances?.brand ?? 'Unknown',
+              name: log.collections?.fragrances?.name ?? 'Unknown',
               count: 0,
             }
           }

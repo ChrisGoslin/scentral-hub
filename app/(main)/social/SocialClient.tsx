@@ -9,7 +9,22 @@ import { getPersonaById } from '@/lib/personas'
 import { formatDistanceToNow } from 'date-fns'
 import Sheet from '@/components/ui/Sheet'
 
-function StripCard({ post, isTopOfTheWeek = false }: { post: any; isTopOfTheWeek?: boolean }) {
+type WearPost = {
+  id: string
+  persona_id: string | null
+  note: string | null
+  created_at: string
+  likes: number | null
+  fragrances: { brand: string; name: string } | null
+}
+
+type QueueItem = {
+  fragranceId: string
+  fragranceName: string
+  note?: string
+}
+
+function StripCard({ post, isTopOfTheWeek = false }: { post: WearPost; isTopOfTheWeek?: boolean }) {
   const p = post.persona_id ? getPersonaById(post.persona_id) : null
   const relativeTime = formatDistanceToNow(new Date(post.created_at)) + ' ago'
 
@@ -42,7 +57,7 @@ function StripCard({ post, isTopOfTheWeek = false }: { post: any; isTopOfTheWeek
       </p>
       {post.note && (
         <p style={{ fontSize: 13, color: 'var(--text)', fontStyle: 'italic', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', marginBottom: 10 }}>
-          "{post.note}"
+          &quot;{post.note}&quot;
         </p>
       )}
       <div style={{ display: 'flex', gap: 16, fontSize: 12, color: 'var(--text-muted)' }}>
@@ -121,12 +136,12 @@ export default function SocialClient() {
     track('social_tab_viewed', { section: 'community_videos' })
   }, [])
 
-  const [posts, setPosts] = useState<any[]>([])
-  const [stripOfTheWeek, setStripOfTheWeek] = useState<any | null>(null)
-  
+  const [posts, setPosts] = useState<WearPost[]>([])
+  const [stripOfTheWeek, setStripOfTheWeek] = useState<WearPost | null>(null)
+
   // Wear-to-Post Queue state
-  const [queue, setQueue] = useState<any[]>([])
-  const [activeQueueItem, setActiveQueueItem] = useState<any | null>(null)
+  const [queue, setQueue] = useState<QueueItem[]>([])
+  const [activeQueueItem, setActiveQueueItem] = useState<QueueItem | null>(null)
   const [queueNote, setQueueNote] = useState('')
   const [isPosting, setIsPosting] = useState(false)
 

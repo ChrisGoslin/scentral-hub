@@ -38,7 +38,33 @@ export default function CollectionClientWrapper() {
           throw collectionError
         }
 
-        const collectionFragrances: CollectionFragrance[] = (data ?? []).map((row: any) => {
+        type CollectionRow = {
+          fragrance_id: string
+          created_at: string | null
+          maceration_started_at: string | null
+          maceration_ready_at: string | null
+          affinity_score: number | null
+          status: string | null
+          origin_code: 'B' | 'D' | 'T' | 'O' | 'W' | null
+          frag: {
+            id: string
+            brand: string
+            name: string
+            phase: 1 | 2 | 3
+            phase_label: string
+            family: string
+            projection: string
+            anosmia_risk: 'High' | 'Medium' | 'Low'
+            lean: string
+            rating: number | null
+            image_url: string | null
+            optimal_season: string | null
+            maturation: string | null
+            use_case: string | null
+          }
+        }
+
+        const collectionFragrances: CollectionFragrance[] = ((data ?? []) as unknown as CollectionRow[]).map((row) => {
           const f = row.frag
           return {
             id: f.id,

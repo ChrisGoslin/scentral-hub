@@ -5,7 +5,6 @@
 
 import dotenv from 'dotenv'
 import { createClient } from '@supabase/supabase-js'
-import { execSync } from 'child_process'
 
 dotenv.config({ path: '.env.local' })
 

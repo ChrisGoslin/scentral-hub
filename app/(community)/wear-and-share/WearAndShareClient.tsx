@@ -12,8 +12,8 @@ interface Post {
   wear_photo_url: string | null
   likes: number
   created_at: string
-  profiles: any
-  fragrances: any
+  profiles: { display_name: string | null; avatar_url: string | null; persona?: string | null }[] | null
+  fragrances: { id: string; brand: string; name: string; image_url: string | null }[] | null
 }
 
 interface Props {
@@ -186,7 +186,7 @@ export default function WearAndShareClient({
                   WebkitBoxOrient: 'vertical',
                 }}
               >
-                "{truncatedCaption}"
+                &quot;{truncatedCaption}&quot;
               </p>
             )}
 

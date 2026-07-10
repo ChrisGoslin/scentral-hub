@@ -13,11 +13,9 @@ export default function SupabaseAuth() {
     let mounted = true
     async function fetchUser() {
       try {
-        // @ts-ignore
         const { data } = await supabase.auth.getUser()
-        // @ts-ignore
         if (mounted) setUserEmail(data?.user?.email ?? null)
-      } catch (e) {
+      } catch {
         // ignore
       }
     }
@@ -32,8 +30,8 @@ export default function SupabaseAuth() {
       const { error } = await supabase.auth.signInWithOtp({ email })
       if (error) setMsg(String(error.message))
       else setMsg('Magic link sent — check your email')
-    } catch (err: any) {
-      setMsg(String(err.message || err))
+    } catch (err) {
+      setMsg(err instanceof Error ? err.message : String(err))
     }
   }
 

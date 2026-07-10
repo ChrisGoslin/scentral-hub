@@ -115,7 +115,7 @@ async function main() {
     
     try {
       execSync(`open "${searchUrl}"`)
-    } catch (err) {
+    } catch {
       console.warn('  ⚠️  Could not open browser automatically.')
     }
 

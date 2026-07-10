@@ -33,7 +33,7 @@ interface CachedInsights {
   }
 }
 
-export async function handler(req: Request): Promise<Response> {
+export async function handler(): Promise<Response> {
   try {
     // Fetch all unique anon_ids from profiles
     const { data: profiles, error: profilesError } = await supabase

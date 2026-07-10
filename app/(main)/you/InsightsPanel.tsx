@@ -240,7 +240,7 @@ export default function InsightsPanel({
     const personaId = localStorage.getItem('scentral_persona')
     if (personaId) {
       const p = getPersonaById(personaId)
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+       
       if (p) setClientPersona(p)
     }
   }, [])

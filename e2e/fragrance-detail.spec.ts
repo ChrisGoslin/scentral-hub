@@ -33,7 +33,6 @@ test.describe('Fragrance Detail Page', () => {
     const wishlistBtn = page.locator('button[aria-label="Add to wishlist"]').first();
     if (await wishlistBtn.isVisible()) {
       // This test just verifies no errors on interaction
-      const initialColor = await wishlistBtn.evaluate((el) => window.getComputedStyle(el).color);
       await wishlistBtn.click();
       // Verify button is still present after click
       await expect(wishlistBtn).toBeVisible();

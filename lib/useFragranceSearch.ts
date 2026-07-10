@@ -101,7 +101,7 @@ export function useFragranceSearch(localFragrances: DiscoverFragrance[]) {
 
         // Fetch owner counts for all returned fragrances (batched)
         const fragrances = data ?? []
-        let ownerCounts: Record<string, number> = {}
+        const ownerCounts: Record<string, number> = {}
 
         if (fragrances.length > 0) {
           try {
@@ -183,7 +183,7 @@ export function useFragranceSearch(localFragrances: DiscoverFragrance[]) {
         setSemanticResults(
           (results ?? [])
             .slice(0, 6)
-            .map((r: any) => ({
+            .map((r: DiscoverFragrance) => ({
               id: r.id,
               brand: r.brand,
               name: r.name,

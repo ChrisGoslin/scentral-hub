@@ -53,7 +53,7 @@ export default function CoherenceCard({ owned }: { owned: CollectionFragrance[] 
       {coherenceReading.missing.length > 0 && (
         <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--line)' }}>
           <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>
-            The cabinet doesn't have a {coherenceReading.missing[0].toLowerCase()} note yet.
+            The cabinet doesn&apos;t have a {coherenceReading.missing[0].toLowerCase()} note yet.
           </p>
           <a href={`/study?family=${encodeURIComponent(coherenceReading.missing[0])}`} style={{ fontSize: 11, color: 'var(--accent)', textDecoration: 'none' }}>
             Study a lead → {coherenceReading.missing[0]} fragrances

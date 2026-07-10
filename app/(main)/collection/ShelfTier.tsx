@@ -5,7 +5,7 @@ import { useDroppable } from '@dnd-kit/core'
 import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable'
 import { type CollectionFragrance } from './CollectionClient'
 import OptimizedBottleCard from '@/components/collection/OptimizedBottleCard'
-import { getTierColor, type TierKey } from '@/lib/affinity'
+import { type TierKey } from '@/lib/affinity'
 
 interface ShelfTierProps {
   tierId: TierKey
@@ -26,8 +26,6 @@ const TIER_EXPLAINERS: Record<TierKey, string> = {
 
 export default function ShelfTier({ tierId, label, sublabel, items, locked, activeId, isMobile = false }: ShelfTierProps) {
   const { setNodeRef, isOver } = useDroppable({ id: tierId })
-
-  const { accent, glow } = getTierColor(tierId)
 
   return (
     <div style={{ position: 'relative' }}>

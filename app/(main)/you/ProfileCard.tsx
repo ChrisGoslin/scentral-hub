@@ -2,11 +2,9 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/utils/supabase/client'
 import { getPersonaById } from '@/lib/personas'
 import { buildPersonalNote } from '@/lib/personalization'
 import ThemeToggle from '@/components/ThemeToggle'
-import Button from '@/components/ui/Button'
 import Chip from '@/components/ui/Chip'
 import Link from 'next/link'
 
@@ -156,8 +154,8 @@ function SettingsSection({ email, onSignOut, signingOut, onReset }: ProfileCardP
               } else {
                 alert('Permission denied or not supported')
               }
-            } catch (e: any) {
-              alert('Failed to enable push: ' + e.message)
+            } catch (e) {
+              alert('Failed to enable push: ' + (e instanceof Error ? e.message : String(e)))
             }
           }}
           style={{ padding: '6px 12px', fontSize: 12, borderRadius: 999, background: 'var(--surface-2)', border: '1px solid var(--line)', color: 'var(--text)' }}

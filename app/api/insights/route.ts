@@ -89,10 +89,23 @@ export async function GET(request: NextRequest) {
   }
 }
 
+type InsightsResult = {
+  your_impact: {
+    interactions_count: number
+    reactions_received: number
+    saves_count: number
+    summary: string
+  }
+  best_traces: Array<{ id: string; reaction_count: number; content: string }>
+  scentiment_vision: { resonance_score: number; warmth_factor: string; summary: string }
+  taste_evolution: Array<{ period?: string; family_distribution?: Record<string, number> }>
+  trajectory: { start_families: string[]; current_families: string[]; morphing: boolean }
+}
+
 async function computeInsights(
   supabase: Awaited<ReturnType<typeof createClient>>,
   anonId: string
-): Promise<any> {
+): Promise<InsightsResult | null> {
   try {
     // Fetch all user data in parallel
     const [tracesResult, reactionsResult, collectionsResult, shelfEventsResult] = await Promise.all([

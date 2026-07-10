@@ -49,19 +49,25 @@ export default async function CommunityDepth({ fragranceId }: { fragranceId: str
   const { data: alsoOwnRows } = await supabase
     .rpc('get_also_owned_fragrances', { f_id: fragranceId, limit_count: 6 })
 
-  let alsoOwnFragrances = []
+  type AlsoOwnedFragrance = { id: string; name: string; brand: string; image_url: string | null }
+  let alsoOwnFragrances: AlsoOwnedFragrance[] = []
   if (alsoOwnRows && alsoOwnRows.length > 0) {
-    const ids = alsoOwnRows.map((r: any) => r.fragrance_id)
+    const ids = alsoOwnRows.map((r: { fragrance_id: string }) => r.fragrance_id)
     const { data: frags } = await supabase
       .from('fragrances')
       .select('id, name, brand, image_url')
       .in('id', ids)
-    
+
     if (frags) {
-      const lookup = new Map(frags.map(f => [f.id, f]))
-      alsoOwnFragrances = alsoOwnRows
-        .map((r: any) => lookup.get(r.fragrance_id))
-        .filter(Boolean)
+      const lookup = new Map<string, AlsoOwnedFragrance>(
+        (frags as AlsoOwnedFragrance[]).map(f => [f.id, f])
+      )
+      const matched: AlsoOwnedFragrance[] = []
+      for (const r of alsoOwnRows as { fragrance_id: string }[]) {
+        const match = lookup.get(r.fragrance_id)
+        if (match) matched.push(match)
+      }
+      alsoOwnFragrances = matched
     }
   }
 
@@ -123,11 +129,11 @@ export default async function CommunityDepth({ fragranceId }: { fragranceId: str
         <div style={{ marginBottom: 24 }}>
           <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>Recently pinned in Wear & Share:</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {recentPosts.map((post: any, i: number) => {
+            {recentPosts.map((post, i) => {
               const p = post.persona_id ? getPersonaById(post.persona_id) : null
               return (
                 <div key={i} style={{ padding: '10px 12px', background: 'var(--bg)', borderRadius: 8, border: '1px solid var(--line)' }}>
-                  <p style={{ fontSize: 13, color: 'var(--text)', fontStyle: 'italic', marginBottom: 6 }}>"{post.note}"</p>
+                  <p style={{ fontSize: 13, color: 'var(--text)', fontStyle: 'italic', marginBottom: 6 }}>&quot;{post.note}&quot;</p>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     {p ? (
                       <span style={{ fontSize: 9, color: p.ui_theme.accentColor, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{p.name}</span>
@@ -147,7 +153,7 @@ export default async function CommunityDepth({ fragranceId }: { fragranceId: str
             Members who own this also own:
           </p>
           <div style={{ display: 'flex', gap: 10, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 8 }}>
-            {alsoOwnFragrances.map((f: any) => {
+            {alsoOwnFragrances.map((f) => {
               const safeImageUrl = getSafeFragranceImageUrl(f.image_url)
               return (
                 <Link key={f.id} href={`/cabinet/${f.id}?from=cabinet`} style={{ textDecoration: 'none', flexShrink: 0, width: 90 }}>

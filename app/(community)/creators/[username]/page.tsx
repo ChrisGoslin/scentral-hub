@@ -172,11 +172,16 @@ export default async function CreatorProfilePage({ params }: Props) {
                     </div>
                   )}
                   <div style={{ padding: '1rem' }}>
-                    {post.fragrances && (
-                      <p style={{ color: 'var(--text)', fontWeight: '500', marginBottom: '0.5rem' }}>
-                        {(post.fragrances as any).brand} {(post.fragrances as any).name}
-                      </p>
-                    )}
+                    {post.fragrances && (() => {
+                      const raw = post.fragrances as { brand: string; name: string } | { brand: string; name: string }[]
+                      const fragrance = Array.isArray(raw) ? raw[0] : raw
+                      if (!fragrance) return null
+                      return (
+                        <p style={{ color: 'var(--text)', fontWeight: '500', marginBottom: '0.5rem' }}>
+                          {fragrance.brand} {fragrance.name}
+                        </p>
+                      )
+                    })()}
                     {post.caption && (
                       <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
                         {post.caption}

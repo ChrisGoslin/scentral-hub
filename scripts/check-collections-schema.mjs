@@ -1,8 +1,9 @@
-const { createClient } = require('@supabase/supabase-js');
-const fs = require('fs');
-const path = require('path');
+import { createClient } from '@supabase/supabase-js';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-const envPath = path.resolve(__dirname, '../.env.local');
+const envPath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../.env.local');
 const envContent = fs.readFileSync(envPath, 'utf8');
 const env = {};
 envContent.split('\n').forEach(line => {

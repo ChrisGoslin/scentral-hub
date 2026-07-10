@@ -44,7 +44,7 @@ export async function POST(req: Request) {
     })
 
     const text = (message.content[0] as { type: 'text'; text: string }).text
-    let result = JSON.parse(text)
+    const result = JSON.parse(text)
     result.key = cacheKey
 
     // Cache the result

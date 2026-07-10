@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useState, useEffect, useCallback, useRef } from 'react'
-import Link from 'next/link'
 import {
   DndContext,
   DragEndEvent,
