@@ -17,7 +17,11 @@
     "test:e2e": "playwright test",
     "pretest:e2e:headed": "npm run build",
     "test:e2e:headed": "playwright test --headed",
-    "audit": "npm audit --audit-level=high"
+    "audit": "npm audit --audit-level=high",
+    "ingest:fragrance": "tsx scripts/ingest_fragrance_sources.ts",
+    "export:wardrobe": "tsx scripts/export_knowledge.ts --target=wardrobe",
+    "export:layering": "tsx scripts/export_knowledge.ts --target=layering",
+    "brief:weekly": "tsx scripts/generate_weekly_product_brief.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.110.0",
@@ -58,6 +62,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
     "tailwindcss": "^4",
+    "tsx": "^4.23.0",
     "typescript": "^6"
   }
 }

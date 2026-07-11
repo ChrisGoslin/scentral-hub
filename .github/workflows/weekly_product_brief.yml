@@ -1,0 +1,33 @@
+# Generates the weekly nota. product brief and commits it to the repo.
+# Requires repo secrets: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_KEY,
+# ANTHROPIC_API_KEY. See docs/nota/PRODUCT_LOOP.md.
+name: Weekly Product Brief
+on:
+  schedule:
+    - cron: '0 23 * * 0' # Sunday 23:00 UTC
+  workflow_dispatch: {}
+jobs:
+  generate-brief:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run brief:weekly
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      - name: Commit brief
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/weekly/
+          git diff --cached --quiet && echo "No changes to commit" && exit 0
+          git commit -m "docs(weekly): product brief $(date -u +%Y-%m-%d)"
+          git push
