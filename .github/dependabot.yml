@@ -7,3 +7,13 @@ updates:
     open-pull-requests-limit: 5
     labels:
       - "dependencies"
+    ignore:
+      # TypeScript 7 restructured its package (ESM-only, no lib/typescript.js);
+      # Next.js 16.2.9's hasNecessaryDependencies check doesn't recognize it yet.
+      # Re-enable once Next.js ships TS7 support.
+      - dependency-name: "typescript"
+        versions: [">=7.0.0"]
+      # eslint-plugin-react (via eslint-config-next) only supports ESLint up to ^9.7.
+      # Re-enable once eslint-config-next/eslint-plugin-react add ESLint 10 support.
+      - dependency-name: "eslint"
+        versions: [">=10.0.0"]
