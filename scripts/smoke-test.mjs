@@ -8,7 +8,10 @@
  *   BASE_URL=https://your-preview.vercel.app node scripts/smoke-test.mjs
  */
 
-const BASE_URL = process.env.BASE_URL || 'https://scentral-hub.vercel.app'
+const BASE_URL =
+  process.env.BASE_URL ||
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  'https://scentral-hub.vercel.app'
 
 const ROUTES = [
   // [path, expected status, description]
@@ -42,7 +45,7 @@ async function testFragranceById(fragranceId) {
     const res = await fetch(url, {
       method: 'GET',
       redirect: 'follow',
-      headers: { 'User-Agent': 'scentral-smoke-test/1.0' },
+      headers: { 'User-Agent': 'nota-smoke-test/1.0' },
       signal: AbortSignal.timeout(10_000),
     })
 
@@ -77,7 +80,7 @@ async function testDiscoverCarriesMannenzaakImage() {
     const res = await fetch(url, {
       method: 'GET',
       redirect: 'follow',
-      headers: { 'User-Agent': 'scentral-smoke-test/1.0' },
+      headers: { 'User-Agent': 'nota-smoke-test/1.0' },
       signal: AbortSignal.timeout(10_000),
     })
 
@@ -109,7 +112,7 @@ async function run() {
       const res = await fetch(url, {
         method: 'GET',
         redirect: 'follow',
-        headers: { 'User-Agent': 'scentral-smoke-test/1.0' },
+        headers: { 'User-Agent': 'nota-smoke-test/1.0' },
         signal: AbortSignal.timeout(10_000),
       })
 
@@ -137,7 +140,7 @@ async function run() {
     const searchRes = await fetch(searchUrl, {
       method: 'GET',
       redirect: 'follow',
-      headers: { 'User-Agent': 'scentral-smoke-test/1.0' },
+      headers: { 'User-Agent': 'nota-smoke-test/1.0' },
       signal: AbortSignal.timeout(10_000),
     })
 

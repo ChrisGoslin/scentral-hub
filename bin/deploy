@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# bin/deploy — guarded deployment script for scentral-hub
+# bin/deploy — guarded deployment script for the nota. web app
 # Enforces pre-flight checks before pushing to production
 
 set -e
@@ -8,7 +8,7 @@ set -e
 CURRENT_BRANCH=$(git branch --show-current)
 GIT_STATUS=$(git status --porcelain)
 
-echo "🚀 Scentral Deploy"
+echo "🚀 nota. Deploy"
 echo ""
 
 # 1. Verify on main

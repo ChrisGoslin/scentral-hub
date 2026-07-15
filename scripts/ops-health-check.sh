@@ -3,6 +3,9 @@
 
 set -e
 
+SITE_URL="${SITE_URL:-${NEXT_PUBLIC_SITE_URL:-https://scentral-hub.vercel.app}}"
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
 echo "╔════════════════════════════════════════════════════════════════╗"
 echo "║         nota. Production Health Check                         ║"
 echo "╚════════════════════════════════════════════════════════════════╝"
@@ -25,9 +28,9 @@ check() {
 }
 
 echo "Deployment Health"
-check "Vercel deployment active" "curl -s https://scentral-hub.vercel.app | grep -q 'nota'"
-check "API routes responding" "curl -s -I https://scentral-hub.vercel.app/api/shelf | grep -q '401\\|200'"
-check "Public pages accessible" "curl -s https://scentral-hub.vercel.app/trails | grep -q 'trail\\|Trail'"
+check "Vercel deployment active" "curl -s \"$SITE_URL\" | grep -q 'nota'"
+check "API routes responding" "curl -s -I \"$SITE_URL/api/shelf\" | grep -q '401\\|200'"
+check "Public pages accessible" "curl -s \"$SITE_URL/trails\" | grep -q 'trail\\|Trail'"
 echo ""
 
 echo "Database Health"
@@ -35,7 +38,7 @@ check "Supabase responsive" "supabase projects list > /dev/null 2>&1"
 echo ""
 
 echo "Build Health"
-check "TypeScript builds" "cd /Users/christophergoslin/Projects/scentral-hub && npm run build 2>&1 | grep -q 'Compiled successfully'"
+check "TypeScript builds" "cd \"$PROJECT_ROOT\" && npm run build 2>&1 | grep -q 'Compiled successfully'"
 echo ""
 
 echo "Summary"
