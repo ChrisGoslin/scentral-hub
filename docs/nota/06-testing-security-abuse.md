@@ -9,7 +9,7 @@
 |---|---|
 | Unit tests | **None.** No Vitest/Jest installed. |
 | E2E | Playwright 1.60, 4 browser projects, 8 specs in `e2e/` — all legacy-era surfaces (collection, discover, layering, onboarding, you-tab). **Zero nota-core coverage** (Read, Shelf, Noseprint, Blind Ranking, Traces). |
-| Smoke | `scripts/smoke-test.mjs` (`npm run test:smoke`, `test:smoke:prod` → scentral-hub.vercel.app). |
+| Smoke | `scripts/smoke-test.mjs` (`npm run test:smoke`, `test:smoke:prod` → `NEXT_PUBLIC_SITE_URL` when set, otherwise `scentral-hub.vercel.app`). |
 | CI | `.github/workflows/security-audit.yml` — `npm audit --audit-level=high` only. No tsc, lint, build, or test in CI. |
 | Local gates | Husky pre-push: tsc + module-scope `createClient()` check (L15). `npm run build` before push (L14) is convention, not enforced. |
 | Rate limiting | `@upstash/ratelimit` + `@upstash/redis` installed. Used in **exactly one** of ~58 API routes: `app/api/formulate/route.ts` (sliding window 10/min per user, graceful no-op without env vars). |
