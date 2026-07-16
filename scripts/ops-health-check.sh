@@ -21,10 +21,10 @@ check() {
 
   if bash -c "$script" bash "$@" > /dev/null 2>&1; then
     echo "✅ $name"
-    ((CHECKS_PASSED++))
+    CHECKS_PASSED=$((CHECKS_PASSED + 1))
   else
     echo "❌ $name"
-    ((CHECKS_FAILED++))
+    CHECKS_FAILED=$((CHECKS_FAILED + 1))
   fi
 }
 
