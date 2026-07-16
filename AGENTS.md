@@ -42,7 +42,7 @@ fictional features, lore like "Agent Luna / Hegemony / Shadow Branching", and ha
 
 ## 1. Ground truth (the ONLY accepted facts unless re-verified)
 - **Display name:** nota. **Repo:** verify the current local checkout and GitHub remote before asserting the repo name; historical references may still say `scentral-hub` / `ChrisGoslin/scentral`. **DB:** `scentral-mvp` (`lrkdwobnemczvhpixpky`). Do NOT rename DB or tables as part of branding cleanup.
-- **Brand history:** Scentral Hub → AnotherSense → BaseNote → nota. You may still see `Scentral`, `AnotherSense`, and `BaseNote` in archived docs, old prompts, localStorage keys, repo names, database names, or internal implementation details. Treat `nota.` as the current user-facing brand unless a source-of-truth doc explicitly says otherwise.
+- **Brand history:** Scentral Hub → AnotherSense → nota. You may still see older legacy brand names in archived docs, old prompts, localStorage keys, repo names, database names, or internal implementation details. Treat `nota.` as the current user-facing brand unless a source-of-truth doc explicitly says otherwise.
 - **Data:** 127,195 fragrances (bulk-imported from 3 Kaggle datasets — 2026-06-24, IMPORT COMPLETE). Key columns: `plain_description`, `inspired_by`, `family`, `projection`, `optimal_season`, `use_case`, `lean`, `image_url` (populated by backfill scripts — may be null for some rows).
 - **Stack:** Next.js 16.2.9 (App Router, route groups like `(main)`), React 19.2.4, Supabase JS 2.x, Vercel, Tailwind CSS, `@dnd-kit/core` + `@dnd-kit/sortable` + `@dnd-kit/utilities` (Living Wardrobe). Always re-verify version from `package.json` if in doubt — do NOT assert from memory.
 - **Architecture:** Single product. No auth for MVP — identity via `scentral_anon_id` (localStorage UUID, generated on first load).
@@ -117,7 +117,7 @@ fictional features, lore like "Agent Luna / Hegemony / Shadow Branching", and ha
   - `--motion-organic: 800ms cubic-bezier(0.34, 1.56, 0.64, 1)`
 - **Typography:** Instrument Serif italic (emotional/narrative copy, Aura voice) + Unbounded (functional/navigational). Both font variables on the `html` element in `app/layout.tsx`.
 - **Personas:** See `SCENTRAL_PERSONAS.md`. Gavin (newcomer, plain language). Christopher (enthusiast, expert).
-- **Source-of-truth docs:** `AGENTS.md` (this file), `docs/HANDOVER.md` (latest launch handover), `docs/nota/` (current nota. audits and plans), `SCENTRAL_PERSONAS.md`. Older BaseNote/AnotherSense docs are historical unless referenced by the latest handover.
+- **Source-of-truth docs:** `AGENTS.md` (this file), `docs/HANDOVER.md` (latest launch handover), `docs/nota/` (current nota. audits and plans), `SCENTRAL_PERSONAS.md`. Older legacy docs are historical unless referenced by the latest handover.
 
 If a "fact" is not in these docs, the repo, or the database, it is NOT a fact yet — verify it or label it unverified.
 
@@ -478,3 +478,30 @@ npm run build must pass. Commit: feat: epic-N <description>. Deploy: npx vercel 
 4. Did I label assumptions vs verified facts?
 5. Does my script need the network? If yes — did I give Christopher the local run command instead of running it myself?
 Fix any unsatisfactory answer before declaring done.
+## AI Ops Review
+
+After significant work, run an AI Ops Review.
+
+Significant work includes:
+
+- 10+ files changed
+- 500+ lines changed
+- new dependency
+- new API
+- schema/database change
+- new agent, prompt, skill, or tool
+- repeated pattern appears 3+ times
+- completed feature
+- bug required more than 2 attempts
+
+Review for:
+
+- reusable skills
+- agent opportunities
+- token waste
+- duplicated instructions
+- MCP/tool candidates
+- missing docs
+- simplification opportunities
+
+Prefer simple, boring, proven improvements over clever abstractions.
