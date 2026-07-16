@@ -57,7 +57,14 @@ export default function YouClient(props: YouClientProps) {
   const [auraStreak, setAuraStreak] = useState(0)
   const [localPersona, setLocalPersona] = useState<Persona | null>(null)
   const [localCollectionCount, setLocalCollectionCount] = useState(0)
-  const [localScentHistory, setLocalScentHistory] = useState<{ fragranceId: string; brand: string; name: string; loggedAt: string }[]>([])
+  const [localWishlistCount, setLocalWishlistCount] = useState(0)
+  const [localScentHistory, setLocalScentHistory] = useState<{
+    fragranceId: string
+    brand: string
+    name: string
+    loggedAt: string
+    note: string | null
+  }[]>([])
   const [identityScore, setIdentityScore] = useState<IdentityScore | null>(null)
   
   // Nose Report
@@ -79,10 +86,16 @@ export default function YouClient(props: YouClientProps) {
     }
 
     const supabase = createClient()
+    let wearNotes: Array<{ fragrance_id: string; note: string; date: string }> = []
 
     try {
       const col: string[] = JSON.parse(localStorage.getItem('scentral_collection') ?? '[]')
+      const wishlist: string[] = JSON.parse(localStorage.getItem('scentral_wishlist') ?? '[]')
+      wearNotes = JSON.parse(
+        localStorage.getItem('scentral_wear_notes') ?? '[]'
+      )
       setLocalCollectionCount(col.length)
+      setLocalWishlistCount(wishlist.length)
       if (col.length > 0) {
         // Fetch families for identity score
         supabase.from('fragrances').select('family').in('id', col).then(({ data }) => {
@@ -110,23 +123,30 @@ export default function YouClient(props: YouClientProps) {
 
           const { data: logsData } = await supabase
             .from('wear_logs')
-            .select('fragrance_id, logged_at, fragrances ( brand, name )')
+            .select('fragrance_id, logged_at, notes, fragrances ( brand, name )')
             .eq('user_id', anonId)
             .order('logged_at', { ascending: false })
 
           const logs = logsData as {
             fragrance_id: string
             logged_at: string
+            notes: string | null
             fragrances: { brand: string; name: string } | null
           }[] | null
 
           if (logs && logs.length > 0) {
+            const latestNoteByFragrance = new Map<string, string>()
+            for (const entry of wearNotes) {
+              latestNoteByFragrance.set(entry.fragrance_id, entry.note)
+            }
+
             setLocalScentHistory(
               logs.slice(0, 7).map((log) => ({
                 fragranceId: log.fragrance_id,
                 brand: log.fragrances?.brand ?? 'Unknown',
                 name: log.fragrances?.name ?? 'Unknown',
                 loggedAt: log.logged_at,
+                note: log.notes ?? latestNoteByFragrance.get(log.fragrance_id) ?? null,
               }))
             )
           }
@@ -402,20 +422,45 @@ export default function YouClient(props: YouClientProps) {
               </Link>
             </div>
 
+            {localCollectionCount >= 3 && (
+              <div style={{ padding: '14px 16px', background: 'var(--surface)', borderLeft: '2px solid var(--accent)', borderRadius: 'var(--r-card)' }}>
+                <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 6 }}>
+                  Your cabinet
+                </p>
+                <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 15, color: 'var(--text)', lineHeight: 1.4, marginBottom: 8 }}>
+                  {localCollectionCount} in collection · {localWishlistCount} in wishlist
+                </p>
+                <Link href="/collection" style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 600 }}>
+                  View your collection →
+                </Link>
+              </div>
+            )}
+
             {localScentHistory.length > 0 && (
               <div>
                 <p style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700, marginBottom: 12 }}>
                   Your Scent History
                 </p>
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-4">
                   {localScentHistory.map((entry, i) => (
-                    <div key={`${entry.fragranceId}-${i}`} className="flex items-baseline justify-between" style={{ borderBottom: '1px solid var(--line)', paddingBottom: 8 }}>
-                      <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 16, color: 'var(--text)' }}>
+                    <div
+                      key={`${entry.fragranceId}-${i}`}
+                      style={{
+                        paddingLeft: 12,
+                        borderLeft: '1px solid var(--line)',
+                      }}
+                    >
+                      <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 16, color: 'var(--text)', marginBottom: 2 }}>
                         {entry.brand} {entry.name}
                       </p>
-                      <p style={{ fontSize: 11, fontFamily: 'var(--font-mono, monospace)', color: 'var(--text-muted)' }}>
+                      <p style={{ fontSize: 11, fontFamily: 'var(--font-mono, monospace)', color: 'var(--text-muted)', marginBottom: entry.note ? 6 : 0 }}>
                         {formatRelativeDate(entry.loggedAt)}
                       </p>
+                      {entry.note && (
+                        <p style={{ fontSize: 13, color: 'var(--text)', fontStyle: 'italic', lineHeight: 1.5, margin: 0 }}>
+                          “{entry.note}”
+                        </p>
+                      )}
                     </div>
                   ))}
                 </div>
