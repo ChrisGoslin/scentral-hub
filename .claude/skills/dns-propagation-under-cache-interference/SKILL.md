@@ -31,9 +31,13 @@ dig +short A notalabs.io
 # Get the authoritative nameservers for the domain
 dig NS notalabs.io +short
 
-# Query one of those nameservers directly via TCP (UDP can be intercepted, TCP usually isn't)
-dig +tcp +short A notalabs.io @ns-cloud-e1.googledomains.com
+# Query one of the returned nameservers directly via TCP (UDP can be intercepted, TCP usually isn't).
+# Don't hard-code a specific nameserver — use one from the `dig NS` output above, since
+# delegation can change. Example, substituting an actual result from that command:
+dig +tcp +short A notalabs.io @<nameserver-from-dig-NS-output>
 ```
+
+If you need to confirm the response actually came from an authoritative server (not a resolver), drop `+short` and check the `aa` (authoritative answer) flag in the full `dig` output.
 
 If this shows the **old** value, the zone change truly hasn't propagated yet (give it 5–15 minutes).
 
@@ -61,7 +65,7 @@ If DoH shows new + authoritative shows new + local shows old → local cache is 
 ### 4. Check TTL to estimate cache expiration
 
 ```bash
-dig A notalabs.io @ns-cloud-e1.googledomains.com +noall +answer
+dig A notalabs.io @<nameserver-from-dig-NS-output> +noall +answer
 ```
 
 Look for the number after the domain name (TTL in seconds):
@@ -71,7 +75,9 @@ notalabs.io.		21600	IN	A	216.198.79.1
                     TTL (6 hours)
 ```
 
-If TTL is large (3600+ seconds / 1+ hour), expect local caches to hold the old value until TTL expires. You can't force this to go faster on others' machines; only way to accelerate is:
+**Important:** this is the authoritative record's TTL — the cache lifetime for a *newly retrieved* answer, not the remaining time on a stale answer some ISP or local resolver is already serving. It does not tell you how much longer an old cached value will stick around; that depends on when each individual resolver last fetched it. To estimate remaining staleness on a specific affected resolver, query that resolver directly and compare its returned TTL to this authoritative value.
+
+If the authoritative TTL is large (3600+ seconds / 1+ hour), expect any resolver that fetches (or fetched) the record to hold it for that long from its own fetch time. You can't force this to go faster on others' machines; only way to accelerate is:
 - Lower TTL **before** the change (should have been done 24h prior, too late now)
 - Use the new IP for HTTPS cert provisioning in parallel (Vercel will recognize it's live even if clients still see old IP)
 

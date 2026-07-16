@@ -16,9 +16,10 @@ CHECKS_FAILED=0
 
 check() {
   local name=$1
-  local command=$2
+  local script=$2
+  shift 2
 
-  if eval "$command" > /dev/null 2>&1; then
+  if bash -c "$script" bash "$@" > /dev/null 2>&1; then
     echo "✅ $name"
     ((CHECKS_PASSED++))
   else
@@ -28,17 +29,17 @@ check() {
 }
 
 echo "Deployment Health"
-check "Vercel deployment active" "curl -s \"$SITE_URL\" | grep -q 'nota'"
-check "API routes responding" "curl -s -I \"$SITE_URL/api/shelf\" | grep -q '401\\|200'"
-check "Public pages accessible" "curl -s \"$SITE_URL/trails\" | grep -q 'trail\\|Trail'"
+check "Vercel deployment active" 'curl -s "$1" | grep -q "nota"' "$SITE_URL"
+check "API routes responding" 'curl -s -I "$1/api/shelf" | grep -qE "401|200"' "$SITE_URL"
+check "Public pages accessible" 'curl -s "$1/trails" | grep -qi "trail"' "$SITE_URL"
 echo ""
 
 echo "Database Health"
-check "Supabase responsive" "supabase projects list > /dev/null 2>&1"
+check "Supabase responsive" 'supabase projects list > /dev/null 2>&1'
 echo ""
 
 echo "Build Health"
-check "TypeScript builds" "cd \"$PROJECT_ROOT\" && npm run build 2>&1 | grep -q 'Compiled successfully'"
+check "TypeScript builds" 'cd "$1" && npm run build > /dev/null 2>&1' "$PROJECT_ROOT"
 echo ""
 
 echo "Summary"

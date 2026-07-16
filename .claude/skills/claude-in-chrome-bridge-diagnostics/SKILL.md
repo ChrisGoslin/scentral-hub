@@ -48,11 +48,16 @@ You should see:
 cat ~/.claude/chrome/chrome-native-host
 ```
 
-**Good (dynamic):**
+**Good (dynamic, with a guard for an empty/invalid result):**
 ```bash
-LATEST=$(ls -t ~/.local/share/claude/versions/ 2>/dev/null | head -1)
+LATEST=$(ls -t ~/.local/share/claude/versions/ 2>/dev/null | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | head -1)
+if [ -z "$LATEST" ]; then
+  echo "No valid Claude Code version found under ~/.local/share/claude/versions/" >&2
+  exit 1
+fi
 exec "$HOME/.local/share/claude/versions/$LATEST" --chrome-native-host
 ```
+`ls -t` alone can pick up a non-version entry (a stray file, a `.DS_Store`, etc.) or resolve to nothing if the directory is empty — filtering to version-shaped names and failing loudly on no match avoids `exec`ing a bad path silently.
 
 **Bad (hardcoded):**
 ```bash
@@ -76,6 +81,8 @@ ls -la /tmp/claude-mcp-browser-bridge-$USER/
 
 ### 5. Fix in isolation (if using Claude Code CLI for browser automation)
 
+**Before running 5a–5d: these steps overwrite a config file, kill processes, delete directories, and quit Chrome. Confirm with the user first, and summarize exactly what will be touched** (the wrapper file, matching `chrome-native-host` processes, the socket path(s) below, and that Chrome will be restarted) **before proceeding.**
+
 **5a. Disable Claude.app native-messaging config:**
 ```bash
 mv ~/Library/Application\ Support/Google/Chrome/NativeMessagingHosts/com.anthropic.claude_browser_extension.json \
@@ -83,19 +90,39 @@ mv ~/Library/Application\ Support/Google/Chrome/NativeMessagingHosts/com.anthrop
 ```
 
 **5b. Update wrapper to use latest version dynamically:**
+
+Back up the existing wrapper first so this is reversible:
+```bash
+cp ~/.claude/chrome/chrome-native-host ~/.claude/chrome/chrome-native-host.bak
+```
+
 ```bash
 cat > ~/.claude/chrome/chrome-native-host << 'EOF'
 #!/bin/bash
-LATEST=$(ls -t ~/.local/share/claude/versions/ 2>/dev/null | head -1)
+LATEST=$(ls -t ~/.local/share/claude/versions/ 2>/dev/null | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | head -1)
+if [ -z "$LATEST" ]; then
+  echo "No valid Claude Code version found under ~/.local/share/claude/versions/" >&2
+  exit 1
+fi
 exec "$HOME/.local/share/claude/versions/$LATEST" --chrome-native-host
 EOF
 chmod +x ~/.claude/chrome/chrome-native-host
 ```
 
 **5c. Kill zombie processes and clean sockets:**
+
+Identify exact PIDs first rather than broadly matching on name, and confirm each is actually a `chrome-native-host` process before killing it:
 ```bash
-pkill -f chrome-native-host
+ps aux | grep chrome-native-host | grep -v grep
+# For each relevant PID:
+kill <pid>
 sleep 1
+kill -9 <pid>   # only if it didn't exit after the plain kill
+```
+
+Only remove the socket paths identified in step 4 above, and confirm they belong to this bridge (not some unrelated `/tmp` content) before deleting:
+```bash
+ls -la /tmp/claude-mcp-browser-bridge-$USER/ 2>/dev/null
 rm -rf /tmp/claude-mcp-browser-bridge-$USER/
 rm -f "$(getconf DARWIN_USER_TEMP_DIR)/claude-mcp-browser-bridge-$USER"
 ```

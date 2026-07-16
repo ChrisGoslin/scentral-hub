@@ -43,30 +43,22 @@ If HTTP works, Vercel's DNS routing is live. HTTPS cert issuance should start no
 ### 3. Check cert issuance status via Vercel CLI
 
 ```bash
-npx vercel domains inspect notalabs.io
+npx vercel@56.2.1 domains inspect notalabs.io
 ```
 
-Look for the `SSL` row under "Domains":
+`vercel domains inspect` reports DNS configuration, not certificate status — it does not have a documented `SSL` row. Check certificate status with:
+
+```bash
+npx vercel@56.2.1 certs ls
+```
 
 | Status | Meaning | Action |
 |--------|---------|--------|
-| ✓ SSL | Cert is live | Try HTTPS now |
-| ⏳ Cert pending | Vercel is checking authoritative DNS + provisioning cert | Wait 5–30 min, re-check |
-| ✗ Error | DNS not seen, or other blocker | Check that A record points to Vercel's IP |
+| Cert listed for the domain | Cert is live | Try HTTPS now |
+| No cert listed yet / domain shows misconfigured in `domains inspect` | Vercel is checking authoritative DNS + provisioning cert | Wait 5–30 min, re-check |
+| Error in either command's output | DNS not seen, or other blocker | Check that A record points to Vercel's IP |
 
-Full output example (cert live):
-```
-Domain             notalabs.io
-Registrar          Third Party
-Nameservers        ns-cloud-e1.googledomains.com (ns-cloud-e1 through e4)
-SSL                ✓
-Updated            2026-07-16 ...
-```
-
-Cert pending (earlier in issuance):
-```
-SSL     WARNING: Certificate generation in progress
-```
+Re-verify the exact field names against the installed CLI version before trusting this table — `vercel` CLI output has changed across major versions.
 
 ### 4. Test HTTPS once cert is ready
 
@@ -78,10 +70,12 @@ curl -I https://notalabs.io --max-time 10
 
 ### 5. Update environment variables in Vercel
 
+**Before running either command below, confirm you're linked to the correct project and environment** (`npx vercel@56.2.1 project ls` / check `.vercel/project.json`) — these commands affect production configuration and a deploy.
+
 Once HTTPS is live, set the public site URL so OG previews, canonical tags, and email links use HTTPS:
 
 ```bash
-npx vercel env add NEXT_PUBLIC_SITE_URL
+npx vercel@56.2.1 env add NEXT_PUBLIC_SITE_URL
 # Enter: https://notalabs.io
 # Environment: All (or Production + Preview if you need different)
 ```
@@ -89,14 +83,17 @@ npx vercel env add NEXT_PUBLIC_SITE_URL
 Then redeploy or wait for the next deploy to pick it up:
 
 ```bash
-npx vercel --prod
+npx vercel@56.2.1 --prod
 ```
+
+**Verify the deploy actually promoted to production** — the command output must include an `▲ Aliased` line pointing at the production domain. If it's absent, the deploy did not go live at the expected domain; stop and investigate before assuming step 6 will pass.
 
 ### 6. Verify OG/canonical tags work correctly
 
-Test an OG preview link:
+Test the real OG endpoint (there is no `/noseprint/[id]` page route — the app has a single `/noseprint` page and a separate `/api/og/noseprint` image route that takes query params):
 ```bash
-curl -I "https://notalabs.io/noseprint/some-id"
+curl -I "https://notalabs.io/noseprint"
+curl -I "https://notalabs.io/api/og/noseprint?name=Test&descriptor=Test"
 # Check X-Og-* headers or inspect og: meta tags in HTML
 ```
 
@@ -145,7 +142,7 @@ For DNS provider setup help (Shopify, Route53, etc.), consult that provider's do
 
 ## Provenance and maintenance
 
-Derived from: notalabs.io A-record cutover 2026-07-16, confirmed with `curl -I http://...` (working immediately) and `npx vercel domains inspect notalabs.io` (cert pending → cert live), live cert issuance observation (~10 min).
+Derived from: notalabs.io A-record cutover 2026-07-16, confirmed with `curl -I http://...` (working immediately) and `npx vercel@56.2.1 domains inspect notalabs.io` (cert pending → cert live), live cert issuance observation (~10 min).
 
 Re-verify on next invocation:
 ```bash

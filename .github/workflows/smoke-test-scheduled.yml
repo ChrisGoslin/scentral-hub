@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
-      NEXT_PUBLIC_SITE_URL: https://scentral-hub.vercel.app
+      NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL || 'https://scentral-hub.vercel.app' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
