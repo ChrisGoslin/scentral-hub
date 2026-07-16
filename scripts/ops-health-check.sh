@@ -3,6 +3,9 @@
 
 set -e
 
+SITE_URL="${SITE_URL:-${NEXT_PUBLIC_SITE_URL:-https://scentral-hub.vercel.app}}"
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
 echo "╔════════════════════════════════════════════════════════════════╗"
 echo "║         nota. Production Health Check                         ║"
 echo "╚════════════════════════════════════════════════════════════════╝"
@@ -13,29 +16,54 @@ CHECKS_FAILED=0
 
 check() {
   local name=$1
-  local command=$2
+  local fn=$2
 
-  if eval "$command" > /dev/null 2>&1; then
+  if "$fn" > /dev/null 2>&1; then
     echo "✅ $name"
-    ((CHECKS_PASSED++))
+    CHECKS_PASSED=$((CHECKS_PASSED + 1))
   else
     echo "❌ $name"
-    ((CHECKS_FAILED++))
+    CHECKS_FAILED=$((CHECKS_FAILED + 1))
   fi
 }
 
+check_homepage() {
+  curl -fsSL "$SITE_URL" | grep -qi "nota"
+}
+
+check_shelf_api() {
+  local status
+  status=$(curl -fsS -o /dev/null -w "%{http_code}" "$SITE_URL/api/shelf")
+  case "$status" in
+    200|401) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+check_trails_page() {
+  curl -fsSL "$SITE_URL/trails" | grep -qi "trail"
+}
+
+check_supabase() {
+  supabase projects list > /dev/null 2>&1
+}
+
+check_build() {
+  cd "$PROJECT_ROOT" && npm run build
+}
+
 echo "Deployment Health"
-check "Vercel deployment active" "curl -s https://scentral-hub.vercel.app | grep -q 'nota'"
-check "API routes responding" "curl -s -I https://scentral-hub.vercel.app/api/shelf | grep -q '401\\|200'"
-check "Public pages accessible" "curl -s https://scentral-hub.vercel.app/trails | grep -q 'trail\\|Trail'"
+check "Vercel deployment active" check_homepage
+check "API routes responding" check_shelf_api
+check "Public pages accessible" check_trails_page
 echo ""
 
 echo "Database Health"
-check "Supabase responsive" "supabase projects list > /dev/null 2>&1"
+check "Supabase responsive" check_supabase
 echo ""
 
 echo "Build Health"
-check "TypeScript builds" "cd /Users/christophergoslin/Projects/scentral-hub && npm run build 2>&1 | grep -q 'Compiled successfully'"
+check "TypeScript builds" check_build
 echo ""
 
 echo "Summary"

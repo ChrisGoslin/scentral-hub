@@ -11,6 +11,8 @@
 
 ---
 
+> **2026-07-16 operational note:** Verify the current GitHub remote and public domain before acting on the repository/deployment lines above. The live fallback domain is still `https://scentral-hub.vercel.app`; `notalabs.io` is mid-cutover and should not be assumed healthy until HTTPS and DNS checks are complete.
+
 ## What Was Delivered
 
 ### Tier 1 (Blocking) — ✅ COMPLETE

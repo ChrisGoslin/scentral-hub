@@ -1,11 +1,12 @@
 # nota. — Engineering Handover
 
 > Written 2026-07-04 for the incoming lead engineer. Everything here is verified against the live repo/DB unless marked otherwise. Read this first, then `CLAUDE.md` (system memory), then the audit suite (`docs/nota/01–06`) as reference material.
+> 2026-07-16 note: treat the repo/domain naming in this file as historical unless re-verified. `scentral-hub.vercel.app` is still the reliable public fallback; `notalabs.io` is in cutover and should not be treated as the default until DNS and HTTPS checks pass.
 
 ## 0. Orientation in 60 seconds
 
 - **Product:** nota. — a personal scent identity system (NOT a fragrance catalogue/marketplace; the catalogue is substrate). Doctrine, tone, and the "2036 test" are in `CLAUDE.md` §1.
-- **Names:** display = **nota.** · repo = `scentral-hub` · DB = `scentral-mvp` (Supabase `lrkdwobnemczvhpixpky`) · prod = `scentral-hub.vercel.app` · new domain = `notalabs.io` (bought, **not yet DNS-pointed**).
+- **Names:** display = **nota.** · repo = verify the current Git remote before asserting the repo name · DB = `scentral-mvp` (Supabase `lrkdwobnemczvhpixpky`) · prod fallback = `scentral-hub.vercel.app` · new domain = `notalabs.io` (mid-cutover; re-verify DNS/HTTPS before using as canonical).
 - **Stack:** Next.js 16 App Router, React 19, Supabase (auth + Postgres + edge functions), Vercel, Tailwind 4 + CSS-variable tokens, Claude Haiku for the single LLM feature.
 - **Sources of truth, in order:** live DB > repo code > `CLAUDE.md` > `AGENTS.md` (operational lessons — binding) > everything else in `docs/` (much of it stale; `docs/PRODUCT_TRUTH.md` is superseded).
 - **Open PR:** #47 `nota-rebrand-and-audit` — display-layer rebrand + audit suite + two migration mirrors. Merge this before starting new work.
