@@ -35,10 +35,12 @@ the raw text to the LLM with a system prompt that classifies content into
   + radiance). This is the same phase model already encoded in
   `docs/MASTER_WARDROBE.md` and `app/api/aura/route.ts`'s `preferred_phases`.
 
-Extracted items are inserted into `fragrance_facts` / `layering_patterns`
-(migration `supabase/migrations/20260711000001_fragrance_knowledge_engine.sql`
-— **not yet applied**, pending approval per project rule). The source file is
-then moved to `data/fragrance/canonical/`.
+Extracted items are inserted into `fragrance_facts` / `layering_patterns`.
+Before inserting a source file, the script deletes previous rows for that same
+`source_file`, so rerunning a corrected source replaces stale extracted rows
+instead of creating duplicates. The migration also enforces one row per
+`source_file` + item name/pattern. The source file is then moved to
+`data/fragrance/canonical/`.
 
 ```bash
 npm run ingest:fragrance -- --dry-run   # list files that would be processed

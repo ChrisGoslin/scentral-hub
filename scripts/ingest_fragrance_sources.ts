@@ -11,7 +11,7 @@
 // Requires: ANTHROPIC_API_KEY, NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_KEY
 // in .env.local. Rate limit: 1 LLM call per file, 500ms apart.
 
-import { createClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import dotenv from 'dotenv'
 import { readdirSync, readFileSync, renameSync, existsSync } from 'fs'
 import { join } from 'path'
@@ -21,6 +21,9 @@ dotenv.config({ path: '.env.local' })
 
 const isDryRun = process.argv.includes('--dry-run')
 const delayMs = 500
+const MAX_CONSECUTIVE_FAILURES = 3
+const MAX_FAILURE_RATIO = 0.5
+const MIN_FILES_BEFORE_RATIO_BREAK = 5
 
 const INCOMING_DIR = join(process.cwd(), 'data/fragrance/incoming')
 const CANONICAL_DIR = join(process.cwd(), 'data/fragrance/canonical')
@@ -36,11 +39,6 @@ if (!isDryRun && !process.env.ANTHROPIC_API_KEY) {
   console.error('Missing ANTHROPIC_API_KEY in .env.local')
   process.exit(1)
 }
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!,
-)
 
 function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms))
@@ -83,14 +81,93 @@ Each item is either:
 Return ONLY JSON: {"items": [...]}. If the text has no extractable fragrance content, return {"items": []}.`
 
 async function classifyAndExtract(rawText: string): Promise<ExtractedItem[]> {
-  const result = await runLLM({
+  const result = await runLLM<{ items?: ExtractedItem[] }>({
     system: EXTRACTION_SYSTEM_PROMPT,
     prompt: rawText.slice(0, 12000),
     maxTokens: 4096,
     json: true,
   })
-  const items = (result as { items?: ExtractedItem[] })?.items
+  const items = result.items
   return Array.isArray(items) ? items : []
+}
+
+function createSupabaseAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_KEY!,
+  )
+}
+
+async function cleanupSourceFile(supabase: SupabaseClient, sourceFile: string) {
+  const { error: factsError } = await supabase
+    .from('fragrance_facts')
+    .delete()
+    .eq('source_file', sourceFile)
+  if (factsError) throw new Error(`fragrance_facts cleanup failed: ${factsError.message}`)
+
+  const { error: patternsError } = await supabase
+    .from('layering_patterns')
+    .delete()
+    .eq('source_file', sourceFile)
+  if (patternsError) throw new Error(`layering_patterns cleanup failed: ${patternsError.message}`)
+}
+
+async function processFile(supabase: SupabaseClient, file: string) {
+  const path = join(INCOMING_DIR, file)
+  const rawText = readFileSync(path, 'utf8')
+
+  if (isDryRun) {
+    console.log(`[DRY RUN] would classify+ingest: ${file}`)
+    return { profilesWritten: 0, patternsWritten: 0 }
+  }
+
+  const items = await classifyAndExtract(rawText)
+  await cleanupSourceFile(supabase, file)
+
+  let profilesWritten = 0
+  let patternsWritten = 0
+
+  for (const item of items) {
+    if (item.kind === 'fragrance_profile') {
+      const { error } = await supabase.from('fragrance_facts').insert({
+        brand: item.brand ?? null,
+        name: item.name,
+        source_file: file,
+        top_notes: item.top_notes ?? [],
+        heart_notes: item.heart_notes ?? [],
+        base_notes: item.base_notes ?? [],
+        accord_families: item.accord_families ?? [],
+        role: item.role ?? null,
+        raw_text: rawText,
+        enriched: item,
+      })
+      if (error) throw new Error(`fragrance_facts insert failed: ${error.message}`)
+      profilesWritten++
+    } else if (item.kind === 'layering_pattern') {
+      const { error } = await supabase.from('layering_patterns').insert({
+        pattern_name: item.pattern_name,
+        source_file: file,
+        fragrance_names: item.fragrance_names ?? [],
+        roles: item.roles ?? [],
+        use_case: item.use_case ?? null,
+        rationale: item.rationale ?? null,
+        raw_text: rawText,
+        enriched: item,
+      })
+      if (error) throw new Error(`layering_patterns insert failed: ${error.message}`)
+      patternsWritten++
+    }
+  }
+
+  renameSync(path, join(CANONICAL_DIR, file))
+  console.log(`✓ ${file} — ${items.length} item(s) extracted, moved to canonical/`)
+
+  return { profilesWritten, patternsWritten }
+}
+
+function shouldStopForFailure(processed: number, failed: number, consecutiveFailures: number) {
+  if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) return true
+  return processed >= MIN_FILES_BEFORE_RATIO_BREAK && failed / processed > MAX_FAILURE_RATIO
 }
 
 async function main() {
@@ -108,61 +185,31 @@ async function main() {
     return
   }
 
+  const supabase = createSupabaseAdmin()
   console.log(`Found ${files.length} file(s) to ingest.`)
 
   let profilesWritten = 0
   let patternsWritten = 0
   let failed = 0
+  let processed = 0
+  let consecutiveFailures = 0
 
   for (const file of files) {
-    const path = join(INCOMING_DIR, file)
-    const rawText = readFileSync(path, 'utf8')
-
-    if (isDryRun) {
-      console.log(`[DRY RUN] would classify+ingest: ${file}`)
-      continue
-    }
-
     try {
-      const items = await classifyAndExtract(rawText)
-
-      for (const item of items) {
-        if (item.kind === 'fragrance_profile') {
-          const { error } = await supabase.from('fragrance_facts').insert({
-            brand: item.brand ?? null,
-            name: item.name,
-            source_file: file,
-            top_notes: item.top_notes ?? [],
-            heart_notes: item.heart_notes ?? [],
-            base_notes: item.base_notes ?? [],
-            accord_families: item.accord_families ?? [],
-            role: item.role ?? null,
-            raw_text: rawText,
-            enriched: item,
-          })
-          if (error) throw new Error(`fragrance_facts insert failed: ${error.message}`)
-          profilesWritten++
-        } else if (item.kind === 'layering_pattern') {
-          const { error } = await supabase.from('layering_patterns').insert({
-            pattern_name: item.pattern_name,
-            source_file: file,
-            fragrance_names: item.fragrance_names ?? [],
-            roles: item.roles ?? [],
-            use_case: item.use_case ?? null,
-            rationale: item.rationale ?? null,
-            raw_text: rawText,
-            enriched: item,
-          })
-          if (error) throw new Error(`layering_patterns insert failed: ${error.message}`)
-          patternsWritten++
-        }
-      }
-
-      renameSync(path, join(CANONICAL_DIR, file))
-      console.log(`✓ ${file} — ${items.length} item(s) extracted, moved to canonical/`)
+      const result = await processFile(supabase, file)
+      profilesWritten += result.profilesWritten
+      patternsWritten += result.patternsWritten
+      consecutiveFailures = 0
     } catch (err) {
       failed++
+      consecutiveFailures++
       console.error(`❌ ${file}:`, err instanceof Error ? err.message : err)
+    }
+
+    processed++
+    if (shouldStopForFailure(processed, failed, consecutiveFailures)) {
+      console.error('Stopping early: failure threshold exceeded.')
+      break
     }
 
     await sleep(delayMs)

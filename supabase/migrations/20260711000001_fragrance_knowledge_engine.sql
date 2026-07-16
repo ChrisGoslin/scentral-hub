@@ -3,7 +3,7 @@
 -- LLM into notes/accords/roles for NotebookLM export. Not the live catalogue
 -- (`fragrances`, 127k rows) — this is curated knowledge-pipeline output.
 
-CREATE TABLE public.fragrance_facts (
+CREATE TABLE IF NOT EXISTS public.fragrance_facts (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   fragrance_id uuid REFERENCES public.fragrances ON DELETE SET NULL,
   brand text,
@@ -17,7 +17,8 @@ CREATE TABLE public.fragrance_facts (
   raw_text text NOT NULL,
   enriched jsonb,
   created_at timestamp with time zone DEFAULT now(),
-  updated_at timestamp with time zone DEFAULT now()
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT fragrance_facts_source_name_unique UNIQUE (source_file, name)
 );
 
 CREATE INDEX idx_fragrance_facts_brand_name ON public.fragrance_facts(brand, name);
@@ -28,18 +29,25 @@ ALTER TABLE public.fragrance_facts ENABLE ROW LEVEL SECURITY;
 -- No anon/authenticated policies: this table is written and read only via
 -- the service-role key (ingest/export scripts). Deny-by-default is correct.
 
-CREATE TABLE public.layering_patterns (
+CREATE TABLE IF NOT EXISTS public.layering_patterns (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   pattern_name text NOT NULL,
   source_file text NOT NULL,
   fragrance_names text[] NOT NULL DEFAULT '{}',
-  roles text[] DEFAULT '{}', -- parallel array to fragrance_names: anchor/modulator/top
+  roles text[] NOT NULL DEFAULT '{}' CHECK (
+    roles <@ ARRAY['anchor', 'modulator', 'top']::text[]
+    AND (
+      roles = '{}'::text[]
+      OR array_length(roles, 1) = array_length(fragrance_names, 1)
+    )
+  ), -- parallel array to fragrance_names: anchor/modulator/top
   use_case text,
   rationale text,
   raw_text text NOT NULL,
   enriched jsonb,
   created_at timestamp with time zone DEFAULT now(),
-  updated_at timestamp with time zone DEFAULT now()
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT layering_patterns_source_pattern_unique UNIQUE (source_file, pattern_name)
 );
 
 CREATE INDEX idx_layering_patterns_source_file ON public.layering_patterns(source_file);

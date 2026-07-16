@@ -9,16 +9,22 @@
 form / email forwarder / DM / Zapier
         │  POST /api/signals/ingest  { source, text, metadata? }
         ▼
-  best-effort LLM triage (lib/llm.ts) — summary, sentiment, persona_guess, feature_area, tags
+  bounded raw signal capture — source, text, metadata
         ▼
   product_signals table (Supabase)
 ```
 
 `app/api/signals/ingest/route.ts` accepts any JSON payload of the shape
 `{ source: string, text: string, metadata?: any }`, rate-limited per IP
-(20/min via `lib/rate-limit.ts`). It writes the raw text unconditionally; if
-the LLM triage call fails, the signal is still stored with the enrichment
-columns left null — ingestion never blocks on the LLM.
+(20/min via `lib/rate-limit.ts`). It validates the source/text fields, caps
+raw text at 12k characters, caps serialized metadata at 10KB, and stores the
+signal without doing synchronous LLM enrichment. That keeps the public intake
+fast and avoids spending LLM budget before the weekly clustering job.
+
+`product_signals.raw_text` is intentionally short-lived. Run
+`select public.redact_old_product_signal_raw_text();` after the retention
+window to replace old raw text with a redaction marker while preserving source,
+metadata, tags, and future derived fields for reporting.
 
 **Not wired yet (TODO):** a Zapier zap pointed at this endpoint for
 form/email/DM sources. The endpoint is public and unauthenticated by design
@@ -64,6 +70,8 @@ Run it manually any time with `npm run brief:weekly` (needs
 
 - Wire a Zapier zap → `/api/signals/ingest` for at least one real source
   (form or email forwarder).
+- Schedule `public.redact_old_product_signal_raw_text()` after the agreed raw
+  text retention window; default retention is 7 days.
 - Confirm the exact cron time works for the product owner's timezone (Dublin)
   — currently Sunday 23:00 UTC (Sunday 23:00/00:00 Dublin depending on DST).
 - Add repo secrets `ANTHROPIC_API_KEY`, `SUPABASE_SERVICE_KEY` (and confirm

@@ -22,11 +22,6 @@ for (const key of ['NEXT_PUBLIC_SUPABASE_URL', 'SUPABASE_SERVICE_KEY', 'ANTHROPI
   }
 }
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!,
-)
-
 interface ProductSignalRow {
   id: string
   created_at: string
@@ -90,14 +85,78 @@ async function clusterSignals(signals: ProductSignalRow[]): Promise<BriefResult>
     tags: s.tags,
   }))
 
-  const result = await runLLM({
+  const result = await runLLM<unknown>({
     system: CLUSTERING_SYSTEM_PROMPT,
     prompt: JSON.stringify(payload),
     maxTokens: 4096,
     json: true,
   })
 
-  return result as BriefResult
+  return validateBriefResult(result)
+}
+
+function createSupabaseAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_KEY!,
+  )
+}
+
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((item) => typeof item === 'string')
+}
+
+function validateBriefResult(value: unknown): BriefResult {
+  if (!value || typeof value !== 'object') {
+    throw new Error('weekly brief LLM response was not an object')
+  }
+
+  const candidate = value as Partial<BriefResult>
+  if (typeof candidate.overview !== 'string' || !Array.isArray(candidate.themes) || !Array.isArray(candidate.recommended_bets)) {
+    throw new Error('weekly brief LLM response is missing required fields')
+  }
+
+  const themes = candidate.themes.map((theme) => {
+    if (!theme || typeof theme !== 'object') throw new Error('weekly brief theme was malformed')
+    const item = theme as Partial<Theme>
+    if (
+      typeof item.name !== 'string' ||
+      typeof item.signal_count !== 'number' ||
+      !isStringArray(item.personas_impacted) ||
+      !isStringArray(item.feature_areas) ||
+      !isStringArray(item.example_quotes)
+    ) {
+      throw new Error('weekly brief theme failed validation')
+    }
+    return item as Theme
+  })
+
+  const recommended_bets = candidate.recommended_bets.map((bet) => {
+    if (!bet || typeof bet !== 'object') throw new Error('weekly brief bet was malformed')
+    const item = bet as Partial<RecommendedBet>
+    if (
+      typeof item.title !== 'string' ||
+      typeof item.rationale !== 'string' ||
+      !['S', 'M', 'L'].includes(item.effort ?? '') ||
+      !['low', 'medium', 'high'].includes(item.impact ?? '')
+    ) {
+      throw new Error('weekly brief bet failed validation')
+    }
+    return item as RecommendedBet
+  })
+
+  return { overview: candidate.overview, themes, recommended_bets }
+}
+
+function redactExampleQuote(text: string) {
+  const redacted = text
+    .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, '[email]')
+    .replace(/\+?\d[\d\s().-]{7,}\d/g, '[phone]')
+    .replace(/@[a-z0-9_]{2,}/gi, '[handle]')
+    .replace(/\s+/g, ' ')
+    .trim()
+
+  return redacted.length > 180 ? `${redacted.slice(0, 177)}...` : redacted
 }
 
 function renderBrief(dateStr: string, signalCount: number, truncated: boolean, brief: BriefResult): string {
@@ -120,7 +179,7 @@ function renderBrief(dateStr: string, signalCount: number, truncated: boolean, b
     lines.push(`- **Feature areas:** ${theme.feature_areas.join(', ') || 'N/A'}`)
     if (theme.example_quotes.length > 0) {
       lines.push('- **Examples:**')
-      for (const q of theme.example_quotes) lines.push(`  - "${q}"`)
+      for (const q of theme.example_quotes) lines.push(`  - "${redactExampleQuote(q)}"`)
     }
     lines.push('')
   }
@@ -155,6 +214,7 @@ function renderBrief(dateStr: string, signalCount: number, truncated: boolean, b
 }
 
 async function main() {
+  const supabase = createSupabaseAdmin()
   const since = new Date()
   since.setDate(since.getDate() - 7)
 

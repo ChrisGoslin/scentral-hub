@@ -15,9 +15,9 @@
 // — that file predates this pipeline. Output here is a separate,
 // script-generated artifact so nothing curated gets silently overwritten.
 
-import { createClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import dotenv from 'dotenv'
-import { writeFileSync } from 'fs'
+import { existsSync, readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
 
 dotenv.config({ path: '.env.local' })
@@ -34,38 +34,67 @@ for (const key of ['NEXT_PUBLIC_SUPABASE_URL', 'SUPABASE_SERVICE_KEY']) {
   }
 }
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!,
-)
-
 const OUT_DIR = join(process.cwd(), 'data/fragrance/canonical')
+const INDEX_PATH = join(OUT_DIR, 'WARDROBE_INDEX.json')
 const ROLE_LABELS: Record<string, string> = {
   anchor: 'Anchor (base-heavy — foundation + longevity)',
   modulator: 'Modulator (heart-heavy — complexity + texture)',
   top: 'Top (volatile/fresh — opening + radiance)',
 }
 
-async function fetchFacts() {
+interface FragranceFactRow {
+  brand: string | null
+  name: string
+  source_file: string
+  top_notes: string[] | null
+  heart_notes: string[] | null
+  base_notes: string[] | null
+  accord_families: string[] | null
+  role: 'anchor' | 'modulator' | 'top' | null
+}
+
+interface LayeringPatternRow {
+  pattern_name: string
+  source_file: string
+  fragrance_names: string[]
+  roles: string[] | null
+  use_case: string | null
+  rationale: string | null
+}
+
+interface WardrobeIndex {
+  generated_at: string
+  facts: FragranceFactRow[]
+  patterns: LayeringPatternRow[]
+}
+
+function createSupabaseAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_KEY!,
+  )
+}
+
+async function fetchFacts(supabase: SupabaseClient): Promise<FragranceFactRow[]> {
   const { data, error } = await supabase
     .from('fragrance_facts')
     .select('*')
     .order('role', { ascending: true })
     .order('brand', { ascending: true })
   if (error) throw new Error(`fragrance_facts fetch failed: ${error.message}`)
-  return data ?? []
+  return (data ?? []) as FragranceFactRow[]
 }
 
-async function fetchPatterns() {
+async function fetchPatterns(supabase: SupabaseClient): Promise<LayeringPatternRow[]> {
   const { data, error } = await supabase
     .from('layering_patterns')
     .select('*')
     .order('pattern_name', { ascending: true })
   if (error) throw new Error(`layering_patterns fetch failed: ${error.message}`)
-  return data ?? []
+  return (data ?? []) as LayeringPatternRow[]
 }
 
-function renderWardrobe(facts: Array<Record<string, unknown>>): string {
+function renderWardrobe(facts: FragranceFactRow[]): string {
   const lines = [
     '# nota. — Knowledge Engine: Fragrance Facts',
     '',
@@ -85,10 +114,10 @@ function renderWardrobe(facts: Array<Record<string, unknown>>): string {
     lines.push(`## ${role ? ROLE_LABELS[role] : 'Unclassified'}`, '')
     for (const f of group) {
       lines.push(`### ${f.brand ? `${f.brand} — ` : ''}${f.name}`)
-      lines.push(`- **Top notes:** ${(f.top_notes as string[])?.join(', ') || 'N/A'}`)
-      lines.push(`- **Heart notes:** ${(f.heart_notes as string[])?.join(', ') || 'N/A'}`)
-      lines.push(`- **Base notes:** ${(f.base_notes as string[])?.join(', ') || 'N/A'}`)
-      lines.push(`- **Accord families:** ${(f.accord_families as string[])?.join(', ') || 'N/A'}`)
+      lines.push(`- **Top notes:** ${f.top_notes?.join(', ') || 'N/A'}`)
+      lines.push(`- **Heart notes:** ${f.heart_notes?.join(', ') || 'N/A'}`)
+      lines.push(`- **Base notes:** ${f.base_notes?.join(', ') || 'N/A'}`)
+      lines.push(`- **Accord families:** ${f.accord_families?.join(', ') || 'N/A'}`)
       lines.push(`- **Source:** ${f.source_file}`)
       lines.push('')
     }
@@ -97,7 +126,7 @@ function renderWardrobe(facts: Array<Record<string, unknown>>): string {
   return lines.join('\n')
 }
 
-function renderLayering(patterns: Array<Record<string, unknown>>): string {
+function renderLayering(patterns: LayeringPatternRow[]): string {
   const lines = [
     '# nota. — Knowledge Engine: Layering Patterns',
     '',
@@ -109,8 +138,8 @@ function renderLayering(patterns: Array<Record<string, unknown>>): string {
   for (const p of patterns) {
     lines.push(`## ${p.pattern_name}`)
     if (p.use_case) lines.push(`- **Use case:** ${p.use_case}`)
-    const names = p.fragrance_names as string[]
-    const roles = p.roles as string[] | undefined
+    const names = p.fragrance_names
+    const roles = p.roles ?? undefined
     lines.push(
       `- **Fragrances:** ${names.map((n, i) => (roles?.[i] ? `${n} (${roles[i]})` : n)).join(' → ')}`,
     )
@@ -122,9 +151,28 @@ function renderLayering(patterns: Array<Record<string, unknown>>): string {
   return lines.join('\n')
 }
 
+function loadExistingIndex(): WardrobeIndex {
+  if (!existsSync(INDEX_PATH)) {
+    return { generated_at: new Date().toISOString(), facts: [], patterns: [] }
+  }
+
+  try {
+    const parsed = JSON.parse(readFileSync(INDEX_PATH, 'utf8')) as Partial<WardrobeIndex>
+    return {
+      generated_at: typeof parsed.generated_at === 'string' ? parsed.generated_at : new Date().toISOString(),
+      facts: Array.isArray(parsed.facts) ? parsed.facts : [],
+      patterns: Array.isArray(parsed.patterns) ? parsed.patterns : [],
+    }
+  } catch {
+    return { generated_at: new Date().toISOString(), facts: [], patterns: [] }
+  }
+}
+
 async function main() {
-  const facts = target !== 'layering' ? await fetchFacts() : []
-  const patterns = target !== 'wardrobe' ? await fetchPatterns() : []
+  const supabase = createSupabaseAdmin()
+  const existingIndex = loadExistingIndex()
+  const facts = target !== 'layering' ? await fetchFacts(supabase) : existingIndex.facts
+  const patterns = target !== 'wardrobe' ? await fetchPatterns(supabase) : existingIndex.patterns
 
   if (target !== 'layering') {
     writeFileSync(join(OUT_DIR, 'MASTER_WARDROBE.md'), renderWardrobe(facts))
@@ -136,7 +184,7 @@ async function main() {
   }
 
   writeFileSync(
-    join(OUT_DIR, 'WARDROBE_INDEX.json'),
+    INDEX_PATH,
     JSON.stringify({ generated_at: new Date().toISOString(), facts, patterns }, null, 2),
   )
   console.log('✓ WARDROBE_INDEX.json')

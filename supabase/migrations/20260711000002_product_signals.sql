@@ -2,7 +2,7 @@
 -- signals land here via POST /api/signals/ingest, then
 -- scripts/generate_weekly_product_brief.ts clusters the last 7 days.
 
-CREATE TABLE public.product_signals (
+CREATE TABLE IF NOT EXISTS public.product_signals (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   created_at timestamp with time zone DEFAULT now(),
   source text NOT NULL, -- 'form' | 'email' | 'dm' | ...
@@ -24,3 +24,24 @@ ALTER TABLE public.product_signals ENABLE ROW LEVEL SECURITY;
 -- (service-role key, server-side only); reads are the weekly brief script.
 -- This table can carry raw user feedback text, so it stays service-role-only
 -- by default rather than exposed to the anon/authenticated roles.
+
+CREATE OR REPLACE FUNCTION public.redact_old_product_signal_raw_text(retention interval DEFAULT interval '7 days')
+RETURNS integer
+LANGUAGE plpgsql
+SET search_path = public
+AS $$
+DECLARE
+  redacted_count integer;
+BEGIN
+  UPDATE public.product_signals
+  SET raw_text = '[redacted after retention window]'
+  WHERE created_at < now() - retention
+    AND raw_text <> '[redacted after retention window]';
+
+  GET DIAGNOSTICS redacted_count = ROW_COUNT;
+  RETURN redacted_count;
+END;
+$$;
+
+COMMENT ON FUNCTION public.redact_old_product_signal_raw_text(interval)
+  IS 'Redacts raw product signal text after the retention window while preserving derived metadata for weekly briefs.';

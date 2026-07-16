@@ -11,6 +11,7 @@ export interface RunLLMOptions {
   maxTokens?: number
   json?: boolean // when true, strips ```json fences and JSON.parses the response
   model?: string
+  timeoutMs?: number
 }
 
 let client: Anthropic | null = null
@@ -31,20 +32,26 @@ function stripJsonFence(text: string): string {
 }
 
 /**
- * Calls the configured LLM (model defaults to process.env.LLM_MODEL, falling
- * back to Haiku) and returns raw text, or a parsed object when json=true.
+ * Calls the configured LLM and returns raw text, or a parsed object when
+ * json=true.
  */
-export async function runLLM(opts: RunLLMOptions): Promise<string | unknown> {
-  const { system, prompt, maxTokens = 1024, json = false, model } = opts
+export async function runLLM(opts: RunLLMOptions & { json?: false }): Promise<string>
+export async function runLLM<T = unknown>(opts: RunLLMOptions & { json: true }): Promise<T>
+export async function runLLM<T = unknown>(opts: RunLLMOptions): Promise<string | T> {
+  const { system, prompt, maxTokens = 1024, json = false, model, timeoutMs } = opts
   const anthropic = getClient()
   const resolvedModel = model ?? process.env.LLM_MODEL ?? 'claude-haiku-4-5-20251001'
+  const timeout = timeoutMs ?? Number(process.env.LLM_TIMEOUT_MS ?? 30_000)
 
-  const message = await anthropic.messages.create({
-    model: resolvedModel,
-    max_tokens: maxTokens,
-    system,
-    messages: [{ role: 'user', content: prompt }],
-  })
+  const message = await anthropic.messages.create(
+    {
+      model: resolvedModel,
+      max_tokens: maxTokens,
+      system,
+      messages: [{ role: 'user', content: prompt }],
+    },
+    { timeout },
+  )
 
   const block = message.content[0]
   const rawText = block && block.type === 'text' ? block.text : ''
@@ -53,7 +60,7 @@ export async function runLLM(opts: RunLLMOptions): Promise<string | unknown> {
 
   const cleaned = stripJsonFence(rawText)
   try {
-    return JSON.parse(cleaned)
+    return JSON.parse(cleaned) as T
   } catch {
     throw new Error(`runLLM: expected JSON but got unparseable text: ${cleaned.slice(0, 200)}`)
   }
