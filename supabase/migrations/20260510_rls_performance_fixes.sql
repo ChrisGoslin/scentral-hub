@@ -5,48 +5,66 @@
 -- this can be a significant speedup.
 -- ============================================================
 
--- profiles
-drop policy if exists "Users can view their own profile" on profiles;
-create policy "Users can view their own profile" on profiles
-  for select using ((select auth.uid()) = id);
+DO $$
+BEGIN
+  IF to_regclass('public.profiles') IS NOT NULL THEN
+    DROP POLICY IF EXISTS "Users can view their own profile" ON public.profiles;
+    CREATE POLICY "Users can view their own profile" ON public.profiles
+      FOR SELECT USING ((select auth.uid()) = id);
 
-drop policy if exists "Users can update their own profile" on profiles;
-create policy "Users can update their own profile" on profiles
-  for update using ((select auth.uid()) = id)
-  with check ((select auth.uid()) = id);
+    DROP POLICY IF EXISTS "Users can update their own profile" ON public.profiles;
+    CREATE POLICY "Users can update their own profile" ON public.profiles
+      FOR UPDATE USING ((select auth.uid()) = id)
+      WITH CHECK ((select auth.uid()) = id);
+  END IF;
 
--- fragrances (insert policy only — select is public, no auth.uid())
-drop policy if exists "Authenticated users can add fragrances" on fragrances;
-create policy "Authenticated users can add fragrances" on fragrances
-  for insert to authenticated
-  with check ((select auth.uid()) = created_by);
+  IF to_regclass('public.fragrances') IS NOT NULL
+    AND EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_schema = 'public'
+        AND table_name = 'fragrances'
+        AND column_name = 'created_by'
+    )
+  THEN
+    DROP POLICY IF EXISTS "Authenticated users can add fragrances" ON public.fragrances;
+    CREATE POLICY "Authenticated users can add fragrances" ON public.fragrances
+      FOR INSERT TO authenticated
+      WITH CHECK ((select auth.uid()) = created_by);
+  END IF;
 
--- collections
-drop policy if exists "Users manage their own collection" on collections;
-create policy "Users manage their own collection" on collections
-  for all using ((select auth.uid()) = user_id)
-  with check ((select auth.uid()) = user_id);
+  IF to_regclass('public.collections') IS NOT NULL THEN
+    DROP POLICY IF EXISTS "Users manage their own collection" ON public.collections;
+    CREATE POLICY "Users manage their own collection" ON public.collections
+      FOR ALL USING ((select auth.uid()) = user_id)
+      WITH CHECK ((select auth.uid()) = user_id);
+  END IF;
 
--- wear_logs
-drop policy if exists "Users manage their own wear logs" on wear_logs;
-create policy "Users manage their own wear logs" on wear_logs
-  for all using ((select auth.uid()) = user_id)
-  with check ((select auth.uid()) = user_id);
+  IF to_regclass('public.wear_logs') IS NOT NULL THEN
+    DROP POLICY IF EXISTS "Users manage their own wear logs" ON public.wear_logs;
+    CREATE POLICY "Users manage their own wear logs" ON public.wear_logs
+      FOR ALL USING ((select auth.uid()) = user_id)
+      WITH CHECK ((select auth.uid()) = user_id);
+  END IF;
 
--- layering_combinations
-drop policy if exists "Users manage their own layering combos" on layering_combinations;
-create policy "Users manage their own layering combos" on layering_combinations
-  for all using ((select auth.uid()) = user_id)
-  with check ((select auth.uid()) = user_id);
+  IF to_regclass('public.layering_combinations') IS NOT NULL THEN
+    DROP POLICY IF EXISTS "Users manage their own layering combos" ON public.layering_combinations;
+    CREATE POLICY "Users manage their own layering combos" ON public.layering_combinations
+      FOR ALL USING ((select auth.uid()) = user_id)
+      WITH CHECK ((select auth.uid()) = user_id);
+  END IF;
 
--- spritz_schedules
-drop policy if exists "Users manage their own spritz schedules" on spritz_schedules;
-create policy "Users manage their own spritz schedules" on spritz_schedules
-  for all using ((select auth.uid()) = user_id)
-  with check ((select auth.uid()) = user_id);
+  IF to_regclass('public.spritz_schedules') IS NOT NULL THEN
+    DROP POLICY IF EXISTS "Users manage their own spritz schedules" ON public.spritz_schedules;
+    CREATE POLICY "Users manage their own spritz schedules" ON public.spritz_schedules
+      FOR ALL USING ((select auth.uid()) = user_id)
+      WITH CHECK ((select auth.uid()) = user_id);
+  END IF;
 
--- learning_notes
-drop policy if exists "Users manage their own learning notes" on learning_notes;
-create policy "Users manage their own learning notes" on learning_notes
-  for all using ((select auth.uid()) = user_id)
-  with check ((select auth.uid()) = user_id);
+  IF to_regclass('public.learning_notes') IS NOT NULL THEN
+    DROP POLICY IF EXISTS "Users manage their own learning notes" ON public.learning_notes;
+    CREATE POLICY "Users manage their own learning notes" ON public.learning_notes
+      FOR ALL USING ((select auth.uid()) = user_id)
+      WITH CHECK ((select auth.uid()) = user_id);
+  END IF;
+END
+$$;
