@@ -49,8 +49,9 @@ npx vercel@56.2.1 domains inspect notalabs.io
 `vercel domains inspect` reports DNS configuration, not certificate status — it does not have a documented `SSL` row. Check certificate status with:
 
 ```bash
-npx vercel@56.2.1 certs ls
+npx vercel@56.2.1 certs ls --limit 100
 ```
+(`certs ls` defaults to 20 results — pass `--limit 100`, or otherwise page/filter, so an existing cert for this domain isn't missed. Confirm current flags with `npx vercel@56.2.1 certs ls --help` since output/options can shift across versions.)
 
 | Status | Meaning | Action |
 |--------|---------|--------|
@@ -90,14 +91,17 @@ npx vercel@56.2.1 --prod
 
 ### 6. Verify OG/canonical tags work correctly
 
-Test the real OG endpoint (there is no `/noseprint/[id]` page route — the app has a single `/noseprint` page and a separate `/api/og/noseprint` image route that takes query params):
+Test the real OG endpoint (there is no `/noseprint/[id]` page route — the app has a single `/noseprint` page and a separate `/api/og/noseprint` image route that takes query params). `curl -I` only shows headers — it can't confirm `<meta>` tags or the canonical `<link>`, so fetch the body:
+
 ```bash
-curl -I "https://notalabs.io/noseprint"
+# Status/header check for the OG image endpoint
 curl -I "https://notalabs.io/api/og/noseprint?name=Test&descriptor=Test"
-# Check X-Og-* headers or inspect og: meta tags in HTML
+
+# Fetch the actual page body to inspect og: meta tags and the canonical link
+curl -fsSL "https://notalabs.io/noseprint" | grep -Ei '<meta property="og:|rel="canonical"'
 ```
 
-And check canonical tag points to HTTPS domain (not old domain or myshopify subdomain).
+Confirm the canonical tag's `href` points to the HTTPS `notalabs.io` domain (not the old domain or a `myshopify` subdomain).
 
 ## What to expect during issuance
 
@@ -142,7 +146,7 @@ For DNS provider setup help (Shopify, Route53, etc.), consult that provider's do
 
 ## Provenance and maintenance
 
-Derived from: notalabs.io A-record cutover 2026-07-16, confirmed with `curl -I http://...` (working immediately) and `npx vercel@56.2.1 domains inspect notalabs.io` (cert pending → cert live), live cert issuance observation (~10 min).
+Derived from: notalabs.io A-record cutover 2026-07-16, confirmed with `curl -I http://...` (working immediately), `npx vercel@56.2.1 domains inspect notalabs.io` (DNS verified), and `npx vercel@56.2.1 certs ls` (cert pending → cert live), live cert issuance observation (~10 min).
 
 Re-verify on next invocation:
 ```bash

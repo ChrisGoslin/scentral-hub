@@ -91,9 +91,9 @@ mv ~/Library/Application\ Support/Google/Chrome/NativeMessagingHosts/com.anthrop
 
 **5b. Update wrapper to use latest version dynamically:**
 
-Back up the existing wrapper first so this is reversible:
+Back up the existing wrapper first so this is reversible — stop if the backup fails, don't proceed to overwrite:
 ```bash
-cp ~/.claude/chrome/chrome-native-host ~/.claude/chrome/chrome-native-host.bak
+cp ~/.claude/chrome/chrome-native-host ~/.claude/chrome/chrome-native-host.bak || { echo "Backup failed, aborting" >&2; exit 1; }
 ```
 
 ```bash
@@ -120,10 +120,16 @@ sleep 1
 kill -9 <pid>   # only if it didn't exit after the plain kill
 ```
 
-Only remove the socket paths identified in step 4 above, and confirm they belong to this bridge (not some unrelated `/tmp` content) before deleting:
+Only remove the socket paths identified in step 4 above, and confirm they belong to this bridge — check that the directory is actually owned by you and contains only `.sock` files, not some unrelated `/tmp` content, before deleting:
 ```bash
-ls -la /tmp/claude-mcp-browser-bridge-$USER/ 2>/dev/null
-rm -rf /tmp/claude-mcp-browser-bridge-$USER/
+SOCKET_DIR="/tmp/claude-mcp-browser-bridge-$USER"
+if [ -d "$SOCKET_DIR" ] && [ "$(stat -f%u "$SOCKET_DIR" 2>/dev/null || stat -c%u "$SOCKET_DIR")" = "$(id -u)" ]; then
+  find "$SOCKET_DIR" -mindepth 1 -maxdepth 1 ! -name '*.sock' -print
+  # ↑ if this prints anything, stop and inspect manually — the directory has
+  # unexpected content and should not be blindly deleted
+  find "$SOCKET_DIR" -mindepth 1 -maxdepth 1 -name '*.sock' -delete
+  rmdir "$SOCKET_DIR" 2>/dev/null
+fi
 rm -f "$(getconf DARWIN_USER_TEMP_DIR)/claude-mcp-browser-bridge-$USER"
 ```
 

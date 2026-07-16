@@ -89,11 +89,12 @@ export default function YouClient(props: YouClientProps) {
     let wearNotes: Array<{ fragrance_id: string; note: string; date: string }> = []
 
     try {
-      const col: string[] = JSON.parse(localStorage.getItem('scentral_collection') ?? '[]')
-      const wishlist: string[] = JSON.parse(localStorage.getItem('scentral_wishlist') ?? '[]')
-      wearNotes = JSON.parse(
-        localStorage.getItem('scentral_wear_notes') ?? '[]'
-      )
+      const parsedCol = JSON.parse(localStorage.getItem('scentral_collection') ?? '[]')
+      const parsedWishlist = JSON.parse(localStorage.getItem('scentral_wishlist') ?? '[]')
+      const parsedWearNotes = JSON.parse(localStorage.getItem('scentral_wear_notes') ?? '[]')
+      const col: string[] = Array.isArray(parsedCol) ? parsedCol : []
+      const wishlist: string[] = Array.isArray(parsedWishlist) ? parsedWishlist : []
+      wearNotes = Array.isArray(parsedWearNotes) ? parsedWearNotes : []
       setLocalCollectionCount(col.length)
       setLocalWishlistCount(wishlist.length)
       if (col.length > 0) {

@@ -29,9 +29,9 @@ check() {
 }
 
 echo "Deployment Health"
-check "Vercel deployment active" 'curl -s "$1" | grep -q "nota"' "$SITE_URL"
-check "API routes responding" 'curl -s -I "$1/api/shelf" | grep -qE "401|200"' "$SITE_URL"
-check "Public pages accessible" 'curl -s "$1/trails" | grep -qi "trail"' "$SITE_URL"
+check "Vercel deployment active" 'body=$(curl -fsSL "$1") && printf "%s" "$body" | grep -qi "nota"' "$SITE_URL"
+check "API routes responding" 'status=$(curl -sS -o /dev/null -w "%{http_code}" "$1/api/shelf") && case "$status" in 200|401|405) exit 0;; *) exit 1;; esac' "$SITE_URL"
+check "Public pages accessible" 'body=$(curl -fsSL "$1/trails") && printf "%s" "$body" | grep -qi "trail"' "$SITE_URL"
 echo ""
 
 echo "Database Health"
