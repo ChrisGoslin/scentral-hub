@@ -12,20 +12,28 @@ BEGIN
     CREATE INDEX IF NOT EXISTS idx_lc_base_fragrance_id ON public.layering_combinations (base_fragrance_id);
     CREATE INDEX IF NOT EXISTS idx_lc_top_fragrance_id ON public.layering_combinations (top_fragrance_id);
 
-    DROP POLICY IF EXISTS "layering_combinations_owner" ON public.layering_combinations;
+    IF EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_schema = 'public'
+        AND table_name = 'layering_combinations'
+        AND column_name = 'user_id'
+    )
+    THEN
+      DROP POLICY IF EXISTS "layering_combinations_owner" ON public.layering_combinations;
 
-    CREATE POLICY "lc_select_own" ON public.layering_combinations
-      FOR SELECT USING ((select auth.uid()) = user_id);
+      CREATE POLICY "lc_select_own" ON public.layering_combinations
+        FOR SELECT USING ((select auth.uid()) = user_id);
 
-    CREATE POLICY "lc_insert_own" ON public.layering_combinations
-      FOR INSERT WITH CHECK ((select auth.uid()) = user_id);
+      CREATE POLICY "lc_insert_own" ON public.layering_combinations
+        FOR INSERT WITH CHECK ((select auth.uid()) = user_id);
 
-    CREATE POLICY "lc_update_own" ON public.layering_combinations
-      FOR UPDATE USING ((select auth.uid()) = user_id)
-      WITH CHECK ((select auth.uid()) = user_id);
+      CREATE POLICY "lc_update_own" ON public.layering_combinations
+        FOR UPDATE USING ((select auth.uid()) = user_id)
+        WITH CHECK ((select auth.uid()) = user_id);
 
-    CREATE POLICY "lc_delete_own" ON public.layering_combinations
-      FOR DELETE USING ((select auth.uid()) = user_id);
+      CREATE POLICY "lc_delete_own" ON public.layering_combinations
+        FOR DELETE USING ((select auth.uid()) = user_id);
+    END IF;
   END IF;
 END
 $$;
