@@ -16,10 +16,9 @@ CHECKS_FAILED=0
 
 check() {
   local name=$1
-  local script=$2
-  shift 2
+  local fn=$2
 
-  if bash -c "$script" bash "$@" > /dev/null 2>&1; then
+  if "$fn" > /dev/null 2>&1; then
     echo "✅ $name"
     CHECKS_PASSED=$((CHECKS_PASSED + 1))
   else
@@ -28,18 +27,43 @@ check() {
   fi
 }
 
+check_homepage() {
+  curl -fsSL "$SITE_URL" | grep -qi "nota"
+}
+
+check_shelf_api() {
+  local status
+  status=$(curl -fsS -o /dev/null -w "%{http_code}" "$SITE_URL/api/shelf")
+  case "$status" in
+    200|401) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+check_trails_page() {
+  curl -fsSL "$SITE_URL/trails" | grep -qi "trail"
+}
+
+check_supabase() {
+  supabase projects list > /dev/null 2>&1
+}
+
+check_build() {
+  cd "$PROJECT_ROOT" && npm run build
+}
+
 echo "Deployment Health"
-check "Vercel deployment active" 'body=$(curl -fsSL "$1") && printf "%s" "$body" | grep -qi "nota"' "$SITE_URL"
-check "API routes responding" 'status=$(curl -sS -o /dev/null -w "%{http_code}" "$1/api/shelf") && case "$status" in 200|401|405) exit 0;; *) exit 1;; esac' "$SITE_URL"
-check "Public pages accessible" 'body=$(curl -fsSL "$1/trails") && printf "%s" "$body" | grep -qi "trail"' "$SITE_URL"
+check "Vercel deployment active" check_homepage
+check "API routes responding" check_shelf_api
+check "Public pages accessible" check_trails_page
 echo ""
 
 echo "Database Health"
-check "Supabase responsive" 'supabase projects list > /dev/null 2>&1'
+check "Supabase responsive" check_supabase
 echo ""
 
 echo "Build Health"
-check "TypeScript builds" 'cd "$1" && npm run build > /dev/null 2>&1' "$PROJECT_ROOT"
+check "TypeScript builds" check_build
 echo ""
 
 echo "Summary"

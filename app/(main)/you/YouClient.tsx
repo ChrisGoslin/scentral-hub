@@ -31,6 +31,8 @@ type NoseReportData = {
   unwornName: string | null
 }
 
+type WearNoteEntry = { fragrance_id: string; note: string; date: string }
+
 export type YouClientProps =
   | { state: 'signed-out' }
   | {
@@ -74,6 +76,51 @@ export default function YouClient(props: YouClientProps) {
   const userId = props.state === 'signed-in' ? (props.email ? 'user-id' : null) : null
   const { saves, fetchError } = useSavedCombinations(userId)
 
+  const cabinetSummary = localCollectionCount >= 3 ? (
+    <div style={{ padding: '14px 16px', background: 'var(--surface)', borderLeft: '2px solid var(--accent)', borderRadius: 'var(--r-card)' }}>
+      <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 6 }}>
+        Your cabinet
+      </p>
+      <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 15, color: 'var(--text)', lineHeight: 1.4, marginBottom: 8 }}>
+        {localCollectionCount} in collection · {localWishlistCount} in wishlist
+      </p>
+      <Link href="/collection" style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 600 }}>
+        View your collection →
+      </Link>
+    </div>
+  ) : null
+
+  const scentHistorySummary = localScentHistory.length > 0 ? (
+    <div>
+      <p style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700, marginBottom: 12 }}>
+        Your Scent History
+      </p>
+      <div className="flex flex-col gap-4">
+        {localScentHistory.map((entry, i) => (
+          <div
+            key={`${entry.fragranceId}-${i}`}
+            style={{
+              paddingLeft: 12,
+              borderLeft: '1px solid var(--line)',
+            }}
+          >
+            <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 16, color: 'var(--text)', marginBottom: 2 }}>
+              {entry.brand} {entry.name}
+            </p>
+            <p style={{ fontSize: 11, fontFamily: 'var(--font-mono, monospace)', color: 'var(--text-muted)', marginBottom: entry.note ? 6 : 0 }}>
+              {formatRelativeDate(entry.loggedAt)}
+            </p>
+            {entry.note && (
+              <p style={{ fontSize: 13, color: 'var(--text)', fontStyle: 'italic', lineHeight: 1.5, margin: 0 }}>
+                “{entry.note}”
+              </p>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  ) : null
+
   // Initialize persona & engagement on mount
   useEffect(() => {
     setVibe(localStorage.getItem('scentral_vibe'))
@@ -86,15 +133,22 @@ export default function YouClient(props: YouClientProps) {
     }
 
     const supabase = createClient()
-    let wearNotes: Array<{ fragrance_id: string; note: string; date: string }> = []
+    let wearNotes: WearNoteEntry[] = []
 
     try {
       const parsedCol = JSON.parse(localStorage.getItem('scentral_collection') ?? '[]')
       const parsedWishlist = JSON.parse(localStorage.getItem('scentral_wishlist') ?? '[]')
       const parsedWearNotes = JSON.parse(localStorage.getItem('scentral_wear_notes') ?? '[]')
-      const col: string[] = Array.isArray(parsedCol) ? parsedCol : []
-      const wishlist: string[] = Array.isArray(parsedWishlist) ? parsedWishlist : []
-      wearNotes = Array.isArray(parsedWearNotes) ? parsedWearNotes : []
+      const col: string[] = Array.isArray(parsedCol) ? parsedCol.filter((id): id is string => typeof id === 'string') : []
+      const wishlist: string[] = Array.isArray(parsedWishlist) ? parsedWishlist.filter((id): id is string => typeof id === 'string') : []
+      wearNotes = Array.isArray(parsedWearNotes)
+        ? parsedWearNotes.filter((entry): entry is WearNoteEntry =>
+            entry &&
+            typeof entry.fragrance_id === 'string' &&
+            typeof entry.note === 'string' &&
+            typeof entry.date === 'string'
+          )
+        : []
       setLocalCollectionCount(col.length)
       setLocalWishlistCount(wishlist.length)
       if (col.length > 0) {
@@ -124,7 +178,7 @@ export default function YouClient(props: YouClientProps) {
 
           const { data: logsData } = await supabase
             .from('wear_logs')
-            .select('fragrance_id, logged_at, note, fragrances ( brand, name )')
+            .select('fragrance_id, logged_at, note, notes, fragrances ( brand, name )')
             .eq('user_id', anonId)
             .order('logged_at', { ascending: false })
 
@@ -132,6 +186,7 @@ export default function YouClient(props: YouClientProps) {
             fragrance_id: string
             logged_at: string
             note: string | null
+            notes: string | null
             fragrances: { brand: string; name: string } | null
           }[] | null
 
@@ -147,7 +202,7 @@ export default function YouClient(props: YouClientProps) {
                 brand: log.fragrances?.brand ?? 'Unknown',
                 name: log.fragrances?.name ?? 'Unknown',
                 loggedAt: log.logged_at,
-                note: log.note ?? latestNoteByFragrance.get(log.fragrance_id) ?? null,
+                note: log.note ?? log.notes ?? latestNoteByFragrance.get(log.fragrance_id) ?? null,
               }))
             )
           }
@@ -423,50 +478,8 @@ export default function YouClient(props: YouClientProps) {
               </Link>
             </div>
 
-            {localCollectionCount >= 3 && (
-              <div style={{ padding: '14px 16px', background: 'var(--surface)', borderLeft: '2px solid var(--accent)', borderRadius: 'var(--r-card)' }}>
-                <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 6 }}>
-                  Your cabinet
-                </p>
-                <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 15, color: 'var(--text)', lineHeight: 1.4, marginBottom: 8 }}>
-                  {localCollectionCount} in collection · {localWishlistCount} in wishlist
-                </p>
-                <Link href="/collection" style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 600 }}>
-                  View your collection →
-                </Link>
-              </div>
-            )}
-
-            {localScentHistory.length > 0 && (
-              <div>
-                <p style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700, marginBottom: 12 }}>
-                  Your Scent History
-                </p>
-                <div className="flex flex-col gap-4">
-                  {localScentHistory.map((entry, i) => (
-                    <div
-                      key={`${entry.fragranceId}-${i}`}
-                      style={{
-                        paddingLeft: 12,
-                        borderLeft: '1px solid var(--line)',
-                      }}
-                    >
-                      <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 16, color: 'var(--text)', marginBottom: 2 }}>
-                        {entry.brand} {entry.name}
-                      </p>
-                      <p style={{ fontSize: 11, fontFamily: 'var(--font-mono, monospace)', color: 'var(--text-muted)', marginBottom: entry.note ? 6 : 0 }}>
-                        {formatRelativeDate(entry.loggedAt)}
-                      </p>
-                      {entry.note && (
-                        <p style={{ fontSize: 13, color: 'var(--text)', fontStyle: 'italic', lineHeight: 1.5, margin: 0 }}>
-                          “{entry.note}”
-                        </p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            {cabinetSummary}
+            {scentHistorySummary}
 
             <Card>
               <div style={{ display: 'grid', gap: 12 }}>
@@ -554,6 +567,9 @@ export default function YouClient(props: YouClientProps) {
         />
 
         <RitualCalendar auraStreak={auraStreak} />
+
+        {cabinetSummary}
+        {scentHistorySummary}
 
         <YourContributions />
       </div>

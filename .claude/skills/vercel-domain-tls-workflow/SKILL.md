@@ -49,6 +49,7 @@ npx vercel@56.2.1 domains inspect notalabs.io
 `vercel domains inspect` reports DNS configuration, not certificate status — it does not have a documented `SSL` row. Check certificate status with:
 
 ```bash
+npx vercel@56.2.1 certs ls --help
 npx vercel@56.2.1 certs ls --limit 100
 ```
 (`certs ls` defaults to 20 results — pass `--limit 100`, or otherwise page/filter, so an existing cert for this domain isn't missed. Confirm current flags with `npx vercel@56.2.1 certs ls --help` since output/options can shift across versions.)

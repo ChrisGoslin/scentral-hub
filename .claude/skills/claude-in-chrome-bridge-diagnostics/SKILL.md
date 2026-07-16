@@ -93,11 +93,15 @@ mv ~/Library/Application\ Support/Google/Chrome/NativeMessagingHosts/com.anthrop
 
 Back up the existing wrapper first so this is reversible — stop if the backup fails, don't proceed to overwrite:
 ```bash
-cp ~/.claude/chrome/chrome-native-host ~/.claude/chrome/chrome-native-host.bak || { echo "Backup failed, aborting" >&2; exit 1; }
+WRAPPER="$HOME/.claude/chrome/chrome-native-host"
+BACKUP="$HOME/.claude/chrome/chrome-native-host.bak"
+cp "$WRAPPER" "$BACKUP" || { echo "Backup failed, aborting" >&2; exit 1; }
 ```
 
 ```bash
-cat > ~/.claude/chrome/chrome-native-host << 'EOF'
+WRAPPER="$HOME/.claude/chrome/chrome-native-host"
+test -f "$WRAPPER.bak" || { echo "Missing backup, aborting" >&2; exit 1; }
+cat > "$WRAPPER" << 'EOF'
 #!/bin/bash
 LATEST=$(ls -t ~/.local/share/claude/versions/ 2>/dev/null | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | head -1)
 if [ -z "$LATEST" ]; then
@@ -106,7 +110,7 @@ if [ -z "$LATEST" ]; then
 fi
 exec "$HOME/.local/share/claude/versions/$LATEST" --chrome-native-host
 EOF
-chmod +x ~/.claude/chrome/chrome-native-host
+chmod +x "$WRAPPER"
 ```
 
 **5c. Kill zombie processes and clean sockets:**
@@ -124,13 +128,19 @@ Only remove the socket paths identified in step 4 above, and confirm they belong
 ```bash
 SOCKET_DIR="/tmp/claude-mcp-browser-bridge-$USER"
 if [ -d "$SOCKET_DIR" ] && [ "$(stat -f%u "$SOCKET_DIR" 2>/dev/null || stat -c%u "$SOCKET_DIR")" = "$(id -u)" ]; then
-  find "$SOCKET_DIR" -mindepth 1 -maxdepth 1 ! -name '*.sock' -print
-  # ↑ if this prints anything, stop and inspect manually — the directory has
-  # unexpected content and should not be blindly deleted
-  find "$SOCKET_DIR" -mindepth 1 -maxdepth 1 -name '*.sock' -delete
+  UNEXPECTED=$(find "$SOCKET_DIR" -mindepth 1 -maxdepth 1 ! -type s -print)
+  if [ -n "$UNEXPECTED" ]; then
+    printf '%s\n' "$UNEXPECTED"
+    echo "Unexpected non-socket content, aborting cleanup" >&2
+    exit 1
+  fi
+  find "$SOCKET_DIR" -mindepth 1 -maxdepth 1 -type s -name '*.sock' -delete
   rmdir "$SOCKET_DIR" 2>/dev/null
 fi
-rm -f "$(getconf DARWIN_USER_TEMP_DIR)/claude-mcp-browser-bridge-$USER"
+CLI_SOCKET="$(getconf DARWIN_USER_TEMP_DIR)/claude-mcp-browser-bridge-$USER"
+if [ -S "$CLI_SOCKET" ] && [ "$(stat -f%u "$CLI_SOCKET" 2>/dev/null || stat -c%u "$CLI_SOCKET")" = "$(id -u)" ]; then
+  rm -f "$CLI_SOCKET"
+fi
 ```
 
 **5d. Restart Chrome and Claude Code:**
