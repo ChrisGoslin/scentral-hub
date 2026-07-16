@@ -56,7 +56,7 @@
     "@types/web-push": "^3.6.4",
     "dotenv": "^17.4.2",
     "eslint": "^9",
-    "eslint-config-next": "16.2.9",
+    "eslint-config-next": "16.2.10",
     "tailwindcss": "^4",
     "typescript": "^6"
   }
