@@ -123,14 +123,14 @@ export default function YouClient(props: YouClientProps) {
 
           const { data: logsData } = await supabase
             .from('wear_logs')
-            .select('fragrance_id, logged_at, notes, fragrances ( brand, name )')
+            .select('fragrance_id, logged_at, note, fragrances ( brand, name )')
             .eq('user_id', anonId)
             .order('logged_at', { ascending: false })
 
           const logs = logsData as {
             fragrance_id: string
             logged_at: string
-            notes: string | null
+            note: string | null
             fragrances: { brand: string; name: string } | null
           }[] | null
 
@@ -146,7 +146,7 @@ export default function YouClient(props: YouClientProps) {
                 brand: log.fragrances?.brand ?? 'Unknown',
                 name: log.fragrances?.name ?? 'Unknown',
                 loggedAt: log.logged_at,
-                note: log.notes ?? latestNoteByFragrance.get(log.fragrance_id) ?? null,
+                note: log.note ?? latestNoteByFragrance.get(log.fragrance_id) ?? null,
               }))
             )
           }
