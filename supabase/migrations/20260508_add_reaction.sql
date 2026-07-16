@@ -1,7 +1,28 @@
 -- Add reaction stamp to collections
-alter table collections
-  add column reaction text check (reaction in ('liked', 'disliked', 'unworn'));
+DO $$
+BEGIN
+  IF to_regclass('public.collections') IS NULL THEN
+    RETURN;
+  END IF;
 
--- Ensure upsert can resolve conflicts on (user_id, fragrance_id)
-create unique index if not exists collections_user_fragrance_idx
-  on collections (user_id, fragrance_id);
+  ALTER TABLE public.collections
+    ADD COLUMN IF NOT EXISTS reaction text CHECK (reaction IN ('liked', 'disliked', 'unworn'));
+
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'collections'
+      AND column_name = 'user_id'
+  )
+    AND EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_schema = 'public'
+        AND table_name = 'collections'
+        AND column_name = 'fragrance_id'
+    )
+  THEN
+    CREATE UNIQUE INDEX IF NOT EXISTS collections_user_fragrance_idx
+      ON public.collections (user_id, fragrance_id);
+  END IF;
+END
+$$;
