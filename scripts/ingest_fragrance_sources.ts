@@ -28,6 +28,9 @@ const MIN_FILES_BEFORE_RATIO_BREAK = 5
 const INCOMING_DIR = join(process.cwd(), 'data/fragrance/incoming')
 const CANONICAL_DIR = join(process.cwd(), 'data/fragrance/canonical')
 const SUPPORTED_EXTENSIONS = new Set(['.md', '.csv', '.json'])
+// Filenames export_knowledge.ts generates into CANONICAL_DIR — reserved so
+// an incoming source can't silently overwrite a generated export via rename.
+const RESERVED_FILENAMES = new Set(['MASTER_WARDROBE.md', 'LAYERING_PATTERNS.md', 'WARDROBE_INDEX.json'])
 
 if (!isDryRun) {
   for (const key of ['NEXT_PUBLIC_SUPABASE_URL', 'SUPABASE_SERVICE_KEY']) {
@@ -181,9 +184,13 @@ async function main() {
     process.exit(1)
   }
 
-  const files = readdirSync(INCOMING_DIR).filter((f) =>
-    SUPPORTED_EXTENSIONS.has(f.slice(f.lastIndexOf('.'))),
+  const files = readdirSync(INCOMING_DIR).filter(
+    (f) => SUPPORTED_EXTENSIONS.has(f.slice(f.lastIndexOf('.'))) && !RESERVED_FILENAMES.has(f),
   )
+  const skippedReserved = readdirSync(INCOMING_DIR).filter((f) => RESERVED_FILENAMES.has(f))
+  for (const f of skippedReserved) {
+    console.error(`⚠️  Skipping ${f}: reserved for generated exports, would overwrite canonical/${f}`)
+  }
 
   if (files.length === 0) {
     console.log('No new files in data/fragrance/incoming/.')

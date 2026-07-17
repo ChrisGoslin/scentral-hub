@@ -33,8 +33,12 @@ AS $$
 DECLARE
   redacted_count integer;
 BEGIN
+  -- metadata is arbitrary client-supplied JSON from a public endpoint (not
+  -- derived analysis output), so it can carry the same PII raw_text can —
+  -- clear it alongside raw_text rather than letting it outlive the window.
   UPDATE public.product_signals
-  SET raw_text = '[redacted after retention window]'
+  SET raw_text = '[redacted after retention window]',
+      metadata = NULL
   WHERE created_at < now() - retention
     AND raw_text <> '[redacted after retention window]';
 
@@ -44,4 +48,4 @@ END;
 $$;
 
 COMMENT ON FUNCTION public.redact_old_product_signal_raw_text(interval)
-  IS 'Redacts raw product signal text after the retention window while preserving derived metadata for weekly briefs.';
+  IS 'Redacts raw product signal text and metadata after the retention window while preserving derived analysis fields (summary/sentiment/tags) for weekly briefs.';

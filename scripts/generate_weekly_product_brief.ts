@@ -94,7 +94,7 @@ async function clusterSignals(signals: ProductSignalRow[]): Promise<BriefResult>
   // redacted/tokenized before entering any LLM prompt, not just before
   // rendering output. This is public, unauthenticated submission text.
   const payload = signals.map((s) => ({
-    source: s.source,
+    source: redactPII(s.source),
     text: redactPII(s.raw_text),
     summary: s.summary ? redactPII(s.summary) : s.summary,
     sentiment: s.sentiment,

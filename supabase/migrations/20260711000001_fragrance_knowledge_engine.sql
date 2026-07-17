@@ -17,9 +17,14 @@ CREATE TABLE IF NOT EXISTS public.fragrance_facts (
   raw_text text NOT NULL,
   enriched jsonb,
   created_at timestamp with time zone DEFAULT now(),
-  updated_at timestamp with time zone DEFAULT now(),
-  CONSTRAINT fragrance_facts_source_brand_name_unique UNIQUE (source_file, brand, name)
+  updated_at timestamp with time zone DEFAULT now()
 );
+
+-- Expression index (not a plain UNIQUE constraint) so a NULL brand doesn't
+-- let the same (source_file, name) repeat — Postgres treats NULLs as
+-- distinct in a regular UNIQUE constraint, COALESCE closes that gap.
+CREATE UNIQUE INDEX fragrance_facts_source_brand_name_unique
+  ON public.fragrance_facts (source_file, COALESCE(brand, ''), name);
 
 CREATE INDEX idx_fragrance_facts_brand_name ON public.fragrance_facts(brand, name);
 CREATE INDEX idx_fragrance_facts_role ON public.fragrance_facts(role);
