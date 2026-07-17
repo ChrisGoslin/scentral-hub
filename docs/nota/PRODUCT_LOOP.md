@@ -16,10 +16,15 @@ form / email forwarder / DM / Zapier
 
 `app/api/signals/ingest/route.ts` accepts any JSON payload of the shape
 `{ source: string, text: string, metadata?: any }`, rate-limited per IP
-(20/min via `lib/rate-limit.ts`). It validates the source/text fields, caps
-raw text at 12k characters, caps serialized metadata at 10KB, and stores the
-signal without doing synchronous LLM enrichment. That keeps the public intake
-fast and avoids spending LLM budget before the weekly clustering job.
+(20/min, plus a 300/day per-IP cap, both via `lib/rate-limit.ts`). It
+validates the source/text fields, caps raw text at 12k characters, caps
+serialized metadata at 10KB, and stores the signal without doing synchronous
+LLM enrichment. That keeps the public intake fast and avoids spending LLM
+budget before the weekly clustering job. The 300/day cap is defense-in-depth
+against one IP sustaining a flood for hours — it does not by itself prevent
+one source crowding out others; that fairness guarantee lives in the
+selection policy below, since `source` is client-supplied and unauthenticated
+(can't be trusted as a quota identity on its own).
 
 `product_signals.raw_text` is intentionally short-lived. Run
 `select public.redact_old_product_signal_raw_text();` after the retention
@@ -36,18 +41,43 @@ can post a signal, so treat `source`/`metadata` as untrusted input downstream.
 Sunday 23:00 UTC, `.github/workflows/weekly_product_brief.yml` runs
 `npm run brief:weekly` (`scripts/generate_weekly_product_brief.ts`), which:
 
-1. Pulls the last 7 days of `product_signals` (capped at 200 most recent —
-   logged if truncated, never silently).
-2. Sends them to the LLM to cluster into 3–7 themes, mapped to:
+1. Pulls the last 7 days of `product_signals` — up to a 5,000-row fetch
+   ceiling (logged, never silent, if hit — that would mean ingest volume
+   needs its own investigation, not a bigger number here) so the selection
+   step below sees the whole week, not just the newest slice of it.
+2. Selects which signals actually reach the LLM, capped at 200
+   (`MAX_SIGNALS_PER_RUN`) total, via a three-step policy in
+   `selectSignalsForBrief()` — not pure recency truncation:
+   - **Dedup** — collapses same-source, same-normalized-text repeats to one
+     representative (earliest) row. Kills naive copy-paste bulk submission
+     outright, regardless of volume.
+   - **Fair-share allocation across sources** — max-min fair queuing: each
+     source's equal share of the 200-signal budget rolls over to other
+     sources if unused, so a single source with thousands of rows only
+     consumes what's left after every other source's *actual* volume is
+     satisfied — it can never crowd another source out. A week with only one
+     active source is not capped at all, since there's nothing to protect.
+   - **Stratified-by-day pick within a source's quota** — when a source's own
+     volume exceeds its allocated quota, picks are spread round-robin across
+     the 7 calendar days (earliest-in-day first) instead of taking that
+     source's most recent rows. This is what stops "one caller fills the
+     window in the last 10 minutes before the run" from silently erasing
+     that same source's earlier legitimate signals — they're still in this
+     run's 200, just possibly not the ones closest to the deadline.
+   - Every drop (dedup count, which sources got capped and by how much,
+     fetch-ceiling hits) is logged to the run output and folded into the
+     brief's header line — never silent.
+3. Sends the selected signals to the LLM to cluster into 3–7 themes, mapped
+   to:
    - **Personas** — from `SCENTRAL_PERSONAS.md` (Gavan, Christopher).
    - **Feature areas** — from the route surface in `CLAUDE.md` §4 and
      `docs/ANOTHERSENSE_GAP_ANALYSIS_2026-06-23.md`. (Note:
      `AnotherSense_Final_UX_Overhaul.md`, referenced when this pipeline was
      scoped, does not exist in this repo as of 2026-07-11 — the gap-analysis
      doc was used instead. Reconcile if that file turns up elsewhere.)
-3. Writes `docs/weekly/PRODUCT_BRIEF_<YYYY-MM-DD>.md` with Overview, Signals
+4. Writes `docs/weekly/PRODUCT_BRIEF_<YYYY-MM-DD>.md` with Overview, Signals
    & Themes, Persona Impact, and 3–5 Recommended Bets (effort/impact rated).
-4. The Action commits the new file directly to the branch it runs on.
+5. The Action commits the new file directly to the branch it runs on.
 
 Run it manually any time with `npm run brief:weekly` (needs
 `ANTHROPIC_API_KEY`, `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_KEY` in

@@ -13,7 +13,7 @@ const redis =
 export function makeLimiter(
   prefix: string,
   tokens: number,
-  window: `${number} ${'s' | 'm' | 'h'}`,
+  window: `${number} ${'s' | 'm' | 'h' | 'd'}`,
 ): Ratelimit | null {
   return redis
     ? new Ratelimit({

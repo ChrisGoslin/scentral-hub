@@ -10,14 +10,26 @@ import { createClient } from '@supabase/supabase-js'
 import { clientIp, enforce, makeLimiter } from '@/lib/rate-limit'
 
 const signalsLimiter = makeLimiter('signals-ingest', 20, '1 m')
+// Defense-in-depth against a single IP sustaining bursts just under the
+// per-minute limit for hours (e.g. one caller filling the weekly brief's
+// selection window well before the per-source fairness cap in
+// scripts/generate_weekly_product_brief.ts even sees the data). This does
+// not solve fairness across many IPs/a botnet — that's handled at selection
+// time — it only raises the cost of a single-IP flood.
+const signalsDailyLimiter = makeLimiter('signals-ingest-daily', 300, '1 d')
 const MAX_SOURCE_LENGTH = 80
 const MAX_TEXT_LENGTH = 12_000
 const MAX_METADATA_BYTES = 10_000
 
 export async function POST(req: NextRequest) {
-  const allowed = await enforce(signalsLimiter, clientIp(req))
+  const ip = clientIp(req)
+  const allowed = await enforce(signalsLimiter, ip)
   if (!allowed) {
     return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 })
+  }
+  const allowedDaily = await enforce(signalsDailyLimiter, ip)
+  if (!allowedDaily) {
+    return NextResponse.json({ error: 'Daily rate limit exceeded' }, { status: 429 })
   }
 
   let parsed: unknown
