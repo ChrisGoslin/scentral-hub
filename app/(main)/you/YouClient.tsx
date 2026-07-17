@@ -192,8 +192,13 @@ export default function YouClient(props: YouClientProps) {
 
           if (logs && logs.length > 0) {
             const latestNoteByFragrance = new Map<string, string>()
+            const latestDateByFragrance = new Map<string, string>()
             for (const entry of wearNotes) {
-              latestNoteByFragrance.set(entry.fragrance_id, entry.note)
+              const existingDate = latestDateByFragrance.get(entry.fragrance_id)
+              if (!existingDate || entry.date > existingDate) {
+                latestNoteByFragrance.set(entry.fragrance_id, entry.note)
+                latestDateByFragrance.set(entry.fragrance_id, entry.date)
+              }
             }
 
             setLocalScentHistory(

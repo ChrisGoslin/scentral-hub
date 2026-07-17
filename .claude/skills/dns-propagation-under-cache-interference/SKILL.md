@@ -39,9 +39,9 @@ dig +tcp +short A notalabs.io @<nameserver-from-dig-NS-output>
 
 If you need to confirm the response actually came from an authoritative server (not a resolver), drop `+short` and check the `aa` (authoritative answer) flag in the full `dig` output.
 
-If this shows the **old** value, the zone change truly hasn't propagated yet (give it 5–15 minutes).
+If this shows the **old** value, "propagation" is the wrong frame — this *is* the authoritative source, so an old answer here means the change hasn't reached the authoritative zone yet, delegation may be wrong, or you're updating the wrong provider/record. Check the source system before waiting.
 
-If this shows the **new** value, the zone is live at authoritative servers, but your local path is cached.
+If this shows the **new** value, the zone is live at authoritative servers, but your local path is cached — that's where "propagation delay" actually applies (stale recursive-cache responses), not the authoritative answer itself.
 
 ### 3. Query via DNS-over-HTTPS to bypass local network interception
 
@@ -106,7 +106,7 @@ If the authoritative TTL is large (3600+ seconds / 1+ hour), expect any resolver
 ## Anti-patterns to avoid
 
 - Assuming local `dig` failures mean the zone change didn't work; always check authoritative NS directly
-- Waiting for 100% propagation before declaring victory (cert issuance, traffic routing can proceed with 50%+)
+- Waiting for 100% client propagation before declaring victory — base success on the authoritative answer plus checks against 2-3 representative recursive resolvers (cert issuance and traffic routing key off authoritative DNS, not client-side propagation percentage); document any residual TTL-driven staleness separately rather than treating it as an open blocker
 - Not lowering TTL before a planned migration (should be done 24h prior, not after)
 - Trusting a single public resolver (Google's DoH can be outdated if it hasn't queried recently; check 2–3 sources)
 - Reloading a cached page in browser without hard-refresh or incognito mode (browser also caches DNS)

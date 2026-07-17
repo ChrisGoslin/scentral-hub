@@ -85,8 +85,11 @@ ls -la /tmp/claude-mcp-browser-bridge-$USER/
 
 **5a. Disable Claude.app native-messaging config:**
 ```bash
-mv ~/Library/Application\ Support/Google/Chrome/NativeMessagingHosts/com.anthropic.claude_browser_extension.json \
-   ~/Library/Application\ Support/Google/Chrome/NativeMessagingHosts/com.anthropic.claude_browser_extension.json.disabled
+CONFIG="$HOME/Library/Application Support/Google/Chrome/NativeMessagingHosts/com.anthropic.claude_browser_extension.json"
+DISABLED="$CONFIG.disabled"
+test -f "$CONFIG" || { echo "Missing native-messaging config; aborting" >&2; exit 1; }
+test ! -e "$DISABLED" || { echo "Disabled config already exists; aborting" >&2; exit 1; }
+mv "$CONFIG" "$DISABLED"
 ```
 
 **5b. Update wrapper to use latest version dynamically:**

@@ -12,7 +12,14 @@ function parseVerdict(text: string): { pros: string[]; cons: string[] } | null {
   const stripped = text.trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim()
   try {
     const parsed = JSON.parse(stripped)
-    if (Array.isArray(parsed?.pros) && Array.isArray(parsed?.cons)) return parsed
+    if (
+      Array.isArray(parsed?.pros) &&
+      parsed.pros.every((value: unknown) => typeof value === 'string') &&
+      Array.isArray(parsed?.cons) &&
+      parsed.cons.every((value: unknown) => typeof value === 'string')
+    ) {
+      return { pros: parsed.pros, cons: parsed.cons }
+    }
     return null
   } catch {
     return null

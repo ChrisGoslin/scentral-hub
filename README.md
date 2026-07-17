@@ -1,7 +1,7 @@
 # nota. — Architecture & Context
 
 ## 🏛️ Domain Perimeter
-- **Execution Root:** verify the current checkout path before acting. Historically this repo has lived at `/Users/christophergoslin/Projects/scentral-hub`.
+- **Execution Root:** verify the current checkout path before acting. Historically this repo has lived at `<repo-root>/scentral-hub`.
 - **Identity:** This is the **Product Build** folder. It contains the Next.js app, Supabase migrations, and implementation scripts.
 - **Separation:** This project is completely distinct from **Foresight** (Strategy/Finance). Never cross-reference Foresight intelligence here unless explicitly instructed.
 

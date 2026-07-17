@@ -78,7 +78,7 @@ The following segments are inferred from repo persona documents and public categ
 
 ### Primary customer: the emerging curator
 
-This is the leading near-term growth hypothesis, represented in the older persona work by Gavan.
+This is the leading near-term growth hypothesis, represented in the older persona work by Gavin.
 
 **Job to be done:** Help me develop a fragrance taste I can trust without wasting money or feeling ignorant.
 

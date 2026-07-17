@@ -353,7 +353,7 @@ Use this block at the start of every new CLI agent session. Summary of §1 — u
 
 ```
 # nota. — Project Briefing
-# Repo: scentral-hub | DB: scentral-mvp | Display name: nota. (display-layer only, all internal names unchanged)
+# Repo: verify current checkout/remote (historical name: scentral-hub) | DB: scentral-mvp | Display name: nota. (display-layer only, all internal names unchanged)
 
 ## Must-read docs before writing any code
 - AGENTS.md — ground truth, safeguards, lessons learned (READ THIS FIRST)

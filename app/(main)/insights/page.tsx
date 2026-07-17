@@ -109,32 +109,33 @@ export default async function InsightsPage() {
 
   return (
     <InsightsClient
-      state={computedInsights ? 'hydrated' : 'loading'}
+      state={computedInsights ? 'hydrated' : 'no-data'}
       userId={userId}
       insights={computedInsights}
-      computedAt={computedAt ?? new Date().toISOString()}
+      computedAt={computedInsights ? (computedAt ?? new Date().toISOString()) : null}
     />
   )
 }
 
 async function computeInsights(supabase: Awaited<ReturnType<typeof createClient>>, userId: string): Promise<CachedInsights | null> {
   try {
-    // Fetch all user data in parallel
-    const [tracesResult, reactionsResult, collectionsResult, shelfEventsResult] = await Promise.all([
-      // Get traces (if available)
+    // Traces must be fetched first: reactions are counted by trace ownership
+    // (reactions *received* on this user's traces), not by who reacted.
+    const [tracesResult, collectionsResult, shelfEventsResult] = await Promise.all([
       supabase.from('traces').select('id, user_id, body').eq('user_id', userId).limit(100),
-      // Get reactions
-      supabase.from('trace_reactions').select('trace_id, reaction').eq('user_id', userId),
-      // Get collection
       supabase.from('collections').select('id, fragrance_id, affinity_score').eq('user_id', userId),
-      // Get shelf events
       supabase.from('shelf_events').select('id, fragrance_id, event_type, created_at').eq('user_id', userId).order('created_at', { ascending: true }),
     ])
 
     const traces = tracesResult.data ?? []
-    const reactions = reactionsResult.data ?? []
     const collections = collectionsResult.data ?? []
     const shelfEvents = shelfEventsResult.data ?? []
+
+    const traceIds = traces.map(t => t.id)
+    const reactionsResult = traceIds.length > 0
+      ? await supabase.from('trace_reactions').select('trace_id, reaction').in('trace_id', traceIds)
+      : { data: [] }
+    const reactions = reactionsResult.data ?? []
 
     // Compute Your Impact
     const interactionsCount = traces.length

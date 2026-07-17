@@ -43,6 +43,9 @@ BEGIN
     FROM public.profiles p
     WHERE p.anon_id = ic.anon_id;
 
+    RAISE NOTICE 'insights_cache: % row(s) have no matching profile and will be permanently deleted (anon_id could not map to user_id)',
+      (SELECT count(*) FROM public.insights_cache WHERE user_id IS NULL);
+
     DELETE FROM public.insights_cache WHERE user_id IS NULL;
 
     ALTER TABLE public.insights_cache ALTER COLUMN user_id SET NOT NULL;

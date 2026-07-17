@@ -54,7 +54,7 @@ export async function handler(): Promise<Response> {
       try {
         const insights = await computeUserInsights(userId)
         if (insights) {
-          await supabase
+          const { error: upsertError } = await supabase
             .from('insights_cache')
             .upsert({
               user_id: userId,
@@ -62,6 +62,7 @@ export async function handler(): Promise<Response> {
               payload: insights,
               computed_at: new Date().toISOString(),
             })
+          if (upsertError) throw upsertError
           results.push({ user_id: userId, status: 'success' })
         }
       } catch (error) {
@@ -82,18 +83,23 @@ export async function handler(): Promise<Response> {
 
 async function computeUserInsights(userId: string): Promise<CachedInsights | null> {
   try {
-    // Fetch all user data in parallel
-    const [tracesResult, reactionsResult, collectionsResult, shelfEventsResult] = await Promise.all([
+    // Traces must be fetched first: reactions are counted by trace ownership
+    // (reactions *received* on this user's traces), not by who reacted.
+    const [tracesResult, collectionsResult, shelfEventsResult] = await Promise.all([
       supabase.from('traces').select('id, user_id, body').eq('user_id', userId).limit(100),
-      supabase.from('trace_reactions').select('trace_id, reaction').eq('user_id', userId),
       supabase.from('collections').select('id, fragrance_id, affinity_score').eq('user_id', userId),
       supabase.from('shelf_events').select('id, fragrance_id, event_type, created_at').eq('user_id', userId).order('created_at', { ascending: true }),
     ])
 
     const traces = tracesResult.data ?? []
-    const reactions = reactionsResult.data ?? []
     const collections = collectionsResult.data ?? []
     const shelfEvents = shelfEventsResult.data ?? []
+
+    const traceIds = traces.map(t => t.id)
+    const reactionsResult = traceIds.length > 0
+      ? await supabase.from('trace_reactions').select('trace_id, reaction').in('trace_id', traceIds)
+      : { data: [] }
+    const reactions = reactionsResult.data ?? []
 
     // Compute Your Impact
     const interactionsCount = traces.length
@@ -208,7 +214,7 @@ async function computeUserInsights(userId: string): Promise<CachedInsights | nul
       trajectory,
     }
   } catch (error) {
-    console.error(`Failed to compute insights for ${anonId}:`, error)
+    console.error(`Failed to compute insights for ${userId}:`, error)
     return null
   }
 }

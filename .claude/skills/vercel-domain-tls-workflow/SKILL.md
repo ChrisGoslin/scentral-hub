@@ -72,7 +72,7 @@ curl -I https://notalabs.io --max-time 10
 
 ### 5. Update environment variables in Vercel
 
-**Before running either command below, confirm you're linked to the correct project and environment** (`npx vercel@56.2.1 project ls` / check `.vercel/project.json`) — these commands affect production configuration and a deploy.
+**Before running either command below, confirm you're linked to the correct project and environment** (`npx vercel@56.2.1 project ls` / check `.vercel/project.json`) — these commands affect production configuration and a deploy. Confirming the project/environment is not the same as approval: get explicit human confirmation immediately before running `vercel env add` (changes production config) and, separately, immediately before running `vercel --prod` (deploys).
 
 Once HTTPS is live, set the public site URL so OG previews, canonical tags, and email links use HTTPS:
 
@@ -152,7 +152,7 @@ Derived from: notalabs.io A-record cutover 2026-07-16, confirmed with `curl -I h
 Re-verify on next invocation:
 ```bash
 # Check Vercel CLI works and reports domain status correctly
-npx vercel domains list 2>&1 | head -5
+npx vercel@56.2.1 domains list 2>&1 | head -5
 # Should list domains without error
 ```
 

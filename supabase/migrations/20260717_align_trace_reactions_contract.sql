@@ -57,6 +57,9 @@ BEGIN
 
     -- Rows with no matching profile.id (anon_id never claimed) cannot be
     -- carried forward under the new user_id-keyed contract.
+    RAISE NOTICE 'trace_reactions: % row(s) have no matching profile and will be permanently deleted (anon_id could not map to user_id)',
+      (SELECT count(*) FROM public.trace_reactions WHERE user_id IS NULL);
+
     DELETE FROM public.trace_reactions WHERE user_id IS NULL;
 
     ALTER TABLE public.trace_reactions ALTER COLUMN user_id SET NOT NULL;
