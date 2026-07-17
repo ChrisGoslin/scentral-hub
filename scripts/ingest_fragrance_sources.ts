@@ -218,6 +218,10 @@ async function main() {
   console.log(
     `\n📊 ${profilesWritten} fragrance_facts, ${patternsWritten} layering_patterns written, ${failed} file(s) failed.`,
   )
+
+  if (failed > 0) {
+    process.exitCode = 1
+  }
 }
 
 main()

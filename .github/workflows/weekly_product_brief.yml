@@ -35,4 +35,15 @@ jobs:
           git add docs/weekly/
           git diff --cached --quiet && echo "No changes to commit" && exit 0
           git commit -m "docs(weekly): product brief $(date -u +%Y-%m-%d)"
-          git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:${GITHUB_REF_NAME}
+
+          REMOTE="https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          for attempt in 1 2 3; do
+            if git push "$REMOTE" HEAD:${GITHUB_REF_NAME}; then
+              exit 0
+            fi
+            echo "Push rejected (attempt ${attempt}/3) — fetching and rebasing before retry."
+            git fetch "$REMOTE" "${GITHUB_REF_NAME}"
+            git rebase "FETCH_HEAD"
+          done
+          echo "Failed to push brief after 3 attempts." >&2
+          exit 1
