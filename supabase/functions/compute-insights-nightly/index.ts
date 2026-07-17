@@ -35,42 +35,38 @@ interface CachedInsights {
 
 export async function handler(): Promise<Response> {
   try {
-    // Fetch all unique anon_ids from profiles
+    // Fetch all user ids from profiles
     const { data: profiles, error: profilesError } = await supabase
       .from('profiles')
-      .select('anon_id')
+      .select('id')
 
     if (profilesError) throw profilesError
     if (!profiles || profiles.length === 0) {
       return new Response(JSON.stringify({ message: 'No profiles to process' }), { status: 200 })
     }
 
-    const anonIds = profiles.map(p => p.anon_id)
+    const userIds = profiles.map(p => p.id)
 
     // Process insights for each user
-    const results: { anon_id: string; status: 'success' | 'error'; error?: string }[] = []
+    const results: { user_id: string; status: 'success' | 'error'; error?: string }[] = []
 
-    for (const anonId of anonIds) {
+    for (const userId of userIds) {
       try {
-        const insights = await computeUserInsights(anonId)
+        const insights = await computeUserInsights(userId)
         if (insights) {
           await supabase
             .from('insights_cache')
             .upsert({
-              anon_id: anonId,
-              your_impact: insights.your_impact,
-              best_traces: insights.best_traces,
-              scentiment_vision: insights.scentiment_vision,
-              taste_evolution: insights.taste_evolution,
-              trajectory: insights.trajectory,
+              user_id: userId,
+              period: 'latest',
+              payload: insights,
               computed_at: new Date().toISOString(),
             })
-            .eq('anon_id', anonId)
-          results.push({ anon_id: anonId, status: 'success' })
+          results.push({ user_id: userId, status: 'success' })
         }
       } catch (error) {
-        console.error(`Error computing insights for ${anonId}:`, error)
-        results.push({ anon_id: anonId, status: 'error', error: String(error) })
+        console.error(`Error computing insights for ${userId}:`, error)
+        results.push({ user_id: userId, status: 'error', error: String(error) })
       }
     }
 
@@ -84,14 +80,14 @@ export async function handler(): Promise<Response> {
   }
 }
 
-async function computeUserInsights(anonId: string): Promise<CachedInsights | null> {
+async function computeUserInsights(userId: string): Promise<CachedInsights | null> {
   try {
     // Fetch all user data in parallel
     const [tracesResult, reactionsResult, collectionsResult, shelfEventsResult] = await Promise.all([
-      supabase.from('traces').select('id, anon_id, content').eq('anon_id', anonId).limit(100),
-      supabase.from('trace_reactions').select('id, trace_id, reaction_type').eq('anon_id', anonId),
-      supabase.from('collections').select('id, fragrance_id, affinity_score').eq('anon_id', anonId),
-      supabase.from('shelf_events').select('id, fragrance_id, event_type, created_at').eq('anon_id', anonId).order('created_at', { ascending: true }),
+      supabase.from('traces').select('id, user_id, body').eq('user_id', userId).limit(100),
+      supabase.from('trace_reactions').select('trace_id, reaction').eq('user_id', userId),
+      supabase.from('collections').select('id, fragrance_id, affinity_score').eq('user_id', userId),
+      supabase.from('shelf_events').select('id, fragrance_id, event_type, created_at').eq('user_id', userId).order('created_at', { ascending: true }),
     ])
 
     const traces = tracesResult.data ?? []
@@ -102,7 +98,7 @@ async function computeUserInsights(anonId: string): Promise<CachedInsights | nul
     // Compute Your Impact
     const interactionsCount = traces.length
     const reactionsReceived = reactions.length
-    const savesCount = reactions.filter(r => r.reaction_type === 'saved').length
+    const savesCount = reactions.filter(r => r.reaction === 'too_real').length
 
     const yourImpact = {
       interactions_count: interactionsCount,
@@ -125,7 +121,7 @@ async function computeUserInsights(anonId: string): Promise<CachedInsights | nul
       .map(t => ({
         id: t.id,
         reaction_count: traceReactionMap.get(t.id) ?? 0,
-        content: t.content ?? '',
+        content: t.body ?? '',
       }))
       .sort((a, b) => (b.reaction_count ?? 0) - (a.reaction_count ?? 0))
       .slice(0, 3)
