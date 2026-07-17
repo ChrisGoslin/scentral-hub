@@ -79,7 +79,17 @@ the generated roll-ups.
 
 - Migrations `20260711000001_fragrance_knowledge_engine.sql` and
   `20260711000002_product_signals.sql` are written but **not applied** —
-  needs explicit approval, then `supabase db push` (or the Supabase MCP).
+  needs explicit approval, then `supabase db push --include-all` (or the
+  Supabase MCP). **`--include-all` is required, not optional**: this branch
+  also backfills several migrations with version numbers earlier than
+  what's already recorded as applied in production (e.g.
+  `20260507000002_handle_new_user_trigger.sql`,
+  `20260507000003_backfill_fragrance_columns.sql`,
+  `20260510120000_missing_fk_indexes.sql`,
+  `20260511235900_seed_fragrances_rls_bypass.sql`). A plain `supabase db push`
+  only applies migrations newer than the latest remote version and will
+  silently skip these, which can leave the `20260711*` tables referencing
+  state that isn't actually there.
 - `Fragrance App Product Audit & Strategy.md` (referenced as the source of
   the anchor/modulator/top framework) does not exist in this repo as of
   2026-07-11 — the framework was instead verified against

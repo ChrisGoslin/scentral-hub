@@ -387,6 +387,12 @@ async function main() {
   const supabase = createSupabaseAdmin()
   const since = new Date()
   since.setDate(since.getDate() - 7)
+  // Frozen upper bound: the public ingest endpoint stays live during this
+  // run, so without this, a signal inserted mid-fetch would shift every
+  // later offset page — a row already fetched can repeat, and a newly
+  // inserted row can silently displace an older one at the ceiling. Bounding
+  // both ends up front makes every page draw from a consistent snapshot.
+  const until = new Date()
 
   // A single .limit() call is silently capped by Supabase's default
   // PostgREST page size (1,000 rows) regardless of the number requested, so
@@ -400,6 +406,7 @@ async function main() {
       .from('product_signals')
       .select('*')
       .gte('created_at', since.toISOString())
+      .lte('created_at', until.toISOString())
       .order('created_at', { ascending: false })
       .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1)
 

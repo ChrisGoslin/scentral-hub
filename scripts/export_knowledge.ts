@@ -17,7 +17,7 @@
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import dotenv from 'dotenv'
-import { existsSync, readFileSync, writeFileSync } from 'fs'
+import { writeFileSync } from 'fs'
 import { join } from 'path'
 
 dotenv.config({ path: '.env.local' })
@@ -60,12 +60,6 @@ interface LayeringPatternRow {
   roles: string[] | null
   use_case: string | null
   rationale: string | null
-}
-
-interface WardrobeIndex {
-  generated_at: string
-  facts: FragranceFactRow[]
-  patterns: LayeringPatternRow[]
 }
 
 function createSupabaseAdmin() {
@@ -151,41 +145,32 @@ function renderLayering(patterns: LayeringPatternRow[]): string {
   return lines.join('\n')
 }
 
-function loadExistingIndex(): WardrobeIndex {
-  if (!existsSync(INDEX_PATH)) {
-    return { generated_at: new Date().toISOString(), facts: [], patterns: [] }
-  }
-
-  try {
-    const parsed = JSON.parse(readFileSync(INDEX_PATH, 'utf8')) as Partial<WardrobeIndex>
-    return {
-      generated_at: typeof parsed.generated_at === 'string' ? parsed.generated_at : new Date().toISOString(),
-      facts: Array.isArray(parsed.facts) ? parsed.facts : [],
-      patterns: Array.isArray(parsed.patterns) ? parsed.patterns : [],
-    }
-  } catch {
-    return { generated_at: new Date().toISOString(), facts: [], patterns: [] }
-  }
-}
-
 async function main() {
   const supabase = createSupabaseAdmin()
-  const existingIndex = loadExistingIndex()
-  const facts = target !== 'layering' ? await fetchFacts(supabase) : existingIndex.facts
-  const patterns = target !== 'wardrobe' ? await fetchPatterns(supabase) : existingIndex.patterns
+  const facts = target !== 'layering' ? await fetchFacts(supabase) : null
+  const patterns = target !== 'wardrobe' ? await fetchPatterns(supabase) : null
 
-  if (target !== 'layering') {
+  if (facts) {
     writeFileSync(join(OUT_DIR, 'MASTER_WARDROBE.md'), renderWardrobe(facts))
     console.log(`✓ MASTER_WARDROBE.md (${facts.length} facts)`)
   }
-  if (target !== 'wardrobe') {
+  if (patterns) {
     writeFileSync(join(OUT_DIR, 'LAYERING_PATTERNS.md'), renderLayering(patterns))
     console.log(`✓ LAYERING_PATTERNS.md (${patterns.length} patterns)`)
   }
 
+  // The index always needs both halves regardless of which --target was
+  // requested for the .md exports — fetch whichever wasn't already fetched
+  // above instead of falling back to a possibly-missing/stale local file.
+  // A targeted export on a fresh clone (no existing WARDROBE_INDEX.json)
+  // previously wrote an empty array for the untouched half even when the
+  // corresponding DB table had real rows.
+  const indexFacts = facts ?? (await fetchFacts(supabase))
+  const indexPatterns = patterns ?? (await fetchPatterns(supabase))
+
   writeFileSync(
     INDEX_PATH,
-    JSON.stringify({ generated_at: new Date().toISOString(), facts, patterns }, null, 2),
+    JSON.stringify({ generated_at: new Date().toISOString(), facts: indexFacts, patterns: indexPatterns }, null, 2),
   )
   console.log('✓ WARDROBE_INDEX.json')
 }
