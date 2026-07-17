@@ -32,6 +32,38 @@ type NoseReportData = {
 }
 
 type WearNoteEntry = { fragrance_id: string; note: string; date: string }
+type ScentHistorySummaryEntry = {
+  fragranceId: string
+  brand: string
+  name: string
+  meta: string
+  note: string | null
+}
+
+function parseStringListStorage(key: string): string[] {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(key) ?? '[]')
+    return Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === 'string') : []
+  } catch {
+    return []
+  }
+}
+
+function parseWearNoteStorage(): WearNoteEntry[] {
+  try {
+    const parsed = JSON.parse(localStorage.getItem('scentral_wear_notes') ?? '[]')
+    return Array.isArray(parsed)
+      ? parsed.filter((entry): entry is WearNoteEntry =>
+          entry &&
+          typeof entry.fragrance_id === 'string' &&
+          typeof entry.note === 'string' &&
+          typeof entry.date === 'string'
+        )
+      : []
+  } catch {
+    return []
+  }
+}
 
 export type YouClientProps =
   | { state: 'signed-out' }
@@ -75,14 +107,34 @@ export default function YouClient(props: YouClientProps) {
   // Fetch saved combinations
   const userId = props.state === 'signed-in' ? (props.email ? 'user-id' : null) : null
   const { saves, fetchError } = useSavedCombinations(userId)
+  const displayCollectionCount = props.state === 'signed-in' ? ownedCount : localCollectionCount
+  const displayWishlistCount = props.state === 'signed-in' ? null : localWishlistCount
+  const signedInHistory: ScentHistorySummaryEntry[] = props.state === 'signed-in'
+    ? weekWear.slice(0, 7).map((entry) => ({
+        fragranceId: entry.fragrance_id,
+        brand: entry.brand,
+        name: entry.name,
+        meta: `${entry.count} wear${entry.count === 1 ? '' : 's'} this week`,
+        note: null,
+      }))
+    : []
+  const displayScentHistory: ScentHistorySummaryEntry[] = localScentHistory.length > 0
+    ? localScentHistory.map((entry) => ({
+        fragranceId: entry.fragranceId,
+        brand: entry.brand,
+        name: entry.name,
+        meta: formatRelativeDate(entry.loggedAt),
+        note: entry.note,
+      }))
+    : signedInHistory
 
-  const cabinetSummary = localCollectionCount >= 3 ? (
+  const cabinetSummary = displayCollectionCount >= 3 ? (
     <div style={{ padding: '14px 16px', background: 'var(--surface)', borderLeft: '2px solid var(--accent)', borderRadius: 'var(--r-card)' }}>
       <p style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 6 }}>
         Your cabinet
       </p>
       <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 15, color: 'var(--text)', lineHeight: 1.4, marginBottom: 8 }}>
-        {localCollectionCount} in collection · {localWishlistCount} in wishlist
+        {displayCollectionCount} in collection{displayWishlistCount === null ? '' : ` · ${displayWishlistCount} in wishlist`}
       </p>
       <Link href="/collection" style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 600 }}>
         View your collection →
@@ -90,13 +142,13 @@ export default function YouClient(props: YouClientProps) {
     </div>
   ) : null
 
-  const scentHistorySummary = localScentHistory.length > 0 ? (
+  const scentHistorySummary = displayScentHistory.length > 0 ? (
     <div>
       <p style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700, marginBottom: 12 }}>
         Your Scent History
       </p>
       <div className="flex flex-col gap-4">
-        {localScentHistory.map((entry, i) => (
+        {displayScentHistory.map((entry, i) => (
           <div
             key={`${entry.fragranceId}-${i}`}
             style={{
@@ -108,7 +160,7 @@ export default function YouClient(props: YouClientProps) {
               {entry.brand} {entry.name}
             </p>
             <p style={{ fontSize: 11, fontFamily: 'var(--font-mono, monospace)', color: 'var(--text-muted)', marginBottom: entry.note ? 6 : 0 }}>
-              {formatRelativeDate(entry.loggedAt)}
+              {entry.meta}
             </p>
             {entry.note && (
               <p style={{ fontSize: 13, color: 'var(--text)', fontStyle: 'italic', lineHeight: 1.5, margin: 0 }}>
@@ -133,35 +185,20 @@ export default function YouClient(props: YouClientProps) {
     }
 
     const supabase = createClient()
-    let wearNotes: WearNoteEntry[] = []
+    const col = parseStringListStorage('scentral_collection')
+    const wishlist = parseStringListStorage('scentral_wishlist')
+    const wearNotes = parseWearNoteStorage()
 
-    try {
-      const parsedCol = JSON.parse(localStorage.getItem('scentral_collection') ?? '[]')
-      const parsedWishlist = JSON.parse(localStorage.getItem('scentral_wishlist') ?? '[]')
-      const parsedWearNotes = JSON.parse(localStorage.getItem('scentral_wear_notes') ?? '[]')
-      const col: string[] = Array.isArray(parsedCol) ? parsedCol.filter((id): id is string => typeof id === 'string') : []
-      const wishlist: string[] = Array.isArray(parsedWishlist) ? parsedWishlist.filter((id): id is string => typeof id === 'string') : []
-      wearNotes = Array.isArray(parsedWearNotes)
-        ? parsedWearNotes.filter((entry): entry is WearNoteEntry =>
-            entry &&
-            typeof entry.fragrance_id === 'string' &&
-            typeof entry.note === 'string' &&
-            typeof entry.date === 'string'
-          )
-        : []
-      setLocalCollectionCount(col.length)
-      setLocalWishlistCount(wishlist.length)
-      if (col.length > 0) {
-        // Fetch families for identity score
-        supabase.from('fragrances').select('family').in('id', col).then(({ data }) => {
-          if (data) {
-            const families = data.map(f => f.family).filter(Boolean) as string[]
-            setIdentityScore(calculateIdentityScore(families))
-          }
-        })
-      }
-    } catch {
-      // best-effort
+    setLocalCollectionCount(col.length)
+    setLocalWishlistCount(wishlist.length)
+    if (col.length > 0) {
+      // Fetch families for identity score
+      supabase.from('fragrances').select('family').in('id', col).then(({ data }) => {
+        if (data) {
+          const families = data.map(f => f.family).filter(Boolean) as string[]
+          setIdentityScore(calculateIdentityScore(families))
+        }
+      })
     }
 
     // Aura Spritz Schedule streak & Nose Report
@@ -191,14 +228,9 @@ export default function YouClient(props: YouClientProps) {
           }[] | null
 
           if (logs && logs.length > 0) {
-            const latestNoteByFragrance = new Map<string, string>()
-            const latestDateByFragrance = new Map<string, string>()
+            const noteByFragranceAndDate = new Map<string, string>()
             for (const entry of wearNotes) {
-              const existingDate = latestDateByFragrance.get(entry.fragrance_id)
-              if (!existingDate || entry.date > existingDate) {
-                latestNoteByFragrance.set(entry.fragrance_id, entry.note)
-                latestDateByFragrance.set(entry.fragrance_id, entry.date)
-              }
+              noteByFragranceAndDate.set(`${entry.fragrance_id}:${entry.date.slice(0, 10)}`, entry.note)
             }
 
             setLocalScentHistory(
@@ -207,7 +239,7 @@ export default function YouClient(props: YouClientProps) {
                 brand: log.fragrances?.brand ?? 'Unknown',
                 name: log.fragrances?.name ?? 'Unknown',
                 loggedAt: log.logged_at,
-                note: log.note ?? log.notes ?? latestNoteByFragrance.get(log.fragrance_id) ?? null,
+                note: log.note ?? log.notes ?? noteByFragranceAndDate.get(`${log.fragrance_id}:${log.logged_at.slice(0, 10)}`) ?? null,
               }))
             )
           }
