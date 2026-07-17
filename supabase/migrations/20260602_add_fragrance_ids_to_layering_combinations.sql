@@ -19,7 +19,22 @@ BEGIN
         AND column_name = 'user_id'
     )
     THEN
+      -- Postgres OR-combines permissive policies: leaving the broad
+      -- pre-ownership policies from 001_enable_rls_layering_combinations.sql
+      -- active alongside the owner-scoped lc_* ones below would keep
+      -- granting access they're meant to replace (e.g. "Allow select for
+      -- authenticated" lets ANY authenticated user read every row). Drop
+      -- every legacy name explicitly, not just the mismatched one this
+      -- migration used to check for.
       DROP POLICY IF EXISTS "layering_combinations_owner" ON public.layering_combinations;
+      DROP POLICY IF EXISTS "Allow authenticated insert as owner" ON public.layering_combinations;
+      DROP POLICY IF EXISTS "Allow select for authenticated" ON public.layering_combinations;
+      DROP POLICY IF EXISTS "Allow update by owner" ON public.layering_combinations;
+      DROP POLICY IF EXISTS "Allow delete by owner" ON public.layering_combinations;
+      DROP POLICY IF EXISTS "lc_select_own" ON public.layering_combinations;
+      DROP POLICY IF EXISTS "lc_insert_own" ON public.layering_combinations;
+      DROP POLICY IF EXISTS "lc_update_own" ON public.layering_combinations;
+      DROP POLICY IF EXISTS "lc_delete_own" ON public.layering_combinations;
 
       CREATE POLICY "lc_select_own" ON public.layering_combinations
         FOR SELECT USING ((select auth.uid()) = user_id);

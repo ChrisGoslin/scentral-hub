@@ -35,5 +35,18 @@ BEGIN
     CREATE INDEX IF NOT EXISTS idx_fragrances_inspired_by_trgm
       ON public.fragrances USING GIN (inspired_by gin_trgm_ops);
   END IF;
+
+  -- app/api/search/route.ts also matches on full_name.ilike in the same OR
+  -- query; without this index, full-name-only matches still scan.
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'fragrances'
+      AND column_name = 'full_name'
+  )
+  THEN
+    CREATE INDEX IF NOT EXISTS idx_fragrances_full_name_trgm
+      ON public.fragrances USING GIN (full_name gin_trgm_ops);
+  END IF;
 END
 $$;

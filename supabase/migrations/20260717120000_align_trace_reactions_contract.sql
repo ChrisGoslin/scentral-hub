@@ -27,6 +27,9 @@ BEGIN
 END $$;
 
 -- trace_id: legacy column was `text`; current contract is `uuid` FK to traces.id.
+-- The legacy column carried no FK, so orphan values (referencing a trace
+-- that no longer exists) are possible — clean those up before adding the
+-- constraint the fresh-table path already has.
 DO $$
 BEGIN
   IF EXISTS (
@@ -35,8 +38,22 @@ BEGIN
   ) THEN
     ALTER TABLE public.trace_reactions
       ALTER COLUMN trace_id TYPE uuid USING trace_id::uuid;
+
+    DELETE FROM public.trace_reactions tr
+    WHERE NOT EXISTS (SELECT 1 FROM public.traces t WHERE t.id = tr.trace_id);
+
+    ALTER TABLE public.trace_reactions
+      ADD CONSTRAINT trace_reactions_trace_id_fkey
+      FOREIGN KEY (trace_id) REFERENCES public.traces(id) ON DELETE CASCADE;
   END IF;
 END $$;
+
+-- Drop legacy policies before the anon_id column they reference is removed
+-- below — Postgres refuses to DROP COLUMN when a policy predicate depends
+-- on it (without CASCADE, which we don't want here).
+DROP POLICY IF EXISTS "Users can view all reactions" ON public.trace_reactions;
+DROP POLICY IF EXISTS "Users can create their own reactions" ON public.trace_reactions;
+DROP POLICY IF EXISTS "Users can delete their own reactions" ON public.trace_reactions;
 
 -- anon_id (text, FK profiles.anon_id) -> user_id (uuid, FK profiles.id).
 DO $$
@@ -107,6 +124,16 @@ BEGIN
     SELECT 1 FROM information_schema.columns
     WHERE table_schema = 'public' AND table_name = 'trace_reactions' AND column_name = 'id'
   ) THEN
+    -- Legacy uniqueness was (trace_id, anon_id, reaction_type), so one user
+    -- can legitimately have several reaction rows on the same trace (one per
+    -- reaction_type). Those now collide on the new (trace_id, user_id) key
+    -- — keep only the most recent row per pair before adding the constraint.
+    DELETE FROM public.trace_reactions a
+    USING public.trace_reactions b
+    WHERE a.trace_id = b.trace_id
+      AND a.user_id = b.user_id
+      AND (a.created_at, a.ctid) < (b.created_at, b.ctid);
+
     ALTER TABLE public.trace_reactions DROP CONSTRAINT IF EXISTS trace_reactions_pkey;
     ALTER TABLE public.trace_reactions DROP COLUMN id;
     ALTER TABLE public.trace_reactions ADD CONSTRAINT trace_reactions_pkey PRIMARY KEY (trace_id, user_id);
@@ -118,9 +145,7 @@ DROP INDEX IF EXISTS public.idx_trace_reactions_anon_id;
 DROP INDEX IF EXISTS public.idx_trace_reactions_unique_reaction;
 
 -- Realign RLS policies to the user_id-keyed contract (verified live shape).
-DROP POLICY IF EXISTS "Users can view all reactions" ON public.trace_reactions;
-DROP POLICY IF EXISTS "Users can create their own reactions" ON public.trace_reactions;
-DROP POLICY IF EXISTS "Users can delete their own reactions" ON public.trace_reactions;
+-- Legacy policies already dropped above, before the anon_id column removal.
 
 DO $$
 BEGIN

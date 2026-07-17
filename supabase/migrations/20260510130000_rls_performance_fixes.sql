@@ -46,7 +46,12 @@ BEGIN
       WITH CHECK ((select auth.uid()) = user_id);
   END IF;
 
-  IF to_regclass('public.layering_combinations') IS NOT NULL THEN
+  IF to_regclass('public.layering_combinations') IS NOT NULL
+    AND EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_schema = 'public' AND table_name = 'layering_combinations' AND column_name = 'user_id'
+    )
+  THEN
     DROP POLICY IF EXISTS "Users manage their own layering combos" ON public.layering_combinations;
     CREATE POLICY "Users manage their own layering combos" ON public.layering_combinations
       FOR ALL USING ((select auth.uid()) = user_id)

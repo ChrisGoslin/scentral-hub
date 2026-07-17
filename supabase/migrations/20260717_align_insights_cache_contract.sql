@@ -25,6 +25,13 @@ BEGIN
   END IF;
 END $$;
 
+-- Drop legacy policies before the anon_id column they reference is removed
+-- below — Postgres refuses to DROP COLUMN when a policy predicate depends
+-- on it (without CASCADE, which we don't want here).
+DROP POLICY IF EXISTS "Users can view their own insights" ON public.insights_cache;
+DROP POLICY IF EXISTS "Service role can write insights" ON public.insights_cache;
+DROP POLICY IF EXISTS "Service role can update insights" ON public.insights_cache;
+
 -- anon_id (text, FK profiles.anon_id) -> user_id (uuid, FK profiles.id).
 DO $$
 BEGIN
@@ -97,11 +104,8 @@ DROP INDEX IF EXISTS public.idx_insights_cache_anon_id;
 
 -- Realign RLS policies to the user_id-keyed contract (verified live shape:
 -- a single owner-scoped ALL policy; the nightly job writes via the
--- service-role key, which bypasses RLS entirely).
-DROP POLICY IF EXISTS "Users can view their own insights" ON public.insights_cache;
-DROP POLICY IF EXISTS "Service role can write insights" ON public.insights_cache;
-DROP POLICY IF EXISTS "Service role can update insights" ON public.insights_cache;
-
+-- service-role key, which bypasses RLS entirely). Legacy policies already
+-- dropped above, before the anon_id column removal.
 DO $$
 BEGIN
   IF NOT EXISTS (

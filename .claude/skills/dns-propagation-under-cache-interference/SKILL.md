@@ -86,7 +86,7 @@ If the authoritative TTL is large (3600+ seconds / 1+ hour), expect any resolver
 | Source | Shows Old | Shows New | Interpretation |
 |--------|-----------|-----------|-----------------|
 | Local dig | ✓ | ✗ | Your ISP/router caching |
-| Authoritative NS (TCP) | ✓ | ✗ | Zone change hasn't applied yet; wait 5–15 min |
+| Authoritative NS (TCP) | ✓ | ✗ | Not propagation — this is the source. Check the source system, delegation, provider, and record are correct |
 | Authoritative NS (TCP) | ✗ | ✓ | Zone is live; local cache is stale |
 | DoH (Google/CF) | ✗ | ✓ | Public resolvers see it; ISP cache is older than TTL |
 
