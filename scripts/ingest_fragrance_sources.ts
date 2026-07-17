@@ -86,14 +86,23 @@ Each item is either:
 Return ONLY JSON: {"items": [...]}. If the text has no extractable fragrance content, return {"items": []}.`
 
 async function classifyAndExtract(rawText: string): Promise<ExtractedItem[]> {
-  const result = await runLLM<{ items?: ExtractedItem[] }>({
+  const result = await runLLM<unknown>({
     system: EXTRACTION_SYSTEM_PROMPT,
     prompt: rawText.slice(0, 12000),
     maxTokens: 4096,
     json: true,
   })
-  const items = result.items
-  return Array.isArray(items) ? items : []
+
+  if (!result || typeof result !== 'object' || !('items' in result)) {
+    throw new Error('LLM extraction response must include an items array')
+  }
+
+  const { items } = result as { items: unknown }
+  if (!Array.isArray(items)) {
+    throw new Error('LLM extraction response items must be an array')
+  }
+
+  return items as ExtractedItem[]
 }
 
 function createSupabaseAdmin() {
