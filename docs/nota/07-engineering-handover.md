@@ -9,7 +9,7 @@
 - **Names:** display = **nota.** · repo = verify the current Git remote before asserting the repo name · DB = `scentral-mvp` (Supabase `lrkdwobnemczvhpixpky`) · prod fallback = `scentral-hub.vercel.app` · new domain = `notalabs.io` (mid-cutover; re-verify DNS/HTTPS before using as canonical).
 - **Stack:** Next.js 16 App Router, React 19, Supabase (auth + Postgres + edge functions), Vercel, Tailwind 4 + CSS-variable tokens, Claude Haiku for the single LLM feature.
 - **Sources of truth, in order:** live DB > repo code > `CLAUDE.md` > `AGENTS.md` (operational lessons — binding) > everything else in `docs/` (much of it stale; `docs/PRODUCT_TRUTH.md` is superseded).
-- **Open PR:** #47 `nota-rebrand-and-audit` — display-layer rebrand + audit suite + two migration mirrors. Merge this before starting new work.
+- **PR status note, 2026-07-17:** the old #47 `nota-rebrand-and-audit` instruction is superseded. GitHub currently reports no open PRs for `ChrisGoslin/scentral-hub`; re-check live PR state before treating any historical PR note as blocking.
 
 ## 1. ⚠️ The one thing to fix first (live rough edge)
 
@@ -90,3 +90,22 @@ Migration workflow used here: apply via Supabase MCP **after explicit founder ap
 | Edge functions | `supabase/functions/{aura-advisory,compute-insights-nightly,detect-noseprint-evolution,enrich-descriptions-batch}` |
 | Rate-limit pattern to copy | `app/api/formulate/route.ts` |
 | Auth | `utils/supabase/server.ts`, `app/login`, `proxy.ts` |
+
+## 9. 2026-07-17 session: Pre-Launch Cut remediation
+
+PR #47 confirmed merged (`gh pr view 47` → `MERGED`) before this session started. Baseline `npm run test:smoke:prod` was 19/19 pass before any changes; re-ran clean after (see below). Full detail: `docs/nota/10-customer-competitor-acquisition-teardown.md`'s new "Pre-Launch Cut" section.
+
+**Shipped:**
+
+- **Privacy policy rewritten** (`app/(main)/privacy/page.tsx`) — no longer claims "no accounts" or "no server persistence." Now describes local/guest mode vs. signed-in Supabase-backed accounts, that auth processes email, that analytics are consent-gated (verified true in `lib/posthog.ts`/`lib/consent.ts` — not previously documented as such), and removed an unverifiable DNT claim that no code actually implements.
+- **Traces reaction contract reconciled.** Verified live `trace_reactions` schema via Supabase MCP: it already matches the target contract (`trace_id`/`user_id`/`reaction`, values `on_the_nose`/`feel_this`/`too_real`) — the checked-in migration (`20260703_trace_reactions_table.sql`) describes a stale legacy shape that was never mirrored back after an out-of-band production change. Added idempotent `supabase/migrations/20260717_align_trace_reactions_contract.sql` (**not applied — needs approval**) so a fresh DB reaches the same state.
+- **Same drift found in `insights_cache`** (not named in the original brief — discovered while fixing the above): live schema is `user_id`/`period`/`payload` jsonb, not the five-separate-jsonb-column shape in `20260703_insights_cache_table.sql`. Added `supabase/migrations/20260717_align_insights_cache_contract.sql` (**not applied — needs approval**).
+- **Fixed legacy `anon_id`/`reaction_type` code** that would have errored against the current schema: `app/(main)/insights/page.tsx` (now uses `auth.getUser()` instead of a `scentral_anon_id` cookie) and `supabase/functions/compute-insights-nightly/index.ts` (now iterates `profiles.id`). Both now read/write `insights_cache` via `payload`/`period`.
+- **`/api/pros-cons` and `/api/proscons`** no longer crash when Claude wraps JSON in a ```` ```json ```` fence — response is stripped before parsing, and parse/call failures return `{ success: false, unavailable: true }` (200) instead of a 500. Both `ProsCons.tsx` variants now render a quiet "isn't available right now" line on failure instead of silently vanishing.
+- **"Strong fit" softened to "Matches your pattern"** in `lib/fitNarrative.ts` and `app/(main)/discover/DiscoverGrid.tsx`. Confirmed no other occurrences repo-wide.
+- **Post-Read handoff added**: `app/noseprint/NoseprintClient.tsx` now shows "Add three fragrances you know, including one you stopped loving" linking to `/collection`, right after the reveal.
+- **App Store checklist**: `docs/todo/app-store-launch-checklist.md` (linked from `docs/todo/README.md`), converting §7's screenshot sequence into an owned list.
+
+**Verified before calling this done:** `npx tsc --noEmit` clean, `npm run build` succeeds, `npm run test:smoke:prod` 19/19 both before and after (no regression — expected, since nothing here is deployed yet).
+
+**Still open / not touched this session:** live `aura-advisory` 503s, catalogue/imagery rights ledger, RLS adversarial testing, both new migrations awaiting explicit approval + apply.
