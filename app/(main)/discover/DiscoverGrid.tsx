@@ -232,7 +232,7 @@ export function DiscoverGrid({
                         zIndex: 2,
                       }}
                     >
-                      ◆ Strong fit
+                      ◆ Matches your pattern
                     </span>
                   )}
                   {sort === '◆ Rare' && f.inspired_by && (
