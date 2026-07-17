@@ -36,6 +36,12 @@ BEGIN
     SELECT 1 FROM information_schema.columns
     WHERE table_schema = 'public' AND table_name = 'trace_reactions' AND column_name = 'trace_id' AND data_type <> 'uuid'
   ) THEN
+    -- The legacy column has no format constraint, so malformed values would
+    -- abort the cast below before orphan cleanup ever runs. Remove them
+    -- first while trace_id is still text.
+    DELETE FROM public.trace_reactions
+    WHERE trace_id !~ '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$';
+
     ALTER TABLE public.trace_reactions
       ALTER COLUMN trace_id TYPE uuid USING trace_id::uuid;
 
@@ -128,11 +134,21 @@ BEGIN
     -- can legitimately have several reaction rows on the same trace (one per
     -- reaction_type). Those now collide on the new (trace_id, user_id) key
     -- — keep only the most recent row per pair before adding the constraint.
-    DELETE FROM public.trace_reactions a
-    USING public.trace_reactions b
-    WHERE a.trace_id = b.trace_id
-      AND a.user_id = b.user_id
-      AND (a.created_at, a.ctid) < (b.created_at, b.ctid);
+    -- created_at is nullable on the legacy shape, so rank with NULLS LAST
+    -- (a tuple comparison against a NULL created_at would itself be NULL,
+    -- silently keeping duplicates the plain `<` version above missed).
+    DELETE FROM public.trace_reactions
+    WHERE ctid IN (
+      SELECT ctid FROM (
+        SELECT ctid,
+          ROW_NUMBER() OVER (
+            PARTITION BY trace_id, user_id
+            ORDER BY created_at DESC NULLS LAST, ctid DESC
+          ) AS rn
+        FROM public.trace_reactions
+      ) ranked
+      WHERE rn > 1
+    );
 
     ALTER TABLE public.trace_reactions DROP CONSTRAINT IF EXISTS trace_reactions_pkey;
     ALTER TABLE public.trace_reactions DROP COLUMN id;
