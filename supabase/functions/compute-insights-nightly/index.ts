@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.40.0'
-import { computeCachedInsights, type CachedInsights } from '../../../lib/insights-impact.ts'
+import { computeCachedInsights, createInsightsDataSource, type CachedInsights } from '../../../lib/insights-impact.ts'
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
@@ -56,30 +56,7 @@ export async function handler(): Promise<Response> {
 
 async function computeUserInsights(userId: string): Promise<CachedInsights | null> {
   try {
-    return await computeCachedInsights(userId, {
-      fetchRows: async (targetUserId) => {
-        const [tracesResult, collectionsResult, shelfEventsResult] = await Promise.all([
-          supabase.from('traces').select('id, body').eq('user_id', targetUserId).limit(100),
-          supabase.from('collections').select('fragrance_id').eq('user_id', targetUserId),
-          supabase.from('shelf_events').select('fragrance_id, created_at').eq('user_id', targetUserId).order('created_at', { ascending: true }),
-        ])
-        return {
-          traces: tracesResult.data ?? [],
-          collections: collectionsResult.data ?? [],
-          shelfEvents: shelfEventsResult.data ?? [],
-        }
-      },
-      fetchReactions: async (traceIds) => {
-        if (traceIds.length === 0) return []
-        const { data } = await supabase.from('trace_reactions').select('trace_id, reaction').in('trace_id', traceIds)
-        return data ?? []
-      },
-      fetchFamilies: async (fragranceIds) => {
-        if (fragranceIds.length === 0) return []
-        const { data } = await supabase.from('fragrances').select('family').in('id', fragranceIds)
-        return data ?? []
-      },
-    })
+    return await computeCachedInsights(userId, createInsightsDataSource(supabase))
   } catch (error) {
     console.error(`Failed to compute insights for ${userId}:`, error)
     return null
