@@ -1,3 +1,7 @@
+# ARCHIVED / SUPERSEDED
+
+This document is historical and must not be used as current project truth. It is superseded by `AGENTS.md`, `CLAUDE.md`, `docs/index.md`, and the active nota. docs under `docs/nota/`. The completion and App Store readiness claims below are stale.
+
 # Scentral Hub
 
 **Status:** Pre-launch hardening — targeting App Store + Play Store submission  
