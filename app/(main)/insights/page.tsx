@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { cookies } from 'next/headers'
 import { createClient } from '@/utils/supabase/server'
-import { computeImpactAndBestTraces } from '@/lib/insights-impact'
+import { computeCachedInsights, type CachedInsights } from '@/lib/insights-impact'
 import InsightsClient from './InsightsClient'
 
 export const metadata: Metadata = {
@@ -12,32 +12,25 @@ export const metadata: Metadata = {
 
 export const dynamic = 'force-dynamic'
 
-interface CachedInsights {
+const emptyInsights: CachedInsights = {
   your_impact: {
-    interactions_count?: number
-    reactions_received?: number
-    too_real_count?: number
-    summary?: string
-  }
-  best_traces?: Array<{
-    id: string
-    reaction_count?: number
-    content?: string
-  }>
-  scentiment_vision?: {
-    resonance_score?: number
-    warmth_factor?: string
-    summary?: string
-  }
-  taste_evolution?: Array<{
-    period?: string
-    family_distribution?: Record<string, number>
-  }>
-  trajectory?: {
-    start_families?: string[]
-    current_families?: string[]
-    morphing?: boolean
-  }
+    interactions_count: 0,
+    reactions_received: 0,
+    too_real_count: 0,
+    summary: 'Start describing scents to build your impact.',
+  },
+  best_traces: [],
+  scentiment_vision: {
+    resonance_score: 0,
+    warmth_factor: 'awakening',
+    summary: 'Your traces are waiting for their first resonance.',
+  },
+  taste_evolution: [],
+  trajectory: {
+    start_families: [],
+    current_families: [],
+    morphing: false,
+  },
 }
 
 export default async function InsightsPage() {
@@ -74,11 +67,11 @@ export default async function InsightsPage() {
     if (data) {
       const payload = (data.payload ?? {}) as Partial<CachedInsights>
       insights = {
-        your_impact: payload.your_impact ?? {},
+        your_impact: payload.your_impact ?? emptyInsights.your_impact,
         best_traces: payload.best_traces ?? [],
-        scentiment_vision: payload.scentiment_vision ?? {},
+        scentiment_vision: payload.scentiment_vision ?? emptyInsights.scentiment_vision,
         taste_evolution: payload.taste_evolution ?? [],
-        trajectory: payload.trajectory ?? {},
+        trajectory: payload.trajectory ?? emptyInsights.trajectory,
       }
       computedAt = data.computed_at
 
@@ -123,106 +116,32 @@ export default async function InsightsPage() {
 
 async function computeInsights(supabase: Awaited<ReturnType<typeof createClient>>, userId: string): Promise<CachedInsights | null> {
   try {
-    // Traces must be fetched first: reactions are counted by trace ownership
-    // (reactions *received* on this user's traces), not by who reacted.
-    const [tracesResult, collectionsResult, shelfEventsResult] = await Promise.all([
-      supabase.from('traces').select('id, user_id, body').eq('user_id', userId).limit(100),
-      supabase.from('collections').select('id, fragrance_id, affinity_score').eq('user_id', userId),
-      supabase.from('shelf_events').select('id, fragrance_id, event_type, created_at').eq('user_id', userId).order('created_at', { ascending: true }),
-    ])
-
-    const traces = tracesResult.data ?? []
-    const collections = collectionsResult.data ?? []
-    const shelfEvents = shelfEventsResult.data ?? []
-
-    const traceIds = traces.map(t => t.id)
-    const reactionsResult = traceIds.length > 0
-      ? await supabase.from('trace_reactions').select('trace_id, reaction').in('trace_id', traceIds)
-      : { data: [] }
-    const reactions = reactionsResult.data ?? []
-
-    const { yourImpact, bestTraces, scentimentVision } = computeImpactAndBestTraces(traces, reactions)
-
-    // Compute Taste Evolution (shelf events + family distribution)
-    const tasteEvolution: Array<{
-      period?: string
-      family_distribution?: Record<string, number>
-    }> = []
-
-    if (shelfEvents.length > 0) {
-      // Group events by week
-      const weekMap = new Map<string, Set<string>>()
-      for (const event of shelfEvents) {
-        const date = new Date(event.created_at)
-        const weekKey = `${date.getFullYear()}-W${Math.ceil(date.getDate() / 7)}`
-        if (!weekMap.has(weekKey)) weekMap.set(weekKey, new Set())
-        if (event.fragrance_id) weekMap.get(weekKey)!.add(event.fragrance_id.toString())
-      }
-
-      // For each week, fetch fragrances and count by family
-      for (const [weekKey, fragIds] of weekMap.entries()) {
-        if (fragIds.size === 0) continue
-        const { data: frags } = await supabase
-          .from('fragrances')
-          .select('family')
-          .in('id', Array.from(fragIds))
-
-        const familyDist: Record<string, number> = {}
-        frags?.forEach(f => {
-          if (f.family) familyDist[f.family] = (familyDist[f.family] ?? 0) + 1
-        })
-
-        tasteEvolution.push({ period: weekKey, family_distribution: familyDist })
-      }
-    }
-
-    // Compute Trajectory (start → now)
-    let startFamilies: string[] = []
-    let currentFamilies: string[] = []
-
-    if (collections.length > 0) {
-      const collectionFragIds = collections.map(c => c.fragrance_id.toString())
-      const { data: frags } = await supabase
-        .from('fragrances')
-        .select('family')
-        .in('id', collectionFragIds)
-
-      const allFamilies = frags?.map(f => f.family).filter(Boolean) as string[]
-      if (allFamilies && allFamilies.length > 0) {
-        currentFamilies = [...new Set(allFamilies)]
-        // Assume first 20% of events define "start"
-        const startCutoff = Math.ceil(shelfEvents.length * 0.2)
-        if (startCutoff > 0) {
-          const { data: startFrags } = await supabase
-            .from('fragrances')
-            .select('family')
-            .in('id', shelfEvents.slice(0, startCutoff).map(e => e.fragrance_id.toString()).filter(Boolean))
-          startFamilies = [...new Set(startFrags?.map(f => f.family).filter(Boolean) as string[])]
+    return await computeCachedInsights(userId, {
+      fetchRows: async (targetUserId) => {
+        const [tracesResult, collectionsResult, shelfEventsResult] = await Promise.all([
+          supabase.from('traces').select('id, body').eq('user_id', targetUserId).limit(100),
+          supabase.from('collections').select('fragrance_id').eq('user_id', targetUserId),
+          supabase.from('shelf_events').select('fragrance_id, created_at').eq('user_id', targetUserId).order('created_at', { ascending: true }),
+        ])
+        return {
+          traces: tracesResult.data ?? [],
+          collections: collectionsResult.data ?? [],
+          shelfEvents: shelfEventsResult.data ?? [],
         }
-      }
-    }
-
-    const trajectory = {
-      start_families: startFamilies,
-      current_families: currentFamilies,
-      morphing: startFamilies.length > 0 && currentFamilies.length > 0 && !arraysEqual(startFamilies, currentFamilies),
-    }
-
-    return {
-      your_impact: yourImpact,
-      best_traces: bestTraces,
-      scentiment_vision: scentimentVision,
-      taste_evolution: tasteEvolution,
-      trajectory,
-    }
+      },
+      fetchReactions: async (traceIds) => {
+        if (traceIds.length === 0) return []
+        const { data } = await supabase.from('trace_reactions').select('trace_id, reaction').in('trace_id', traceIds)
+        return data ?? []
+      },
+      fetchFamilies: async (fragranceIds) => {
+        if (fragranceIds.length === 0) return []
+        const { data } = await supabase.from('fragrances').select('family').in('id', fragranceIds)
+        return data ?? []
+      },
+    })
   } catch (error) {
     console.error('Failed to compute insights:', error)
     return null
   }
-}
-
-function arraysEqual(a: string[], b: string[]): boolean {
-  if (a.length !== b.length) return false
-  const setB = new Set(b)
-  return a.every(item => setB.has(item))
 }

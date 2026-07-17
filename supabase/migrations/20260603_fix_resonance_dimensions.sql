@@ -4,16 +4,28 @@ CREATE EXTENSION IF NOT EXISTS vector;
 -- Add typed embedding column (3072 dims = gemini-embedding-001)
 ALTER TABLE fragrances ADD COLUMN IF NOT EXISTS embedding vector(3072);
 
--- Migrate text arrays stored in primary_vector → typed vector column
-UPDATE fragrances
-SET embedding = primary_vector::vector(3072)
-WHERE primary_vector IS NOT NULL
-  AND primary_vector LIKE '[%';
+-- Migrate text arrays stored in the legacy primary_vector column when replaying
+-- against older databases. Fresh databases no longer have this column.
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'fragrances'
+      AND column_name = 'primary_vector'
+  )
+  THEN
+    UPDATE fragrances
+    SET embedding = primary_vector::vector(3072)
+    WHERE primary_vector IS NOT NULL
+      AND primary_vector LIKE '[%';
 
--- Restore primary_vector to human-readable family label
-UPDATE fragrances
-SET primary_vector = family
-WHERE family IS NOT NULL;
+    UPDATE fragrances
+    SET primary_vector = family
+    WHERE family IS NOT NULL;
+  END IF;
+END
+$$;
 
 -- HNSW index via halfvec cast — required because pgvector HNSW caps at 2000 dims,
 -- but halfvec supports up to 4000 dims (pgvector 0.7+)

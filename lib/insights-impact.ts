@@ -1,15 +1,6 @@
-// Pure computation shared between app/(main)/insights/page.tsx (on-demand,
-// Next.js/Node) and supabase/functions/compute-insights-nightly/index.ts
-// (scheduled, Deno). Deliberately dependency-free — no Supabase client, no
-// runtime-specific API — so a plain relative/local import works unmodified
-// in both environments. Duplicating this logic previously let the same
-// reaction-ownership bug exist in both places at once; this is the fix for
-// that failure mode, not just the SonarQube duplication gate.
-//
-// Taste Evolution and Trajectory aren't here: both need mid-computation
-// Supabase queries (fetching fragrance families by id), which makes sharing
-// them across Deno/Node a real cross-runtime typing question rather than a
-// pure-function extraction — tracked as a follow-up, not done blind here.
+// Shared between app/(main)/insights/page.tsx (Next.js/Node) and
+// supabase/functions/compute-insights-nightly/index.ts (Deno). Keep this file
+// dependency-free so both runtimes can import it without bundler-specific code.
 
 export interface TraceRow {
   id: string
@@ -19,6 +10,59 @@ export interface TraceRow {
 export interface ReactionRow {
   trace_id: string
   reaction?: string | null
+}
+
+export interface CollectionRow {
+  fragrance_id?: string | number | null
+}
+
+export interface ShelfEventRow {
+  fragrance_id?: string | number | null
+  created_at: string
+}
+
+export interface FamilyRow {
+  family?: string | null
+}
+
+export interface CachedInsights {
+  your_impact: {
+    interactions_count: number
+    reactions_received: number
+    too_real_count: number
+    summary: string
+  }
+  best_traces: Array<{
+    id: string
+    reaction_count: number
+    content: string
+  }>
+  scentiment_vision: {
+    resonance_score: number
+    warmth_factor: string
+    summary: string
+  }
+  taste_evolution: Array<{
+    period: string
+    family_distribution: Record<string, number>
+  }>
+  trajectory: {
+    start_families: string[]
+    current_families: string[]
+    morphing: boolean
+  }
+}
+
+export interface InsightRows {
+  traces: TraceRow[]
+  collections: CollectionRow[]
+  shelfEvents: ShelfEventRow[]
+}
+
+export interface InsightDataSource {
+  fetchRows(userId: string): Promise<InsightRows>
+  fetchReactions(traceIds: string[]): Promise<ReactionRow[]>
+  fetchFamilies(fragranceIds: string[]): Promise<FamilyRow[]>
 }
 
 export function computeImpactAndBestTraces(traces: TraceRow[], reactions: ReactionRow[]) {
@@ -72,4 +116,96 @@ export function computeImpactAndBestTraces(traces: TraceRow[], reactions: Reacti
   }
 
   return { yourImpact, bestTraces, scentimentVision }
+}
+
+export async function computeCachedInsights(
+  userId: string,
+  source: InsightDataSource,
+): Promise<CachedInsights> {
+  const { traces, collections, shelfEvents } = await source.fetchRows(userId)
+  const reactions = await source.fetchReactions(traces.map((t) => t.id))
+  const { yourImpact, bestTraces, scentimentVision } = computeImpactAndBestTraces(traces, reactions)
+
+  const tasteEvolution = await buildTasteEvolution(shelfEvents, source.fetchFamilies)
+  const trajectory = await buildTrajectory(collections, shelfEvents, source.fetchFamilies)
+
+  return {
+    your_impact: yourImpact,
+    best_traces: bestTraces,
+    scentiment_vision: scentimentVision,
+    taste_evolution: tasteEvolution,
+    trajectory,
+  }
+}
+
+async function buildTasteEvolution(
+  shelfEvents: ShelfEventRow[],
+  fetchFamilies: InsightDataSource['fetchFamilies'],
+): Promise<CachedInsights['taste_evolution']> {
+  const weekMap = new Map<string, Set<string>>()
+  for (const event of shelfEvents) {
+    const id = event.fragrance_id?.toString()
+    if (!id) continue
+    const date = new Date(event.created_at)
+    const weekKey = `${date.getFullYear()}-W${Math.ceil(date.getDate() / 7)}`
+    if (!weekMap.has(weekKey)) weekMap.set(weekKey, new Set())
+    weekMap.get(weekKey)!.add(id)
+  }
+
+  const tasteEvolution: CachedInsights['taste_evolution'] = []
+  for (const [weekKey, fragIds] of weekMap.entries()) {
+    const familyDist = countFamilies(await fetchFamilies(Array.from(fragIds)))
+    tasteEvolution.push({ period: weekKey, family_distribution: familyDist })
+  }
+  return tasteEvolution
+}
+
+async function buildTrajectory(
+  collections: CollectionRow[],
+  shelfEvents: ShelfEventRow[],
+  fetchFamilies: InsightDataSource['fetchFamilies'],
+): Promise<CachedInsights['trajectory']> {
+  const collectionFragIds = collections
+    .map((collection) => collection.fragrance_id?.toString())
+    .filter((id): id is string => Boolean(id))
+
+  if (collectionFragIds.length === 0) {
+    return { start_families: [], current_families: [], morphing: false }
+  }
+
+  const currentFamilies = uniqueFamilies(await fetchFamilies(collectionFragIds))
+  let startFamilies: string[] = []
+
+  const startCutoff = Math.ceil(shelfEvents.length * 0.2)
+  if (startCutoff > 0) {
+    const startFragIds = shelfEvents
+      .slice(0, startCutoff)
+      .map((event) => event.fragrance_id?.toString())
+      .filter((id): id is string => Boolean(id))
+    startFamilies = uniqueFamilies(await fetchFamilies(startFragIds))
+  }
+
+  return {
+    start_families: startFamilies,
+    current_families: currentFamilies,
+    morphing: startFamilies.length > 0 && currentFamilies.length > 0 && !arraysEqual(startFamilies, currentFamilies),
+  }
+}
+
+function countFamilies(rows: FamilyRow[]): Record<string, number> {
+  const familyDist: Record<string, number> = {}
+  rows.forEach((row) => {
+    if (row.family) familyDist[row.family] = (familyDist[row.family] ?? 0) + 1
+  })
+  return familyDist
+}
+
+function uniqueFamilies(rows: FamilyRow[]): string[] {
+  return [...new Set(rows.map((row) => row.family).filter((family): family is string => Boolean(family)))]
+}
+
+function arraysEqual(a: string[], b: string[]): boolean {
+  if (a.length !== b.length) return false
+  const setB = new Set(b)
+  return a.every((item) => setB.has(item))
 }
