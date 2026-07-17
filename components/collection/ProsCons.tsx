@@ -23,11 +23,15 @@ export default function ProsCons({ fragranceId }: ProsConsProps) {
         })
         if (!res.ok) throw new Error('Failed to fetch')
         const data = await res.json()
-        setPros(data.pros ?? [])
-        setCons(data.cons ?? [])
+        if (data.unavailable) {
+          setError('unavailable')
+        } else {
+          setPros(data.pros ?? [])
+          setCons(data.cons ?? [])
+        }
       } catch (err) {
         console.error('ProsCons error:', err)
-        setError('Could not load verdict')
+        setError('unavailable')
       } finally {
         setLoading(false)
       }
@@ -40,7 +44,11 @@ export default function ProsCons({ fragranceId }: ProsConsProps) {
   }
 
   if (error) {
-    return null
+    return (
+      <p style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic' }}>
+        The verdict isn&apos;t available right now — check back later.
+      </p>
+    )
   }
 
   if (pros.length === 0 && cons.length === 0) {
