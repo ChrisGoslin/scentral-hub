@@ -3,6 +3,8 @@ CREATE EXTENSION IF NOT EXISTS vector;
 
 -- Add typed embedding column (3072 dims = gemini-embedding-001)
 ALTER TABLE fragrances ADD COLUMN IF NOT EXISTS embedding vector(3072);
+ALTER TABLE fragrances ADD COLUMN IF NOT EXISTS family text;
+ALTER TABLE fragrances ADD COLUMN IF NOT EXISTS image_url text;
 
 -- Migrate text arrays stored in the legacy primary_vector column when replaying
 -- against older databases. Fresh databases no longer have this column.
