@@ -2,14 +2,38 @@
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 -- Trigram indexes for ILIKE search on key columns
-CREATE INDEX IF NOT EXISTS idx_fragrances_name_trgm
-  ON fragrances USING GIN (name gin_trgm_ops);
+DO $$
+BEGIN
+  IF to_regclass('public.fragrances') IS NULL THEN
+    RETURN;
+  END IF;
 
-CREATE INDEX IF NOT EXISTS idx_fragrances_brand_trgm
-  ON fragrances USING GIN (brand gin_trgm_ops);
+  CREATE INDEX IF NOT EXISTS idx_fragrances_name_trgm
+    ON public.fragrances USING GIN (name gin_trgm_ops);
 
-CREATE INDEX IF NOT EXISTS idx_fragrances_plain_description_trgm
-  ON fragrances USING GIN (plain_description gin_trgm_ops);
+  CREATE INDEX IF NOT EXISTS idx_fragrances_brand_trgm
+    ON public.fragrances USING GIN (brand gin_trgm_ops);
 
-CREATE INDEX IF NOT EXISTS idx_fragrances_inspired_by_trgm
-  ON fragrances USING GIN (inspired_by gin_trgm_ops);
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'fragrances'
+      AND column_name = 'plain_description'
+  )
+  THEN
+    CREATE INDEX IF NOT EXISTS idx_fragrances_plain_description_trgm
+      ON public.fragrances USING GIN (plain_description gin_trgm_ops);
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'fragrances'
+      AND column_name = 'inspired_by'
+  )
+  THEN
+    CREATE INDEX IF NOT EXISTS idx_fragrances_inspired_by_trgm
+      ON public.fragrances USING GIN (inspired_by gin_trgm_ops);
+  END IF;
+END
+$$;
