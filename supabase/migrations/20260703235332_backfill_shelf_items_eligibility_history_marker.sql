@@ -1,0 +1,1 @@
+-- Historical marker retained for Supabase parent migration reconciliation.
