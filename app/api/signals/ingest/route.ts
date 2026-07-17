@@ -20,13 +20,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 })
   }
 
-  let body: { source?: string; text?: string; metadata?: unknown }
+  let parsed: unknown
   try {
-    body = await req.json()
+    parsed = await req.json()
   } catch {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
 
+  if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
+  }
+
+  const body = parsed as { source?: string; text?: string; metadata?: unknown }
   const { source, text, metadata } = body
   if (!source || typeof source !== 'string' || !text || typeof text !== 'string') {
     return NextResponse.json({ error: 'Missing required fields: source, text' }, { status: 400 })

@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS public.fragrance_facts (
   enriched jsonb,
   created_at timestamp with time zone DEFAULT now(),
   updated_at timestamp with time zone DEFAULT now(),
-  CONSTRAINT fragrance_facts_source_name_unique UNIQUE (source_file, name)
+  CONSTRAINT fragrance_facts_source_brand_name_unique UNIQUE (source_file, brand, name)
 );
 
 CREATE INDEX idx_fragrance_facts_brand_name ON public.fragrance_facts(brand, name);

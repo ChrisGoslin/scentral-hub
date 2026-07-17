@@ -29,10 +29,12 @@ const INCOMING_DIR = join(process.cwd(), 'data/fragrance/incoming')
 const CANONICAL_DIR = join(process.cwd(), 'data/fragrance/canonical')
 const SUPPORTED_EXTENSIONS = new Set(['.md', '.csv', '.json'])
 
-for (const key of ['NEXT_PUBLIC_SUPABASE_URL', 'SUPABASE_SERVICE_KEY']) {
-  if (!process.env[key]) {
-    console.error(`Missing ${key} in .env.local`)
-    process.exit(1)
+if (!isDryRun) {
+  for (const key of ['NEXT_PUBLIC_SUPABASE_URL', 'SUPABASE_SERVICE_KEY']) {
+    if (!process.env[key]) {
+      console.error(`Missing ${key} in .env.local`)
+      process.exit(1)
+    }
   }
 }
 if (!isDryRun && !process.env.ANTHROPIC_API_KEY) {
@@ -112,13 +114,16 @@ async function cleanupSourceFile(supabase: SupabaseClient, sourceFile: string) {
   if (patternsError) throw new Error(`layering_patterns cleanup failed: ${patternsError.message}`)
 }
 
-async function processFile(supabase: SupabaseClient, file: string) {
+async function processFile(supabase: SupabaseClient | null, file: string) {
   const path = join(INCOMING_DIR, file)
   const rawText = readFileSync(path, 'utf8')
 
   if (isDryRun) {
     console.log(`[DRY RUN] would classify+ingest: ${file}`)
     return { profilesWritten: 0, patternsWritten: 0 }
+  }
+  if (!supabase) {
+    throw new Error('processFile: supabase client is required outside dry-run mode')
   }
 
   const items = await classifyAndExtract(rawText)
@@ -185,7 +190,7 @@ async function main() {
     return
   }
 
-  const supabase = createSupabaseAdmin()
+  const supabase = isDryRun ? null : createSupabaseAdmin()
   console.log(`Found ${files.length} file(s) to ingest.`)
 
   let profilesWritten = 0
