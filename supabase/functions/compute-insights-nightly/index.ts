@@ -83,17 +83,20 @@ export async function handler(): Promise<Response> {
 async function computeUserInsights(userId: string): Promise<CachedInsights | null> {
   try {
     // Fetch all user data in parallel
-    const [tracesResult, reactionsResult, collectionsResult, shelfEventsResult] = await Promise.all([
+    const [tracesResult, collectionsResult, shelfEventsResult] = await Promise.all([
       supabase.from('traces').select('id, user_id, body').eq('user_id', userId).limit(100),
-      supabase.from('trace_reactions').select('trace_id, reaction').eq('user_id', userId),
       supabase.from('collections').select('id, fragrance_id, affinity_score').eq('user_id', userId),
       supabase.from('shelf_events').select('id, fragrance_id, event_type, created_at').eq('user_id', userId).order('created_at', { ascending: true }),
     ])
 
     const traces = tracesResult.data ?? []
-    const reactions = reactionsResult.data ?? []
     const collections = collectionsResult.data ?? []
     const shelfEvents = shelfEventsResult.data ?? []
+    const traceIds = traces.map(t => t.id)
+    const reactionsResult = traceIds.length > 0
+      ? await supabase.from('trace_reactions').select('trace_id, reaction').in('trace_id', traceIds)
+      : { data: [] as Array<{ trace_id: string; reaction: string }> }
+    const reactions = reactionsResult.data ?? []
 
     // Compute Your Impact
     const interactionsCount = traces.length
@@ -208,7 +211,7 @@ async function computeUserInsights(userId: string): Promise<CachedInsights | nul
       trajectory,
     }
   } catch (error) {
-    console.error(`Failed to compute insights for ${anonId}:`, error)
+    console.error(`Failed to compute insights for ${userId}:`, error)
     return null
   }
 }

@@ -34,7 +34,7 @@ interface CachedInsights {
 }
 
 interface InsightsClientProps {
-  state: 'hydrated' | 'loading' | 'no-data'
+  state: 'hydrated' | 'loading' | 'no-data' | 'unavailable'
   userId: string | null
   insights: CachedInsights | null
   computedAt: string | null
@@ -64,8 +64,8 @@ export default function InsightsClient({ state, insights, computedAt }: Insights
       </div>
 
       <div className="px-4 pb-12">
-        {state === 'no-data' && (
-          <EmptyState />
+        {(state === 'no-data' || state === 'unavailable') && (
+          <EmptyState variant={state === 'unavailable' ? 'unavailable' : 'empty'} />
         )}
 
         {(state === 'hydrated' || state === 'loading') && notEmpty ? (
@@ -296,7 +296,9 @@ function MetricBox({ label, value }: { label: string; value: number }) {
   )
 }
 
-function EmptyState() {
+function EmptyState({ variant = 'empty' }: { variant?: 'empty' | 'unavailable' }) {
+  const isUnavailable = variant === 'unavailable'
+
   return (
     <Card
       style={{
@@ -306,10 +308,12 @@ function EmptyState() {
       }}
     >
       <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8, color: 'var(--text)' }}>
-        Start Building Your Insights
+        {isUnavailable ? 'Insights Temporarily Unavailable' : 'Start Building Your Insights'}
       </h3>
       <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 20, lineHeight: '1.6' }}>
-        Interact with scents, describe traces, and build your collection to see your evolving scent identity.
+        {isUnavailable
+          ? 'We could not compute fresh insights right now. Try again in a moment.'
+          : 'Interact with scents, describe traces, and build your collection to see your evolving scent identity.'}
       </p>
       <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
         <Link href="/study">

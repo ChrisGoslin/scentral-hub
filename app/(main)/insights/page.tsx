@@ -93,26 +93,31 @@ export default async function InsightsPage() {
   // If no cached data or stale, compute on-demand
   let computedInsights = insights
   if (!insights || isStale) {
-    computedInsights = await computeInsights(supabase, userId)
-    if (computedInsights) {
+    const freshInsights = await computeInsights(supabase, userId)
+    if (freshInsights) {
+      computedInsights = freshInsights
+      computedAt = new Date().toISOString()
       // Store in cache
       await supabase
         .from('insights_cache')
         .upsert({
           user_id: userId,
           period: 'latest',
-          payload: computedInsights,
-          computed_at: new Date().toISOString(),
+          payload: freshInsights,
+          computed_at: computedAt,
         })
+    } else if (!insights) {
+      computedInsights = null
+      computedAt = null
     }
   }
 
   return (
     <InsightsClient
-      state={computedInsights ? 'hydrated' : 'loading'}
+      state={computedInsights ? 'hydrated' : 'unavailable'}
       userId={userId}
       insights={computedInsights}
-      computedAt={computedAt ?? new Date().toISOString()}
+      computedAt={computedInsights ? computedAt : null}
     />
   )
 }
@@ -120,11 +125,9 @@ export default async function InsightsPage() {
 async function computeInsights(supabase: Awaited<ReturnType<typeof createClient>>, userId: string): Promise<CachedInsights | null> {
   try {
     // Fetch all user data in parallel
-    const [tracesResult, reactionsResult, collectionsResult, shelfEventsResult] = await Promise.all([
+    const [tracesResult, collectionsResult, shelfEventsResult] = await Promise.all([
       // Get traces (if available)
       supabase.from('traces').select('id, user_id, body').eq('user_id', userId).limit(100),
-      // Get reactions
-      supabase.from('trace_reactions').select('trace_id, reaction').eq('user_id', userId),
       // Get collection
       supabase.from('collections').select('id, fragrance_id, affinity_score').eq('user_id', userId),
       // Get shelf events
@@ -132,9 +135,13 @@ async function computeInsights(supabase: Awaited<ReturnType<typeof createClient>
     ])
 
     const traces = tracesResult.data ?? []
-    const reactions = reactionsResult.data ?? []
     const collections = collectionsResult.data ?? []
     const shelfEvents = shelfEventsResult.data ?? []
+    const traceIds = traces.map(t => t.id)
+    const reactionsResult = traceIds.length > 0
+      ? await supabase.from('trace_reactions').select('trace_id, reaction').in('trace_id', traceIds)
+      : { data: [] as Array<{ trace_id: string; reaction: string }> }
+    const reactions = reactionsResult.data ?? []
 
     // Compute Your Impact
     const interactionsCount = traces.length

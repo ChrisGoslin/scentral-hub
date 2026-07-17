@@ -3,21 +3,9 @@ import { cookies } from 'next/headers'
 import { createClient } from '@/utils/supabase/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { clientIp, enforce, makeLimiter } from '@/lib/rate-limit'
+import { parseVerdict } from '@/lib/parseVerdict'
 
 const prosConsLimiter = makeLimiter('proscons', 20, '1 m')
-
-// Claude sometimes wraps JSON responses in a ```json ... ``` fence even when
-// asked not to — strip it before parsing instead of letting JSON.parse throw.
-function parseVerdict(text: string): { pros: string[]; cons: string[] } | null {
-  const stripped = text.trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim()
-  try {
-    const parsed = JSON.parse(stripped)
-    if (Array.isArray(parsed?.pros) && Array.isArray(parsed?.cons)) return parsed
-    return null
-  } catch {
-    return null
-  }
-}
 
 export async function POST(req: Request) {
   try {
