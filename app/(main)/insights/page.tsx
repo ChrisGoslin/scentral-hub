@@ -16,7 +16,7 @@ interface CachedInsights {
   your_impact: {
     interactions_count?: number
     reactions_received?: number
-    saves_count?: number
+    too_real_count?: number
     summary?: string
   }
   best_traces?: Array<{
@@ -91,19 +91,22 @@ export default async function InsightsPage() {
     console.error('Failed to fetch insights cache:', error)
   }
 
-  // If no cached data or stale, compute on-demand
+  // If no cached data or stale, compute on-demand. A failed/null refresh
+  // should not discard a perfectly usable stale payload — only replace it
+  // once recomputation actually succeeds.
   let computedInsights = insights
   if (!insights || isStale) {
-    computedInsights = await computeInsights(supabase, userId)
-    if (computedInsights) {
-      // Store in cache
+    const refreshedInsights = await computeInsights(supabase, userId)
+    if (refreshedInsights) {
+      computedInsights = refreshedInsights
+      computedAt = new Date().toISOString()
       await supabase
         .from('insights_cache')
         .upsert({
           user_id: userId,
           period: 'latest',
-          payload: computedInsights,
-          computed_at: new Date().toISOString(),
+          payload: refreshedInsights,
+          computed_at: computedAt,
         })
     }
   }

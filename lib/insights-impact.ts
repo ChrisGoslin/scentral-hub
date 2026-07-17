@@ -24,23 +24,27 @@ export interface ReactionRow {
 export function computeImpactAndBestTraces(traces: TraceRow[], reactions: ReactionRow[]) {
   const interactionsCount = traces.length
   const reactionsReceived = reactions.length
-  const savesCount = reactions.filter((r) => r.reaction === 'too_real').length
-
-  const yourImpact = {
-    interactions_count: interactionsCount,
-    reactions_received: reactionsReceived,
-    saves_count: savesCount,
-    summary:
-      interactionsCount > 0
-        ? `You've described ${interactionsCount} scent${interactionsCount === 1 ? '' : 's'} so far.`
-        : 'Start describing scents to build your impact.',
-  }
+  // 'too_real' is one of three peer reactions (on_the_nose/feel_this/too_real)
+  // under the current contract, not a save action — the legacy 'saved' value
+  // was merged into it during the schema migration. Track it as its own
+  // reaction count, not as a stand-in for a "save" that no longer exists.
+  const tooRealCount = reactions.filter((r) => r.reaction === 'too_real').length
 
   const traceReactionMap = new Map<string, number>()
   reactions.forEach((r) => {
     const count = traceReactionMap.get(r.trace_id) ?? 0
     traceReactionMap.set(r.trace_id, count + 1)
   })
+
+  const yourImpact = {
+    interactions_count: interactionsCount,
+    reactions_received: reactionsReceived,
+    too_real_count: tooRealCount,
+    summary:
+      interactionsCount > 0
+        ? `You've described ${interactionsCount} scent${interactionsCount === 1 ? '' : 's'} so far.`
+        : 'Start describing scents to build your impact.',
+  }
 
   const bestTraces = traces
     .map((t) => ({
@@ -51,7 +55,12 @@ export function computeImpactAndBestTraces(traces: TraceRow[], reactions: Reacti
     .sort((a, b) => (b.reaction_count ?? 0) - (a.reaction_count ?? 0))
     .slice(0, 3)
 
-  const resonanceScore = interactionsCount > 0 ? (reactionsReceived / interactionsCount) * 100 : 0
+  // % of traces that received at least one reaction — inherently bounded to
+  // [0, 100]. A ratio of total reactions to total traces isn't (a trace can
+  // receive reactions from more than one user), which let this read as high
+  // as 200% before.
+  const tracesWithReactionsCount = traceReactionMap.size
+  const resonanceScore = interactionsCount > 0 ? (tracesWithReactionsCount / interactionsCount) * 100 : 0
 
   const scentimentVision = {
     resonance_score: Math.round(resonanceScore * 10) / 10,

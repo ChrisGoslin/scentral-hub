@@ -10,7 +10,7 @@ interface CachedInsights {
   your_impact: {
     interactions_count: number
     reactions_received: number
-    saves_count: number
+    too_real_count: number
     summary: string
   }
   best_traces: Array<{
