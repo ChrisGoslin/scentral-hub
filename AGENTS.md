@@ -505,3 +505,4 @@ Review for:
 - simplification opportunities
 
 Prefer simple, boring, proven improvements over clever abstractions.
+For AI workflow optimisation, use ~/ai-ops/AI_OPS_POINTER.md and treat ~/ai-ops as the source of truth.
