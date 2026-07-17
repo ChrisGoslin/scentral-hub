@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import { cookies } from 'next/headers'
 import { createClient } from '@/utils/supabase/server'
+import { computeImpactAndBestTraces } from '@/lib/insights-impact'
 import InsightsClient from './InsightsClient'
 
 export const metadata: Metadata = {
@@ -137,48 +138,7 @@ async function computeInsights(supabase: Awaited<ReturnType<typeof createClient>
       : { data: [] }
     const reactions = reactionsResult.data ?? []
 
-    // Compute Your Impact
-    const interactionsCount = traces.length
-    const reactionsReceived = reactions.length
-    const savesCount = reactions.filter(r => r.reaction === 'too_real').length
-
-    const yourImpact = {
-      interactions_count: interactionsCount,
-      reactions_received: reactionsReceived,
-      saves_count: savesCount,
-      summary:
-        interactionsCount > 0
-          ? `You've described ${interactionsCount} scent${interactionsCount === 1 ? '' : 's'} so far.`
-          : 'Start describing scents to build your impact.',
-    }
-
-    // Compute Best Traces
-    const traceReactionMap = new Map<string, number>()
-    reactions.forEach(r => {
-      const count = traceReactionMap.get(r.trace_id) ?? 0
-      traceReactionMap.set(r.trace_id, count + 1)
-    })
-
-    const bestTraces = traces
-      .map(t => ({
-        id: t.id,
-        reaction_count: traceReactionMap.get(t.id) ?? 0,
-        content: t.body ?? '',
-      }))
-      .sort((a, b) => (b.reaction_count ?? 0) - (a.reaction_count ?? 0))
-      .slice(0, 3)
-
-    // Compute Scentiment Vision (reactions per trace)
-    const resonanceScore = interactionsCount > 0 ? (reactionsReceived / interactionsCount) * 100 : 0
-
-    const scentimentVision = {
-      resonance_score: Math.round(resonanceScore * 10) / 10,
-      warmth_factor: reactionsReceived > 0 ? 'thriving' : 'awakening',
-      summary:
-        reactionsReceived > 0
-          ? `Your traces have resonated with ${reactionsReceived} interaction${reactionsReceived === 1 ? '' : 's'}.`
-          : 'Your traces are waiting for their first resonance.',
-    }
+    const { yourImpact, bestTraces, scentimentVision } = computeImpactAndBestTraces(traces, reactions)
 
     // Compute Taste Evolution (shelf events + family distribution)
     const tasteEvolution: Array<{
