@@ -6,6 +6,19 @@ import { clientIp, enforce, makeLimiter } from '@/lib/rate-limit'
 
 const prosConsLimiter = makeLimiter('pros-cons', 20, '1 m')
 
+// Claude sometimes wraps JSON responses in a ```json ... ``` fence even when
+// asked not to — strip it before parsing instead of letting JSON.parse throw.
+function parseVerdict(text: string): { pros: string[]; cons: string[] } | null {
+  const stripped = text.trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim()
+  try {
+    const parsed = JSON.parse(stripped)
+    if (Array.isArray(parsed?.pros) && Array.isArray(parsed?.cons)) return parsed
+    return null
+  } catch {
+    return null
+  }
+}
+
 export async function POST(req: Request) {
   try {
     if (!(await enforce(prosConsLimiter, clientIp(req)))) {
@@ -44,7 +57,12 @@ export async function POST(req: Request) {
     })
 
     const text = (message.content[0] as { type: 'text'; text: string }).text
-    const result = JSON.parse(text)
+    const result = parseVerdict(text)
+
+    if (!result) {
+      console.error('pros-cons: could not parse verdict from Claude response:', text)
+      return NextResponse.json({ success: false, unavailable: true }, { status: 200 })
+    }
 
     // Cache the result
     await supabase.from('chemist_cache').upsert({
@@ -55,6 +73,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true, ...result })
   } catch (error) {
     console.error('pros-cons error:', error)
-    return NextResponse.json({ error: 'Failed to generate verdict' }, { status: 500 })
+    return NextResponse.json({ success: false, unavailable: true }, { status: 200 })
   }
 }

@@ -26,11 +26,15 @@ export default function ProsCons({ fragranceId, brand, name, description }: Pros
         })
         if (!res.ok) throw new Error('Failed to fetch')
         const data = await res.json()
-        setPros(data.pros ?? [])
-        setCons(data.cons ?? [])
+        if (data.unavailable) {
+          setError('unavailable')
+        } else {
+          setPros(data.pros ?? [])
+          setCons(data.cons ?? [])
+        }
       } catch (err) {
         console.error('ProsCons error:', err)
-        setError('Could not load verdict')
+        setError('unavailable')
       } finally {
         setLoading(false)
       }
@@ -42,7 +46,15 @@ export default function ProsCons({ fragranceId, brand, name, description }: Pros
     return <LoadingShimmer variant="line" count={2} />
   }
 
-  if (error || (pros.length === 0 && cons.length === 0)) {
+  if (error) {
+    return (
+      <p style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic' }}>
+        The AI verdict isn&apos;t available right now — check back later.
+      </p>
+    )
+  }
+
+  if (pros.length === 0 && cons.length === 0) {
     return null
   }
 
