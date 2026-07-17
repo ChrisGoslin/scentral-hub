@@ -43,7 +43,11 @@ CREATE TABLE IF NOT EXISTS public.layering_patterns (
     roles <@ ARRAY['anchor', 'modulator', 'top']::text[]
     AND (
       roles = '{}'::text[]
-      OR array_length(roles, 1) = array_length(fragrance_names, 1)
+      -- cardinality(), not array_length(): array_length() returns NULL
+      -- (not 0) for an empty array, and Postgres CHECK constraints treat a
+      -- NULL result as passing — that let a nonempty `roles` slip through
+      -- unchecked whenever `fragrance_names` was empty.
+      OR cardinality(roles) = cardinality(fragrance_names)
     )
   ), -- parallel array to fragrance_names: anchor/modulator/top
   use_case text,
