@@ -35,7 +35,7 @@ interface CachedInsights {
 
 interface InsightsClientProps {
   state: 'hydrated' | 'loading' | 'no-data'
-  anonId: string | null
+  userId: string | null
   insights: CachedInsights | null
   computedAt: string | null
 }

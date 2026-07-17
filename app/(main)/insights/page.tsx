@@ -41,29 +41,21 @@ interface CachedInsights {
 
 export default async function InsightsPage() {
   const cookieStore = await cookies()
+  const supabase = await createClient(cookieStore)
 
-  // Get anon_id from localStorage bridge via cookie
-  // In a real implementation, this would be read from the request
-  let anonId: string | null = null
-  try {
-    const anonIdCookie = cookieStore.get('scentral_anon_id')
-    anonId = anonIdCookie?.value ?? null
-  } catch {
-    // Silent fail
-  }
+  const { data: userData } = await supabase.auth.getUser()
+  const userId = userData?.user?.id ?? null
 
-  if (!anonId) {
+  if (!userId) {
     return (
       <InsightsClient
         state="no-data"
-        anonId={null}
+        userId={null}
         insights={null}
         computedAt={null}
       />
     )
   }
-
-  const supabase = await createClient(cookieStore)
 
   // Fetch cached insights
   let insights: CachedInsights | null = null
@@ -73,17 +65,19 @@ export default async function InsightsPage() {
   try {
     const { data } = await supabase
       .from('insights_cache')
-      .select('your_impact, best_traces, scentiment_vision, taste_evolution, trajectory, computed_at')
-      .eq('anon_id', anonId)
+      .select('payload, computed_at')
+      .eq('user_id', userId)
+      .eq('period', 'latest')
       .maybeSingle()
 
     if (data) {
+      const payload = (data.payload ?? {}) as Partial<CachedInsights>
       insights = {
-        your_impact: data.your_impact ?? {},
-        best_traces: data.best_traces ?? [],
-        scentiment_vision: data.scentiment_vision ?? {},
-        taste_evolution: data.taste_evolution ?? [],
-        trajectory: data.trajectory ?? {},
+        your_impact: payload.your_impact ?? {},
+        best_traces: payload.best_traces ?? [],
+        scentiment_vision: payload.scentiment_vision ?? {},
+        taste_evolution: payload.taste_evolution ?? [],
+        trajectory: payload.trajectory ?? {},
       }
       computedAt = data.computed_at
 
@@ -99,46 +93,42 @@ export default async function InsightsPage() {
   // If no cached data or stale, compute on-demand
   let computedInsights = insights
   if (!insights || isStale) {
-    computedInsights = await computeInsights(supabase, anonId)
+    computedInsights = await computeInsights(supabase, userId)
     if (computedInsights) {
       // Store in cache
       await supabase
         .from('insights_cache')
         .upsert({
-          anon_id: anonId,
-          your_impact: computedInsights.your_impact ?? {},
-          best_traces: computedInsights.best_traces ?? [],
-          scentiment_vision: computedInsights.scentiment_vision ?? {},
-          taste_evolution: computedInsights.taste_evolution ?? [],
-          trajectory: computedInsights.trajectory ?? {},
+          user_id: userId,
+          period: 'latest',
+          payload: computedInsights,
           computed_at: new Date().toISOString(),
         })
-        .eq('anon_id', anonId)
     }
   }
 
   return (
     <InsightsClient
       state={computedInsights ? 'hydrated' : 'loading'}
-      anonId={anonId}
+      userId={userId}
       insights={computedInsights}
       computedAt={computedAt ?? new Date().toISOString()}
     />
   )
 }
 
-async function computeInsights(supabase: Awaited<ReturnType<typeof createClient>>, anonId: string): Promise<CachedInsights | null> {
+async function computeInsights(supabase: Awaited<ReturnType<typeof createClient>>, userId: string): Promise<CachedInsights | null> {
   try {
     // Fetch all user data in parallel
     const [tracesResult, reactionsResult, collectionsResult, shelfEventsResult] = await Promise.all([
       // Get traces (if available)
-      supabase.from('traces').select('id, anon_id, content').eq('anon_id', anonId).limit(100),
+      supabase.from('traces').select('id, user_id, body').eq('user_id', userId).limit(100),
       // Get reactions
-      supabase.from('trace_reactions').select('id, trace_id, reaction_type').eq('anon_id', anonId),
+      supabase.from('trace_reactions').select('trace_id, reaction').eq('user_id', userId),
       // Get collection
-      supabase.from('collections').select('id, fragrance_id, affinity_score').eq('anon_id', anonId),
+      supabase.from('collections').select('id, fragrance_id, affinity_score').eq('user_id', userId),
       // Get shelf events
-      supabase.from('shelf_events').select('id, fragrance_id, event_type, created_at').eq('anon_id', anonId).order('created_at', { ascending: true }),
+      supabase.from('shelf_events').select('id, fragrance_id, event_type, created_at').eq('user_id', userId).order('created_at', { ascending: true }),
     ])
 
     const traces = tracesResult.data ?? []
@@ -149,7 +139,7 @@ async function computeInsights(supabase: Awaited<ReturnType<typeof createClient>
     // Compute Your Impact
     const interactionsCount = traces.length
     const reactionsReceived = reactions.length
-    const savesCount = reactions.filter(r => r.reaction_type === 'saved').length
+    const savesCount = reactions.filter(r => r.reaction === 'too_real').length
 
     const yourImpact = {
       interactions_count: interactionsCount,
@@ -172,7 +162,7 @@ async function computeInsights(supabase: Awaited<ReturnType<typeof createClient>
       .map(t => ({
         id: t.id,
         reaction_count: traceReactionMap.get(t.id) ?? 0,
-        content: t.content ?? '',
+        content: t.body ?? '',
       }))
       .sort((a, b) => (b.reaction_count ?? 0) - (a.reaction_count ?? 0))
       .slice(0, 3)
