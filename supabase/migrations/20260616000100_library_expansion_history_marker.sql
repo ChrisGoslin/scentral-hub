@@ -1,0 +1,2 @@
+-- Historical marker retained for Supabase preview branches that already
+-- recorded this timestamped version during PR validation.

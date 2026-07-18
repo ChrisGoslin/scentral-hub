@@ -69,6 +69,47 @@ export interface InsightDataSource {
   fetchFamilies(fragranceIds: string[]): Promise<FamilyRow[]>
 }
 
+interface SupabaseQuery extends PromiseLike<{ data: unknown }> {
+  eq(column: string, value: string): SupabaseQuery
+  in(column: string, values: string[]): SupabaseQuery
+  limit(count: number): SupabaseQuery
+  order(column: string, options: { ascending: boolean }): SupabaseQuery
+}
+
+interface SupabaseLike {
+  from(table: string): {
+    select(columns: string): SupabaseQuery
+  }
+}
+
+export function createInsightsDataSource(supabase: SupabaseLike): InsightDataSource {
+  return {
+    fetchRows: async (userId) => {
+      const [tracesResult, collectionsResult, shelfEventsResult] = await Promise.all([
+        supabase.from('traces').select('id, body').eq('user_id', userId).limit(100),
+        supabase.from('collections').select('fragrance_id').eq('user_id', userId),
+        supabase.from('shelf_events').select('fragrance_id, created_at').eq('user_id', userId).order('created_at', { ascending: true }),
+      ])
+
+      return {
+        traces: toRows<TraceRow>(tracesResult.data),
+        collections: toRows<CollectionRow>(collectionsResult.data),
+        shelfEvents: toRows<ShelfEventRow>(shelfEventsResult.data),
+      }
+    },
+    fetchReactions: async (traceIds) => {
+      if (traceIds.length === 0) return []
+      const { data } = await supabase.from('trace_reactions').select('trace_id, reaction').in('trace_id', traceIds)
+      return toRows<ReactionRow>(data)
+    },
+    fetchFamilies: async (fragranceIds) => {
+      if (fragranceIds.length === 0) return []
+      const { data } = await supabase.from('fragrances').select('family').in('id', fragranceIds)
+      return toRows<FamilyRow>(data)
+    },
+  }
+}
+
 export function computeImpactAndBestTraces(traces: TraceRow[], reactions: ReactionRow[]) {
   const interactionsCount = traces.length
   const reactionsReceived = reactions.length
@@ -206,6 +247,10 @@ function countFamilies(rows: FamilyRow[]): Record<string, number> {
 
 function uniqueFamilies(rows: FamilyRow[]): string[] {
   return [...new Set(rows.map((row) => row.family).filter((family): family is string => Boolean(family)))]
+}
+
+function toRows<T>(data: unknown): T[] {
+  return Array.isArray(data) ? data as T[] : []
 }
 
 function arraysEqual(a: string[], b: string[]): boolean {
