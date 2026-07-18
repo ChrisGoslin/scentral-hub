@@ -15,11 +15,20 @@ BEGIN
     RETURN;
   END IF;
 
+  -- search_path = '' (not 'public'): 20260510_security_fixes.sql hardens
+  -- this function's search_path on any environment where it already
+  -- exists. On an existing database, that hardening migration is already
+  -- recorded as applied and won't re-run — so if this backfill set
+  -- search_path back to 'public', it would silently undo the hardening
+  -- with nothing left to re-fix it. Setting the final hardened value
+  -- directly is correct on both fresh and existing databases. Fully
+  -- schema-qualified body (public.profiles) is required for this to work
+  -- under an empty search_path.
   CREATE OR REPLACE FUNCTION public.handle_new_user()
   RETURNS trigger
   LANGUAGE plpgsql
   SECURITY DEFINER
-  SET search_path TO 'public'
+  SET search_path TO ''
   AS $function$
   begin
     insert into public.profiles (id, display_name)
