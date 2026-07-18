@@ -118,7 +118,8 @@ export async function ArchivePageContent() {
       .gte('logged_at', sevenDaysAgo),
     supabase
       .from('collections')
-      .select('id', { count: 'exact', head: true }),
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'owned'),
   ])
 
   // Supabase returns multi-FK joins as arrays; unwrap to single object or null

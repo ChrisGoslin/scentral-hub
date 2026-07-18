@@ -73,9 +73,22 @@ BEGIN
     ALTER TABLE public.insights_cache ADD COLUMN period text NOT NULL DEFAULT 'latest';
     ALTER TABLE public.insights_cache ADD COLUMN payload jsonb NOT NULL DEFAULT '{}'::jsonb;
 
+    -- your_impact.saves_count was renamed to too_real_count (see the
+    -- saves_count -> too_real_count reaction-counting fix elsewhere this
+    -- session) — InsightsClient reads too_real_count only, so copying the
+    -- legacy JSON verbatim would leave any pre-existing cache row showing
+    -- zero "Too Real" reactions until the next nightly recompute overwrites
+    -- it. Rewrite the key while constructing the payload instead of
+    -- passing it through unchanged.
     UPDATE public.insights_cache
     SET payload = jsonb_build_object(
-      'your_impact', COALESCE(your_impact, '{}'::jsonb),
+      'your_impact', (
+        COALESCE(your_impact, '{}'::jsonb)
+        - 'saves_count'
+      ) || jsonb_build_object(
+        'too_real_count',
+        COALESCE(your_impact->'too_real_count', your_impact->'saves_count', '0'::jsonb)
+      ),
       'best_traces', COALESCE(best_traces, '[]'::jsonb),
       'scentiment_vision', COALESCE(scentiment_vision, '{}'::jsonb),
       'taste_evolution', COALESCE(taste_evolution, '[]'::jsonb),

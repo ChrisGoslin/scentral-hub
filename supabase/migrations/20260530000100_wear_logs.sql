@@ -16,6 +16,11 @@ CREATE TABLE IF NOT EXISTS wear_logs (
 
 ALTER TABLE wear_logs ENABLE ROW LEVEL SECURITY;
 
+-- Re-versioned from 20260530_wear_logs.sql — on any database where the
+-- original version already applied, this policy already exists, and a
+-- bare CREATE POLICY would abort with a duplicate-policy error and block
+-- every later migration.
+DROP POLICY IF EXISTS "Users can manage their own logs" ON wear_logs;
 CREATE POLICY "Users can manage their own logs"
   ON wear_logs FOR ALL
   TO authenticated

@@ -68,13 +68,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'User already has an active temptation this week' }, { status: 429 })
   }
 
+  // reason is NOT NULL in the live table (verified via Supabase MCP,
+  // 2026-07-18) — a request that omits it would otherwise reach the
+  // database and get a 500 from the NOT NULL violation instead of creating
+  // the temptation.
   const { data, error } = await supabase
     .from('temptations')
     .insert({
       user_id: user.id,
       fragrance_id: fragranceId,
       status: 'shown',
-      reason: reason ?? null,
+      reason: reason ?? 'unspecified',
     })
     .select('id, fragrance_id, status, reason, shown_at')
 
