@@ -27,10 +27,25 @@ ALTER TABLE public.product_signals ENABLE ROW LEVEL SECURITY;
 -- caller can add a row but never read, modify, or delete any row (including
 -- their own) — reads stay restricted to the weekly brief script, which runs
 -- with the service-role key server-side.
+--
+-- Because this table is reachable directly via the Supabase Data API with
+-- the public anon key, a caller can bypass the route's IP rate limits
+-- entirely and post straight to /rest/v1/product_signals. The size caps
+-- below (mirroring MAX_SOURCE_LENGTH/MAX_TEXT_LENGTH/MAX_METADATA_BYTES in
+-- the route) can't be bypassed that way even so — they're the one part of
+-- the route's protection that a DB CHECK can enforce. Volumetric flooding
+-- (many small valid rows) still isn't blocked at this layer; that requires
+-- either revoking anon INSERT here and moving writes behind an RPC/Edge
+-- Function, or a trigger-based per-IP counter, neither done here — tracked
+-- as a known gap, not silently accepted.
 CREATE POLICY "Allow anon insert" ON public.product_signals
   FOR INSERT
   TO anon
-  WITH CHECK (true);
+  WITH CHECK (
+    length(source) <= 80
+    AND length(raw_text) <= 12000
+    AND (metadata IS NULL OR octet_length(metadata::text) <= 10000)
+  );
 
 CREATE OR REPLACE FUNCTION public.redact_old_product_signal_raw_text(retention interval DEFAULT interval '7 days')
 RETURNS integer

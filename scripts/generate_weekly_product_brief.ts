@@ -14,6 +14,12 @@ import { runLLM } from '../lib/llm'
 dotenv.config({ path: '.env.local' })
 
 const MAX_SIGNALS_PER_RUN = 200 // guardrail against unbounded LLM context; logged if hit
+// Row count alone doesn't bound prompt size: the ingest route allows up to
+// 12,000 chars of raw_text per signal, so 200 signals near that limit would
+// send ~2.4M characters into the LLM call, well past any model's context
+// window. Cap the actual character budget sent to the LLM independently of
+// the row-count cap above.
+const MAX_PROMPT_CHARS = 180_000
 // Raw fetch ceiling, independent of MAX_SIGNALS_PER_RUN: the selection
 // policy below needs to see the *whole* 7-day window to fairly allocate
 // across sources and days, not just the most recent slice of it. This only
@@ -251,7 +257,7 @@ async function clusterSignals(signals: ProductSignalRow[]): Promise<BriefResult>
   // Per docs/nota/06-testing-security-abuse.md: free-text user data must be
   // redacted/tokenized before entering any LLM prompt, not just before
   // rendering output. This is public, unauthenticated submission text.
-  const payload = signals.map((s) => ({
+  const fullPayload = signals.map((s) => ({
     source: redactPII(s.source),
     text: redactPII(s.raw_text),
     summary: s.summary ? redactPII(s.summary) : s.summary,
@@ -260,6 +266,24 @@ async function clusterSignals(signals: ProductSignalRow[]): Promise<BriefResult>
     feature_area: s.feature_area,
     tags: s.tags,
   }))
+
+  // signals is already sorted most-recent-first (selectSignalsForBrief).
+  // Greedily take entries until the character budget is spent rather than
+  // truncating the serialized JSON string mid-object, which would produce
+  // invalid JSON for the LLM.
+  const payload: typeof fullPayload = []
+  let chars = 0
+  for (const entry of fullPayload) {
+    const entryChars = JSON.stringify(entry).length
+    if (payload.length > 0 && chars + entryChars > MAX_PROMPT_CHARS) break
+    payload.push(entry)
+    chars += entryChars
+  }
+  if (payload.length < fullPayload.length) {
+    console.warn(
+      `⚠️ Prompt character budget (${MAX_PROMPT_CHARS}) hit — clustering ${payload.length} of ${fullPayload.length} selected signal(s).`,
+    )
+  }
 
   const result = await runLLM<unknown>({
     system: CLUSTERING_SYSTEM_PROMPT,

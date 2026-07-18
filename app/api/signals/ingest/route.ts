@@ -77,21 +77,24 @@ export async function POST(req: NextRequest) {
     auth: { autoRefreshToken: false, persistSession: false },
   })
 
-  const { data, error } = await supabaseAnon
-    .from('product_signals')
-    .insert({
-      source,
-      raw_text: text,
-      tags: [],
-      metadata: metadataPayload,
-    })
-    .select('id')
-    .single()
+  // Generate the id up front rather than chaining .select().single() after
+  // the insert: the anon policy is INSERT-only (no SELECT), so asking
+  // PostgREST to return the inserted row would fail the whole request under
+  // RLS even though the row was written successfully — the row lands, but
+  // the caller gets a false 500.
+  const id = crypto.randomUUID()
+  const { error } = await supabaseAnon.from('product_signals').insert({
+    id,
+    source,
+    raw_text: text,
+    tags: [],
+    metadata: metadataPayload,
+  })
 
   if (error) {
     console.error('signals/ingest: insert failed', error)
     return NextResponse.json({ error: 'Failed to record signal' }, { status: 500 })
   }
 
-  return NextResponse.json({ success: true, id: data.id })
+  return NextResponse.json({ success: true, id })
 }

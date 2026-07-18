@@ -90,6 +90,10 @@ the generated roll-ups.
   only applies migrations newer than the latest remote version and will
   silently skip these, which can leave the `20260711*` tables referencing
   state that isn't actually there.
+  `20260616000200_library_expansion_v2_to_500.sql` is a documented no-op
+  (its original body was a literal `undefined` token that would otherwise
+  abort the batch) — already fixed in this branch, noted here so a future
+  `--include-all` rollout doesn't need to rediscover it.
 - `Fragrance App Product Audit & Strategy.md` (referenced as the source of
   the anchor/modulator/top framework) does not exist in this repo as of
   2026-07-11 — the framework was instead verified against

@@ -85,10 +85,23 @@ Each item is either:
 
 Return ONLY JSON: {"items": [...]}. If the text has no extractable fragrance content, return {"items": []}.`
 
+const MAX_SOURCE_CHARS = 12_000
+
 async function classifyAndExtract(rawText: string): Promise<ExtractedItem[]> {
+  // processFile archives the full source after this returns, regardless of
+  // what got extracted — silently sending only rawText.slice(0, N) to the
+  // LLM would let content past the cutoff get archived as "done" with no
+  // extraction and no retry. Fail fast instead so an oversized source stays
+  // in incoming/ and shows up as a failure, not a silent partial ingest.
+  if (rawText.length > MAX_SOURCE_CHARS) {
+    throw new Error(
+      `source is ${rawText.length} chars, exceeds ${MAX_SOURCE_CHARS} char limit — split into smaller files before ingest`,
+    )
+  }
+
   const result = await runLLM<unknown>({
     system: EXTRACTION_SYSTEM_PROMPT,
-    prompt: rawText.slice(0, 12000),
+    prompt: rawText,
     maxTokens: 4096,
     json: true,
   })
