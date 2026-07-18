@@ -58,7 +58,13 @@ CREATE POLICY "Allow anon insert" ON public.product_signals
   WITH CHECK (
     length(source) <= 80
     AND length(raw_text) <= 12000
-    AND (metadata IS NULL OR octet_length(metadata::text) <= 10000)
+    -- The route measures Buffer.byteLength(JSON.stringify(metadata)) <=
+    -- 10,000 (compact JSON, no extra whitespace). jsonb::text output adds
+    -- a space after every ':' and ',', so the same object can exceed
+    -- 10,000 bytes here even though the route accepted it — a false
+    -- rejection that surfaces as a confusing 500. 12,000 gives headroom
+    -- for that formatting overhead while still bounding size.
+    AND (metadata IS NULL OR octet_length(metadata::text) <= 12000)
     AND summary IS NULL
     AND sentiment IS NULL
     AND persona_guess IS NULL

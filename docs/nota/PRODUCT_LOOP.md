@@ -28,8 +28,11 @@ selection policy below, since `source` is client-supplied and unauthenticated
 
 `product_signals.raw_text` is intentionally short-lived. Run
 `select public.redact_old_product_signal_raw_text();` after the retention
-window to replace old raw text with a redaction marker while preserving source,
-metadata, tags, and future derived fields for reporting.
+window to replace old raw text with a redaction marker. `metadata` is cleared
+to NULL in the same pass (it's arbitrary client-supplied JSON from a public
+endpoint and can carry the same PII raw_text can) — only source, tags, and
+derived fields (summary/sentiment/persona_guess/feature_area) survive for
+reporting.
 
 **Not wired yet (TODO):** a Zapier zap pointed at this endpoint for
 form/email/DM sources. The endpoint is public and unauthenticated by design —
