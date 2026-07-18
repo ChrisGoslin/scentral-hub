@@ -21,7 +21,57 @@
 
 DO $$
 BEGIN
+  -- If temptations already exists but is still in the legacy anon_id/
+  -- trigger_reason/first_shown_at shape, convert it in place instead of
+  -- treating "table exists" as "already reconciled" — DB-006 only adds
+  -- user_id, it doesn't create reason/shown_at/resolved_at or replace the
+  -- legacy status constraint, so the active API's selects and its
+  -- status: 'shown' insert would keep failing on an upgraded database.
   IF to_regclass('public.temptations') IS NOT NULL THEN
+    IF EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_schema = 'public' AND table_name = 'temptations' AND column_name = 'anon_id'
+    ) AND NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_schema = 'public' AND table_name = 'temptations' AND column_name = 'reason'
+    ) THEN
+      ALTER TABLE public.temptations ADD COLUMN IF NOT EXISTS user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE;
+      ALTER TABLE public.temptations RENAME COLUMN trigger_reason TO reason;
+      ALTER TABLE public.temptations RENAME COLUMN first_shown_at TO shown_at;
+      ALTER TABLE public.temptations ADD COLUMN IF NOT EXISTS resolved_at timestamp with time zone;
+
+      UPDATE public.temptations SET reason = 'unspecified' WHERE reason IS NULL;
+      ALTER TABLE public.temptations ALTER COLUMN reason SET NOT NULL;
+      ALTER TABLE public.temptations ALTER COLUMN shown_at SET NOT NULL;
+
+      -- Legacy status set was pending/viewed/wishlisted/bought/dismissed;
+      -- live is shown/viewed/wishlisted/blind_buy/maybe_later/dismissed.
+      UPDATE public.temptations SET status = CASE status
+        WHEN 'pending' THEN 'shown'
+        WHEN 'bought' THEN 'blind_buy'
+        ELSE status
+      END;
+      ALTER TABLE public.temptations ALTER COLUMN status SET DEFAULT 'shown';
+      ALTER TABLE public.temptations DROP CONSTRAINT IF EXISTS temptations_status_check;
+      ALTER TABLE public.temptations ADD CONSTRAINT temptations_status_check
+        CHECK (status IN ('shown', 'viewed', 'wishlisted', 'blind_buy', 'maybe_later', 'dismissed'));
+
+      DROP POLICY IF EXISTS "Users can view own temptations" ON public.temptations;
+      DROP POLICY IF EXISTS "Users can update own temptations" ON public.temptations;
+      DROP POLICY IF EXISTS "System can insert temptations" ON public.temptations;
+
+      ALTER TABLE public.temptations DROP COLUMN anon_id;
+      ALTER TABLE public.temptations DROP COLUMN IF EXISTS created_at;
+      ALTER TABLE public.temptations DROP COLUMN IF EXISTS updated_at;
+
+      CREATE POLICY "own rows" ON public.temptations
+        FOR ALL
+        USING (auth.uid() = user_id)
+        WITH CHECK (auth.uid() = user_id);
+
+      CREATE INDEX IF NOT EXISTS idx_temptations_user_id ON public.temptations(user_id);
+    END IF;
+
     RETURN;
   END IF;
 

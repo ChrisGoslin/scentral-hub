@@ -1,12 +1,25 @@
 -- DB-003: Tier model + eligibility enforcement for shelf_items
 -- Adds S/A/B/C tiers (GENERATED from rank), rank range constraint, and DB-enforced eligibility
+--
+-- This file was re-versioned — production already has DB-003 applied
+-- under its original version. Every step guarded/made idempotent so it
+-- no-ops there instead of aborting on the first duplicate object and
+-- blocking every migration after it.
 
 -- Step 1: Permit rank 0 (intermediate state during reorder) + full -20..20 range for two-phase updates
-ALTER TABLE shelf_items ADD CONSTRAINT shelf_items_rank_range
-  CHECK (rank BETWEEN -20 AND 20 AND rank <> 0);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'shelf_items_rank_range' AND conrelid = 'shelf_items'::regclass
+  ) THEN
+    ALTER TABLE shelf_items ADD CONSTRAINT shelf_items_rank_range
+      CHECK (rank BETWEEN -20 AND 20 AND rank <> 0);
+  END IF;
+END
+$$;
 
 -- Step 2: Add tier as GENERATED ALWAYS column (read-only, derived from rank)
-ALTER TABLE shelf_items ADD COLUMN tier text GENERATED ALWAYS AS (
+ALTER TABLE shelf_items ADD COLUMN IF NOT EXISTS tier text GENERATED ALWAYS AS (
   CASE WHEN rank BETWEEN 1 AND 5 THEN 'S'
        WHEN rank BETWEEN 6 AND 10 THEN 'A'
        WHEN rank BETWEEN 11 AND 15 THEN 'B'
@@ -16,7 +29,7 @@ ALTER TABLE shelf_items ADD COLUMN tier text GENERATED ALWAYS AS (
 ) STORED;
 
 -- Step 3: Add tier index for queries like "get user's S-tier fragrances"
-CREATE INDEX idx_shelf_items_user_tier ON shelf_items(user_id, tier)
+CREATE INDEX IF NOT EXISTS idx_shelf_items_user_tier ON shelf_items(user_id, tier)
   WHERE rank BETWEEN 1 AND 20;
 
 -- Step 4: Eligibility trigger — only Tested/Owned/Past-Purchase fragrances can be shelved

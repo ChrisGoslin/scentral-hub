@@ -56,11 +56,16 @@ BEGIN
       ALTER TABLE public.shelf_events ALTER COLUMN event SET NOT NULL;
       ALTER TABLE public.shelf_events ADD CONSTRAINT shelf_events_event_check
         CHECK (event IN ('added', 'removed', 'rank_changed', 'replaced', 'returned'));
+
+      -- Policies referencing anon_id must be dropped before the column
+      -- they depend on — Postgres rejects DROP COLUMN while a policy
+      -- predicate still references it.
+      DROP POLICY IF EXISTS "Users can view their own shelf events" ON public.shelf_events;
+      DROP POLICY IF EXISTS "Users can create shelf events" ON public.shelf_events;
+
       ALTER TABLE public.shelf_events DROP COLUMN anon_id;
       ALTER TABLE public.shelf_events DROP COLUMN IF EXISTS event_type;
 
-      DROP POLICY IF EXISTS "Users can view their own shelf events" ON public.shelf_events;
-      DROP POLICY IF EXISTS "Users can create shelf events" ON public.shelf_events;
       CREATE POLICY "own rows" ON public.shelf_events
         FOR ALL
         USING (auth.uid() = user_id)

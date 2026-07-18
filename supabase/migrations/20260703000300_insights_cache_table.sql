@@ -1,30 +1,11 @@
 -- Epic 13: Insights Dashboard — Cache table for nightly computed insights
-
-CREATE TABLE public.insights_cache (
-  anon_id text PRIMARY KEY REFERENCES public.profiles(anon_id) ON DELETE CASCADE,
-  computed_at timestamp with time zone DEFAULT now(),
-  your_impact jsonb DEFAULT '{}'::jsonb,
-  best_traces jsonb DEFAULT '[]'::jsonb,
-  scentiment_vision jsonb DEFAULT '{}'::jsonb,
-  taste_evolution jsonb DEFAULT '[]'::jsonb,
-  trajectory jsonb DEFAULT '{}'::jsonb,
-  updated_at timestamp with time zone DEFAULT now()
-);
-
--- RLS for insights_cache
-ALTER TABLE public.insights_cache ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Users can view their own insights"
-  ON public.insights_cache FOR SELECT
-  USING (anon_id = current_setting('app.current_anon_id', true));
-
-CREATE POLICY "Service role can write insights"
-  ON public.insights_cache FOR INSERT
-  WITH CHECK (true);
-
-CREATE POLICY "Service role can update insights"
-  ON public.insights_cache FOR UPDATE
-  USING (true);
-
--- Index on computed_at for cache staleness checks
-CREATE INDEX idx_insights_cache_computed_at ON public.insights_cache(computed_at DESC);
+--
+-- Original body here referenced public.profiles(anon_id), which doesn't
+-- exist on production (profiles only has id — verified via Supabase MCP,
+-- 2026-07-18) — this CREATE TABLE would abort a fresh replay immediately.
+-- 20260717_align_insights_cache_contract.sql already fully supersedes this
+-- file: it creates public.insights_cache from scratch (user_id/period/
+-- payload, matching what's actually live) when the table doesn't exist yet,
+-- and transforms the legacy anon_id/five-jsonb-column shape when it does.
+-- Left as a documented no-op rather than duplicating that logic here.
+SELECT 1;

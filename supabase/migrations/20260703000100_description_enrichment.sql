@@ -18,6 +18,43 @@
 -- production, or anywhere this reconciliation has already run), a bare
 -- CREATE TABLE would abort with "relation already exists" and block this
 -- migration version from ever applying there.
+--
+-- If the table already exists but is still in the legacy generated_
+-- description shape (no name/brand/ai_description), convert it in place
+-- instead of treating "table exists" as "already reconciled" — otherwise
+-- enrich-descriptions-batch's inserts and the approval trigger's read of
+-- new.ai_description keep failing against the legacy columns.
+DO $$
+BEGIN
+  IF to_regclass('public.description_enrichment_queue') IS NOT NULL
+    AND EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_schema = 'public' AND table_name = 'description_enrichment_queue' AND column_name = 'generated_description'
+    ) AND NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_schema = 'public' AND table_name = 'description_enrichment_queue' AND column_name = 'ai_description'
+    ) THEN
+    ALTER TABLE public.description_enrichment_queue ADD COLUMN name text;
+    ALTER TABLE public.description_enrichment_queue ADD COLUMN brand text;
+    ALTER TABLE public.description_enrichment_queue RENAME COLUMN generated_description TO ai_description;
+
+    UPDATE public.description_enrichment_queue deq
+    SET name = f.name, brand = f.brand
+    FROM public.fragrances f
+    WHERE f.id = deq.fragrance_id AND deq.name IS NULL;
+
+    -- Rows whose fragrance_id no longer resolves have no name/brand to
+    -- backfill from — delete rather than leave them permanently violating
+    -- the NOT NULL constraint added below.
+    DELETE FROM public.description_enrichment_queue WHERE name IS NULL OR brand IS NULL;
+
+    ALTER TABLE public.description_enrichment_queue ALTER COLUMN name SET NOT NULL;
+    ALTER TABLE public.description_enrichment_queue ALTER COLUMN brand SET NOT NULL;
+    ALTER TABLE public.description_enrichment_queue DROP COLUMN IF EXISTS reviewed_by;
+    ALTER TABLE public.description_enrichment_queue DROP COLUMN IF EXISTS updated_at;
+  END IF;
+END
+$$;
 
 CREATE TABLE IF NOT EXISTS public.description_enrichment_queue (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
