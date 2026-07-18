@@ -45,20 +45,22 @@ BEGIN
 END
 $$;
 
--- Step 3: Add user_id to evolution_events (nullable during transition)
-ALTER TABLE evolution_events ADD COLUMN user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE;
+-- Step 3: Add user_id to evolution_events (nullable during transition).
+-- This file was re-versioned from 20260704_db006_identity_model_migration.sql
+-- — on any database where the original version already applied, these
+-- columns already exist, and a bare ADD COLUMN would abort with "column
+-- already exists" and block every later migration. Same guard as
+-- temptations/shelf_events above.
+ALTER TABLE evolution_events ADD COLUMN IF NOT EXISTS user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE;
 
 -- Step 4: Add user_id to noseprint_history (nullable during transition)
-ALTER TABLE noseprint_history ADD COLUMN user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE;
+ALTER TABLE noseprint_history ADD COLUMN IF NOT EXISTS user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE;
 
--- Step 5: Add indexes for new user_id columns (same as anon_id). The
--- temptations/shelf_events indexes are IF NOT EXISTS since the rewritten
--- 20260703000600/20260703000500 migrations already create the same names
--- on the already-final user_id-only shape.
+-- Step 5: Add indexes for new user_id columns (same as anon_id).
 CREATE INDEX IF NOT EXISTS idx_temptations_user_id ON temptations(user_id);
 CREATE INDEX IF NOT EXISTS idx_shelf_events_user_id ON shelf_events(user_id);
-CREATE INDEX idx_evolution_events_user_id ON evolution_events(user_id);
-CREATE INDEX idx_noseprint_history_user_id ON noseprint_history(user_id);
+CREATE INDEX IF NOT EXISTS idx_evolution_events_user_id ON evolution_events(user_id);
+CREATE INDEX IF NOT EXISTS idx_noseprint_history_user_id ON noseprint_history(user_id);
 
 -- Step 6: Update RLS policies to support both anon_id and user_id (auth)
 -- (These are re-creations of existing policies with user_id support added)

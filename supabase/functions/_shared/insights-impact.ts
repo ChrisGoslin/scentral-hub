@@ -69,11 +69,22 @@ export interface InsightDataSource {
   fetchFamilies(fragranceIds: string[]): Promise<FamilyRow[]>
 }
 
-interface SupabaseQuery extends PromiseLike<{ data: unknown }> {
+interface SupabaseQuery extends PromiseLike<{ data: unknown; error: { message: string } | null }> {
   eq(column: string, value: string): SupabaseQuery
   in(column: string, values: string[]): SupabaseQuery
   limit(count: number): SupabaseQuery
   order(column: string, options: { ascending: boolean }): SupabaseQuery
+}
+
+// A failed query resolves with { data: null, error }, not a rejection — left
+// unchecked, toRows(null) silently becomes [], making a transient DB error
+// look like "the user genuinely has zero traces/reactions/etc." The caller
+// (compute-insights-nightly) then upserts that all-zero result over a
+// usable stale cache instead of its stale-cache fallback ever running.
+function assertNoQueryError(label: string, error: { message: string } | null): void {
+  if (error) {
+    throw new Error(`insights query failed (${label}): ${error.message}`)
+  }
 }
 
 interface SupabaseLike {
@@ -90,6 +101,9 @@ export function createInsightsDataSource(supabase: SupabaseLike): InsightDataSou
         supabase.from('collections').select('fragrance_id').eq('user_id', userId),
         supabase.from('shelf_events').select('fragrance_id, created_at').eq('user_id', userId).order('created_at', { ascending: true }),
       ])
+      assertNoQueryError('traces', tracesResult.error)
+      assertNoQueryError('collections', collectionsResult.error)
+      assertNoQueryError('shelf_events', shelfEventsResult.error)
 
       return {
         traces: toRows<TraceRow>(tracesResult.data),
@@ -99,12 +113,14 @@ export function createInsightsDataSource(supabase: SupabaseLike): InsightDataSou
     },
     fetchReactions: async (traceIds) => {
       if (traceIds.length === 0) return []
-      const { data } = await supabase.from('trace_reactions').select('trace_id, reaction').in('trace_id', traceIds)
+      const { data, error } = await supabase.from('trace_reactions').select('trace_id, reaction').in('trace_id', traceIds)
+      assertNoQueryError('trace_reactions', error)
       return toRows<ReactionRow>(data)
     },
     fetchFamilies: async (fragranceIds) => {
       if (fragranceIds.length === 0) return []
-      const { data } = await supabase.from('fragrances').select('family').in('id', fragranceIds)
+      const { data, error } = await supabase.from('fragrances').select('family').in('id', fragranceIds)
+      assertNoQueryError('fragrances', error)
       return toRows<FamilyRow>(data)
     },
   }
