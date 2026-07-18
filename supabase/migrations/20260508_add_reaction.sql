@@ -36,6 +36,14 @@ BEGIN
   ALTER TABLE public.collections
     ADD COLUMN IF NOT EXISTS reaction text CHECK (reaction IN ('liked', 'disliked', 'unworn'));
 
+  -- origin_code: not present on production, but genuinely needed —
+  -- app/(main)/collection/CollectionClientWrapper.tsx selects it and
+  -- app/api/collection/add/route.ts inserts it ('B' for barcode-scanned
+  -- additions). 'B'/'D'/'T'/'O'/'W' per that client's type union
+  -- (Barcode/Discover/Trace/Onboarding/Wishlist, inferred from call sites).
+  ALTER TABLE public.collections
+    ADD COLUMN IF NOT EXISTS origin_code text CHECK (origin_code IN ('B', 'D', 'T', 'O', 'W'));
+
   IF EXISTS (
     SELECT 1 FROM information_schema.columns
     WHERE table_schema = 'public'

@@ -261,12 +261,39 @@ function selectSignalsForBrief(rawSignals: ProductSignalRow[]): SelectionResult 
   const allocation = fairAllocateBudget(countsBySource, MAX_SIGNALS_PER_RUN)
 
   const sourceAllocations: SourceAllocationLog[] = []
-  const selected: ProductSignalRow[] = []
+  const pickedBySource = new Map<string, ProductSignalRow[]>()
   for (const [source, list] of bySource) {
     const quota = allocation.get(source) ?? 0
     const picked = selectStratifiedByDay(list, quota)
-    selected.push(...picked)
+    pickedBySource.set(source, picked)
     sourceAllocations.push({ source, available: list.length, allocated: picked.length })
+  }
+
+  // Applying MAX_PROMPT_CHARS as a single pass over the final globally-
+  // sorted-by-recency list (the old approach) undoes the fair-share
+  // allocation above: whichever source happens to own the newest entries
+  // fills the whole budget before older entries from every other source
+  // are even considered. Fair-share the character budget the same way row
+  // counts were fair-shared, then trim each source's own picks to fit —
+  // that way a source with a small quota still gets a proportional slice
+  // of the prompt, not zero.
+  const charDemandBySource = new Map(
+    [...pickedBySource.entries()].map(([source, rows]) => [
+      source,
+      rows.reduce((sum, r) => sum + r.raw_text.length, 0),
+    ]),
+  )
+  const charAllocation = fairAllocateBudget(charDemandBySource, MAX_PROMPT_CHARS)
+
+  const selected: ProductSignalRow[] = []
+  for (const [source, rows] of pickedBySource) {
+    const charBudget = charAllocation.get(source) ?? 0
+    let chars = 0
+    for (const row of rows) {
+      if (chars + row.raw_text.length > charBudget) continue
+      selected.push(row)
+      chars += row.raw_text.length
+    }
   }
 
   selected.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())

@@ -33,13 +33,21 @@ BEGIN
     ON public.insights_cache FOR SELECT
     USING (auth.uid() = user_id);
 
-  CREATE POLICY "Service role can write insights"
+  -- Owner-scoped, not "WITH CHECK (true)": app/api/insights/route.ts
+  -- upserts through the user's own session client (not service-role), so
+  -- an INSERT/UPDATE policy is genuinely needed here — but the original
+  -- had no TO clause and no ownership check, so it applied to PUBLIC and
+  -- let any anon or authenticated caller write an arbitrary payload for
+  -- any user_id. compute-insights-nightly writes via the service role,
+  -- which bypasses RLS regardless and needs no policy of its own.
+  CREATE POLICY "Users can write their own insights"
     ON public.insights_cache FOR INSERT
-    WITH CHECK (true);
+    WITH CHECK (auth.uid() = user_id);
 
-  CREATE POLICY "Service role can update insights"
+  CREATE POLICY "Users can update their own insights"
     ON public.insights_cache FOR UPDATE
-    USING (true);
+    USING (auth.uid() = user_id)
+    WITH CHECK (auth.uid() = user_id);
 
   CREATE INDEX idx_insights_cache_computed_at ON public.insights_cache(computed_at DESC);
 END

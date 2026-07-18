@@ -8,11 +8,19 @@
 -- below (verified read-only against production via Supabase MCP,
 -- 2026-07-18: user_id, not created_by_id, is the real owner column) so
 -- app/api/layering/save/route.ts's writes don't fail at runtime on an
--- environment built from these migrations. The created_by_id-guarded
--- policy blocks further down are legacy and never fire against this
--- shape (harmless no-ops) — real production policies (lc_select_own/
--- lc_insert_own/lc_update_own/lc_delete_own, keyed on user_id) are added
--- alongside the table.
+-- environment built from these migrations.
+--
+-- Deliberately does NOT create lc_select_own/lc_insert_own/lc_update_own/
+-- lc_delete_own here even though those are the real production policy
+-- names: 20260602_add_fragrance_ids_to_layering_combinations.sql (which
+-- runs later in version order) already creates them once it sees a
+-- user_id column, and a duplicate CREATE POLICY with the same name aborts
+-- the replay. This file only creates the table and enables RLS; the owner
+-- policies come from that later migration. The legacy "Allow select for
+-- authenticated" policy further down granted read access to every
+-- authenticated user regardless of ownership — dropped at the end of this
+-- file since it's a real over-broad-read bug once combined (RLS policies
+-- OR together) with the real owner-only policy.
 
 DO $$
 BEGIN
@@ -45,15 +53,6 @@ BEGIN
     );
 
     ALTER TABLE public.layering_combinations ENABLE ROW LEVEL SECURITY;
-
-    CREATE POLICY lc_select_own ON public.layering_combinations
-      FOR SELECT USING (auth.uid() = user_id);
-    CREATE POLICY lc_insert_own ON public.layering_combinations
-      FOR INSERT WITH CHECK (auth.uid() = user_id);
-    CREATE POLICY lc_update_own ON public.layering_combinations
-      FOR UPDATE USING (auth.uid() = user_id);
-    CREATE POLICY lc_delete_own ON public.layering_combinations
-      FOR DELETE USING (auth.uid() = user_id);
   END IF;
 
   IF to_regclass('public.layering_combinations') IS NOT NULL THEN
@@ -73,11 +72,9 @@ BEGIN
         WITH CHECK (auth.uid() IS NOT NULL AND created_by_id = auth.uid());
     END IF;
 
+    -- Legacy over-broad read policy — never created, and dropped below in
+    -- case any environment somehow has it from a prior run.
     DROP POLICY IF EXISTS "Allow select for authenticated" ON public.layering_combinations;
-    CREATE POLICY "Allow select for authenticated"
-      ON public.layering_combinations
-      FOR SELECT
-      USING (auth.uid() IS NOT NULL);
 
     IF EXISTS (
       SELECT 1 FROM information_schema.columns
