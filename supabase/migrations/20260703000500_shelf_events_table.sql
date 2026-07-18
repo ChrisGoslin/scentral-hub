@@ -22,7 +22,53 @@
 
 DO $$
 BEGIN
+  -- If shelf_events already exists but is still in the legacy anon_id/
+  -- event_type shape (only reachable if some environment's profiles table
+  -- once had an anon_id column, since that FK is what the legacy CREATE
+  -- TABLE required to succeed at all), convert it in place instead of
+  -- treating "table exists" as "already reconciled" and leaving writers
+  -- silently failing against missing user_id/event/old_rank/new_rank.
   IF to_regclass('public.shelf_events') IS NOT NULL THEN
+    IF EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_schema = 'public' AND table_name = 'shelf_events' AND column_name = 'anon_id'
+    ) AND NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_schema = 'public' AND table_name = 'shelf_events' AND column_name = 'event'
+    ) THEN
+      ALTER TABLE public.shelf_events ADD COLUMN IF NOT EXISTS user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE;
+      ALTER TABLE public.shelf_events ADD COLUMN IF NOT EXISTS event text;
+      ALTER TABLE public.shelf_events ADD COLUMN IF NOT EXISTS old_rank integer;
+      ALTER TABLE public.shelf_events ADD COLUMN IF NOT EXISTS new_rank integer;
+
+      -- Best-effort mapping from the legacy event_type enum to the live
+      -- event enum — there's no old_rank/new_rank data to recover, only
+      -- the action that happened.
+      UPDATE public.shelf_events
+      SET event = CASE event_type
+        WHEN 'add' THEN 'added'
+        WHEN 'remove' THEN 'removed'
+        WHEN 'reorder' THEN 'rank_changed'
+        ELSE event_type
+      END
+      WHERE event IS NULL;
+
+      ALTER TABLE public.shelf_events ALTER COLUMN event SET NOT NULL;
+      ALTER TABLE public.shelf_events ADD CONSTRAINT shelf_events_event_check
+        CHECK (event IN ('added', 'removed', 'rank_changed', 'replaced', 'returned'));
+      ALTER TABLE public.shelf_events DROP COLUMN anon_id;
+      ALTER TABLE public.shelf_events DROP COLUMN IF EXISTS event_type;
+
+      DROP POLICY IF EXISTS "Users can view their own shelf events" ON public.shelf_events;
+      DROP POLICY IF EXISTS "Users can create shelf events" ON public.shelf_events;
+      CREATE POLICY "own rows" ON public.shelf_events
+        FOR ALL
+        USING (auth.uid() = user_id)
+        WITH CHECK (auth.uid() = user_id);
+
+      CREATE INDEX IF NOT EXISTS idx_shelf_events_user_id ON public.shelf_events(user_id);
+    END IF;
+
     RETURN;
   END IF;
 

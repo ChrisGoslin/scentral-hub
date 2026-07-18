@@ -2,8 +2,16 @@
 
 -- 20260616_library_expansion_v2_to_500.sql
 -- Roadmap to 500: Massive Library Expansion
-
-
+--
+-- This file was re-versioned — on a database where the former
+-- 20260616_the_millennium_expansion.sql already applied, this renamed
+-- version is a new pending migration and reruns the same seed data. The
+-- bulk INSERT below had no ON CONFLICT clause (unlike every individual
+-- INSERT further down in this file, which already has one), so it would
+-- abort at the first duplicate (brand, name) — the unique index that
+-- constraint relies on comes from 20260604_reference_catalogue.sql — and
+-- block every later migration. Added ON CONFLICT (brand, name) DO NOTHING
+-- to match the rest of the file.
 
 INSERT INTO fragrances (brand, name, family, top_notes, heart_notes, base_notes, gender_profile, projection, use_case, phase, phase_label, is_user_created, concentration, clone_target, plain_description) VALUES
 ('Roja Parfums', 'Apex', 'Aromatic Fougere', ARRAY['Orange', 'Bergamot', 'Mandarin Orange', 'Lemon'], ARRAY['Pineapple', 'Cistus', 'Jasmine'], ARRAY['Cypress', 'Balsam Fir', 'Oakmoss', 'Patchouli', 'Leather'], 'Men', 'Strong', 'Daytime, Versatile, Professional', 3, 'Exothermic Top', false, 'Parfum', NULL, 'Galvanized, luxurious, Stone-50 inspired fragrance with high-quality Orange, Bergamot and Cypress, Balsam Fir.'),
@@ -155,7 +163,7 @@ INSERT INTO fragrances (brand, name, family, top_notes, heart_notes, base_notes,
 ('Creed', 'Royal Water', 'Citrus Aromatic', ARRAY['Citrus Notes', 'Mint'], ARRAY['Juniper Berries', 'Basil'], ARRAY['Musk', 'Ambergris'], 'Unisex', 'Moderate', 'Summer, Fresh, Daytime', 3, 'Exothermic Top', false, 'Eau de Parfum', NULL, 'Galvanized, luxurious, Stone-50 inspired fragrance with high-quality Citrus Notes, Mint and Musk, Ambergris.'),
 ('Creed', 'Silver Mountain Water', 'Aromatic Fougere', ARRAY['Bergamot', 'Mandarin Orange'], ARRAY['Green Tea', 'Blackcurrant'], ARRAY['Musk', 'Petitgrain', 'Sandalwood', 'Galbanum'], 'Unisex', 'Moderate', 'Daytime, Clean, Summer', 3, 'Exothermic Top', false, 'Eau de Parfum', NULL, 'Galvanized, luxurious, Stone-50 inspired fragrance with high-quality Bergamot, Mandarin Orange and Musk, Petitgrain.'),
 ('Creed', 'Viking', 'Woody Spicy', ARRAY['Pink Pepper', 'Spicy Mint', 'Bergamot', 'Lemon', 'Absinthe', 'Orange'], ARRAY['Lavender', 'Bulgarian Rose', 'Clove', 'Allspice', 'Orris Root', 'Jasmine'], ARRAY['Vetiver', 'Cedar', 'White Musk', 'Tonka Bean'], 'Men', 'Strong', 'Signature, Bold, All-Season', 2, 'Textural Modulator', false, 'Eau de Parfum', NULL, 'Galvanized, luxurious, Stone-50 inspired fragrance with high-quality Pink Pepper, Spicy Mint and Vetiver, Cedar.'),
-('Creed', 'Viking Cologne', 'Aromatic Fougere', ARRAY['Mandarin Orange', 'Lemon', 'Pink Pepper', 'Bergamot'], ARRAY['Lavender', 'Geranium', 'Nutmeg', 'Rosemary', 'Sage'], ARRAY['Vetiver', 'Sandalwood', 'Cedar', 'Olibanum', 'Patchouli'], 'Men', 'Moderate', 'Summer, Office, Refreshing', 3, 'Exothermic Top', false, 'Eau de Parfum', NULL, 'Galvanized, luxurious, Stone-50 inspired fragrance with high-quality Mandarin Orange, Lemon and Vetiver, Sandalwood.');
+('Creed', 'Viking Cologne', 'Aromatic Fougere', ARRAY['Mandarin Orange', 'Lemon', 'Pink Pepper', 'Bergamot'], ARRAY['Lavender', 'Geranium', 'Nutmeg', 'Rosemary', 'Sage'], ARRAY['Vetiver', 'Sandalwood', 'Cedar', 'Olibanum', 'Patchouli'], 'Men', 'Moderate', 'Summer, Office, Refreshing', 3, 'Exothermic Top', false, 'Eau de Parfum', NULL, 'Galvanized, luxurious, Stone-50 inspired fragrance with high-quality Mandarin Orange, Lemon and Vetiver, Sandalwood.') ON CONFLICT (brand, name) DO NOTHING;
 
 
 INSERT INTO fragrances (brand, name, family, top_notes, heart_notes, base_notes, gender_profile, projection, use_case, phase, phase_label, is_user_created, concentration, clone_target, plain_description) VALUES ('Maison Alhambra', 'Jean Lowe Immortal', 'Amber Spicy', ARRAY['Bergamot', 'Ginger', 'Grapefruit'], ARRAY['Rosemary', 'Geranium', 'Sage'], ARRAY['Ambroxan', 'Amber', 'Labdanum'], 'Men', 'Strong', 'Signature', 1, 'The Opening', false, 'EDP', 'L''Immensite', 'A sharp, gingery citrus burst that transitions into a sophisticated, salty ambergris trail. It is the scent of modern success and boundless energy.') ON CONFLICT (brand, name) DO NOTHING;

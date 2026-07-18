@@ -52,8 +52,18 @@ BEGIN
   -- the session's timezone setting), which Postgres rejects in an index
   -- expression — converting to a fixed 'UTC' timestamp first makes the
   -- whole expression immutable.
+  --
+  -- DATE_TRUNC('week', ...) buckets ISO-style, Monday-start weeks, but
+  -- app/api/temptations/route.ts computes weekStart as the most recent
+  -- Sunday (`today - getUTCDay()` — Sunday is day 0). Shifting the
+  -- timestamp forward a day before truncating, then back a day after,
+  -- re-buckets it to the same Sunday-start week the route uses — without
+  -- this, a Sunday row is bucketed into next week by Postgres while the
+  -- route still considers it this week, so the API's weekly-cap check and
+  -- this unique index can disagree at the boundary (missed 500 vs. a
+  -- false 429).
   CREATE UNIQUE INDEX idx_temptations_user_id_week
-    ON public.temptations(user_id, DATE_TRUNC('week', shown_at AT TIME ZONE 'UTC'))
+    ON public.temptations(user_id, (DATE_TRUNC('week', (shown_at AT TIME ZONE 'UTC') + interval '1 day') - interval '1 day'))
     WHERE status = 'shown';
 END
 $$;

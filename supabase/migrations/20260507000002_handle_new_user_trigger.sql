@@ -3,16 +3,47 @@
 -- migration file. Reverse-engineered from the live production
 -- function/trigger definitions (read via execute_sql, 2026-07-17).
 --
--- public.profiles is itself not created by any migration in this repo
--- (same situation, out of scope to backfill here) — guard on its
--- existence so this still no-ops safely on a fresh preview branch that
--- replays history from scratch, and only takes effect where profiles
--- already exists (production, and any environment that already has it).
+-- public.profiles is itself not created by any migration in this repo —
+-- same gap, and a hard blocker on a fresh replay: dependent tables
+-- (insights_cache, trace_reactions, traces backfill above) FK to profiles
+-- and abort if it doesn't exist yet. Backfilled here (right after
+-- initial_schema, before anything that references it) instead of just
+-- guarded away. profiles.house_id FKs to public.houses, which has the
+-- same problem — backfilled first for the same reason. Both shapes
+-- verified read-only against production via Supabase MCP, 2026-07-18.
 
 DO $$
 BEGIN
+  IF to_regclass('public.houses') IS NULL THEN
+    CREATE TABLE public.houses (
+      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      name text NOT NULL,
+      descriptor text NOT NULL,
+      created_at timestamp with time zone NOT NULL DEFAULT now()
+    );
+
+    ALTER TABLE public.houses ENABLE ROW LEVEL SECURITY;
+
+    CREATE POLICY "houses readable" ON public.houses
+      FOR SELECT USING (true);
+  END IF;
+
   IF to_regclass('public.profiles') IS NULL THEN
-    RETURN;
+    CREATE TABLE public.profiles (
+      id uuid PRIMARY KEY REFERENCES auth.users(id),
+      display_name text,
+      avatar_url text,
+      created_at timestamp with time zone DEFAULT now(),
+      username text UNIQUE,
+      onboarding_completed_at timestamp with time zone,
+      house_id uuid REFERENCES public.houses(id)
+    );
+
+    ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+
+    CREATE POLICY profiles_owner ON public.profiles
+      FOR ALL
+      USING (auth.uid() = id);
   END IF;
 
   -- search_path = '' (not 'public'): 20260510_security_fixes.sql hardens
