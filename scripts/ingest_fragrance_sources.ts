@@ -152,6 +152,18 @@ async function processFile(supabase: SupabaseClient | null, file: string) {
   }
 
   const items = await classifyAndExtract(rawText)
+
+  // An item with a missing/unrecognized kind falls through both branches
+  // of the loop below silently — neither writes it nor errors on it. A
+  // mixed response would lose just that item; a wholly malformed response
+  // would archive the source with zero facts written. Fail before any
+  // cleanup/write happens so the source stays in incoming/ for retry.
+  for (const item of items) {
+    if (item.kind !== 'fragrance_profile' && item.kind !== 'layering_pattern') {
+      throw new Error(`unrecognized extraction item kind: ${JSON.stringify((item as { kind?: unknown }).kind)}`)
+    }
+  }
+
   await cleanupSourceFile(supabase, file)
 
   let profilesWritten = 0

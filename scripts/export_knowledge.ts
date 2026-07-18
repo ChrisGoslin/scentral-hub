@@ -84,9 +84,14 @@ async function fetchFacts(supabase: SupabaseClient): Promise<FragranceFactRow[]>
     // dropping another, since Postgres doesn't guarantee stable ordering
     // among ties across separate queries. id is the primary key, so it's
     // always unique and breaks every tie.
+    // Explicit projection, not select('*'): the table also has raw_text
+    // (the full original source, stored per row) and enriched (the raw LLM
+    // extraction JSON) — every extracted item repeats that source text, so
+    // pulling them into WARDROBE_INDEX.json balloons it far beyond the
+    // structured catalogue this export is meant to produce.
     const { data, error } = await supabase
       .from('fragrance_facts')
-      .select('*')
+      .select('id, brand, name, source_file, top_notes, heart_notes, base_notes, accord_families, role')
       .order('role', { ascending: true })
       .order('brand', { ascending: true })
       .order('id', { ascending: true })
@@ -106,9 +111,11 @@ async function fetchPatterns(supabase: SupabaseClient): Promise<LayeringPatternR
   for (;;) {
     // pattern_name is only unique within a source_file, so it alone is a
     // non-unique tie-breaker across pages — same issue as fetchFacts.
+    // Explicit projection for the same reason as fetchFacts: raw_text/
+    // enriched aren't part of the exported shape.
     const { data, error } = await supabase
       .from('layering_patterns')
-      .select('*')
+      .select('id, pattern_name, source_file, fragrance_names, roles, use_case, rationale')
       .order('pattern_name', { ascending: true })
       .order('id', { ascending: true })
       .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1)
