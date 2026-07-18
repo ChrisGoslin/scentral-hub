@@ -12,25 +12,40 @@
 -- point, and this migration's original body never matched it. Rewritten to
 -- match what's actually live rather than leave the app's shelf/blind-ranking
 -- audit trail broken on any environment built from these migrations.
+--
+-- Guarded on the table not already existing: on production (or anywhere
+-- this reconciliation has already run), a bare CREATE TABLE would abort
+-- with "relation already exists" and block this migration version from
+-- ever applying there. CREATE POLICY has no IF NOT EXISTS form, so the
+-- whole body — table, policy, indexes — is wrapped in one DO block rather
+-- than guarding each statement separately.
 
-CREATE TABLE public.shelf_events (
-  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  fragrance_id uuid NOT NULL REFERENCES public.fragrances(id) ON DELETE CASCADE,
-  event text NOT NULL CHECK (event IN ('added', 'removed', 'rank_changed', 'replaced', 'returned')),
-  old_rank integer,
-  new_rank integer,
-  created_at timestamp with time zone NOT NULL DEFAULT now()
-);
+DO $$
+BEGIN
+  IF to_regclass('public.shelf_events') IS NOT NULL THEN
+    RETURN;
+  END IF;
 
-ALTER TABLE public.shelf_events ENABLE ROW LEVEL SECURITY;
+  CREATE TABLE public.shelf_events (
+    id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    fragrance_id uuid NOT NULL REFERENCES public.fragrances(id) ON DELETE CASCADE,
+    event text NOT NULL CHECK (event IN ('added', 'removed', 'rank_changed', 'replaced', 'returned')),
+    old_rank integer,
+    new_rank integer,
+    created_at timestamp with time zone NOT NULL DEFAULT now()
+  );
 
-CREATE POLICY "own rows" ON public.shelf_events
-  FOR ALL
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
+  ALTER TABLE public.shelf_events ENABLE ROW LEVEL SECURITY;
 
-CREATE INDEX idx_shelf_events_user_id ON public.shelf_events(user_id);
-CREATE INDEX idx_shelf_events_fragrance_id ON public.shelf_events(fragrance_id);
-CREATE INDEX idx_shelf_events_created_at ON public.shelf_events(created_at DESC);
-CREATE INDEX idx_shelf_events_event ON public.shelf_events(event);
+  CREATE POLICY "own rows" ON public.shelf_events
+    FOR ALL
+    USING (auth.uid() = user_id)
+    WITH CHECK (auth.uid() = user_id);
+
+  CREATE INDEX idx_shelf_events_user_id ON public.shelf_events(user_id);
+  CREATE INDEX idx_shelf_events_fragrance_id ON public.shelf_events(fragrance_id);
+  CREATE INDEX idx_shelf_events_created_at ON public.shelf_events(created_at DESC);
+  CREATE INDEX idx_shelf_events_event ON public.shelf_events(event);
+END
+$$;

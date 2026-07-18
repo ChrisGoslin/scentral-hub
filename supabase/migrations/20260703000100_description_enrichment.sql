@@ -12,8 +12,14 @@
 -- live — this table is only ever touched with the service-role key. Same
 -- phantom-object pattern as shelf_events/temptations: rewritten to match
 -- what's actually live.
+--
+-- Guarded on the table not already existing: on any environment where
+-- description_enrichment_queue is already live in this exact shape (i.e.
+-- production, or anywhere this reconciliation has already run), a bare
+-- CREATE TABLE would abort with "relation already exists" and block this
+-- migration version from ever applying there.
 
-CREATE TABLE public.description_enrichment_queue (
+CREATE TABLE IF NOT EXISTS public.description_enrichment_queue (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   fragrance_id uuid NOT NULL UNIQUE REFERENCES fragrances ON DELETE CASCADE,
   name text NOT NULL,
@@ -43,12 +49,13 @@ begin
 end;
 $function$;
 
+DROP TRIGGER IF EXISTS description_enrichment_queue_approval ON public.description_enrichment_queue;
 CREATE TRIGGER description_enrichment_queue_approval
   BEFORE UPDATE ON public.description_enrichment_queue
   FOR EACH ROW EXECUTE FUNCTION public.apply_enrichment_approval();
 
 -- Indexes for query performance
-CREATE INDEX idx_enrichment_status ON public.description_enrichment_queue(status);
-CREATE INDEX idx_enrichment_fragrance_id ON public.description_enrichment_queue(fragrance_id);
-CREATE INDEX idx_enrichment_created_at ON public.description_enrichment_queue(created_at DESC);
-CREATE INDEX idx_enrichment_status_created_at ON public.description_enrichment_queue(status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_enrichment_status ON public.description_enrichment_queue(status);
+CREATE INDEX IF NOT EXISTS idx_enrichment_fragrance_id ON public.description_enrichment_queue(fragrance_id);
+CREATE INDEX IF NOT EXISTS idx_enrichment_created_at ON public.description_enrichment_queue(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_enrichment_status_created_at ON public.description_enrichment_queue(status, created_at DESC);
