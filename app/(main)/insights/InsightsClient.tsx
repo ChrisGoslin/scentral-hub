@@ -9,7 +9,7 @@ interface CachedInsights {
   your_impact?: {
     interactions_count?: number
     reactions_received?: number
-    saves_count?: number
+    too_real_count?: number
     summary?: string
   }
   best_traces?: Array<{
@@ -34,8 +34,8 @@ interface CachedInsights {
 }
 
 interface InsightsClientProps {
-  state: 'hydrated' | 'loading' | 'no-data'
-  anonId: string | null
+  state: 'hydrated' | 'no-data'
+  userId: string | null
   insights: CachedInsights | null
   computedAt: string | null
 }
@@ -68,7 +68,7 @@ export default function InsightsClient({ state, insights, computedAt }: Insights
           <EmptyState />
         )}
 
-        {(state === 'hydrated' || state === 'loading') && notEmpty ? (
+        {state === 'hydrated' && notEmpty ? (
           <>
             <Section title="Your Impact">
               <YourImpactSection impact={insights?.your_impact} />
@@ -94,10 +94,6 @@ export default function InsightsClient({ state, insights, computedAt }: Insights
               <TrajectorySection trajectory={insights?.trajectory} />
             </Section>
           </>
-        ) : state === 'loading' ? (
-          <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)' }}>
-            Computing your insights...
-          </div>
         ) : null}
       </div>
     </div>
@@ -134,7 +130,7 @@ function YourImpactSection({ impact }: { impact?: CachedInsights['your_impact'] 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
         <MetricBox label="Interactions" value={impact.interactions_count ?? 0} />
         <MetricBox label="Reactions Received" value={impact.reactions_received ?? 0} />
-        <MetricBox label="Saved" value={impact.saves_count ?? 0} />
+        <MetricBox label="Too Real" value={impact.too_real_count ?? 0} />
       </div>
     </Card>
   )
