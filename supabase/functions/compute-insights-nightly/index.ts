@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.40.0'
-import { computeCachedInsights, type CachedInsights } from '../../../lib/insights-impact.ts'
+import { computeCachedInsights, type CachedInsights } from '../_shared/insights-impact.ts'
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''

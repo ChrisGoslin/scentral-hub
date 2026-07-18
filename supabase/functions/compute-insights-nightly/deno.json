@@ -1,5 +1,5 @@
 {
   "tasks": {
-    "dev": "deno run --allow-all --unstable-kv supabase/functions/_shared/cors.ts ./index.ts"
+    "dev": "deno run --allow-all --unstable-kv ./index.ts"
   }
 }
