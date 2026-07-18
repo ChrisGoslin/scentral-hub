@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS wear_logs (
 
 ALTER TABLE wear_logs ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can manage their own logs" ON wear_logs;
 CREATE POLICY "Users can manage their own logs"
   ON wear_logs FOR ALL
   TO authenticated

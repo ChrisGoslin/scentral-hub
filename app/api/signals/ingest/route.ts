@@ -61,18 +61,23 @@ export async function POST(req: NextRequest) {
     metadataPayload = metadata
   }
 
+  // Anon key, not service-role: docs/nota/06-testing-security-abuse.md §2.3
+  // requires the service-role key never appear in an app/ code path. Writes
+  // are scoped by the "Allow anon insert" RLS policy on product_signals
+  // (INSERT only — no read/update/delete for anon), so this can't be used
+  // to do anything beyond adding a row even if fully compromised.
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY
-  if (!supabaseUrl || !serviceRoleKey) {
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!supabaseUrl || !anonKey) {
     console.error('signals/ingest: missing Supabase configuration')
     return NextResponse.json({ error: 'Server configuration error' }, { status: 500 })
   }
 
-  const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
+  const supabaseAnon = createClient(supabaseUrl, anonKey, {
     auth: { autoRefreshToken: false, persistSession: false },
   })
 
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await supabaseAnon
     .from('product_signals')
     .insert({
       source,

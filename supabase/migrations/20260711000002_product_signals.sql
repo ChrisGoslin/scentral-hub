@@ -20,10 +20,17 @@ CREATE INDEX idx_product_signals_source ON public.product_signals(source);
 CREATE INDEX idx_product_signals_feature_area ON public.product_signals(feature_area);
 
 ALTER TABLE public.product_signals ENABLE ROW LEVEL SECURITY;
--- No anon/authenticated policies: writes come from app/api/signals/ingest
--- (service-role key, server-side only); reads are the weekly brief script.
--- This table can carry raw user feedback text, so it stays service-role-only
--- by default rather than exposed to the anon/authenticated roles.
+-- app/api/signals/ingest/route.ts writes with the anon key + this INSERT-only
+-- policy, not the service-role key: docs/nota/06-testing-security-abuse.md
+-- §2.3 requires the service-role key never appear in an app/ code path.
+-- No SELECT/UPDATE/DELETE policy exists for anon or authenticated, so a
+-- caller can add a row but never read, modify, or delete any row (including
+-- their own) — reads stay restricted to the weekly brief script, which runs
+-- with the service-role key server-side.
+CREATE POLICY "Allow anon insert" ON public.product_signals
+  FOR INSERT
+  TO anon
+  WITH CHECK (true);
 
 CREATE OR REPLACE FUNCTION public.redact_old_product_signal_raw_text(retention interval DEFAULT interval '7 days')
 RETURNS integer
@@ -36,11 +43,15 @@ BEGIN
   -- metadata is arbitrary client-supplied JSON from a public endpoint (not
   -- derived analysis output), so it can carry the same PII raw_text can —
   -- clear it alongside raw_text rather than letting it outlive the window.
+  -- Checking raw_text alone for "already redacted" is a bypass: the same
+  -- public endpoint lets a caller submit the literal marker string as text
+  -- while still supplying real metadata, which would then never get
+  -- cleared. Re-check both fields independently.
   UPDATE public.product_signals
   SET raw_text = '[redacted after retention window]',
       metadata = NULL
   WHERE created_at < now() - retention
-    AND raw_text <> '[redacted after retention window]';
+    AND (raw_text <> '[redacted after retention window]' OR metadata IS NOT NULL);
 
   GET DIAGNOSTICS redacted_count = ROW_COUNT;
   RETURN redacted_count;

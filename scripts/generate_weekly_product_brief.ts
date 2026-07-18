@@ -408,6 +408,7 @@ async function main() {
       .gte('created_at', since.toISOString())
       .lte('created_at', until.toISOString())
       .order('created_at', { ascending: false })
+      .order('id', { ascending: false })
       .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1)
 
     if (error) {
