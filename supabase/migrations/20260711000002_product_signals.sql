@@ -4,7 +4,7 @@
 
 CREATE TABLE IF NOT EXISTS public.product_signals (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  created_at timestamp with time zone DEFAULT now(),
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
   source text NOT NULL, -- 'form' | 'email' | 'dm' | ...
   raw_text text NOT NULL,
   summary text,
@@ -43,6 +43,15 @@ ALTER TABLE public.product_signals ENABLE ROW LEVEL SECURITY;
 -- raw_text/tags:[]/metadata) — without constraining them here, a direct
 -- Data API caller could plant fabricated enrichment fields that the weekly
 -- brief then trusts and forwards to the LLM unredacted.
+--
+-- created_at is client-suppliable through the Data API like any other
+-- column despite the DEFAULT now() — a caller could set it to NULL (now
+-- blocked by NOT NULL) or a far-future timestamp, which would make
+-- redact_old_product_signal_raw_text's `created_at < now() - retention`
+-- predicate never select the row, leaving PII in raw_text/metadata
+-- indefinitely. Constraining it to a narrow window around the actual
+-- insert time closes that without needing to strip the column from the
+-- client's control entirely.
 CREATE POLICY "Allow anon insert" ON public.product_signals
   FOR INSERT
   TO anon
@@ -55,6 +64,7 @@ CREATE POLICY "Allow anon insert" ON public.product_signals
     AND persona_guess IS NULL
     AND feature_area IS NULL
     AND tags = '{}'
+    AND created_at BETWEEN now() - interval '5 minutes' AND now() + interval '5 minutes'
   );
 
 CREATE OR REPLACE FUNCTION public.redact_old_product_signal_raw_text(retention interval DEFAULT interval '7 days')

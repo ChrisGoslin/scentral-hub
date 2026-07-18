@@ -79,11 +79,17 @@ async function fetchFacts(supabase: SupabaseClient): Promise<FragranceFactRow[]>
   const rows: FragranceFactRow[] = []
   let page = 0
   for (;;) {
+    // role/brand are frequently tied (esp. both null) — .range() pagination
+    // over a non-unique order can return the same row on two pages while
+    // dropping another, since Postgres doesn't guarantee stable ordering
+    // among ties across separate queries. id is the primary key, so it's
+    // always unique and breaks every tie.
     const { data, error } = await supabase
       .from('fragrance_facts')
       .select('*')
       .order('role', { ascending: true })
       .order('brand', { ascending: true })
+      .order('id', { ascending: true })
       .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1)
     if (error) throw new Error(`fragrance_facts fetch failed: ${error.message}`)
     const batch = (data ?? []) as FragranceFactRow[]
@@ -98,10 +104,13 @@ async function fetchPatterns(supabase: SupabaseClient): Promise<LayeringPatternR
   const rows: LayeringPatternRow[] = []
   let page = 0
   for (;;) {
+    // pattern_name is only unique within a source_file, so it alone is a
+    // non-unique tie-breaker across pages — same issue as fetchFacts.
     const { data, error } = await supabase
       .from('layering_patterns')
       .select('*')
       .order('pattern_name', { ascending: true })
+      .order('id', { ascending: true })
       .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1)
     if (error) throw new Error(`layering_patterns fetch failed: ${error.message}`)
     const batch = (data ?? []) as LayeringPatternRow[]

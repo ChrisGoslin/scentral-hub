@@ -32,13 +32,25 @@ window to replace old raw text with a redaction marker while preserving source,
 metadata, tags, and future derived fields for reporting.
 
 **Not wired yet (TODO):** a Zapier zap pointed at this endpoint for
-form/email/DM sources. The endpoint is public and unauthenticated by design
-(server-side service-role writes, no anon RLS policy) — anyone with the URL
-can post a signal, so treat `source`/`metadata` as untrusted input downstream.
+form/email/DM sources. The endpoint is public and unauthenticated by design —
+`app/api/signals/ingest/route.ts` writes with the anon key, not the
+service-role key, through an anon INSERT-only RLS policy on
+`product_signals` (`supabase/migrations/20260711000002_product_signals.sql`).
+That policy is also reachable directly via the Supabase Data API with the
+public anon key, so a caller can bypass the route's IP rate limits and post
+straight to `/rest/v1/product_signals` — the policy constrains row shape
+(size caps, no client-set enrichment fields, `created_at` within a narrow
+window) but not request volume. Treat `source`/`raw_text`/`metadata` as
+untrusted input downstream regardless of which path a row arrived through.
 
 ## How the weekly brief is generated
 
-Sunday 23:00 UTC, `.github/workflows/weekly_product_brief.yml` runs
+**Currently manual-only:** the `schedule` trigger in
+`.github/workflows/weekly_product_brief.yml` is commented out until the
+`product_signals` migration is confirmed applied and the repo secrets are
+live — see that file's header. Until then, nothing runs automatically; use
+`workflow_dispatch` (or `npm run brief:weekly` locally) to generate a brief.
+Once re-enabled, Sunday 23:00 UTC will run
 `npm run brief:weekly` (`scripts/generate_weekly_product_brief.ts`), which:
 
 1. Pulls the last 7 days of `product_signals` — up to a 5,000-row fetch

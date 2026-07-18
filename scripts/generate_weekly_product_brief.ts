@@ -253,7 +253,9 @@ function selectSignalsForBrief(rawSignals: ProductSignalRow[]): SelectionResult 
   return { selected, dedupedDroppedCount: droppedCount, sourceAllocations }
 }
 
-async function clusterSignals(signals: ProductSignalRow[]): Promise<BriefResult> {
+async function clusterSignals(
+  signals: ProductSignalRow[],
+): Promise<{ brief: BriefResult; clusteredCount: number }> {
   // Per docs/nota/06-testing-security-abuse.md: free-text user data must be
   // redacted/tokenized before entering any LLM prompt, not just before
   // rendering output. This is public, unauthenticated submission text.
@@ -267,15 +269,19 @@ async function clusterSignals(signals: ProductSignalRow[]): Promise<BriefResult>
     tags: s.tags,
   }))
 
-  // signals is already sorted most-recent-first (selectSignalsForBrief).
-  // Greedily take entries until the character budget is spent rather than
-  // truncating the serialized JSON string mid-object, which would produce
-  // invalid JSON for the LLM.
+  // signals is already sorted most-recent-first (selectSignalsForBrief),
+  // which is itself already fair-allocated across sources/days. Stopping
+  // at the first entry that doesn't fit would undo that fairness — a large
+  // entry early in the list would block every smaller entry after it,
+  // including ones from sources/days the fair-share allocation specifically
+  // protected. Scan the whole list and skip individual oversized entries
+  // instead, so the budget is spent on entries that fit regardless of
+  // position.
   const payload: typeof fullPayload = []
   let chars = 0
   for (const entry of fullPayload) {
     const entryChars = JSON.stringify(entry).length
-    if (payload.length > 0 && chars + entryChars > MAX_PROMPT_CHARS) break
+    if (chars + entryChars > MAX_PROMPT_CHARS) continue
     payload.push(entry)
     chars += entryChars
   }
@@ -292,7 +298,7 @@ async function clusterSignals(signals: ProductSignalRow[]): Promise<BriefResult>
     json: true,
   })
 
-  return validateBriefResult(result)
+  return { brief: validateBriefResult(result), clusteredCount: payload.length }
 }
 
 function createSupabaseAdmin() {
@@ -486,15 +492,18 @@ async function main() {
   if (dedupedDroppedCount > 0) selectionNoteParts.push(`${dedupedDroppedCount} duplicate(s) dropped`)
   if (cappedSources.length > 0) selectionNoteParts.push(`fair-share capped: ${cappedSources.map((s) => s.source).join(', ')}`)
   if (fetchCeilingHit) selectionNoteParts.push(`fetch ceiling (${SIGNAL_FETCH_CEILING}) hit — see log`)
-  const selectionNote = selectionNoteParts.length > 0 ? `(${selectionNoteParts.join('; ')})` : ''
 
   console.log(`Clustering ${signals.length} signal(s)...`)
-  const brief = await clusterSignals(signals)
+  const { brief, clusteredCount } = await clusterSignals(signals)
+  if (clusteredCount < signals.length) {
+    selectionNoteParts.push(`prompt budget capped: ${clusteredCount}/${signals.length} clustered`)
+  }
+  const finalSelectionNote = selectionNoteParts.length > 0 ? `(${selectionNoteParts.join('; ')})` : ''
 
   const outDir = join(process.cwd(), 'docs/weekly')
   if (!existsSync(outDir)) mkdirSync(outDir, { recursive: true })
   const outPath = join(outDir, `PRODUCT_BRIEF_${todayStr}.md`)
-  writeFileSync(outPath, renderBrief(todayStr, signals.length, selectionNote, brief))
+  writeFileSync(outPath, renderBrief(todayStr, clusteredCount, finalSelectionNote, brief))
   console.log(`✓ Wrote ${outPath}`)
 }
 
