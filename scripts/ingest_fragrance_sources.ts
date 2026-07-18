@@ -174,6 +174,13 @@ async function processFile(supabase: SupabaseClient | null, file: string) {
       if (error) throw new Error(`fragrance_facts insert failed: ${error.message}`)
       profilesWritten++
     } else if (item.kind === 'layering_pattern') {
+      // A pattern with no fragrances is not a layering pattern — writing it
+      // anyway and moving the source to canonical/ would archive the file
+      // as successfully processed while silently dropping content that
+      // will never get retried.
+      if (!item.fragrance_names || item.fragrance_names.length === 0) {
+        throw new Error(`layering_pattern "${item.pattern_name}" has no fragrance_names`)
+      }
       const { error } = await supabase.from('layering_patterns').insert({
         pattern_name: item.pattern_name,
         source_file: file,

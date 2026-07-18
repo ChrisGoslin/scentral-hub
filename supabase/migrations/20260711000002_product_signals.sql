@@ -38,6 +38,11 @@ ALTER TABLE public.product_signals ENABLE ROW LEVEL SECURITY;
 -- either revoking anon INSERT here and moving writes behind an RPC/Edge
 -- Function, or a trigger-based per-IP counter, neither done here — tracked
 -- as a known gap, not silently accepted.
+-- summary/sentiment/persona_guess/feature_area/tags are derived analysis
+-- output the app never sets on insert (route.ts only ever inserts source/
+-- raw_text/tags:[]/metadata) — without constraining them here, a direct
+-- Data API caller could plant fabricated enrichment fields that the weekly
+-- brief then trusts and forwards to the LLM unredacted.
 CREATE POLICY "Allow anon insert" ON public.product_signals
   FOR INSERT
   TO anon
@@ -45,6 +50,11 @@ CREATE POLICY "Allow anon insert" ON public.product_signals
     length(source) <= 80
     AND length(raw_text) <= 12000
     AND (metadata IS NULL OR octet_length(metadata::text) <= 10000)
+    AND summary IS NULL
+    AND sentiment IS NULL
+    AND persona_guess IS NULL
+    AND feature_area IS NULL
+    AND tags = '{}'
   );
 
 CREATE OR REPLACE FUNCTION public.redact_old_product_signal_raw_text(retention interval DEFAULT interval '7 days')

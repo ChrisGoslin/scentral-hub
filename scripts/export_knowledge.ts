@@ -69,23 +69,47 @@ function createSupabaseAdmin() {
   )
 }
 
+// Supabase's Data API caps a single select at its configured max rows
+// (1,000 by default) with no error — an unpaginated select silently
+// returns only the first page once the tables grow past that, and the
+// generated exports would look complete while missing everything after.
+const PAGE_SIZE = 1000
+
 async function fetchFacts(supabase: SupabaseClient): Promise<FragranceFactRow[]> {
-  const { data, error } = await supabase
-    .from('fragrance_facts')
-    .select('*')
-    .order('role', { ascending: true })
-    .order('brand', { ascending: true })
-  if (error) throw new Error(`fragrance_facts fetch failed: ${error.message}`)
-  return (data ?? []) as FragranceFactRow[]
+  const rows: FragranceFactRow[] = []
+  let page = 0
+  for (;;) {
+    const { data, error } = await supabase
+      .from('fragrance_facts')
+      .select('*')
+      .order('role', { ascending: true })
+      .order('brand', { ascending: true })
+      .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1)
+    if (error) throw new Error(`fragrance_facts fetch failed: ${error.message}`)
+    const batch = (data ?? []) as FragranceFactRow[]
+    rows.push(...batch)
+    if (batch.length < PAGE_SIZE) break
+    page++
+  }
+  return rows
 }
 
 async function fetchPatterns(supabase: SupabaseClient): Promise<LayeringPatternRow[]> {
-  const { data, error } = await supabase
-    .from('layering_patterns')
-    .select('*')
-    .order('pattern_name', { ascending: true })
-  if (error) throw new Error(`layering_patterns fetch failed: ${error.message}`)
-  return (data ?? []) as LayeringPatternRow[]
+  const rows: LayeringPatternRow[] = []
+  let page = 0
+  for (;;) {
+    const { data, error } = await supabase
+      .from('layering_patterns')
+      .select('*')
+      .order('pattern_name', { ascending: true })
+      .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1)
+    if (error) throw new Error(`layering_patterns fetch failed: ${error.message}`)
+    const batch = (data ?? []) as LayeringPatternRow[]
+    rows.push(...batch)
+    if (batch.length < PAGE_SIZE) break
+    page++
+  }
+  return rows
 }
 
 function renderWardrobe(facts: FragranceFactRow[]): string {

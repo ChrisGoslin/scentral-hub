@@ -1,10 +1,17 @@
 # Generates the weekly nota. product brief and commits it to the repo.
 # Requires repo secrets: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_KEY,
 # ANTHROPIC_API_KEY. See docs/nota/PRODUCT_LOOP.md.
+#
+# The scheduled trigger is intentionally commented out: per
+# docs/KNOWLEDGE_ENGINE.md, the product_signals migration isn't applied yet
+# and these repo secrets aren't confirmed live. Running on a schedule before
+# both are in place means `npm run brief:weekly` fails every Sunday against
+# a missing table or missing credentials. Uncomment once both are verified,
+# and manual runs (workflow_dispatch) stay available in the meantime.
 name: Weekly Product Brief
 on:
-  schedule:
-    - cron: '0 23 * * 0' # Sunday 23:00 UTC
+  # schedule:
+  #   - cron: '0 23 * * 0' # Sunday 23:00 UTC
   workflow_dispatch: {}
 jobs:
   generate-brief:
