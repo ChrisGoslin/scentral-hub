@@ -20,6 +20,13 @@ const signalsDailyLimiter = makeLimiter('signals-ingest-daily', 300, '1 d')
 const MAX_SOURCE_LENGTH = 80
 const MAX_TEXT_LENGTH = 12_000
 const MAX_METADATA_BYTES = 10_000
+// A byte-size cap alone doesn't bound worst case: many tiny keys (e.g.
+// 1,192 single-digit numeric keys) can serialize under 10KB via compact
+// JSON.stringify() here but exceed the DB's jsonb::text limit once Postgres
+// adds formatting whitespace — a request this check accepts can still get
+// rejected by the DB CHECK. A key-count cap is stable across both
+// serializations regardless of formatting differences.
+const MAX_METADATA_KEYS = 50
 
 export async function POST(req: NextRequest) {
   const ip = clientIp(req)
@@ -54,6 +61,12 @@ export async function POST(req: NextRequest) {
 
   let metadataPayload: unknown = null
   if (metadata !== undefined) {
+    if (metadata !== null && (typeof metadata !== 'object' || Array.isArray(metadata))) {
+      return NextResponse.json({ error: 'metadata must be a JSON object' }, { status: 400 })
+    }
+    if (metadata !== null && Object.keys(metadata as Record<string, unknown>).length > MAX_METADATA_KEYS) {
+      return NextResponse.json({ error: 'metadata has too many keys' }, { status: 400 })
+    }
     const serialized = JSON.stringify(metadata)
     if (!serialized || Buffer.byteLength(serialized, 'utf8') > MAX_METADATA_BYTES) {
       return NextResponse.json({ error: 'metadata exceeds allowed size' }, { status: 400 })

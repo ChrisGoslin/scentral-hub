@@ -58,13 +58,19 @@ CREATE POLICY "Allow anon insert" ON public.product_signals
   WITH CHECK (
     length(source) <= 80
     AND length(raw_text) <= 12000
-    -- The route measures Buffer.byteLength(JSON.stringify(metadata)) <=
-    -- 10,000 (compact JSON, no extra whitespace). jsonb::text output adds
-    -- a space after every ':' and ',', so the same object can exceed
-    -- 10,000 bytes here even though the route accepted it — a false
-    -- rejection that surfaces as a confusing 500. 12,000 gives headroom
-    -- for that formatting overhead while still bounding size.
-    AND (metadata IS NULL OR octet_length(metadata::text) <= 12000)
+    -- Byte-size alone isn't a stable equivalent to the route's compact
+    -- JSON.stringify() measurement: many tiny keys can stay under the
+    -- route's 10KB while exceeding this looser 12,000-byte allowance once
+    -- jsonb::text formatting overhead is added (Codex found a concrete
+    -- counter-example: 1,192 single-digit keys serializes to 9,619 bytes
+    -- via JSON.stringify but 12,002 via jsonb::text). A key-count cap is
+    -- stable across both serializations and closes that regardless of
+    -- formatting differences — the route enforces the same 50-key cap.
+    AND (metadata IS NULL OR (
+      octet_length(metadata::text) <= 12000
+      AND jsonb_typeof(metadata) = 'object'
+      AND (SELECT count(*) FROM jsonb_object_keys(metadata)) <= 50
+    ))
     AND summary IS NULL
     AND sentiment IS NULL
     AND persona_guess IS NULL

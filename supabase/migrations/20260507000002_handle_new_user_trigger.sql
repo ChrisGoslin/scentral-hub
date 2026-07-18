@@ -22,6 +22,11 @@ BEGIN
       descriptor text NOT NULL,
       created_at timestamp with time zone NOT NULL DEFAULT now()
     );
+
+    ALTER TABLE public.houses ENABLE ROW LEVEL SECURITY;
+
+    CREATE POLICY "houses readable" ON public.houses
+      FOR SELECT USING (true);
   END IF;
 
   IF to_regclass('public.profiles') IS NULL THEN
