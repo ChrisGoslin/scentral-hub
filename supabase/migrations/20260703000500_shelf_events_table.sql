@@ -1,26 +1,36 @@
 -- Epic 13: Insights Dashboard — Shelf event log for taste evolution tracking
+--
+-- Original body here created a legacy anon_id/event_type shape that no
+-- shelf writer has ever used. app/api/shelf/route.ts, app/api/blind-ranking/
+-- reveal/route.ts, and app/(main)/shelf/page.tsx all insert user_id/event/
+-- old_rank/new_rank — verified against the live production table (Supabase
+-- MCP, 2026-07-18), which already has exactly that shape (id bigint
+-- identity, user_id uuid, fragrance_id uuid, event text, old_rank/new_rank
+-- int, created_at) and a single "own rows" ALL policy on auth.uid() =
+-- user_id. Same phantom-object pattern as handle_new_user/profiles found
+-- earlier: the real table was created directly against production at some
+-- point, and this migration's original body never matched it. Rewritten to
+-- match what's actually live rather than leave the app's shelf/blind-ranking
+-- audit trail broken on any environment built from these migrations.
 
 CREATE TABLE public.shelf_events (
-  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  anon_id text NOT NULL REFERENCES public.profiles(anon_id) ON DELETE CASCADE,
+  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   fragrance_id uuid NOT NULL REFERENCES public.fragrances(id) ON DELETE CASCADE,
-  event_type text NOT NULL CHECK (event_type IN ('add', 'remove', 'reorder')),
-  created_at timestamp with time zone DEFAULT now()
+  event text NOT NULL CHECK (event IN ('added', 'removed', 'rank_changed', 'replaced', 'returned')),
+  old_rank integer,
+  new_rank integer,
+  created_at timestamp with time zone NOT NULL DEFAULT now()
 );
 
--- RLS for shelf_events
 ALTER TABLE public.shelf_events ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can view their own shelf events"
-  ON public.shelf_events FOR SELECT
-  USING (anon_id = current_setting('app.current_anon_id', true));
+CREATE POLICY "own rows" ON public.shelf_events
+  FOR ALL
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY "Users can create shelf events"
-  ON public.shelf_events FOR INSERT
-  WITH CHECK (anon_id = current_setting('app.current_anon_id', true));
-
--- Indexes for performance
-CREATE INDEX idx_shelf_events_anon_id ON public.shelf_events(anon_id);
+CREATE INDEX idx_shelf_events_user_id ON public.shelf_events(user_id);
 CREATE INDEX idx_shelf_events_fragrance_id ON public.shelf_events(fragrance_id);
 CREATE INDEX idx_shelf_events_created_at ON public.shelf_events(created_at DESC);
-CREATE INDEX idx_shelf_events_event_type ON public.shelf_events(event_type);
+CREATE INDEX idx_shelf_events_event ON public.shelf_events(event);
