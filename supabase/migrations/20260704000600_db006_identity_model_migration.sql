@@ -99,10 +99,9 @@ BEGIN
         )
     $policy$;
 
-    EXECUTE $policy$
-      CREATE POLICY "System can insert temptations" ON temptations
-        FOR INSERT WITH CHECK (true)
-    $policy$;
+    -- Note: "System can insert temptations" policy is intentionally NOT recreated.
+    -- It had no role restriction (WITH CHECK (true), no TO clause), which applies to PUBLIC.
+    -- Service role bypasses RLS entirely and needs no explicit policy.
   END IF;
 END
 $$;

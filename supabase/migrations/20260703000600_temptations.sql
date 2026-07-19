@@ -81,6 +81,10 @@ BEGIN
         WITH CHECK (auth.uid() = user_id);
 
       CREATE INDEX IF NOT EXISTS idx_temptations_user_id ON public.temptations(user_id);
+      CREATE INDEX IF NOT EXISTS idx_temptations_user_id_week ON public.temptations(
+        user_id,
+        DATE_TRUNC('week', (shown_at AT TIME ZONE 'UTC') + INTERVAL '1 day') - INTERVAL '1 day'
+      );
     END IF;
 
     RETURN;
