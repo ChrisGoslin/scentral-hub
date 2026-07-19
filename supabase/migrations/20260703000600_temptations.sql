@@ -46,13 +46,16 @@ BEGIN
 
       -- Legacy status set was pending/viewed/wishlisted/bought/dismissed;
       -- live is shown/viewed/wishlisted/blind_buy/maybe_later/dismissed.
+      -- The legacy CHECK constraint must be dropped BEFORE remapping the
+      -- values — while it's still active it only permits the old set, so
+      -- writing 'shown'/'blind_buy' into it aborts the whole conversion.
+      ALTER TABLE public.temptations DROP CONSTRAINT IF EXISTS temptations_status_check;
       UPDATE public.temptations SET status = CASE status
         WHEN 'pending' THEN 'shown'
         WHEN 'bought' THEN 'blind_buy'
         ELSE status
       END;
       ALTER TABLE public.temptations ALTER COLUMN status SET DEFAULT 'shown';
-      ALTER TABLE public.temptations DROP CONSTRAINT IF EXISTS temptations_status_check;
       ALTER TABLE public.temptations ADD CONSTRAINT temptations_status_check
         CHECK (status IN ('shown', 'viewed', 'wishlisted', 'blind_buy', 'maybe_later', 'dismissed'));
 
@@ -60,7 +63,15 @@ BEGIN
       DROP POLICY IF EXISTS "Users can update own temptations" ON public.temptations;
       DROP POLICY IF EXISTS "System can insert temptations" ON public.temptations;
 
-      ALTER TABLE public.temptations DROP COLUMN anon_id;
+      -- anon_id is NOT dropped: rows converted here may have a null
+      -- user_id (no way to derive it — profiles never had an anon_id
+      -- column to map through, so the "claim via anon_id on sign-in"
+      -- flow DB-006 describes was never actually wireable against real
+      -- production). Dropping anon_id would silently and permanently
+      -- discard the only remaining identifier on those rows. Left in
+      -- place, unindexed and unreferenced by any policy, as an inert
+      -- historical field an admin could still use for manual
+      -- reconciliation later.
       ALTER TABLE public.temptations DROP COLUMN IF EXISTS created_at;
       ALTER TABLE public.temptations DROP COLUMN IF EXISTS updated_at;
 

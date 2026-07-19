@@ -47,17 +47,28 @@ ALTER TABLE evolution_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE noseprint_history ENABLE ROW LEVEL SECURITY;
 
 -- RLS policies: users can see their own evolution events
+--
+-- This file was re-versioned — on a database where the former
+-- 20260703_noseprint_evolution.sql already created these tables/indexes/
+-- policies, the CREATE TABLE/INDEX IF NOT EXISTS above safely no-op, but
+-- a bare CREATE POLICY with the same name aborts on the first one.
+-- DROP POLICY IF EXISTS before each.
+DROP POLICY IF EXISTS evolution_events_select ON evolution_events;
 CREATE POLICY evolution_events_select ON evolution_events
   FOR SELECT USING (anon_id = current_setting('app.current_anon_id', true));
 
+DROP POLICY IF EXISTS evolution_events_insert ON evolution_events;
 CREATE POLICY evolution_events_insert ON evolution_events
   FOR INSERT WITH CHECK (anon_id = current_setting('app.current_anon_id', true));
 
+DROP POLICY IF EXISTS evolution_events_update ON evolution_events;
 CREATE POLICY evolution_events_update ON evolution_events
   FOR UPDATE USING (anon_id = current_setting('app.current_anon_id', true));
 
+DROP POLICY IF EXISTS noseprint_history_select ON noseprint_history;
 CREATE POLICY noseprint_history_select ON noseprint_history
   FOR SELECT USING (anon_id = current_setting('app.current_anon_id', true));
 
+DROP POLICY IF EXISTS noseprint_history_insert ON noseprint_history;
 CREATE POLICY noseprint_history_insert ON noseprint_history
   FOR INSERT WITH CHECK (anon_id = current_setting('app.current_anon_id', true));

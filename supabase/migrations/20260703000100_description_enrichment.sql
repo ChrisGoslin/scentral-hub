@@ -69,6 +69,16 @@ CREATE TABLE IF NOT EXISTS public.description_enrichment_queue (
 
 ALTER TABLE public.description_enrichment_queue ENABLE ROW LEVEL SECURITY;
 
+-- The original migration's "Service role can manage enrichment queue"
+-- policy had no role or command restriction (USING (true) WITH CHECK
+-- (true)), so it applied to every role, not just the service role —
+-- CREATE TABLE IF NOT EXISTS above preserves it on an upgraded table
+-- since it never touches existing policies. Dropped here so any role that
+-- still has table privileges can't read/update queue rows and trigger the
+-- SECURITY DEFINER approval flow that overwrites fragrances.
+-- plain_description, bypassing the admin-passcode API entirely.
+DROP POLICY IF EXISTS "Service role can manage enrichment queue" ON public.description_enrichment_queue;
+
 CREATE OR REPLACE FUNCTION public.apply_enrichment_approval()
 RETURNS trigger
 LANGUAGE plpgsql

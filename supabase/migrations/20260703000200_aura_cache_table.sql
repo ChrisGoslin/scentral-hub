@@ -14,12 +14,19 @@ create table if not exists aura_cache (
   unique(fragrance_id, context_type, weather_state)
 );
 
-create index on aura_cache (fragrance_id, context_type);
-create index on aura_cache (expires_at);
+-- This file was re-versioned — on a database where the former
+-- 20260703_aura_cache_table.sql already ran, CREATE TABLE IF NOT EXISTS
+-- safely reuses the table, but these unnamed indexes and the policy
+-- already exist under Postgres's generated names / the same policy name,
+-- and bare re-creation aborts. Named explicitly + IF NOT EXISTS /
+-- DROP POLICY IF EXISTS first.
+create index if not exists idx_aura_cache_fragrance_context on aura_cache (fragrance_id, context_type);
+create index if not exists idx_aura_cache_expires_at on aura_cache (expires_at);
 
 -- Enable RLS
 alter table aura_cache enable row level security;
 
+drop policy if exists "Public read aura_cache" on aura_cache;
 create policy "Public read aura_cache" on aura_cache
   for select to authenticated, anon
   using (true);

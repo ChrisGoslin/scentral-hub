@@ -57,13 +57,20 @@ BEGIN
       ALTER TABLE public.shelf_events ADD CONSTRAINT shelf_events_event_check
         CHECK (event IN ('added', 'removed', 'rank_changed', 'replaced', 'returned'));
 
-      -- Policies referencing anon_id must be dropped before the column
-      -- they depend on — Postgres rejects DROP COLUMN while a policy
+      -- Policies referencing anon_id must be dropped before we can stop
+      -- relying on it — Postgres rejects DROP COLUMN while a policy
       -- predicate still references it.
       DROP POLICY IF EXISTS "Users can view their own shelf events" ON public.shelf_events;
       DROP POLICY IF EXISTS "Users can create shelf events" ON public.shelf_events;
 
-      ALTER TABLE public.shelf_events DROP COLUMN anon_id;
+      -- anon_id is NOT dropped: rows converted here may have a null
+      -- user_id (no way to derive it — profiles never had an anon_id
+      -- column to map through, so the "claim on sign-in" flow this
+      -- comment block used to describe was never actually wireable).
+      -- Dropping anon_id would silently and permanently discard the only
+      -- remaining identifier on those rows. Left in place, unindexed and
+      -- unreferenced by any policy, as an inert historical field an admin
+      -- could still use for manual reconciliation later.
       ALTER TABLE public.shelf_events DROP COLUMN IF EXISTS event_type;
 
       CREATE POLICY "own rows" ON public.shelf_events

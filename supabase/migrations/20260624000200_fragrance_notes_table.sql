@@ -12,4 +12,9 @@ create table if not exists fragrance_notes (
   created_at timestamptz default now()
 );
 
-create index on fragrance_notes (volatility_class);
+-- This file was re-versioned — on a database where the former
+-- 20260624_fragrance_notes_table.sql already ran, CREATE TABLE IF NOT
+-- EXISTS safely reuses the table, but an unnamed index already exists
+-- under Postgres's generated name and a bare CREATE INDEX with the same
+-- generated name aborts. Named explicitly + IF NOT EXISTS.
+create index if not exists idx_fragrance_notes_volatility_class on fragrance_notes (volatility_class);
