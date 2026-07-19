@@ -9,7 +9,7 @@ interface CachedInsights {
   your_impact: {
     interactions_count: number
     reactions_received: number
-    saves_count: number
+    too_real_count: number
     summary: string
   }
   best_traces: Array<{
@@ -101,12 +101,12 @@ async function computeUserInsights(userId: string): Promise<CachedInsights | nul
     // Compute Your Impact
     const interactionsCount = traces.length
     const reactionsReceived = reactions.length
-    const savesCount = reactions.filter(r => r.reaction === 'too_real').length
+    const tooRealCount = reactions.filter(r => r.reaction === 'too_real').length
 
     const yourImpact = {
       interactions_count: interactionsCount,
       reactions_received: reactionsReceived,
-      saves_count: savesCount,
+      too_real_count: tooRealCount,
       summary:
         interactionsCount > 0
           ? `You've described ${interactionsCount} scent${interactionsCount === 1 ? '' : 's'} so far.`

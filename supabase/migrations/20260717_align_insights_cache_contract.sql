@@ -25,8 +25,17 @@ BEGIN
   END IF;
 END $$;
 
+-- Drop legacy policies before the anon_id column they reference is removed
+-- below — Postgres refuses to DROP COLUMN when a policy predicate depends
+-- on it (without CASCADE, which we don't want here).
+DROP POLICY IF EXISTS "Users can view their own insights" ON public.insights_cache;
+DROP POLICY IF EXISTS "Service role can write insights" ON public.insights_cache;
+DROP POLICY IF EXISTS "Service role can update insights" ON public.insights_cache;
+
 -- anon_id (text, FK profiles.anon_id) -> user_id (uuid, FK profiles.id).
 DO $$
+DECLARE
+  profiles_has_anon_id boolean;
 BEGIN
   IF EXISTS (
     SELECT 1 FROM information_schema.columns
@@ -38,10 +47,27 @@ BEGIN
     ALTER TABLE public.insights_cache DROP CONSTRAINT IF EXISTS insights_cache_pkey;
     ALTER TABLE public.insights_cache ADD COLUMN user_id uuid REFERENCES public.profiles(id) ON DELETE CASCADE;
 
-    UPDATE public.insights_cache ic
-    SET user_id = p.id
-    FROM public.profiles p
-    WHERE p.anon_id = ic.anon_id;
+    SELECT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'anon_id'
+    ) INTO profiles_has_anon_id;
+
+    IF profiles_has_anon_id THEN
+      EXECUTE '
+        UPDATE public.insights_cache ic
+        SET user_id = p.id
+        FROM public.profiles p
+        WHERE p.anon_id = ic.anon_id
+      ';
+    ELSE
+      UPDATE public.insights_cache ic
+      SET user_id = p.id
+      FROM public.profiles p
+      WHERE p.id::text = ic.anon_id;
+    END IF;
+
+    RAISE NOTICE 'insights_cache: % row(s) have no matching profile and will be permanently deleted (anon_id could not map to user_id)',
+      (SELECT count(*) FROM public.insights_cache WHERE user_id IS NULL);
 
     DELETE FROM public.insights_cache WHERE user_id IS NULL;
 
@@ -63,9 +89,22 @@ BEGIN
     ALTER TABLE public.insights_cache ADD COLUMN period text NOT NULL DEFAULT 'latest';
     ALTER TABLE public.insights_cache ADD COLUMN payload jsonb NOT NULL DEFAULT '{}'::jsonb;
 
+    -- your_impact.saves_count was renamed to too_real_count (see the
+    -- saves_count -> too_real_count reaction-counting fix elsewhere this
+    -- session) — InsightsClient reads too_real_count only, so copying the
+    -- legacy JSON verbatim would leave any pre-existing cache row showing
+    -- zero "Too Real" reactions until the next nightly recompute overwrites
+    -- it. Rewrite the key while constructing the payload instead of
+    -- passing it through unchanged.
     UPDATE public.insights_cache
     SET payload = jsonb_build_object(
-      'your_impact', COALESCE(your_impact, '{}'::jsonb),
+      'your_impact', (
+        COALESCE(your_impact, '{}'::jsonb)
+        - 'saves_count'
+      ) || jsonb_build_object(
+        'too_real_count',
+        COALESCE(your_impact->'too_real_count', your_impact->'saves_count', '0'::jsonb)
+      ),
       'best_traces', COALESCE(best_traces, '[]'::jsonb),
       'scentiment_vision', COALESCE(scentiment_vision, '{}'::jsonb),
       'taste_evolution', COALESCE(taste_evolution, '[]'::jsonb),
@@ -94,10 +133,8 @@ DROP INDEX IF EXISTS public.idx_insights_cache_anon_id;
 
 -- Realign RLS policies to the user_id-keyed contract (verified live shape:
 -- a single owner-scoped ALL policy; the nightly job writes via the
--- service-role key, which bypasses RLS entirely).
-DROP POLICY IF EXISTS "Users can view their own insights" ON public.insights_cache;
-DROP POLICY IF EXISTS "Service role can write insights" ON public.insights_cache;
-DROP POLICY IF EXISTS "Service role can update insights" ON public.insights_cache;
+-- service-role key, which bypasses RLS entirely). Legacy policies already
+-- dropped above, before the anon_id column removal.
 
 DO $$
 BEGIN

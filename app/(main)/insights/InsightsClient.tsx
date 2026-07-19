@@ -9,7 +9,7 @@ interface CachedInsights {
   your_impact?: {
     interactions_count?: number
     reactions_received?: number
-    saves_count?: number
+    too_real_count?: number
     summary?: string
   }
   best_traces?: Array<{
@@ -134,7 +134,7 @@ function YourImpactSection({ impact }: { impact?: CachedInsights['your_impact'] 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
         <MetricBox label="Interactions" value={impact.interactions_count ?? 0} />
         <MetricBox label="Reactions Received" value={impact.reactions_received ?? 0} />
-        <MetricBox label="Saved" value={impact.saves_count ?? 0} />
+        <MetricBox label="Too Real" value={impact.too_real_count ?? 0} />
       </div>
     </Card>
   )
