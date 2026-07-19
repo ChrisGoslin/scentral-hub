@@ -12,6 +12,7 @@ Read in this order:
 4. [docs/nota/07-engineering-handover.md](./nota/07-engineering-handover.md) - engineering context, known rough edges, and source-of-truth order.
 5. [docs/nota/08-release-research-pipeline.md](./nota/08-release-research-pipeline.md) - nota-first fork/tooling plan for source-backed enrichment and App Store release work.
 6. [docs/nota/](./nota/) - active audit suite, design notes, architecture, backlog, and testing/security docs.
+7. [docs/nota/11-portability-concierge.md](./nota/11-portability-concierge.md) - approved customer-history import boundary, preview workflow, and release gates.
 
 Older Scentral, AnotherSense, and BaseNote docs may be useful history, but treat them as stale unless one of the files above points to them.
 

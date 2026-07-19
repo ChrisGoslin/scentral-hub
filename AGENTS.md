@@ -141,6 +141,7 @@ If a "fact" is not in these docs, the repo, or the database, it is NOT a fact ye
 - **Before writing any code:** check if the feature already exists on main (`git log`, `find app -name "page.tsx"`).
 - Before DB/auth changes: inspect first; SHOW the migration/SQL and wait for explicit "approved" before applying.
 - Before claiming a third-party tool does X: web-search and cite, or say it's unverified.
+- **Portability boundary:** nota. may ingest customer-provided files or pasted text. A direct connector requires an official API or written permission plus a separate legal/security review. Never request third-party passwords, automate authenticated extraction, or treat an LLM match as catalogue truth.
 - When unsure: ask one specific question. Do not guess and proceed.
 
 ## 4. Forbidden without explicit approval
