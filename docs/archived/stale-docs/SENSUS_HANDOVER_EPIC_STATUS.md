@@ -1,3 +1,7 @@
+# ARCHIVED / SUPERSEDED
+
+This document is historical and must not be used as current project truth. Sensus was an older name and product phase for what is now nota.; this specific plan is superseded by `AGENTS.md`, `CLAUDE.md`, `docs/index.md`, and the active nota. docs under `docs/nota/`.
+
 # SENSUS OVERHAUL — EPIC STATUS & HANDOVER BRIEF
 **Date:** 2026-06-22  
 **Timeline:** Week 1 complete. Production Sprints: Weeks 2–10

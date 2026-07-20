@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Onboarding Flow (Sanctuary Profiler)', () => {
   test('redirects truly new users into onboarding', async ({ page }) => {
-    await page.goto('/discover');
+    await page.goto('/study');
     await expect(page).toHaveURL(/\/onboarding/);
     await expect(page.getByText('Step 1 of 3')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Skip' })).toBeVisible();
@@ -36,7 +36,7 @@ test.describe('Onboarding Flow (Sanctuary Profiler)', () => {
     await exploreBtn.click();
 
     // Should land on discover and set localStorage
-    await expect(page).toHaveURL(/\/discover/, { timeout: 20_000 });
+    await expect(page).toHaveURL(/\/study/, { timeout: 20_000 });
     
     const onboarded = await page.evaluate(() => localStorage.getItem('scentral_onboarded'));
     const persona = await page.evaluate(() => localStorage.getItem('scentral_persona'));
@@ -50,6 +50,6 @@ test.describe('Onboarding Flow (Sanctuary Profiler)', () => {
     const skipBtn = page.getByRole('button', { name: 'Skip' });
     await expect(skipBtn).toBeVisible({ timeout: 10_000 });
     await skipBtn.click();
-    await expect(page).toHaveURL(/\/discover/, { timeout: 20_000 });
+    await expect(page).toHaveURL(/\/study/, { timeout: 20_000 });
   });
 });

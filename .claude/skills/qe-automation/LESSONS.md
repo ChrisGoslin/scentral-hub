@@ -30,3 +30,7 @@
 ## QE-7 (2026-07-05) — `networkidle` wait is a flake source on data-heavy dev pages
 **Bug class:** `page.waitForLoadState('networkidle')` against `/discover` (127k-row catalogue + PostHog/analytics keep-alive requests) never reliably settles, causing intermittent 30s timeouts unrelated to the feature under test.
 **Guard now in place:** `e2e/discover.spec.ts` rewritten to wait on specific elements (`getByPlaceholder(...)`, `getByText(...)` with explicit `toBeVisible({ timeout })`) instead of `networkidle`. Apply the same pattern to any future spec touching a data-heavy or analytics-instrumented page.
+
+## QE-8 (2026-07-19) — Security tests existed without a runnable package script
+**Bug class:** regression tests under `tests/security` were present but `package.json` exposed no unit-test command, so normal project checks could skip them.
+**Guard now in place:** `npm run test:unit` runs all `tests/**/*.test.mjs`, including forged wear-log identity and portability preview cases.

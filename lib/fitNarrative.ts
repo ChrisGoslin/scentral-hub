@@ -44,7 +44,7 @@ export function getFitNarrative(
   }
 
   if (isPreferred) return {
-    level: 'signature', chip: '◆ Strong fit',
+    level: 'signature', chip: '◆ Matches your pattern',
     narrative: SIGNATURE[persona.id] ?? `${fragrance_name} suits your identity.`,
     inspired_by_cue: true,
   }

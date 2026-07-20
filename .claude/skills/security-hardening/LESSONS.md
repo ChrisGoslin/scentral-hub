@@ -17,3 +17,7 @@
 ## SEC-4 (2026-07-04) — Analytics load unconditionally (GDPR gap)
 **What happened:** PostHog and Sentry initialise for all visitors with no consent gate, ahead of an EU-facing domain launch.
 **Guard now in place:** Consent gating + privacy-page truthing added to the pre-launch critical path (06 §2.6, backlog §1); new-service checklist requires processor listing + consent review.
+
+## SEC-5 (2026-07-19) — Wear logging trusted caller identity and bypassed RLS
+**What happened:** `/api/wear-log` accepted `user_id` from the browser and inserted with a service-role client. A caller could attribute a wear to another account if they knew its ID.
+**Guard now in place:** The route uses a request-scoped server client, verifies the current user, derives `user_id` from that identity, validates the payload, and writes through RLS. `tests/security/wear-log.test.mjs` prevents forged identity from re-entering the insert object. The same pattern is mandatory before portability can commit personal history.
