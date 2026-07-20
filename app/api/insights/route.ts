@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
+import { fetchUserTraces, fetchUserCollections, fetchShelfEvents } from '@/lib/insightsQueries'
 
 /**
  * GET /api/insights
@@ -112,9 +113,9 @@ async function computeInsights(
   try {
     // Fetch all user data in parallel
     const [tracesResult, collectionsResult, shelfEventsResult] = await Promise.all([
-      supabase.from('traces').select('id, user_id, body').eq('user_id', userId).limit(100),
-      supabase.from('collections').select('id, fragrance_id, affinity_score').eq('user_id', userId),
-      supabase.from('shelf_events').select('id, fragrance_id, event_type, created_at').eq('user_id', userId).order('created_at', { ascending: true }),
+      fetchUserTraces(supabase, userId),
+      fetchUserCollections(supabase, userId),
+      fetchShelfEvents(supabase, userId),
     ])
 
     const traces = tracesResult.data ?? []

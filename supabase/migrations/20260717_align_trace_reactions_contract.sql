@@ -39,11 +39,19 @@ BEGIN
     -- The legacy column has no format constraint, so malformed values would
     -- abort the cast below before orphan cleanup ever runs. Remove them
     -- first while trace_id is still text.
+    RAISE NOTICE 'Trace reactions: deleting % malformed rows',
+      (SELECT COUNT(*) FROM public.trace_reactions
+       WHERE trace_id !~ '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$');
+
     DELETE FROM public.trace_reactions
     WHERE trace_id !~ '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$';
 
     ALTER TABLE public.trace_reactions
       ALTER COLUMN trace_id TYPE uuid USING trace_id::uuid;
+
+    RAISE NOTICE 'Trace reactions: deleting % orphaned rows',
+      (SELECT COUNT(*) FROM public.trace_reactions tr
+       WHERE NOT EXISTS (SELECT 1 FROM public.traces t WHERE t.id = tr.trace_id));
 
     DELETE FROM public.trace_reactions tr
     WHERE NOT EXISTS (SELECT 1 FROM public.traces t WHERE t.id = tr.trace_id);
@@ -169,6 +177,11 @@ BEGIN
     ALTER TABLE public.trace_reactions DROP CONSTRAINT IF EXISTS trace_reactions_pkey;
     ALTER TABLE public.trace_reactions DROP COLUMN id;
     ALTER TABLE public.trace_reactions ADD CONSTRAINT trace_reactions_pkey PRIMARY KEY (trace_id, user_id);
+
+    UPDATE public.trace_reactions SET created_at = now() WHERE created_at IS NULL;
+    ALTER TABLE public.trace_reactions
+      ALTER COLUMN created_at SET DEFAULT now(),
+      ALTER COLUMN created_at SET NOT NULL;
   END IF;
 END $$;
 

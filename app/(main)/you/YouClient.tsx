@@ -191,7 +191,8 @@ export default function YouClient(props: YouClientProps) {
       typeof entry === 'object' &&
       typeof (entry as WearNoteEntry).fragrance_id === 'string' &&
       typeof (entry as WearNoteEntry).note === 'string' &&
-      typeof (entry as WearNoteEntry).date === 'string'
+      typeof (entry as WearNoteEntry).date === 'string' &&
+      Number.isFinite(Date.parse((entry as WearNoteEntry).date))
     )
     setLocalCollectionCount(col.length)
     setLocalWishlistCount(wishlist.length)

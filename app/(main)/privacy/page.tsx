@@ -37,7 +37,8 @@ export default function PrivacyPage() {
         <ul style={{ marginLeft: 20, marginTop: 8 }}>
           <li style={{ marginBottom: 6 }}>
             <strong>Local/guest mode:</strong> a random ID stored in your browser groups locally-saved
-            activity. It is not linked to your name or email, and never leaves your device.
+            activity. It is not linked to your name or email. Anonymous engagement metrics (like XP and streaks)
+            sync between your device and our servers to allow backup and stats tracking, but do not contain personal identifiers.
           </li>
           <li>
             <strong>Signed-in mode:</strong> a real account (email + Supabase-managed session) that
@@ -79,7 +80,7 @@ export default function PrivacyPage() {
           <li style={{ marginBottom: 6 }}>Aggregated usage patterns (e.g., &quot;50% of users visit /discover first&quot;)</li>
         </ul>
         <p style={{ marginTop: 12 }}>
-          We do <strong>not</strong> send email addresses or account identifiers to PostHog.
+          We employ strict client-side masking settings to avoid sending email addresses or account identifiers to PostHog, but some technical session parameters may be transmitted to analyze session replays.
         </p>
       </section>
 

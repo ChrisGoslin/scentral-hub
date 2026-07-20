@@ -44,7 +44,9 @@ export default function InsightsClient({ state, insights, computedAt }: Insights
   const notEmpty = insights && (
     (insights.your_impact?.interactions_count ?? 0) > 0 ||
     (insights.best_traces?.length ?? 0) > 0 ||
-    (insights.taste_evolution?.length ?? 0) > 0
+    (insights.taste_evolution?.length ?? 0) > 0 ||
+    (insights.trajectory?.start_families?.length ?? 0) > 0 ||
+    (insights.trajectory?.current_families?.length ?? 0) > 0
   )
 
   return (
@@ -64,7 +66,7 @@ export default function InsightsClient({ state, insights, computedAt }: Insights
       </div>
 
       <div className="px-4 pb-12">
-        {(state === 'no-data' || state === 'unavailable') && (
+        {(state === 'no-data' || (state === 'hydrated' && !notEmpty) || state === 'unavailable') && (
           <EmptyState variant={state === 'unavailable' ? 'unavailable' : 'empty'} />
         )}
 

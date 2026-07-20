@@ -10,6 +10,10 @@ export function parseVerdict(text: string): { pros: string[]; cons: string[] } |
       Array.isArray(parsed?.cons) &&
       parsed.cons.every((value: unknown) => typeof value === 'string')
     ) {
+      // Reject empty verdicts
+      if (parsed.pros.length === 0 && parsed.cons.length === 0) {
+        return null
+      }
       return { pros: parsed.pros, cons: parsed.cons }
     }
     return null

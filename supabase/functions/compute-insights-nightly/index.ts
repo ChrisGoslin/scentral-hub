@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.40.0'
+import { fetchUserTraces, fetchUserCollections, fetchShelfEvents } from '../../lib/insightsQueries.ts'
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
@@ -33,41 +34,75 @@ interface CachedInsights {
   }
 }
 
+function redactId(id: string): string {
+  if (typeof id !== 'string') return String(id)
+  return id.substring(0, 8) + '-****-****-****-************'
+}
+
 export async function handler(): Promise<Response> {
   try {
-    // Fetch all user ids from profiles
-    const { data: profiles, error: profilesError } = await supabase
-      .from('profiles')
-      .select('id')
+    const results: { user_id: string; status: 'success' | 'error'; error?: string }[] = []
+    let page = 0
+    const pageSize = 500
+    let hasMore = true
+    let totalProfilesFetched = 0
 
-    if (profilesError) throw profilesError
-    if (!profiles || profiles.length === 0) {
-      return new Response(JSON.stringify({ message: 'No profiles to process' }), { status: 200 })
+    while (hasMore) {
+      const fromRange = page * pageSize
+      const toRange = (page + 1) * pageSize - 1
+
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id')
+        .range(fromRange, toRange)
+
+      if (profilesError) throw profilesError
+      if (!profiles || profiles.length === 0) {
+        hasMore = false
+        break
+      }
+
+      totalProfilesFetched += profiles.length
+      const userIds = profiles.map(p => p.id)
+
+      const batchConcur = 5
+      for (let i = 0; i < userIds.length; i += batchConcur) {
+        const batchUserIds = userIds.slice(i, i + batchConcur)
+        await Promise.all(
+          batchUserIds.map(async (userId) => {
+            try {
+              const insights = await computeUserInsights(userId)
+              if (insights) {
+                const { error: upsertError } = await supabase
+                  .from('insights_cache')
+                  .upsert({
+                    user_id: userId,
+                    period: 'latest',
+                    payload: insights,
+                    computed_at: new Date().toISOString(),
+                  })
+                if (upsertError) throw upsertError
+                results.push({ user_id: redactId(userId), status: 'success' })
+              } else {
+                throw new Error('computeUserInsights returned null or empty')
+              }
+            } catch (error) {
+              console.error(`Error computing insights for ${redactId(userId)}:`, error)
+              results.push({ user_id: redactId(userId), status: 'error', error: String(error) })
+            }
+          })
+        )
+      }
+
+      if (profiles.length < pageSize) {
+        hasMore = false
+      } else {
+        page++
+      }
     }
 
-    const userIds = profiles.map(p => p.id)
-
-    // Process insights for each user
-    const results: { user_id: string; status: 'success' | 'error'; error?: string }[] = []
-
-    for (const userId of userIds) {
-      try {
-        const insights = await computeUserInsights(userId)
-        if (insights) {
-          await supabase
-            .from('insights_cache')
-            .upsert({
-              user_id: userId,
-              period: 'latest',
-              payload: insights,
-              computed_at: new Date().toISOString(),
-            })
-          results.push({ user_id: userId, status: 'success' })
-        }
-      } catch (error) {
-        console.error(`Error computing insights for ${userId}:`, error)
-        results.push({ user_id: userId, status: 'error', error: String(error) })
-      }
+    if (totalProfilesFetched === 0) {
+      return new Response(JSON.stringify({ message: 'No profiles to process' }), { status: 200 })
     }
 
     return new Response(JSON.stringify({ processed: results.length, results }), {
@@ -84,9 +119,9 @@ async function computeUserInsights(userId: string): Promise<CachedInsights | nul
   try {
     // Fetch all user data in parallel
     const [tracesResult, collectionsResult, shelfEventsResult] = await Promise.all([
-      supabase.from('traces').select('id, user_id, body').eq('user_id', userId).limit(100),
-      supabase.from('collections').select('id, fragrance_id, affinity_score').eq('user_id', userId),
-      supabase.from('shelf_events').select('id, fragrance_id, event_type, created_at').eq('user_id', userId).order('created_at', { ascending: true }),
+      fetchUserTraces(supabase, userId),
+      fetchUserCollections(supabase, userId),
+      fetchShelfEvents(supabase, userId),
     ])
 
     const traces = tracesResult.data ?? []
@@ -211,7 +246,7 @@ async function computeUserInsights(userId: string): Promise<CachedInsights | nul
       trajectory,
     }
   } catch (error) {
-    console.error(`Failed to compute insights for ${userId}:`, error)
+    console.error(`Failed to compute insights for ${redactId(userId)}:`, error)
     return null
   }
 }

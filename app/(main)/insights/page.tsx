@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import { cookies } from 'next/headers'
 import { createClient } from '@/utils/supabase/server'
 import InsightsClient from './InsightsClient'
+import { fetchUserTraces, fetchUserCollections, fetchShelfEvents } from '@/lib/insightsQueries'
 
 export const metadata: Metadata = {
   title: 'Insights | nota.',
@@ -126,12 +127,9 @@ async function computeInsights(supabase: Awaited<ReturnType<typeof createClient>
   try {
     // Fetch all user data in parallel
     const [tracesResult, collectionsResult, shelfEventsResult] = await Promise.all([
-      // Get traces (if available)
-      supabase.from('traces').select('id, user_id, body').eq('user_id', userId).limit(100),
-      // Get collection
-      supabase.from('collections').select('id, fragrance_id, affinity_score').eq('user_id', userId),
-      // Get shelf events
-      supabase.from('shelf_events').select('id, fragrance_id, event_type, created_at').eq('user_id', userId).order('created_at', { ascending: true }),
+      fetchUserTraces(supabase, userId),
+      fetchUserCollections(supabase, userId),
+      fetchShelfEvents(supabase, userId),
     ])
 
     const traces = tracesResult.data ?? []

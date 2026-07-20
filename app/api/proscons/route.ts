@@ -90,6 +90,9 @@ Return JSON only with no markdown:
     return NextResponse.json({ success: true, ...result })
   } catch (error) {
     console.error('proscons error:', error)
-    return NextResponse.json({ success: false, unavailable: true }, { status: 200 })
+    return NextResponse.json(
+      { error: 'Service unavailable' },
+      { status: 503 }
+    )
   }
 }
