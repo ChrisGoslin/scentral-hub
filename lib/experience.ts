@@ -14,7 +14,7 @@ export type PresenceMode = 'morning-ritual' | 'evening-desk'
 
 export type SurfacePatinaState = 'fresh' | 'rested' | 'aged' | 'archived'
 
-export type SensoryEvent = 'reveal' | 'alignment' | 'drag' | 'destroy' | 'clink'
+export type SensoryEvent = 'reveal' | 'alignment' | 'drag' | 'destroy' | 'clink' | 'trace-left'
 
 export type AcousticCue = 'clink'
 

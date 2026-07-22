@@ -14,6 +14,7 @@ const HAPTIC_PATTERNS: Record<SensoryEvent, number | number[]> = {
   drag: 18,
   destroy: [120, 60, 120],
   clink: 12,
+  'trace-left': 200,
 }
 
 export function useSymphonicSensory(): SensoryMethod {

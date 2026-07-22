@@ -122,7 +122,7 @@ function PhaseChip({ phase }: { phase: number }) {
         fontWeight: 700,
         letterSpacing: '0.1em',
         textTransform: 'uppercase',
-        borderRadius: 'var(--r-chip)',
+                borderRadius: 999,
         display: 'inline-block',
         whiteSpace: 'nowrap',
       }}
@@ -181,8 +181,9 @@ function SlotRow({ label, time, frag, sprays, isLast }: SlotRowProps) {
             <p
               style={{
                 fontSize: 19,
-                fontFamily: 'Georgia, "Times New Roman", serif',
+                fontFamily: 'var(--font-display)',
                 fontStyle: 'italic',
+                letterSpacing: '-0.01em',
                 color: 'var(--text)',
                 margin: 0,
               }}
@@ -242,7 +243,9 @@ export default async function RitualPage({ params }: { params: Promise<{ id: str
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 56 }}>
           <span
             style={{
-              fontFamily: 'Georgia, "Times New Roman", serif',
+              fontFamily: 'var(--font-display)',
+              fontStyle: 'italic',
+              letterSpacing: '-0.01em',
               fontSize: 22,
               color: 'var(--text)',
               lineHeight: 1,
@@ -279,7 +282,9 @@ export default async function RitualPage({ params }: { params: Promise<{ id: str
         {/* Schedule name */}
         <h1
           style={{
-            fontFamily: 'Georgia, "Times New Roman", serif',
+            fontFamily: 'var(--font-display)',
+            fontStyle: 'italic',
+            letterSpacing: '-0.01em',
             fontSize: 36,
             fontWeight: 400,
             color: 'var(--text)',
