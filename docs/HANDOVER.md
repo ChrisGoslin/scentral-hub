@@ -64,12 +64,16 @@
 >
 > ### Current repository state at handoff
 >
+> **Superseded 2026-07-23.** The state below described `brand/sensory-sanctuary` before it and `docs/canon-updates-and-handover` were merged into `main`. Both are merged now; `NOTA_MANIFESTO.md` is committed, not local/uncommitted. Preserved for history, not current fact — see `docs/lessons.md` L5 on "reviewed" vs "verified" before trusting a repository-state claim in any doc, including this one.
+>
 > - **Branch:** `brand/sensory-sanctuary`, one local commit ahead of `origin/brand/sensory-sanctuary` when this section was written.
 > - **HEAD:** `1cf1a26` — `feat: add sensory trace composer ritual`.
 > - **Current focus:** sensory Trace Composer, ritual repair, manifesto/lore consolidation, and cross-CLI alignment.
 > - **Manifesto:** present locally as `NOTA_MANIFESTO.md`; it was uncommitted when this section was written.
 > - **Shared tree:** unrelated modified API/project files and an untracked maintenance script already exist. Do not stage, revert, or rewrite them as part of brand work.
 > - **Verification boundary:** the last sensory commit passed `npm run build`; the subsequently dirty shared tree has not been certified by this handover. Re-run proportionate checks immediately before any new commit or push.
+>
+> **Open item, not yet resolved:** `NOTA_MANIFESTO_V3.md` also landed on `main` (via `docs/canon-updates-and-handover`) — a second, different brand-doctrine file alongside `NOTA_MANIFESTO.md`. Which one is canonical is Christopher's call, pending as of this merge; every reference to "the manifesto" in this file and in `AGENTS.md` currently assumes `NOTA_MANIFESTO.md` and needs updating if the ruling goes the other way.
 >
 > ### Required task loop for every CLI
 >
@@ -85,6 +89,8 @@
 >
 > This is the intended execution loop for substantial work unless the user explicitly narrows scope.
 > Invoke [`.claude/skills/loop-orchestrator/SKILL.md`](../.claude/skills/loop-orchestrator/SKILL.md) to classify the task as `quick`, `standard`, or `assured`, coordinate the required independent review, and validate the completion record. CLI-specific entries must point back to that file rather than copying its workflow.
+>
+> **Broken pointer, not yet resolved:** `.claude/skills/loop-orchestrator/SKILL.md` does not exist anywhere in this repository as of 2026-07-23 (checked `main` and every source branch). Until it's authored, follow the numbered Version 1/2/3 loop below directly rather than invoking a skill that isn't there.
 >
 > 1. Version 1: review the canonical docs, complete the requested task, add one bounded +20 percent stretch, and produce the first concrete output. The stretch improves quality, resilience, accessibility, or automation inside the original acceptance criteria; it does not expand product scope by 20 percent.
 > 2. Self-critique pass: review Version 1 for weaknesses, gaps, regressions, overclaims, missed routing updates, or automation opportunities.
