@@ -155,7 +155,7 @@ export default function Home() {
       <section className={styles.closing} aria-labelledby="closing-title">
         <p className={styles.kicker}>Your nose is your absolute truth</p>
         <h2 id="closing-title">
-          Start with one scent.
+          Start with one scent.{' '}
           <em>See what it remembers.</em>
         </h2>
         <Link href="/read" className={styles.closingAction}>

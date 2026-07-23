@@ -30,6 +30,12 @@ export default function TraceComposer({ fragranceId, onPosted }: TraceComposerPr
   const inkColor = inkFadeRatio === 0
     ? 'var(--charcoal)'
     : `color-mix(in srgb, var(--charcoal) ${inkWeight}%, var(--secondary-ink))`
+  let submitLabel = 'Leave trace'
+  if (isSubmitting) {
+    submitLabel = 'Sealing…'
+  } else if (posted) {
+    submitLabel = 'Trace left'
+  }
 
   useEffect(() => {
     let active = true
@@ -339,7 +345,7 @@ export default function TraceComposer({ fragranceId, onPosted }: TraceComposerPr
           </div>
         ) : (
           <Button onClick={handleSubmit} disabled={isSubmitting || body.trim().length === 0}>
-            {isSubmitting ? 'Sealing…' : posted ? 'Trace left' : 'Leave trace'}
+            {submitLabel}
           </Button>
         )}
       </div>

@@ -433,11 +433,6 @@
   .readSection,
   .traceSection {
     grid-template-columns: 1fr;
-  }
-
-  .method,
-  .readSection,
-  .traceSection {
     gap: 70px;
   }
 

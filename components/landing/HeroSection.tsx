@@ -29,11 +29,11 @@ const CHAPTERS = [
 
 type Chapter = (typeof CHAPTERS)[number]
 
-function ChapterArtifact({ chapter, title, annotation }: {
+function ChapterArtifact({ chapter, title, annotation }: Readonly<{
   chapter: Chapter
   title: string
   annotation: string
-}) {
+}>) {
   if (chapter.id === 'matter') {
     return (
       <div className={`${styles.artifact} ${styles.matterArtifact}`}>
@@ -117,11 +117,13 @@ export default function HeroSection() {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
   }, [])
 
+  const isSequenceActive = hasMounted && !shouldReduceMotion && !isPaused && isVisible && isPageVisible
+
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
 
-    if (!hasMounted || shouldReduceMotion || isPaused || !isVisible || !isPageVisible) {
+    if (!isSequenceActive) {
       video.pause()
       return
     }
@@ -129,17 +131,17 @@ export default function HeroSection() {
     void video.play().catch(() => {
       // The poster remains the intentional fallback when autoplay is unavailable.
     })
-  }, [hasMounted, isPageVisible, isPaused, isVisible, shouldReduceMotion])
+  }, [isSequenceActive])
 
   useEffect(() => {
-    if (!hasMounted || shouldReduceMotion || isPaused || !isVisible || !isPageVisible) return
+    if (!isSequenceActive) return
 
     const interval = window.setInterval(() => {
       setActiveIndex(current => (current + 1) % CHAPTERS.length)
     }, CHAPTER_DURATION)
 
     return () => window.clearInterval(interval)
-  }, [hasMounted, isPageVisible, isPaused, isVisible, shouldReduceMotion])
+  }, [isSequenceActive])
 
   const note = useMemo(() => buildPersonalNote({ personaId, personaName }), [personaId, personaName])
   const displayedIndex = hasMounted && shouldReduceMotion ? 2 : activeIndex
@@ -158,7 +160,7 @@ export default function HeroSection() {
         <div className={styles.copyInner}>
           <p className={styles.eyebrow}>A personal scent-identity system</p>
           <h1 id="hero-title" className={styles.title}>
-            Your scent identity,
+            Your scent identity,{' '}
             <em>written in motion.</em>
           </h1>
           <p className={styles.intro}>
