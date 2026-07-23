@@ -182,7 +182,8 @@ export default function HeroSection() {
   const { personaId, personaName } = usePersona()
 
   const note = useMemo(() => buildPersonalNote({ personaId, personaName }), [personaId, personaName])
-  const displayedIndex = hasMounted && shouldReduceMotion ? 2 : activeIndex
+  const isStaticPoster = hasMounted && shouldReduceMotion
+  const displayedIndex = isStaticPoster ? 2 : activeIndex
   const activeChapter = CHAPTERS[displayedIndex]
 
   return (
@@ -237,7 +238,7 @@ export default function HeroSection() {
 
       <div className={styles.mediaPanel}>
         {/* Source footage: MART PRODUCTION / Pexels (free to use). */}
-        {hasMounted && shouldReduceMotion ? (
+        {isStaticPoster ? (
           <picture>
             <source media="(max-width: 700px)" srcSet="/media/atelier-matter-mobile-poster.jpg" />
             <img
@@ -268,10 +269,10 @@ export default function HeroSection() {
           <AnimatePresence mode="wait">
             <motion.div
               key={activeChapter.id}
-              initial={hasMounted && shouldReduceMotion ? false : { opacity: 0, y: 18, rotate: -0.5 }}
+              initial={isStaticPoster ? false : { opacity: 0, y: 18, rotate: -0.5 }}
               animate={{ opacity: 1, y: 0, rotate: activeChapter.id === 'memory' ? -1.5 : 0 }}
-              exit={hasMounted && shouldReduceMotion ? undefined : { opacity: 0, y: -10 }}
-              transition={{ duration: hasMounted && shouldReduceMotion ? 0 : 0.6, ease: [0.16, 1, 0.3, 1] }}
+              exit={isStaticPoster ? undefined : { opacity: 0, y: -10 }}
+              transition={{ duration: isStaticPoster ? 0 : 0.6, ease: [0.16, 1, 0.3, 1] }}
             >
               <ChapterArtifact
                 chapter={activeChapter}
@@ -284,7 +285,7 @@ export default function HeroSection() {
 
         <div className={styles.mediaCaption}>
           <span>Film study / matter becoming memory</span>
-          {!(hasMounted && shouldReduceMotion) && (
+          {!isStaticPoster && (
             <button
               type="button"
               className={styles.pauseButton}
