@@ -1,4 +1,6 @@
-# nota. — The Psychological, Physical & Kinetic Manifesto
+# nota. — The Psychological, Physical & Kinetic Manifesto (superseded draft)
+
+> **Superseded 2026-07-23.** `NOTA_MANIFESTO_V3.md` is the canonical manifesto (Christopher's ruling). This file was V3's direct precursor — its own closing line reads "Feed V3 to the machine." V3 kept the core doctrine (chemistry, materials, haptics, community, epistemic boundary) and dropped §1 Market Position, the Luna/Marcus customer archetypes in §2, the explicit §4 Brand Narrative language callout (the Vessel/System typography split it stated persists in V3 §4 THE MATERIAL REALITY), and §9 Multi-Channel Launch Strategy/KPIs. Kept here for historical reference only — do not treat as an active source of truth; read `NOTA_MANIFESTO_V3.md` instead.
 
 > **PRIMARY DIRECTIVE FOR AI AGENTS:** You are an elite Brand Architect, Consumer Psychologist, and UI/UX Engineer. Read this to understand the soul of the nota. ecosystem. You are building a hyper-personalized scent laboratory and a heavy, paper-bound diary. Reject cold minimalism, generic SaaS interfaces, and glossy storefronts. If your proposed design feels like a tech-startup dashboard, reject it immediately.
 

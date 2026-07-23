@@ -7,7 +7,7 @@ Start here when opening this repo from any CLI. This file is a short map; it doe
 Read in this order:
 
 1. [AGENTS.md](../AGENTS.md) - binding operating rules, safety constraints, git/deploy hygiene, and lessons learned.
-2. [NOTA_MANIFESTO.md](../NOTA_MANIFESTO.md) - absolute psychological, material, kinetic, and cognitive-load doctrine.
+2. [NOTA_MANIFESTO_V3.md](../NOTA_MANIFESTO_V3.md) - absolute psychological, material, kinetic, and cognitive-load doctrine. (`NOTA_MANIFESTO.md` is its retired precursor draft, kept for history only.)
 3. [DESIGN.md](../DESIGN.md) - executable design-system contract: tokens, typography split, material rules, glass budget, and Dot states.
 4. [NOTA_LORE.md](../NOTA_LORE.md) - compressed interaction laws and reusable sensory patterns.
 5. [NOTA-BRAND-UIUX-PACK.md](../NOTA-BRAND-UIUX-PACK.md) - implementation companion, surface glossary, and anti-slop design checklist.
@@ -18,6 +18,8 @@ Read in this order:
 10. [docs/nota/](./nota/) - active audit suite, design notes, architecture, backlog, and testing/security docs.
 
 For verification-discipline history and the three-round audit that motivated the current trust rule, see [docs/nota/HANDOVER-2026-07-19-verification-audit.md](./nota/HANDOVER-2026-07-19-verification-audit.md).
+
+For the read-before-build/full-state-matrix/verified-vs-reviewed/sources-of-truth/measurement-plan/opportunity-cost gates (and the eight lessons behind them), see [docs/CANONICAL-GUARDRAILS.md](./CANONICAL-GUARDRAILS.md), enforced via the `implementation-preflight` and `screen-state-completeness` skills.
 For future handoffs, use [docs/nota/HANDOVER-TEMPLATE-verification-first.md](./nota/HANDOVER-TEMPLATE-verification-first.md) as the default scaffold.
 For substantial multi-pass work, use [the loop orchestrator](../.claude/skills/loop-orchestrator/SKILL.md) to select the appropriate depth and enforce independent critique and completion evidence.
 

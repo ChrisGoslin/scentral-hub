@@ -7,7 +7,7 @@
 > ### Start here, in order
 >
 > 1. [`AGENTS.md`](../AGENTS.md) — binding safety, verification, topology, Git, and execution rules.
-> 2. [`NOTA_MANIFESTO.md`](../NOTA_MANIFESTO.md) — absolute psychological, material, kinetic, and cognitive-load doctrine.
+> 2. [`NOTA_MANIFESTO_V3.md`](../NOTA_MANIFESTO_V3.md) — absolute psychological, material, kinetic, and cognitive-load doctrine. (`NOTA_MANIFESTO.md` is its superseded precursor draft — retired 2026-07-23, kept for history only.)
 > 3. [`DESIGN.md`](../DESIGN.md) — executable design-system contract for tokens, typography, materials, and Dot states.
 > 4. [`NOTA_LORE.md`](../NOTA_LORE.md) — compressed interaction laws and recurring sensory patterns.
 > 5. [`NOTA-BRAND-UIUX-PACK.md`](../NOTA-BRAND-UIUX-PACK.md) — implementation companion, surface glossary, and anti-slop checklist.
@@ -32,7 +32,7 @@
 > | Concern | Canonical owner | Role and precedence |
 > |---|---|---|
 > | Agent safety, verification, Git, scope, and task protocol | [`AGENTS.md`](../AGENTS.md) | Binding operational law. It may route to other sources but does not own brand or token values. |
-> | Brand purpose, positioning, audience psychology, voice boundaries, and experiential principles | [`NOTA_MANIFESTO.md`](../NOTA_MANIFESTO.md) | Brand constitution. This is what nota. means and how it should feel. |
+> | Brand purpose, positioning, audience psychology, voice boundaries, and experiential principles | [`NOTA_MANIFESTO_V3.md`](../NOTA_MANIFESTO_V3.md) | Brand constitution. This is what nota. means and how it should feel. |
 > | Design tokens, contrast, typography implementation, modes, surfaces, component anatomy, and Dot specification | [`DESIGN.md`](../DESIGN.md) | Executable design-system contract. It owns these concerns. |
 > | Accumulated sensory patterns and hard-won interaction refinements | [`NOTA_LORE.md`](../NOTA_LORE.md) | Append-only semantic memory. It records reusable learnings but cannot override the Manifesto or DESIGN contract. |
 > | Applied UI/UX guidance, examples, migration notes, and the retirement of previous framing | [`NOTA-BRAND-UIUX-PACK.md`](../NOTA-BRAND-UIUX-PACK.md) | Implementation companion. It interprets the Manifesto and DESIGN; it does not outrank them. |
@@ -64,7 +64,7 @@
 >
 > ### Current repository state at handoff
 >
-> **Superseded 2026-07-23.** The state below described `brand/sensory-sanctuary` before it and `docs/canon-updates-and-handover` were merged into `main`. Both are merged now; `NOTA_MANIFESTO.md` is committed, not local/uncommitted. Preserved for history, not current fact — see `docs/lessons.md` L5 on "reviewed" vs "verified" before trusting a repository-state claim in any doc, including this one.
+> **Superseded 2026-07-23.** The state below described `brand/sensory-sanctuary` before it and `docs/canon-updates-and-handover` were merged into `main`. Both are merged now; `NOTA_MANIFESTO.md` is committed, not local/uncommitted, and is itself now retired in favour of `NOTA_MANIFESTO_V3.md` (see the open item below — resolved). Preserved for history, not current fact — see `docs/CANONICAL-GUARDRAILS.md` L5 on "reviewed" vs "verified" before trusting a repository-state claim in any doc, including this one.
 >
 > - **Branch:** `brand/sensory-sanctuary`, one local commit ahead of `origin/brand/sensory-sanctuary` when this section was written.
 > - **HEAD:** `1cf1a26` — `feat: add sensory trace composer ritual`.
@@ -73,7 +73,9 @@
 > - **Shared tree:** unrelated modified API/project files and an untracked maintenance script already exist. Do not stage, revert, or rewrite them as part of brand work.
 > - **Verification boundary:** the last sensory commit passed `npm run build`; the subsequently dirty shared tree has not been certified by this handover. Re-run proportionate checks immediately before any new commit or push.
 >
-> **Open item, not yet resolved:** `NOTA_MANIFESTO_V3.md` also landed on `main` (via `docs/canon-updates-and-handover`) — a second, different brand-doctrine file alongside `NOTA_MANIFESTO.md`. Which one is canonical is Christopher's call, pending as of this merge; every reference to "the manifesto" in this file and in `AGENTS.md` currently assumes `NOTA_MANIFESTO.md` and needs updating if the ruling goes the other way.
+> **Resolved 2026-07-23:** `NOTA_MANIFESTO_V3.md` also landed on `main` (via `docs/canon-updates-and-handover`) alongside `NOTA_MANIFESTO.md`. Christopher ruled V3 canonical. `NOTA_MANIFESTO.md` is now marked superseded (kept for history), and every "the manifesto" reference in this file and in `AGENTS.md` points at `NOTA_MANIFESTO_V3.md`.
+>
+> **Also resolved 2026-07-23, separate decision:** the font-doctrine question (Geist/Instrument Serif per `NOTA_MANIFESTO_V3.md` §4 vs. the shipped Unbounded/Space Grotesk/Instrument Serif in `app/layout.tsx`) is about how much existing app code to migrate, not which doctrine wins — V3 already settles the doctrine. Default until told otherwise: new work follows V3; the existing shipped app is not being re-themed or font-migrated as a side effect of this doc-reconciliation pass. See `docs/CANONICAL-GUARDRAILS.md` L6/L8 (sources of truth, opportunity cost) before taking on that migration as its own piece of work.
 >
 > ### Required task loop for every CLI
 >
