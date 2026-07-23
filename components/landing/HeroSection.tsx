@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type RefObject } from 'react'
 import { buildPersonalNote } from '@/lib/personalization'
 import styles from './HeroSection.module.css'
 
@@ -77,25 +77,21 @@ function ChapterArtifact({ chapter, title, annotation }: Readonly<{
   )
 }
 
-export default function HeroSection() {
-  const shouldReduceMotion = useReducedMotion()
-  const sectionRef = useRef<HTMLElement>(null)
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const hasMounted = useSyncExternalStore(subscribeToHydration, () => true, () => false)
-  const [activeIndex, setActiveIndex] = useState(0)
-  const [isPaused, setIsPaused] = useState(false)
-  const [isVisible, setIsVisible] = useState(true)
+function usePageVisibility() {
   const [isPageVisible, setIsPageVisible] = useState(true)
-  const [personaId, setPersonaId] = useState<string | null>(null)
-  const [personaName, setPersonaName] = useState<string | null>(null)
 
   useEffect(() => {
-    const frame = window.requestAnimationFrame(() => {
-      setPersonaId(localStorage.getItem('scentral_persona'))
-      setPersonaName(localStorage.getItem('scentral_persona_name'))
-    })
-    return () => window.cancelAnimationFrame(frame)
+    const handleVisibilityChange = () => setIsPageVisible(!document.hidden)
+    handleVisibilityChange()
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
   }, [])
+
+  return isPageVisible
+}
+
+function useSectionVisibility(sectionRef: RefObject<HTMLElement | null>) {
+  const [isVisible, setIsVisible] = useState(true)
 
   useEffect(() => {
     const section = sectionRef.current
@@ -108,15 +104,26 @@ export default function HeroSection() {
 
     observer.observe(section)
     return () => observer.disconnect()
-  }, [])
+  }, [sectionRef])
 
-  useEffect(() => {
-    const handleVisibilityChange = () => setIsPageVisible(!document.hidden)
-    handleVisibilityChange()
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
-  }, [])
+  return isVisible
+}
 
+function useLivingAtelierSequence({
+  sectionRef,
+  videoRef,
+  hasMounted,
+  shouldReduceMotion,
+}: {
+  sectionRef: RefObject<HTMLElement | null>
+  videoRef: RefObject<HTMLVideoElement | null>
+  hasMounted: boolean
+  shouldReduceMotion: boolean | null
+}) {
+  const [activeIndex, setActiveIndex] = useState(0)
+  const [isPaused, setIsPaused] = useState(false)
+  const isVisible = useSectionVisibility(sectionRef)
+  const isPageVisible = usePageVisibility()
   const isSequenceActive = hasMounted && !shouldReduceMotion && !isPaused && isVisible && isPageVisible
 
   useEffect(() => {
@@ -131,7 +138,7 @@ export default function HeroSection() {
     void video.play().catch(() => {
       // The poster remains the intentional fallback when autoplay is unavailable.
     })
-  }, [isSequenceActive])
+  }, [isSequenceActive, videoRef])
 
   useEffect(() => {
     if (!isSequenceActive) return
@@ -142,6 +149,37 @@ export default function HeroSection() {
 
     return () => window.clearInterval(interval)
   }, [isSequenceActive])
+
+  return { activeIndex, isPaused, setIsPaused }
+}
+
+function usePersona() {
+  const [personaId, setPersonaId] = useState<string | null>(null)
+  const [personaName, setPersonaName] = useState<string | null>(null)
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      setPersonaId(localStorage.getItem('scentral_persona'))
+      setPersonaName(localStorage.getItem('scentral_persona_name'))
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [])
+
+  return { personaId, personaName }
+}
+
+export default function HeroSection() {
+  const shouldReduceMotion = useReducedMotion()
+  const sectionRef = useRef<HTMLElement>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const hasMounted = useSyncExternalStore(subscribeToHydration, () => true, () => false)
+  const { activeIndex, isPaused, setIsPaused } = useLivingAtelierSequence({
+    sectionRef,
+    videoRef,
+    hasMounted,
+    shouldReduceMotion,
+  })
+  const { personaId, personaName } = usePersona()
 
   const note = useMemo(() => buildPersonalNote({ personaId, personaName }), [personaId, personaName])
   const displayedIndex = hasMounted && shouldReduceMotion ? 2 : activeIndex
