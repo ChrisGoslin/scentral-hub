@@ -9,7 +9,7 @@ interface CachedInsights {
   your_impact?: {
     interactions_count?: number
     reactions_received?: number
-    saves_count?: number
+    too_real_count?: number
     summary?: string
   }
   best_traces?: Array<{
@@ -34,8 +34,8 @@ interface CachedInsights {
 }
 
 interface InsightsClientProps {
-  state: 'hydrated' | 'loading' | 'no-data'
-  anonId: string | null
+  state: 'hydrated' | 'loading' | 'no-data' | 'unavailable'
+  userId: string | null
   insights: CachedInsights | null
   computedAt: string | null
 }
@@ -44,7 +44,9 @@ export default function InsightsClient({ state, insights, computedAt }: Insights
   const notEmpty = insights && (
     (insights.your_impact?.interactions_count ?? 0) > 0 ||
     (insights.best_traces?.length ?? 0) > 0 ||
-    (insights.taste_evolution?.length ?? 0) > 0
+    (insights.taste_evolution?.length ?? 0) > 0 ||
+    (insights.trajectory?.start_families?.length ?? 0) > 0 ||
+    (insights.trajectory?.current_families?.length ?? 0) > 0
   )
 
   return (
@@ -64,8 +66,8 @@ export default function InsightsClient({ state, insights, computedAt }: Insights
       </div>
 
       <div className="px-4 pb-12">
-        {state === 'no-data' && (
-          <EmptyState />
+        {(state === 'no-data' || (state === 'hydrated' && !notEmpty) || state === 'unavailable') && (
+          <EmptyState variant={state === 'unavailable' ? 'unavailable' : 'empty'} />
         )}
 
         {(state === 'hydrated' || state === 'loading') && notEmpty ? (
@@ -134,7 +136,7 @@ function YourImpactSection({ impact }: { impact?: CachedInsights['your_impact'] 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
         <MetricBox label="Interactions" value={impact.interactions_count ?? 0} />
         <MetricBox label="Reactions Received" value={impact.reactions_received ?? 0} />
-        <MetricBox label="Saved" value={impact.saves_count ?? 0} />
+        <MetricBox label="Too Real" value={impact.too_real_count ?? 0} />
       </div>
     </Card>
   )
@@ -296,7 +298,9 @@ function MetricBox({ label, value }: { label: string; value: number }) {
   )
 }
 
-function EmptyState() {
+function EmptyState({ variant = 'empty' }: { variant?: 'empty' | 'unavailable' }) {
+  const isUnavailable = variant === 'unavailable'
+
   return (
     <Card
       style={{
@@ -306,10 +310,12 @@ function EmptyState() {
       }}
     >
       <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8, color: 'var(--text)' }}>
-        Start Building Your Insights
+        {isUnavailable ? 'Insights Temporarily Unavailable' : 'Start Building Your Insights'}
       </h3>
       <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 20, lineHeight: '1.6' }}>
-        Interact with scents, describe traces, and build your collection to see your evolving scent identity.
+        {isUnavailable
+          ? 'We could not compute fresh insights right now. Try again in a moment.'
+          : 'Interact with scents, describe traces, and build your collection to see your evolving scent identity.'}
       </p>
       <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
         <Link href="/study">

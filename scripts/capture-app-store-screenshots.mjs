@@ -4,7 +4,10 @@ import { chromium } from 'playwright';
 import fs from 'fs';
 import path from 'path';
 
-const APP_URL = 'https://scentral-seven.vercel.app';
+const APP_URL =
+  process.env.APP_URL ||
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  'https://scentral-hub.vercel.app';
 
 // Device configurations for App Store
 const devices = {
@@ -90,7 +93,7 @@ async function captureScreenshots() {
 
   // Generate manifest
   const manifest = {
-    platform: 'AnotherSense App Store Screenshots',
+    platform: 'nota. App Store Screenshots',
     captured: new Date().toISOString(),
     ios: {
       device: 'iPhone 14 Pro',

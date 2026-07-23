@@ -1,0 +1,147 @@
+name: Migration Safety Audit
+
+# Runs the 6-category migration safety audit (see docs/nota/12-migration-patterns-playbook.md)
+# on every PR that touches supabase/migrations/**. Posts findings as a PR comment and fails
+# the check on P1 (critical) findings. P2 (minor) findings are reported but don't block merge.
+
+on:
+  pull_request:
+    paths:
+      - 'supabase/migrations/**'
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Identify changed migration files
+        id: changed
+        run: |
+          git fetch origin ${{ github.base_ref }} --depth=1
+          FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- 'supabase/migrations/*.sql')
+          echo "files<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$FILES" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Run migration safety audit
+        id: audit
+        run: |
+          set -e
+          FINDINGS_FILE=$(mktemp)
+          P1_COUNT=0
+          P2_COUNT=0
+
+          echo "## Migration Safety Audit" > "$FINDINGS_FILE"
+          echo "" >> "$FINDINGS_FILE"
+
+          while IFS= read -r file; do
+            [ -z "$file" ] && continue
+            [ ! -f "$file" ] && continue
+
+            echo "### \`$file\`" >> "$FINDINGS_FILE"
+            FOUND_ANY=0
+
+            # --- P1: Phantom objects (CREATE INDEX/ALTER on tables not created/guarded here) ---
+            if grep -qE 'ALTER TABLE|CREATE INDEX|CREATE POLICY' "$file" \
+               && ! grep -qE 'to_regclass|IF NOT EXISTS|IF EXISTS' "$file"; then
+              echo "- **P1 (Critical):** Unguarded DDL — no \`to_regclass\`, \`IF NOT EXISTS\`, or \`IF EXISTS\` guard found. Verify referenced objects actually exist before this migration runs." >> "$FINDINGS_FILE"
+              P1_COUNT=$((P1_COUNT+1))
+              FOUND_ANY=1
+            fi
+
+            # --- P1: RLS policy scoping (WITH CHECK (true) with no TO role) ---
+            if grep -qE 'WITH CHECK\s*\(\s*true\s*\)' "$file" \
+               && ! grep -qiE '\bTO\s+(authenticated|service_role|anon)\b' "$file"; then
+              echo "- **P1 (Critical):** \`WITH CHECK (true)\` policy with no \`TO <role>\` clause — applies to PUBLIC. Scope explicitly or document that public write access is intentional." >> "$FINDINGS_FILE"
+              P1_COUNT=$((P1_COUNT+1))
+              FOUND_ANY=1
+            fi
+
+            # --- P2: Index immutability (DATE_TRUNC without AT TIME ZONE) ---
+            if grep -qE 'CREATE INDEX.*DATE_TRUNC' "$file" \
+               && ! grep -qE "AT TIME ZONE 'UTC'" "$file"; then
+              echo "- **P2 (Minor):** \`DATE_TRUNC\` used in index expression without \`AT TIME ZONE 'UTC'\` normalization — may fail as non-immutable or drift across timezones." >> "$FINDINGS_FILE"
+              P2_COUNT=$((P2_COUNT+1))
+              FOUND_ANY=1
+            fi
+
+            # --- P2: Constraint ordering (DROP COLUMN before DROP POLICY/CONSTRAINT in same file) ---
+            if grep -n 'DROP COLUMN' "$file" | head -1 | cut -d: -f1 > /tmp/dropcol_line 2>/dev/null; then
+              DROPCOL_LINE=$(cat /tmp/dropcol_line)
+              if [ -n "$DROPCOL_LINE" ]; then
+                POLICY_LINE=$(grep -n 'DROP POLICY\|DROP CONSTRAINT' "$file" | head -1 | cut -d: -f1)
+                if [ -n "$POLICY_LINE" ] && [ "$DROPCOL_LINE" -lt "$POLICY_LINE" ]; then
+                  echo "- **P2 (Minor):** \`DROP COLUMN\` (line $DROPCOL_LINE) appears before \`DROP POLICY\`/\`DROP CONSTRAINT\` (line $POLICY_LINE) — verify dependency order (policies/constraints should drop first)." >> "$FINDINGS_FILE"
+                  P2_COUNT=$((P2_COUNT+1))
+                  FOUND_ANY=1
+                fi
+              fi
+            fi
+
+            # --- P2: Data preservation (DROP COLUMN on legacy identifier columns) ---
+            if grep -qE 'DROP COLUMN\s+"?(anon_id|legacy_.*)"?' "$file"; then
+              echo "- **P2 (Minor):** Dropping a legacy identifier column (\`anon_id\`/\`legacy_*\`) — confirm no orphaned rows depend on it for traceability before merging." >> "$FINDINGS_FILE"
+              P2_COUNT=$((P2_COUNT+1))
+              FOUND_ANY=1
+            fi
+
+            if [ "$FOUND_ANY" -eq 0 ]; then
+              echo "- No issues detected." >> "$FINDINGS_FILE"
+            fi
+            echo "" >> "$FINDINGS_FILE"
+          done <<< "${{ steps.changed.outputs.files }}"
+
+          echo "" >> "$FINDINGS_FILE"
+          echo "**Summary:** $P1_COUNT P1 (critical), $P2_COUNT P2 (minor) finding(s)." >> "$FINDINGS_FILE"
+          echo "" >> "$FINDINGS_FILE"
+          echo "See [migration patterns playbook](../blob/main/docs/nota/12-migration-patterns-playbook.md) for fix templates." >> "$FINDINGS_FILE"
+
+          cat "$FINDINGS_FILE"
+          {
+            echo "report<<EOF"
+            cat "$FINDINGS_FILE"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+          echo "p1_count=$P1_COUNT" >> "$GITHUB_OUTPUT"
+
+      - name: Comment findings on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = `${{ steps.audit.outputs.report }}`;
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const marker = '## Migration Safety Audit';
+            const existing = comments.find(c => c.body.startsWith(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
+
+      - name: Fail on P1 findings
+        if: steps.audit.outputs.p1_count != '0'
+        run: |
+          echo "Migration audit found ${{ steps.audit.outputs.p1_count }} P1 (critical) finding(s). See PR comment for details."
+          exit 1

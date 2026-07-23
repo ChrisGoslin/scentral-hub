@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Privacy Policy | nota.',
-  description: 'How we handle your data at nota.. GDPR and UK GDPR compliant.',
+  description: 'How we handle your data at nota., in plain English.',
 }
 
 export default function PrivacyPage() {
@@ -11,59 +11,68 @@ export default function PrivacyPage() {
       <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 32, marginBottom: 24 }}>Privacy Policy</h1>
 
       <p style={{ marginBottom: 16, fontSize: 14, color: 'var(--text-muted)' }}>
-        Last updated: June 26, 2026
+        Last updated: July 17, 2026
       </p>
 
       <section style={{ marginBottom: 32 }}>
         <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>1. What We Collect</h2>
         <p style={{ marginBottom: 12 }}>
-          <strong>nota. does not require an account.</strong> You can use the app without providing
-          any personal information. We do not store your email address or name in our database.
+          You can browse parts of nota. without an account. In that mode, your fragrance collection,
+          ratings, layering combinations, and wear logs are stored locally on your device using your
+          browser&apos;s <code style={{ background: 'var(--surface-2)', padding: '2px 4px', borderRadius: 2 }}>localStorage</code>, and never reach our servers.
         </p>
         <p>
-          Your fragrance collection, ratings, layering combinations, and wear logs are stored locally on
-          your device using your browser&apos;s <code style={{ background: 'var(--surface-2)', padding: '2px 4px', borderRadius: 2 }}>localStorage</code>.
-          This data never leaves your device unless you explicitly choose to sync it.
+          <strong>Signing in creates a real account and stores your data on our servers.</strong> Features
+          like Shelf, Traces, and cross-device sync require signing in via Supabase Auth, which processes
+          your email address to authenticate you. Once signed in, your collection, wear logs, Noseprint,
+          and community activity are stored server-side, not just in your browser.
         </p>
       </section>
 
       <section style={{ marginBottom: 32 }}>
-        <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>2. Anonymous Identity</h2>
-        <p>
-          On first load, nota. generates a unique UUID (<code style={{ background: 'var(--surface-2)', padding: '2px 4px', borderRadius: 2 }}>scentral_anon_id</code>)
-          and stores it in your browser. This ID is used to:
-        </p>
-        <ul style={{ marginLeft: 20, marginTop: 8 }}>
-          <li style={{ marginBottom: 6 }}>Group your wear logs and collection activity (if you choose to save these)</li>
-          <li style={{ marginBottom: 6 }}>Sync data across devices if you use the sync feature</li>
-          <li>Track your anonymized engagement for analytics</li>
-        </ul>
-        <p style={{ marginTop: 12 }}>
-          This UUID contains no personally identifiable information and is not linked to your name, email, or device.
-        </p>
-      </section>
-
-      <section style={{ marginBottom: 32 }}>
-        <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>3. Server-Stored Data (Optional)</h2>
+        <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>2. Identity: Local vs. Signed-In</h2>
         <p style={{ marginBottom: 12 }}>
-          Some features require us to store data on our servers (Supabase):
+          nota. currently has two identity modes, which we are in the process of consolidating:
         </p>
         <ul style={{ marginLeft: 20, marginTop: 8 }}>
-          <li style={{ marginBottom: 6 }}>Your <strong>wear logs</strong> (fragrances you logged as worn today)</li>
+          <li style={{ marginBottom: 6 }}>
+            <strong>Local/guest mode:</strong> a random ID stored in your browser groups locally-saved
+            activity. It is not linked to your name or email. Anonymous engagement metrics (like XP and streaks)
+            sync between your device and our servers to allow backup and stats tracking, but do not contain personal identifiers.
+          </li>
+          <li>
+            <strong>Signed-in mode:</strong> a real account (email + Supabase-managed session) that
+            identifies you across devices and is required for server-stored features.
+          </li>
+        </ul>
+      </section>
+
+      <section style={{ marginBottom: 32 }}>
+        <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>3. Server-Stored Data (Signed-In Users)</h2>
+        <p style={{ marginBottom: 12 }}>
+          Once you sign in, we store the following on our servers (Supabase):
+        </p>
+        <ul style={{ marginLeft: 20, marginTop: 8 }}>
+          <li style={{ marginBottom: 6 }}>Your <strong>account email</strong> (used only for authentication, via Supabase Auth)</li>
+          <li style={{ marginBottom: 6 }}>Your <strong>wear logs</strong> (fragrances you logged as worn)</li>
           <li style={{ marginBottom: 6 }}>Your <strong>collection</strong> (fragrances you&apos;ve added, with affinity scores)</li>
+          <li style={{ marginBottom: 6 }}>Your <strong>Noseprint, Shelf, and Traces activity</strong> (identity, ranking, and community features)</li>
           <li style={{ marginBottom: 6 }}>Your <strong>streak data</strong> (consecutive days worn)</li>
           <li>Your <strong>XP progress</strong> (engagement level)</li>
         </ul>
         <p style={{ marginTop: 12 }}>
-          This server data is associated only with your anonymous UUID, not your personal identity.
-          We store this data to enable features like wear streak tracking and synchronized collections across devices.
+          We store this data to enable the features you use — collection sync across devices, wear
+          history, identity reflection, and community traces. We do not sell this data.
         </p>
       </section>
 
       <section style={{ marginBottom: 32 }}>
         <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>4. Analytics &amp; Telemetry</h2>
         <p style={{ marginBottom: 12 }}>
-          We use <strong>PostHog</strong> for anonymized event tracking. We collect:
+          We use <strong>PostHog</strong> for product analytics, and it is <strong>off by default</strong>.
+          Analytics only start recording after you explicitly consent via the in-app banner; nothing is
+          sent to PostHog before that choice is made, and you can change your choice at any time. When
+          consented, we collect:
         </p>
         <ul style={{ marginLeft: 20, marginTop: 8 }}>
           <li style={{ marginBottom: 6 }}>App events (page views, button clicks, feature usage)</li>
@@ -71,32 +80,25 @@ export default function PrivacyPage() {
           <li style={{ marginBottom: 6 }}>Aggregated usage patterns (e.g., &quot;50% of users visit /discover first&quot;)</li>
         </ul>
         <p style={{ marginTop: 12 }}>
-          We do <strong>not</strong> collect:
-        </p>
-        <ul style={{ marginLeft: 20, marginTop: 8 }}>
-          <li style={{ marginBottom: 6 }}>Specific fragrance names you search for</li>
-          <li style={{ marginBottom: 6 }}>Your exact wear logs or collection contents</li>
-          <li style={{ marginBottom: 6 }}>Email addresses or personal identifiers</li>
-          <li style={{ marginBottom: 6 }}>Geolocation data</li>
-        </ul>
-        <p style={{ marginTop: 12 }}>
-          We respect the &quot;Do Not Track&quot; (DNT) header in your browser. If you enable DNT, we do not log events.
+          We employ strict client-side masking settings to avoid sending email addresses or account identifiers to PostHog, but some technical session parameters may be transmitted to analyze session replays.
         </p>
       </section>
 
       <section style={{ marginBottom: 32 }}>
         <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>5. Cookies &amp; Local Storage</h2>
         <p style={{ marginBottom: 12 }}>
-          We use browser storage for the following non-personal data:
+          We use browser storage for the following:
         </p>
         <ul style={{ marginLeft: 20, marginTop: 8 }}>
-          <li><code style={{ background: 'var(--surface-2)', padding: '2px 4px', borderRadius: 2 }}>scentral_anon_id</code> — your anonymous UUID</li>
-          <li><code style={{ background: 'var(--surface-2)', padding: '2px 4px', borderRadius: 2 }}>scentral_persona</code> — your chosen scent persona</li>
-          <li><code style={{ background: 'var(--surface-2)', padding: '2px 4px', borderRadius: 2 }}>scentral_onboarded</code> — whether you completed onboarding</li>
-          <li><code style={{ background: 'var(--surface-2)', padding: '2px 4px', borderRadius: 2 }}>as_xp</code> — your XP progress (cached locally)</li>
+          <li style={{ marginBottom: 6 }}><code style={{ background: 'var(--surface-2)', padding: '2px 4px', borderRadius: 2 }}>nota_consent</code> — your analytics/error-tracking consent choice</li>
+          <li style={{ marginBottom: 6 }}><code style={{ background: 'var(--surface-2)', padding: '2px 4px', borderRadius: 2 }}>scentral_anon_id</code> — local/guest-mode ID (see section 2)</li>
+          <li style={{ marginBottom: 6 }}><code style={{ background: 'var(--surface-2)', padding: '2px 4px', borderRadius: 2 }}>scentral_persona</code> — your chosen scent persona</li>
+          <li style={{ marginBottom: 6 }}><code style={{ background: 'var(--surface-2)', padding: '2px 4px', borderRadius: 2 }}>scentral_onboarded</code> — whether you completed onboarding</li>
+          <li style={{ marginBottom: 6 }}><code style={{ background: 'var(--surface-2)', padding: '2px 4px', borderRadius: 2 }}>as_xp</code> — your XP progress (cached locally)</li>
+          <li>Supabase session cookies — required to keep you signed in</li>
         </ul>
         <p style={{ marginTop: 12 }}>
-          No cookies are used for tracking purposes. All cookies are strictly functional.
+          Session cookies are strictly functional. Analytics-related storage is only written after consent.
         </p>
       </section>
 

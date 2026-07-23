@@ -11,7 +11,7 @@ test.describe('Discover Page', () => {
       localStorage.setItem('scentral_onboarded', 'true');
       localStorage.setItem('scentral_vibe', 'fresh');
     });
-    await page.goto('/discover', { waitUntil: 'domcontentloaded', timeout: 180_000 });
+    await page.goto('/study', { waitUntil: 'domcontentloaded', timeout: 180_000 });
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(1000);
     if (testInfo.project.name.includes('Safari')) {
@@ -32,7 +32,7 @@ test.describe('Discover Page', () => {
     await expect(freshChip).toBeVisible({ timeout: 60_000 });
     await freshChip.dispatchEvent('click');
     await page.getByRole('button', { name: 'Top Rated' }).dispatchEvent('click');
-    await expect(page).toHaveURL(/\/discover/);
+    await expect(page).toHaveURL(/\/study/);
   });
 
   test('can heart a fragrance to wishlist', async ({ page }) => {
@@ -64,7 +64,7 @@ test.describe('Discover Page', () => {
       localStorage.setItem('scentral_onboarded', 'true');
       localStorage.setItem('scentral_vibe', 'fresh');
     });
-    await mobilePage.goto('/discover', { waitUntil: 'domcontentloaded', timeout: 180_000 });
+    await mobilePage.goto('/study', { waitUntil: 'domcontentloaded', timeout: 180_000 });
     await mobilePage.waitForLoadState('domcontentloaded');
     await mobilePage.waitForTimeout(20000);
     await expect(mobilePage.getByRole('button', { name: 'Add to wishlist' }).first()).toBeVisible({ timeout: 120_000 });

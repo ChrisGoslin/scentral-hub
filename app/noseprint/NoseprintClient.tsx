@@ -244,6 +244,33 @@ export default function NoseprintClient({
           </div>
         )}
 
+        {/* Post-Read handoff: turn the reveal into an evolving model */}
+        <Link
+          href="/collection"
+          style={{
+            display: 'block',
+            padding: '1.125rem',
+            borderRadius: '10px',
+            border: '1.5px solid var(--color-border)',
+            background: 'var(--color-surface)',
+            textDecoration: 'none',
+            marginBottom: '2rem',
+          }}
+        >
+          <p style={{
+            fontSize: '0.6875rem',
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+            color: 'var(--color-text-faint)',
+            marginBottom: '0.5rem',
+          }}>
+            One next step
+          </p>
+          <p style={{ fontSize: '0.875rem', color: 'var(--color-text)', lineHeight: 1.6 }}>
+            Add three fragrances you know, including one you stopped loving. →
+          </p>
+        </Link>
+
         {/* Stretch note */}
         {noseprint.stretch_note && (
           <div style={{

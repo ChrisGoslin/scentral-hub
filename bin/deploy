@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# bin/deploy — guarded deployment script for scentral-hub
+# bin/deploy — guarded deployment script for the nota. web app
 # Enforces pre-flight checks before pushing to production
 
 set -e
@@ -8,7 +8,7 @@ set -e
 CURRENT_BRANCH=$(git branch --show-current)
 GIT_STATUS=$(git status --porcelain)
 
-echo "🚀 Scentral Deploy"
+echo "🚀 nota. Deploy"
 echo ""
 
 # 1. Verify on main
@@ -90,10 +90,10 @@ if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
   exit 1
 fi
 
-# 5. Run smoke tests
+# 5. Run smoke tests against the deployment just created
 echo ""
 echo "Running smoke tests..."
-if ! npm run test:smoke:prod; then
+if ! SITE_URL="$DEPLOY_URL" npm run test:smoke:prod; then
   echo ""
   echo "❌ Smoke tests failed. Deployment succeeded but health check failed."
   echo "   Check https://vercel.com/dashboard for recent deployments."

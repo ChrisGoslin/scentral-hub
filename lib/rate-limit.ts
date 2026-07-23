@@ -31,8 +31,15 @@ export async function enforce(
   identity: string,
 ): Promise<boolean> {
   if (!limiter) return true;
-  const { success } = await limiter.limit(identity);
-  return success;
+  try {
+    const { success } = await limiter.limit(identity);
+    return success;
+  } catch (error) {
+    // If Redis is unreachable/auth fails, allow the request instead of crashing.
+    // Log for debugging but degrade gracefully.
+    console.error('Rate limit check failed, allowing request:', error);
+    return true;
+  }
 }
 
 export function clientIp(request: Request): string {

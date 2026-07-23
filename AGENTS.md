@@ -7,7 +7,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 ---
 
 # AGENTS.md — Operating rules for ALL CLI agents on nota. (Claude Code, Antigravity, Gemini, etc.)
-# ⚠️  REBRAND: Display name = "nota.". Repo stays `scentral-hub`. DB stays `scentral-mvp`. All internal names unchanged.
+# ⚠️  REBRAND: Display name = "nota.". DB stays `scentral-mvp`. Internal app/storage identifiers may still use legacy `scentral*` names. Verify the current repo name and remote before assuming it is still `scentral-hub`.
 # 📋 LATEST HANDOVER: docs/HANDOVER.md — nota. pre-launch implementation, launched Tier 1 & 2.
 # 🎯 ACTIVE BRAND/ARCHITECTURE NOTES: docs/nota/ — journey audit, brand pack, design audit, architecture plan, backlog, testing, handover.
 
@@ -41,7 +41,7 @@ fictional features, lore like "Agent Luna / Hegemony / Shadow Branching", and ha
 "being wrong" — it's "sounding certain while being wrong."
 
 ## 1. Ground truth (the ONLY accepted facts unless re-verified)
-- **Display name:** nota. **Repo:** `scentral-hub` (GitHub: `ChrisGoslin/scentral`). **DB:** `scentral-mvp` (`lrkdwobnemczvhpixpky`). Display-layer rebrand only — do NOT rename repo, DB, or tables.
+- **Display name:** nota. **Repo:** verify the current local checkout and GitHub remote before asserting the repo name; historical references may still say `scentral-hub` / `ChrisGoslin/scentral`. **DB:** `scentral-mvp` (`lrkdwobnemczvhpixpky`). Do NOT rename DB or tables as part of branding cleanup.
 - **Brand history:** Scentral Hub → AnotherSense → BaseNote → nota. You may still see `Scentral`, `AnotherSense`, and `BaseNote` in archived docs, old prompts, localStorage keys, repo names, database names, or internal implementation details. Treat `nota.` as the current user-facing brand unless a source-of-truth doc explicitly says otherwise.
 - **Data:** 127,195 fragrances (bulk-imported from 3 Kaggle datasets — 2026-06-24, IMPORT COMPLETE). Key columns: `plain_description`, `inspired_by`, `family`, `projection`, `optimal_season`, `use_case`, `lean`, `image_url` (populated by backfill scripts — may be null for some rows).
 - **Stack:** Next.js 16.2.9 (App Router, route groups like `(main)`), React 19.2.4, Supabase JS 2.x, Vercel, Tailwind CSS, `@dnd-kit/core` + `@dnd-kit/sortable` + `@dnd-kit/utilities` (Living Wardrobe). Always re-verify version from `package.json` if in doubt — do NOT assert from memory.
@@ -141,6 +141,7 @@ If a "fact" is not in these docs, the repo, or the database, it is NOT a fact ye
 - **Before writing any code:** check if the feature already exists on main (`git log`, `find app -name "page.tsx"`).
 - Before DB/auth changes: inspect first; SHOW the migration/SQL and wait for explicit "approved" before applying.
 - Before claiming a third-party tool does X: web-search and cite, or say it's unverified.
+- **Portability boundary:** nota. may ingest customer-provided files or pasted text. A direct connector requires an official API or written permission plus a separate legal/security review. Never request third-party passwords, automate authenticated extraction, or treat an LLM match as catalogue truth.
 - When unsure: ask one specific question. Do not guess and proceed.
 
 ## 4. Forbidden without explicit approval

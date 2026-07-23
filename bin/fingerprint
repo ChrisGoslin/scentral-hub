@@ -1,13 +1,16 @@
 #!/bin/bash
 set -e
 
-# 📊  Scentral Architect: Build Fingerprinting Engine
+# 📊  nota Architect: Build Fingerprinting Engine
 echo "------------------------------------------------"
 echo "🔍  GENERATING BUILD FINGERPRINT"
 echo "------------------------------------------------"
 
-PROJECT_ROOT=$(pwd)
-OUTPUT_FILE="$HOME/.gemini/scentral-hub-baseline.json"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
+cd "$PROJECT_ROOT"
+PROJECT_NAME=$(basename "$PROJECT_ROOT")
+OUTPUT_FILE="$HOME/.gemini/${PROJECT_NAME}-baseline.json"
 
 # Ensure build exists
 if [ ! -d ".next" ]; then
@@ -28,7 +31,8 @@ TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 # Generate JSON
 cat <<EOF > "$OUTPUT_FILE"
 {
-  "project": "scentral-hub",
+  "project": "$PROJECT_NAME",
+  "project_root_name": "$PROJECT_NAME",
   "timestamp": "$TIMESTAMP",
   "fingerprint": {
     "static_bundle_size": $STATIC_SIZE,

@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient()
     const results: SearchResult[] = []
-    const escaped = query.replace(/[%,]/g, '')
+    const escaped = query.replace(/[%,()]/g, '')
 
     let exactMatches: FragranceRecord[] = []
     let inspiredMatches: FragranceRecord[] = []
