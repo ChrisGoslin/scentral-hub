@@ -1,14 +1,11 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Metadata } from 'next'
 import HeroSection from '@/components/landing/HeroSection'
-import PressMarquee from '@/components/ui/PressMarquee'
-import PersonaTeasers from '@/components/landing/PersonaTeasers'
-import InspiredByCounter from '@/components/landing/InspiredByCounter'
-import DiscoveryBoxCard from './(main)/components/DiscoveryBoxCard'
+import styles from './page.module.css'
 
-const TITLE = 'nota. — Your Scent Identity'
+const TITLE = 'nota. — Your Scent Identity, Written in Motion'
 const DESCRIPTION =
-  'You already have a scent identity. nota. understands it, reflects it, and evolves it with you.'
+  'A personal scent-identity system that turns what you wear, remember, and reach for into language that feels like you.'
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -28,98 +25,152 @@ export const metadata: Metadata = {
   },
 }
 
+const OBSERVATIONS = [
+  {
+    label: 'Matter',
+    title: 'What touches skin',
+    copy: 'Notes, texture, projection, weather. The physical evidence comes first.',
+  },
+  {
+    label: 'Memory',
+    title: 'What stays with you',
+    copy: 'A place. A person. The hour a dry-down changed. Traces keep the human part intact.',
+  },
+  {
+    label: 'Identity',
+    title: 'What the pattern reveals',
+    copy: 'nota. reflects your choices back in plain language. Never a score. Never a verdict.',
+  },
+]
+
 export default function Home() {
   return (
-    <div
-      style={{
-        minHeight: '100dvh',
-        background: 'var(--bg)',
-        color: 'var(--text)',
-        fontFamily: 'var(--font-body)',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-      }}
-    >
-      {process.env.NEXT_PUBLIC_BETA_MODE === 'true' && (
-        <span
-          style={{
-            position: 'fixed',
-            top: 12,
-            right: 12,
-            zIndex: 50,
-            fontSize: 9,
-            fontWeight: 700,
-            letterSpacing: '0.05em',
-            color: 'var(--text-muted)',
-            background: 'var(--color-surface)',
-            border: '1px solid var(--color-gold)',
-            borderRadius: 999,
-            padding: '3px 8px',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          Beta — Free for early users
-        </span>
-      )}
-
+    <div className={styles.page}>
       <HeroSection />
-      <PressMarquee />
-      <PersonaTeasers />
 
-      {/* ── Inspired By Engine ── */}
-      <section style={{ padding: '80px 24px', background: 'var(--color-bg, #1A1208)', width: '100%', boxSizing: 'border-box' }}>
-        <p style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.12em', textAlign: 'center', marginBottom: 8 }}>
-          The Inspired By Engine
-        </p>
-        <h2 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'clamp(1.8rem, 4vw, 3rem)', color: 'var(--text)', textAlign: 'center', marginBottom: 12, margin: '0 0 12px' }}>
-          Your £140 bottle has an inspired-by at £18.
-        </h2>
-        <p style={{ color: 'var(--text-muted)', textAlign: 'center', marginBottom: 8, fontSize: 15 }}>
-          We find them. You decide.
-        </p>
-        <InspiredByCounter />
-        <div style={{ display: 'flex', gap: 16, maxWidth: 480, margin: '40px auto 0', justifyContent: 'center' }}>
-          {/* Designer card — woody gradient from family tokens */}
-          <div style={{ flex: 1, padding: '24px 16px', borderRadius: 12, background: 'linear-gradient(160deg, var(--family-woody-start), var(--family-woody-end))', textAlign: 'center' }}>
-            <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 8, margin: 0 }}>Designer</p>
-            <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', color: '#F5F0E8', fontSize: 18, margin: '8px 0' }}>Baccarat Rouge 540</p>
-            <p style={{ color: 'var(--accent)', fontSize: 13, marginTop: 4, margin: '4px 0 0' }}>£285</p>
+      <section id="atelier-method" className={styles.method} aria-labelledby="method-title">
+        <div className={styles.sectionIntro}>
+          <p className={styles.kicker}>The atelier method</p>
+          <h2 id="method-title">The system notices before it asks.</h2>
+          <p>
+            Your taste is already in motion. nota. reads the evidence you leave behind and
+            gives it back without flattening it into a percentage.
+          </p>
+        </div>
+
+        <ol className={styles.observationList}>
+          {OBSERVATIONS.map((observation, index) => (
+            <li key={observation.label}>
+              <span className={styles.observationNumber}>0{index + 1}</span>
+              <div>
+                <p>{observation.label}</p>
+                <h3>{observation.title}</h3>
+                <span>{observation.copy}</span>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section className={styles.readSection} aria-labelledby="read-title">
+        <div className={styles.readCopy}>
+          <p className={styles.kicker}>The Read</p>
+          <h2 id="read-title">Recognition, not categorisation.</h2>
+          <p>
+            Begin with what you already know: the bottle you keep returning to, the one that
+            disappears too quickly, the memory that never does. nota. finds the thread.
+          </p>
+          <Link href="/read" className={styles.inkLink}>
+            Begin your Read <span aria-hidden="true">↗</span>
+          </Link>
+        </div>
+
+        <div className={styles.dossier} aria-label="Example Read observation">
+          <span className={styles.tape} aria-hidden="true" />
+          <p className={styles.dossierLabel}>Observation / not a verdict</p>
+          <blockquote>
+            You tend to choose warmth without sweetness. Woods stay. Smoke appears when the
+            day slows down.
+          </blockquote>
+          <div className={styles.dossierNotes}>
+            <span>wear / skin</span>
+            <span>memory / evening</span>
+            <span>shift / dry mineral</span>
           </div>
-          {/* Inspired By card — oriental gradient from family tokens */}
-          <div style={{ flex: 1, padding: '24px 16px', borderRadius: 12, background: 'linear-gradient(160deg, var(--family-oriental-start), var(--family-oriental-end))', textAlign: 'center' }}>
-            <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 8, margin: 0 }}>Inspired By</p>
-            <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', color: '#F5F0E8', fontSize: 18, margin: '8px 0' }}>DNA Match · 94%</p>
-            <p style={{ color: 'var(--accent)', fontSize: 13, marginTop: 4, margin: '4px 0 0' }}>£19</p>
-          </div>
+          <p className={styles.dossierClose}>Still fits.</p>
         </div>
       </section>
 
-      {/* ── Discovery Box ── */}
-      <section style={{ padding: '80px 24px', width: '100%', maxWidth: 480, margin: '0 auto', boxSizing: 'border-box' }}>
-        <DiscoveryBoxCard />
+      <section className={styles.lineageSection} aria-labelledby="lineage-title">
+        <div className={styles.lineageHeading}>
+          <p className={styles.kicker}>Radical honesty</p>
+          <h2 id="lineage-title">A recommendation should show its working.</h2>
+        </div>
+
+        <div className={styles.lineageWorkbench}>
+          <article className={styles.referenceCard}>
+            <p>Familiar reference</p>
+            <h3>Airy saffron over warm woods</h3>
+            <span>The shape you already recognise.</span>
+          </article>
+          <div className={styles.lineageThread} aria-hidden="true">
+            <span />
+            <i />
+            <span />
+          </div>
+          <article className={styles.alternativeCard}>
+            <p>Open alternative</p>
+            <h3>Same luminous heart, softer mineral base</h3>
+            <span>Shared heart notes · lighter projection · lower blind-buy risk</span>
+          </article>
+        </div>
+
+        <p className={styles.lineageNote}>
+          You decide what prestige means. nota. only makes the trade-off visible.
+        </p>
       </section>
 
-      {/* ── Footer ── */}
-      <footer
-        style={{
-          width: '100%',
-          borderTop: '1px solid var(--line)',
-          padding: '24px',
-          textAlign: 'center',
-          boxSizing: 'border-box',
-          background: 'var(--bg)',
-        }}
-      >
-        <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-          nota. · your scent identity
-          <br /><br />
-          <Link href="/privacy" style={{ textDecoration: 'none', color: 'inherit' }}>Privacy</Link>
-          {' · '}
-          <Link href="/terms" style={{ textDecoration: 'none', color: 'inherit' }}>Terms</Link>
-          {' · '}
-          <Link href="/social" style={{ textDecoration: 'none', color: 'inherit' }}>Community</Link>
-        </p>
+      <section className={styles.traceSection} aria-labelledby="trace-title">
+        <div className={styles.tracePaper}>
+          <span className={styles.traceDate}>A trace / after rain</span>
+          <p>
+            It opened like cold stone, then warmed into something familiar. I wore it for the
+            walk home and kept catching it on my sleeve.
+          </p>
+          <span className={styles.traceSignature}>Trace left.</span>
+        </div>
+        <div className={styles.traceCopy}>
+          <p className={styles.kicker}>Asynchronous resonance</p>
+          <h2 id="trace-title">No scorekeeping. Just recognition.</h2>
+          <p>
+            Traces are field notes from people who smell differently. When one feels true, you
+            leave Resonance. The paper gathers patina; nobody climbs a leaderboard.
+          </p>
+          <Link href="/traces" className={styles.inkLinkDark}>
+            Read the Traces <span aria-hidden="true">→</span>
+          </Link>
+        </div>
+      </section>
+
+      <section className={styles.closing} aria-labelledby="closing-title">
+        <p className={styles.kicker}>Your nose is your absolute truth</p>
+        <h2 id="closing-title">
+          Start with one scent.
+          <em>See what it remembers.</em>
+        </h2>
+        <Link href="/read" className={styles.closingAction}>
+          Begin your Read <span aria-hidden="true">↗</span>
+        </Link>
+      </section>
+
+      <footer className={styles.footer}>
+        <p className={styles.footerWordmark}>nota<span>.</span></p>
+        <p>A personal scent-identity system.</p>
+        <nav aria-label="Legal and community links">
+          <Link href="/privacy">Privacy</Link>
+          <Link href="/terms">Terms</Link>
+          <Link href="/traces">Traces</Link>
+        </nav>
       </footer>
     </div>
   )

@@ -1,0 +1,506 @@
+.page {
+  --paper: var(--ivory);
+  --ink: var(--charcoal);
+  --faded: var(--secondary-ink);
+  --amber: var(--amber-glow);
+  width: 100%;
+  overflow: hidden;
+  color: var(--ink);
+  background: var(--paper);
+  font-family: var(--font-body);
+}
+
+.kicker,
+.observationNumber,
+.dossierLabel,
+.traceDate {
+  margin: 0;
+  color: var(--olive);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+.method,
+.readSection,
+.lineageSection,
+.traceSection,
+.closing {
+  width: min(100%, 1600px);
+  margin: 0 auto;
+}
+
+.method {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.2fr);
+  gap: clamp(60px, 10vw, 180px);
+  padding: clamp(100px, 15vw, 220px) clamp(24px, 7vw, 110px);
+}
+
+.sectionIntro {
+  max-width: 530px;
+}
+
+.sectionIntro h2,
+.readCopy h2,
+.lineageHeading h2,
+.traceCopy h2,
+.closing h2 {
+  margin: 20px 0 0;
+  font-family: var(--font-body);
+  font-weight: 500;
+  letter-spacing: -0.05em;
+  line-height: 0.98;
+}
+
+.sectionIntro h2,
+.readCopy h2,
+.lineageHeading h2,
+.traceCopy h2 {
+  font-size: clamp(38px, 5.5vw, 76px);
+}
+
+.sectionIntro > p:last-child,
+.readCopy > p,
+.traceCopy > p {
+  max-width: 48ch;
+  margin: 30px 0 0;
+  color: var(--faded);
+  font-size: clamp(13px, 1.2vw, 16px);
+  line-height: 1.8;
+}
+
+.observationList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid color-mix(in srgb, var(--ink) 16%, transparent);
+}
+
+.observationList li {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 18px;
+  padding: 30px 0 34px;
+  border-bottom: 1px solid color-mix(in srgb, var(--ink) 16%, transparent);
+}
+
+.observationList li > div > p {
+  margin: 0 0 7px;
+  color: var(--faded);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.observationList h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(26px, 3vw, 40px);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.observationList li > div > span {
+  display: block;
+  max-width: 54ch;
+  margin-top: 12px;
+  color: var(--faded);
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.readSection {
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(320px, 0.78fr);
+  align-items: center;
+  gap: clamp(70px, 11vw, 180px);
+  padding: clamp(90px, 12vw, 180px) clamp(24px, 7vw, 110px);
+  border-top: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+  background: var(--stone);
+}
+
+.inkLink,
+.inkLinkDark {
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  gap: 18px;
+  margin-top: 34px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.inkLink {
+  color: var(--ink);
+  border-bottom: 1px solid color-mix(in srgb, var(--ink) 32%, transparent);
+}
+
+.dossier,
+.tracePaper {
+  position: relative;
+  background-color: var(--paper);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.88' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.16'/%3E%3C/svg%3E");
+  border: 1px solid color-mix(in srgb, var(--ink) 15%, transparent);
+  box-shadow:
+    0 1px 2px rgba(43, 41, 38, 0.05),
+    0 6px 12px rgba(43, 41, 38, 0.07),
+    0 18px 34px rgba(43, 41, 38, 0.09),
+    0 42px 90px rgba(43, 41, 38, 0.10);
+}
+
+.dossier {
+  max-width: 510px;
+  padding: clamp(38px, 5vw, 68px);
+  transform: rotate(-1.5deg);
+}
+
+.tape {
+  width: 116px;
+  height: 30px;
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  background: rgba(184, 172, 156, 0.76);
+  transform: translateX(-50%) rotate(1.5deg);
+}
+
+.dossier blockquote {
+  margin: 30px 0;
+  font-family: var(--font-display);
+  font-size: clamp(30px, 4.2vw, 54px);
+  font-style: italic;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+
+.dossierNotes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 18px;
+  border-top: 1px solid color-mix(in srgb, var(--ink) 14%, transparent);
+}
+
+.dossierNotes span {
+  color: var(--faded);
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.dossierClose {
+  margin: 34px 0 0;
+  color: var(--faded);
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-style: italic;
+}
+
+.lineageSection {
+  padding: clamp(100px, 14vw, 210px) clamp(24px, 7vw, 110px);
+}
+
+.lineageHeading {
+  max-width: 820px;
+}
+
+.lineageWorkbench {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 100px minmax(0, 1fr);
+  align-items: center;
+  margin-top: clamp(60px, 8vw, 110px);
+}
+
+.referenceCard,
+.alternativeCard {
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: clamp(28px, 4vw, 54px);
+  border: 1px solid color-mix(in srgb, var(--ink) 18%, transparent);
+}
+
+.referenceCard {
+  color: var(--paper);
+  background: var(--ink);
+}
+
+.alternativeCard {
+  color: var(--ink);
+  background: var(--stone);
+}
+
+.referenceCard > p,
+.alternativeCard > p {
+  margin: 0 0 auto;
+  color: var(--faded);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.referenceCard > p {
+  color: color-mix(in srgb, var(--stone) 70%, transparent);
+}
+
+.referenceCard h3,
+.alternativeCard h3 {
+  max-width: 15ch;
+  margin: 40px 0 14px;
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3.3vw, 46px);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.06;
+}
+
+.referenceCard > span,
+.alternativeCard > span {
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  line-height: 1.6;
+}
+
+.referenceCard > span {
+  color: color-mix(in srgb, var(--stone) 75%, transparent);
+}
+
+.alternativeCard > span {
+  color: var(--faded);
+}
+
+.lineageThread {
+  display: flex;
+  align-items: center;
+}
+
+.lineageThread span {
+  height: 1px;
+  flex: 1;
+  background: color-mix(in srgb, var(--ink) 24%, transparent);
+}
+
+.lineageThread i {
+  width: 12px;
+  height: 12px;
+  display: block;
+  border-radius: 50%;
+  background: var(--olive);
+}
+
+.lineageNote {
+  max-width: 58ch;
+  margin: 28px auto 0;
+  color: var(--faded);
+  font-family: var(--font-display);
+  font-size: 11px;
+  line-height: 1.7;
+  text-align: center;
+}
+
+.traceSection {
+  display: grid;
+  grid-template-columns: minmax(320px, 0.85fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(64px, 12vw, 190px);
+  padding: clamp(100px, 14vw, 200px) clamp(24px, 7vw, 110px);
+  color: var(--paper);
+  background: var(--ink);
+}
+
+.tracePaper {
+  max-width: 520px;
+  padding: clamp(38px, 5vw, 64px);
+  color: var(--ink);
+  transform: rotate(1.25deg);
+}
+
+.tracePaper > p {
+  margin: 34px 0;
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4vw, 48px);
+  font-style: italic;
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+}
+
+.traceSignature {
+  display: block;
+  color: var(--faded);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.traceCopy .kicker {
+  color: color-mix(in srgb, var(--stone) 68%, transparent);
+}
+
+.traceCopy > p {
+  color: color-mix(in srgb, var(--stone) 68%, transparent);
+}
+
+.inkLinkDark {
+  color: var(--paper);
+  border-bottom: 1px solid rgba(247, 244, 238, 0.34);
+}
+
+.closing {
+  padding: clamp(120px, 17vw, 250px) clamp(24px, 7vw, 110px);
+  text-align: center;
+}
+
+.closing h2 {
+  margin-right: auto;
+  margin-left: auto;
+  font-size: clamp(48px, 8vw, 118px);
+}
+
+.closing h2 em {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.closingAction {
+  min-height: 54px;
+  display: inline-flex;
+  align-items: center;
+  gap: 22px;
+  margin-top: 52px;
+  padding: 0 26px;
+  color: var(--paper);
+  background: var(--ink);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.footer {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: end;
+  gap: 24px;
+  padding: 42px clamp(24px, 5vw, 72px);
+  color: var(--paper);
+  background: var(--ink);
+  border-top: 1px solid rgba(247, 244, 238, 0.16);
+}
+
+.footerWordmark {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 42px;
+  letter-spacing: -0.04em;
+}
+
+.footerWordmark span {
+  color: var(--amber);
+}
+
+.footer > p:nth-child(2),
+.footer nav a {
+  color: color-mix(in srgb, var(--stone) 66%, transparent);
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.footer nav {
+  display: flex;
+  justify-content: flex-end;
+  gap: 22px;
+}
+
+.footer nav a {
+  text-decoration: none;
+}
+
+@media (max-width: 820px) {
+  .method,
+  .readSection,
+  .traceSection {
+    grid-template-columns: 1fr;
+  }
+
+  .method,
+  .readSection,
+  .traceSection {
+    gap: 70px;
+  }
+
+  .dossier,
+  .tracePaper {
+    justify-self: center;
+  }
+
+  .lineageWorkbench {
+    grid-template-columns: 1fr;
+  }
+
+  .lineageThread {
+    height: 70px;
+    flex-direction: column;
+  }
+
+  .lineageThread span {
+    width: 1px;
+  }
+
+  .footer {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .footer nav {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 520px) {
+  .method,
+  .readSection,
+  .lineageSection,
+  .traceSection,
+  .closing {
+    padding-right: 22px;
+    padding-left: 22px;
+  }
+
+  .observationList li {
+    grid-template-columns: 30px minmax(0, 1fr);
+  }
+
+  .referenceCard,
+  .alternativeCard {
+    min-height: 240px;
+  }
+
+  .dossier,
+  .tracePaper {
+    padding: 34px 26px;
+  }
+
+  .footer nav {
+    flex-wrap: wrap;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dossier,
+  .tracePaper {
+    transform: none;
+  }
+}

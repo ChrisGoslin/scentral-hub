@@ -611,7 +611,7 @@ export default function OnboardingPage() {
           {/* ── STEP 1: Sanctuary ─────────────────────────────────────────── */}
           {step === 1 && (
             <div>
-              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(22px, 6vw, 30px)', fontWeight: 400, lineHeight: 1.2, marginBottom: 8, color: 'var(--text)' }}>
+              <h1 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'clamp(22px, 6vw, 30px)', fontWeight: 400, lineHeight: 1.2, marginBottom: 8, color: 'var(--text)' }}>
                 Where do you go when the world gets loud?
               </h1>
               <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 32, lineHeight: 1.6 }}>
@@ -694,7 +694,7 @@ export default function OnboardingPage() {
           {/* ── STEP 2: Projection ────────────────────────────────────────── */}
           {step === 2 && (
             <div>
-              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(22px, 6vw, 30px)', fontWeight: 400, lineHeight: 1.2, marginBottom: 8, color: 'var(--text)' }}>
+              <h1 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'clamp(22px, 6vw, 30px)', fontWeight: 400, lineHeight: 1.2, marginBottom: 8, color: 'var(--text)' }}>
                 How close do you want to be felt?
               </h1>
               <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 32, lineHeight: 1.6 }}>
@@ -746,7 +746,7 @@ export default function OnboardingPage() {
           {/* ── STEP 3: Context ───────────────────────────────────────────── */}
           {step === 3 && (
             <div>
-              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(22px, 6vw, 30px)', fontWeight: 400, lineHeight: 1.2, marginBottom: 8, color: 'var(--text)' }}>
+              <h1 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'clamp(22px, 6vw, 30px)', fontWeight: 400, lineHeight: 1.2, marginBottom: 8, color: 'var(--text)' }}>
                 When do you usually reach for it?
               </h1>
               <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 32, lineHeight: 1.6 }}>

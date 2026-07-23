@@ -44,7 +44,7 @@ function PersonaCardComponent({ persona }: { persona: Persona }) {
       <p style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.12em', fontWeight: 700 }}>
         Your Scent Identity
       </p>
-      <p style={{ fontSize: 22, fontFamily: 'var(--font-display)', color: 'var(--text)', marginTop: 4 }}>
+      <p style={{ fontSize: 22, fontFamily: 'var(--font-display)', fontStyle: 'italic', color: 'var(--text)', marginTop: 4 }}>
         {persona.name}
       </p>
       <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4, lineHeight: '18px' }}>
