@@ -1,5 +1,145 @@
 # nota. Pre-Launch Implementation — Project Handover
 
+> ## Current CLI Alignment — 2026-07-23
+>
+> This section is the current cross-CLI handover. The dated implementation record below is preserved for history; it is **not** a complete statement of current product or repository truth.
+>
+> ### Start here, in order
+>
+> 1. [`AGENTS.md`](../AGENTS.md) — binding safety, verification, topology, Git, and execution rules.
+> 2. [`NOTA_MANIFESTO.md`](../NOTA_MANIFESTO.md) — absolute psychological, material, kinetic, and cognitive-load doctrine.
+> 3. [`DESIGN.md`](../DESIGN.md) — executable design-system contract for tokens, typography, materials, and Dot states.
+> 4. [`NOTA_LORE.md`](../NOTA_LORE.md) — compressed interaction laws and recurring sensory patterns.
+> 5. [`NOTA-BRAND-UIUX-PACK.md`](../NOTA-BRAND-UIUX-PACK.md) — implementation companion, surface glossary, and anti-slop checklist.
+> 6. [`CLAUDE.md`](../CLAUDE.md) — living product and implementation memory; verify drift-prone facts against code and live systems.
+> 7. [`docs/index.md`](./index.md) — map of the remaining canonical engineering and design documents.
+>
+> `DESIGN.md` is now present at the repo root and owns the executable token, typography, material, and Dot contract. Use [`docs/nota/03-design-system-audit.md`](./nota/03-design-system-audit.md) as implementation evidence when code and doctrine diverge.
+>
+> ### Truth and conflict rules
+>
+> - **Verified implementation outranks narrative history.** Read the relevant code before asserting that a route, token, font, schema, or interaction is live.
+> - **Doctrine and implementation are different layers.** The Manifesto and Lore define the intended experience. They do not prove every rule has already been implemented.
+> - **Newest explicit direction wins for future work.** When older docs conflict with the Manifesto/Lore, follow the newer doctrine while describing any migration needed from current code.
+> - **Database or authentication changes require inspection, shown SQL, and explicit approval before application.**
+> - **Never sweep the shared worktree.** Preserve unrelated edits and stage or commit only explicit paths authored for the task.
+> - **No destructive cleanup, force-push, deployment, migration, or archive action without the authority required by `AGENTS.md` and the user's request.**
+>
+> ### Canonical concern ownership
+>
+> One concern has one owner. Supporting files may explain or operationalise the owner, but they must not redefine it.
+>
+> | Concern | Canonical owner | Role and precedence |
+> |---|---|---|
+> | Agent safety, verification, Git, scope, and task protocol | [`AGENTS.md`](../AGENTS.md) | Binding operational law. It may route to other sources but does not own brand or token values. |
+> | Brand purpose, positioning, audience psychology, voice boundaries, and experiential principles | [`NOTA_MANIFESTO.md`](../NOTA_MANIFESTO.md) | Brand constitution. This is what nota. means and how it should feel. |
+> | Design tokens, contrast, typography implementation, modes, surfaces, component anatomy, and Dot specification | [`DESIGN.md`](../DESIGN.md) | Executable design-system contract. It owns these concerns. |
+> | Accumulated sensory patterns and hard-won interaction refinements | [`NOTA_LORE.md`](../NOTA_LORE.md) | Append-only semantic memory. It records reusable learnings but cannot override the Manifesto or DESIGN contract. |
+> | Applied UI/UX guidance, examples, migration notes, and the retirement of previous framing | [`NOTA-BRAND-UIUX-PACK.md`](../NOTA-BRAND-UIUX-PACK.md) | Implementation companion. It interprets the Manifesto and DESIGN; it does not outrank them. |
+> | Current repository reality, known drift, active branch state, verification, and next action | [`docs/HANDOVER.md`](./HANDOVER.md) | Time-stamped reality boundary and routing layer. It does not invent product doctrine. |
+> | Document discovery order | [`docs/index.md`](./index.md) | Index only. It links to canonical owners and never duplicates their rules. |
+> | Living product/code memory | [`CLAUDE.md`](../CLAUDE.md) | Useful implementation context. Drift-prone claims must be verified, and it yields to the concern owner above. |
+>
+> **Conflict resolution:** identify the concern first, follow that row's owner, verify current implementation, then record any unresolved mismatch here. Do not resolve a conflict by choosing whichever file was read first.
+>
+> **Import status (2026-07-23):** `DESIGN.md` and `NOTA-BRAND-UIUX-PACK.md` are present at the repo root, the additive topology guidance has been integrated into `AGENTS.md`, the new reconciliation workflow has been codified, and the existing `.claude/skills/verify-cli-claims` and `.claude/skills/repo-tidy` entries have been reconciled against the new doctrine. Remaining unresolved work is implementation drift in code, not missing canon files.
+>
+> ### Deferred by design, not blockers
+>
+> - Drive deep-clean for backup and Takeout build junk belongs in a separate cleanup session.
+> - ChatGPT and Antigravity pointer updates should be handled the next time each tool is opened.
+> - Use a fresh session with the bloat-plan two-line entry test before escalating to plugin pruning from `CONTEXT_BLOAT_RECOVERY_PLAN.md` v2.
+> - Treat these items as operational follow-ups, not blockers for nota. repository alignment.
+>
+> ### Product and experience contract
+>
+> - Product name is **nota.**; the canonical local checkout is `/Users/christophergoslin/Projects/scentral-hub`.
+> - Build for Curators and Contributors: reflective, identity-led, honest about recommendation lineage, and usable at different levels of fragrance fluency.
+> - Reject generic SaaS dashboards, numerical anxiety mechanics, glossy storefront language, XP, and standard likes/upvotes.
+> - Use material constraints: ivory paper, charcoal wet ink, fading taupe history, olive alignment, amber biological heat, restrained grain, and deliberate analog dissonance.
+> - Preserve the 90/10 type intent: functional system typography dominates; italic serif is reserved for emotional identity moments. Verify the actual font tokens before changing a surface.
+> - Enforce the cognitive gate: one primary decision and no more than three actions per screen.
+> - Silence is the default. Haptics and sound must communicate state, not decorate it. Respect reduced-motion and device capability.
+> - Keep the nota. dot meaningful: idle, save, active, and alignment are states—not ornament.
+>
+> ### Current repository state at handoff
+>
+> - **Branch:** `brand/sensory-sanctuary`, one local commit ahead of `origin/brand/sensory-sanctuary` when this section was written.
+> - **HEAD:** `1cf1a26` — `feat: add sensory trace composer ritual`.
+> - **Current focus:** sensory Trace Composer, ritual repair, manifesto/lore consolidation, and cross-CLI alignment.
+> - **Manifesto:** present locally as `NOTA_MANIFESTO.md`; it was uncommitted when this section was written.
+> - **Shared tree:** unrelated modified API/project files and an untracked maintenance script already exist. Do not stage, revert, or rewrite them as part of brand work.
+> - **Verification boundary:** the last sensory commit passed `npm run build`; the subsequently dirty shared tree has not been certified by this handover. Re-run proportionate checks immediately before any new commit or push.
+>
+> ### Required task loop for every CLI
+>
+> 1. Orient: verify repository, branch, status, canonical docs, and whether the requested work already exists.
+> 2. Critique: name the generic SaaS failure mode and how the proposal avoids it.
+> 3. Enhance: add one bounded sensory improvement that supports utility.
+> 4. Gate: confirm one decision, at most three actions, accessibility, and reduced-motion behavior.
+> 5. Execute: use semantic tokens and existing patterns; keep scope reversible.
+> 6. Verify: inspect the real diff, run checks proportionate to risk, and report exact blockers.
+> 7. Hand off: state branch, commit or uncommitted paths, tests run, remaining uncertainty, and the next smallest safe action.
+>
+> ### Cross-CLI three-pass loop
+>
+> This is the intended execution loop for substantial work unless the user explicitly narrows scope.
+> Invoke [`.claude/skills/loop-orchestrator/SKILL.md`](../.claude/skills/loop-orchestrator/SKILL.md) to classify the task as `quick`, `standard`, or `assured`, coordinate the required independent review, and validate the completion record. CLI-specific entries must point back to that file rather than copying its workflow.
+>
+> 1. Version 1: review the canonical docs, complete the requested task, add one bounded +20 percent stretch, and produce the first concrete output. The stretch improves quality, resilience, accessibility, or automation inside the original acceptance criteria; it does not expand product scope by 20 percent.
+> 2. Self-critique pass: review Version 1 for weaknesses, gaps, regressions, overclaims, missed routing updates, or automation opportunities.
+> 3. Version 2: patch the issues found in the critique, then record any genuinely reusable lesson in the canonical lesson system or owning doc.
+> 4. Self-critique pass again: run the same critical review against Version 2 rather than assuming the first remediation is sufficient.
+> 5. Version 3: apply the second-round fixes, verify the result, and only then present the work as complete.
+>
+> Treat these versions as checkpoints of one evolving artifact, not three duplicated reports. Every critique must cite observed evidence; every patch must have a material purpose. `No patch required` is an acceptable pass result when the evidence supports it.
+>
+> Use the smallest loop that matches the work: trivial and reversible work may stop at verified Version 1; standard bounded work normally reaches Version 2; substantial, cross-CLI, canonical, risky, or release-affecting work must reach verified Version 3. Declare a reduced loop before execution and report its residual risk.
+>
+> ### Version-3 completion checklist
+>
+> Do not label substantial work complete until every item can be answered from live evidence.
+>
+> - [ ] **Orientation:** repository, branch, dirty-tree boundary, and canonical reading order were verified.
+> - [ ] **Version 1:** requested outcome exists and the bounded +20 percent stretch supports the task rather than expanding its scope.
+> - [ ] **Critique 1:** weaknesses, overclaims, regressions, routing drift, accessibility, and automation opportunities were inspected.
+> - [ ] **Version 2 delta:** each accepted finding was patched or explicitly rejected with a reason.
+> - [ ] **Lesson routing:** reusable learning was added to the correct owner, or recorded as `none`; task history was not promoted into permanent canon.
+> - [ ] **Critique 2:** Version 2 was reviewed independently for residual risk and unintended consequences.
+> - [ ] **Version 3 delta:** second-pass findings were patched, or the evidence records `no patch required`.
+> - [ ] **Verification:** relevant tests, build, diff review, routing checks, and claim checks were run and their exact outcomes recorded.
+> - [ ] **Reality boundary:** uncommitted files, blockers, uncertainty, and the next smallest safe action are explicit.
+> - [ ] **Completion claim:** the final response identifies loop depth reached and does not imply commit, push, deploy, migration, or production state without direct proof.
+>
+> ### Canon import completion checklist
+>
+> When adding or promoting a canonical file, do not stop at file creation.
+>
+> - Confirm the file exists and is readable.
+> - Add it to `docs/index.md` in the correct read order.
+> - Update `docs/HANDOVER.md` ownership and routing language.
+> - Remove stale "missing" warnings.
+> - Call out any doctrine-versus-implementation drift explicitly.
+> - Verify touched files with `git diff --check` and targeted status output.
+>
+> ### Cross-agent coordination lessons
+>
+> - Cross-agent behavior belongs in shared operating rules, not tool-specific skills, when the goal is consistent conduct across CLIs.
+> - Before moving, archiving, or otherwise filing a document, check the shared ledger or latest handoff first. Parallel agents on shared storage can create duplicate-action risk.
+> - When a cleanup or archive action has already been performed elsewhere, record the outcome and stop. Do not "re-complete" the same file operation.
+>
+> ### External pointer-update instructions
+>
+> These are operational instructions for other CLIs. They do not change nota. product doctrine.
+>
+> - ChatGPT: paste the operating-system instruction into Custom Instructions and begin substantive sessions by pasting the canonical operating file contents, because ChatGPT cannot read the local filesystem directly.
+> - Antigravity: replace duplicated local rule copies with a pointer that instructs it to read the canonical operating files before each task, and route changes back through the shared change-control process instead of maintaining a second instruction canon.
+> - If a CLI cannot write to the canonical lesson file directly, it must append to its accessible working copy and explicitly flag that a merge is required. Silent dual-write drift is a known failure mode.
+
+---
+
+## Historical implementation snapshot — 2026-07-04
+
 **Date:** 2026-07-04  
 **Status:** ✅ LAUNCHED (Tier 1 & 2 complete)  
 **PM Owner:** [Your Name]  
@@ -10,8 +150,6 @@
 **Database:** scentral-mvp (lrkdwobnemczvhpixpky) — Supabase
 
 ---
-
-> **2026-07-16 operational note:** Verify the current GitHub remote and public domain before acting on the repository/deployment lines above. The live fallback domain is still `https://scentral-hub.vercel.app`; `notalabs.io` is mid-cutover and should not be assumed healthy until HTTPS and DNS checks are complete.
 
 ## What Was Delivered
 
