@@ -16,7 +16,7 @@ export async function POST(request: Request) {
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY!;
-  const supabase = createClient(supabaseUrl, supabaseServiceKey);
+  const supabase = await createClient(supabaseUrl, supabaseServiceKey);
 
   webpush.setVapidDetails(
     process.env.VAPID_EMAIL!,
