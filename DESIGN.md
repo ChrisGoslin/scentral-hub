@@ -209,26 +209,27 @@ Until measured, the hold ships behind the three escape hatches documented in §8
 
 ## 12. Surface glossary (canonical names)
 
-**Superseded 2026-07-22.** This table previously invented names (Shelf, Trails, Traces) with no route to back them. A homepage/hero build on `brand/sensory-sanctuary` exposed the real, shipped route map via failing E2E specs (`/collection` vs `/cabinet`, `/discover` vs `/study`, `/layering` vs `/lab`). **The shipped routes are the ground truth now** — this doc's job is to catch up to them, not the other way round.
+**Verified 2026-07-23** by reading the actual route files (`app/(main)/study/page.tsx`, `.../lab/page.tsx`, `.../cabinet/page.tsx`, `.../traces/page.tsx`, `.../trails/page.tsx`, `.../insights/page.tsx`, `app/read/page.tsx`, `app/noseprint/page.tsx`, `.../shelf/blind/page.tsx`), not inferred from naming. Previously every row below was "unconfirmed" — see `docs/CANONICAL-GUARDRAILS.md` L5 (verified means it compiled/built and was read, not that the name sounded right).
 
 | Canonical name | Route | Layer | Status |
 |---|---|---|---|
 | **The Read** | `/read` | identity reveal | Confirmed — route ships, matches doctrine |
-| **Cabinet** | `/cabinet` | truth layer — what the user actually wears | Confirmed route. Retires "Shelf" / "The Shelf" as the UI name — use **Cabinet** in copy and code going forward |
-| **Study** | `/study` | discovery / learning surface | Confirmed route. Mapping to doctrine's Profiler/Trails is **unconfirmed** — needs a repo read of `app/study` to see what it actually contains before this row is trusted |
-| **Lab** | `/lab` | fragrance formulation / blending ("Layering Lab") | Confirmed route. **This is likely NOT the same surface as doctrine's "Traces"** (Traces = memories/expression; Lab = chemistry/formulation per earlier project specs). Treat as a distinct, additional surface until verified — do not silently merge it into Traces |
-| Noseprint | — | behavioural scent identity | Unconfirmed against routes — verify still shipped |
-| Blind Ranking | — | bias removal | Unconfirmed against routes |
-| Traces | — | expression layer — memories, not descriptions | **Do not assume this is `/lab`.** Verify whether Traces exists as its own route or was never built |
-| Insights | — | reflection layer | Unconfirmed against routes |
-| Scentiment | — | resonance metric inside Insights | Unconfirmed |
-| Temptations | — | personalised commerce | Unconfirmed |
-| Aura | — | fragrance intelligence layer | Unconfirmed |
-| Houses | — | belonging layer | Unconfirmed |
+| **Cabinet** | `/cabinet` | Living Wardrobe — renders `CollectionClientWrapper`, backed by the `collections` table | Confirmed. `/collection` is a clean `permanentRedirect` to `/cabinet` (via `lib/rebrand.ts`) — no duplicate implementation, safe legacy alias |
+| **Study** | `/study` | catalogue search/browse — renders `DiscoverClient`, queries `fragrances` | Confirmed. **Not** doctrine's Profiler/Trails — it's the fragrance search/browse surface. `/discover` is a clean `permanentRedirect` to `/study` |
+| **Lab** | `/lab` | fragrance layering/formulation workbench — renders `LayeringClient`, queries `phase`/`application_zone`/`application_method` columns | Confirmed distinct from Traces, as suspected. `/layering` is a clean `permanentRedirect` to `/lab`. **Drift found:** the page's own `<title>` metadata still reads "nota.Lab \| nota." — violates this file's own "`nota.lab`... remain retired regardless of route naming" rule below. Not fixed here (docs-verification pass, not a code change) — flagging for a follow-up commit |
+| Noseprint | `/noseprint` | behavioural scent identity artefact | Confirmed route exists (top-level, outside the `(main)` group, alongside `/read`) |
+| Blind Ranking | `/shelf/blind` (start) + `/shelf/blind/[sessionId]` (session view) | bias removal | Confirmed, two-stage flow (not a duplicate) — matches `blind_ranking_sessions`/`blind_ranking_choices` in the DB |
+| Traces | `/traces` | expression layer — renders `TracesClient`, own metadata, own API (`/api/traces`) | Confirmed as its own route, genuinely distinct from `/lab` |
+| Trails | `/trails` + `/trails/[slug]` | learning surface | Confirmed built (list + detail pages) |
+| Insights | `/insights` | reflection layer — renders `InsightsClient` | Confirmed built |
+| Scentiment | inside `/insights` (`InsightsClient`, `/api/insights`) | resonance metric | Confirmed — not its own route, exactly as this table already said |
+| Temptations | not a route — `components/temptations/{TemptationProvider,TemptationCard}.tsx` | personalised commerce | Confirmed as an embedded component, not a page |
+| Aura | not a route — `components/aura/{AuraAdvisory,AuraShelfAdvisory}.tsx` | fragrance intelligence layer | Confirmed as an embedded advisory component, not a page |
+| Houses | DB table only (`houses`) | belonging layer | **Not built.** Zero references anywhere under `app/` — schema exists, no UI consumes it yet |
 
-**Retired UI names — replace on sight:** "Shelf" / "The Shelf" → **Cabinet**. "Discover" → **Study**. "Layering" (as a UI label, not the chemistry concept) → **Lab**. `nota.lab`, `Trace Composer` remain retired regardless of route naming.
+**Real overlap, not resolved by this pass — do not silently merge:** `/cabinet` (Living Wardrobe, `collections` table, tier/affinity model) and `/shelf` (the ranked Top-N Shelf, `shelf_items` table, S/A/B/C rank model — see `CLAUDE.md` §6 "two competing shelf models") are two genuinely different, currently-shipped features that both present as "your shelf" to the user. This table's older "Retired UI names" line below reads as if `/shelf` were dead — it is not; it's the *other* shelf. Which one the product settles on (or how they reconcile) is a real, open product decision, not a docs fix.
 
-**Action required before this table can be trusted:** someone with repo access must open `app/study/page.tsx` and `app/lab/page.tsx` (or equivalent) and confirm what each surface actually does, then update the "Layer" and "Status" columns from "unconfirmed" to "confirmed." Until then, treat every unconfirmed row as a hypothesis, not a fact — this is the same mistake ("verified" vs "reviewed") flagged in `lessons.md` L5.
+**Retired UI names — replace on sight:** "Discover" → **Study**. "Layering" (as a UI label, not the chemistry concept) → **Lab**. `nota.lab`, `Trace Composer` remain retired regardless of route naming (see the Lab drift note above — this rule is currently violated in shipped metadata). "Shelf" / "The Shelf" as a **UI label for the Living Wardrobe** → **Cabinet** — but `/shelf` the route is a different, live feature; do not read this line as "the shelf route is retired."
 
 Naming register unchanged: short, concrete, slightly literary nouns. Never tech-y compounds (`nota.lab`, `ScentMatch`, `FragranceAI`) and never gamified labels (Streaks, XP, Badges).
 

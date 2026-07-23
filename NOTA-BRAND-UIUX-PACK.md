@@ -233,29 +233,48 @@ only where it adds meaning.
 
 ---
 
-## 10. Surface glossary — reconciled to shipped routes (2026-07-22)
+## 10. Surface glossary — verified against shipped routes (2026-07-23)
 
-**This section previously invented names with no route behind them.** The
-homepage/hero build on `brand/sensory-sanctuary` surfaced the real route map via
-failing E2E specs. Shipped routes now win over doctrine names:
+**Verified by reading the route files themselves** (`app/(main)/study/page.tsx`,
+`.../lab/page.tsx`, `.../cabinet/page.tsx`, `.../traces/page.tsx`,
+`.../trails/page.tsx`, `.../insights/page.tsx`, `app/read/page.tsx`,
+`app/noseprint/page.tsx`, `.../shelf/blind/page.tsx`), not inferred from route
+names. Full detail and sourcing in `DESIGN.md` §12 — this table is the short
+form.
 
 | Confirmed route | UI name | Notes |
 |---|---|---|
 | `/read` | **The Read** | matches doctrine, no change |
-| `/cabinet` | **Cabinet** | retires "Shelf" / "The Shelf" — use Cabinet everywhere |
-| `/study` | **Study** | retires "Discover"; contents vs. Profiler/Trails **unconfirmed**, verify against `app/study` before assuming |
-| `/lab` | **Lab** | retires "Layering" as a UI label; likely a distinct formulation/chemistry surface, **not** the same thing as Traces — do not merge |
+| `/cabinet` | **Cabinet** | Living Wardrobe (`collections` table). `/collection` is a clean redirect to it — no duplicate |
+| `/study` | **Study** | confirmed catalogue search/browse (`DiscoverClient`), **not** Profiler/Trails. `/discover` redirects to it |
+| `/lab` | **Lab** | confirmed layering/formulation workbench, genuinely distinct from Traces. `/layering` redirects to it. **Drift:** shipped `<title>` still says "nota.Lab \| nota." — violates the retirement rule below, not yet fixed in code |
+| `/traces` | **Traces** | confirmed own route, own client, own API — distinct from Lab as expected |
+| `/trails` + `/trails/[slug]` | **Trails** | confirmed built (list + detail) |
+| `/insights` | **Insights** | confirmed built |
+| `/noseprint` | **Noseprint** | confirmed route |
+| `/shelf/blind` + `/shelf/blind/[sessionId]` | **Blind Ranking** | confirmed, two-stage flow (start + session), not a duplicate |
 
-Everything below is **unconfirmed against the live route map** — treat as
-hypothesis, verify against the repo before use in copy or code: Noseprint,
-Blind Ranking, Traces, Trails, Insights, Scentiment, Temptations, Aura, Houses,
-Mood Canvas, Today's Arc.
+**Not routes — confirmed as embedded components/data, not pages:** Scentiment
+(inside `/insights`), Temptations (`components/temptations/`), Aura
+(`components/aura/`).
+
+**Not built:** Houses (DB table exists, zero UI references anywhere under
+`app/`), Mood Canvas, Today's Arc (neither appears anywhere in the codebase).
+
+**Real, unresolved overlap — not a naming retirement:** `/cabinet` (Living
+Wardrobe) and `/shelf` (the separate ranked Top-N Shelf, `shelf_items` table —
+see `CLAUDE.md` §6 "two competing shelf models") are two different, both-live
+features that each present as "your shelf." Do not read "Shelf" as a retired
+label meaning the `/shelf` route is dead — it isn't. Reconciling the two is a
+product decision, out of scope for this verification pass.
 
 **Retired — never ship:** Scentral, BaseNote, AnotherSense, ScentOI, NosePrint™,
-ScentBloom™, Scent Tarot™, nota.lab, Trace Composer, and the UI labels "Shelf"
-and "Discover" (routes renamed to Cabinet/Study). Feature names are short,
-concrete, slightly literary nouns — never tech compounds (ScentMatch,
-FragranceAI) or gamified labels (Streaks, XP, Badges).
+ScentBloom™, Scent Tarot™, nota.lab, Trace Composer, and "Discover" as a UI
+label (route renamed to Study). "Shelf"/"The Shelf" as the UI label for the
+**Living Wardrobe** is retired in favour of Cabinet — again, distinct from the
+`/shelf` route, which stays. Feature names are short, concrete, slightly
+literary nouns — never tech compounds (ScentMatch, FragranceAI) or gamified
+labels (Streaks, XP, Badges).
 
 ---
 
