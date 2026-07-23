@@ -1,7 +1,7 @@
 # Brand ruling: homepage hero video
 
 **Subject:** stock video "A Man Making a Fragrance" (Pexels) used as the hero background on `brand/sensory-sanctuary`.
-**Status:** flagged for human decision, not yet approved or rejected.
+**Status:** RESOLVED 2026-07-23 — Christopher accepted the clip as-is. See "Resolution" below.
 **Raised by:** brand review of the homepage/hero handover, 2026-07-22.
 
 ## The tension
@@ -47,3 +47,32 @@ stay.
 Christopher. This ruling is a recommendation with a concrete path (crop the
 face), not a hard block — but it should not be waved through silently as
 "looks fine, ship it."
+
+## Resolution (2026-07-23)
+
+**Attempted the crop path first.** Extracted frames every 0.5s across the full
+7-second clip on both `atelier-matter.mp4` (1280×676) and
+`atelier-matter-mobile.mp4` (720×1280, same source, different aspect crop).
+Finding: only the opening ~1.5s is a wide shot where the face is soft/
+background and croppable; from roughly 2s to the 7s end (over 70% of the
+clip) the shot cuts to a sustained close-up portrait — face sharp, centered,
+fully identifiable — in both the desktop and mobile encodes. There is no crop
+that removes the face here without cropping out nearly the whole frame. A
+faceless cut of the full clip is **not achievable from this source**, exactly
+the scenario point 2 above anticipated.
+
+**On licensing (point 3):** no license/attribution record for this specific
+asset existed anywhere in the repo, and the original Pexels source URL
+couldn't be identified to check its specific terms. Pexels' general video
+license permits commercial use without attribution, but its own terms note
+videos featuring identifiable people "may require a model release for
+commercial campaigns — Pexels does not guarantee releases are in place."
+This clip does feature an identifiable person, so that risk was real and
+unverified at the time of this ruling.
+
+**Decision:** ship the clip as-is. Christopher has a Pexels API key and may
+use it to pin down the exact source/license before public launch, and may
+replace the footage entirely before then. Until replaced, this is a known,
+accepted risk — not a silently-waved-through one. Re-open this file (don't
+start a new one) if the clip is swapped, so the resolution stays a single
+record rather than a second source of truth.
