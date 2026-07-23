@@ -27,9 +27,9 @@ async function getInitialTraces(): Promise<{ traces: Trace[]; hasMore: boolean }
 }
 
 export default async function TracesPage() {
-  // cookies_called() is read to keep this page dynamic (not statically cached) since
+  // cookies() is read to keep this page dynamic (not statically cached) since
   // the feed content changes as traces are posted.
-  await cookies_called()
+  await cookies()
   const { traces, hasMore } = await getInitialTraces()
 
   return (

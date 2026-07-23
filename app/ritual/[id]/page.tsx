@@ -5,7 +5,7 @@ import type { Metadata } from 'next'
 import type { SavedSchedule, ScheduleFragrance } from '@/app/(main)/schedule/types'
 
 function getPublicSupabase() {
-  return await createClient(
+  return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
   )
