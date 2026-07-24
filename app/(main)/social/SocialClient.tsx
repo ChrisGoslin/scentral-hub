@@ -166,7 +166,7 @@ export default function SocialClient() {
         .order('created_at', { ascending: false })
         .limit(20)
 
-      if (latest) setPosts(latest)
+      if (latest) setPosts(latest as WearPost[])
 
       const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString()
       const { data: top } = await supabase
