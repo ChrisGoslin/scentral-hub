@@ -11,7 +11,6 @@ import { StageDots, ChipGroup } from './WearLogDatePicker'
 export interface WearLogModalProps {
   fragranceId: string
   fragranceName: string
-  userId?: string
   isOpen: boolean
   onClose: () => void
   onSaved?: () => void
@@ -19,26 +18,11 @@ export interface WearLogModalProps {
 
 type Stage = 1 | 2 | 3 | 'final'
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function getOrCreateAnonId(): string {
-  try {
-    const existing = localStorage.getItem('scentral_anon_id')
-    if (existing) return existing
-    const id = crypto.randomUUID()
-    localStorage.setItem('scentral_anon_id', id)
-    return id
-  } catch {
-    return crypto.randomUUID()
-  }
-}
-
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function WearLogModal({
   fragranceId,
   fragranceName,
-  userId,
   isOpen,
   onClose,
   onSaved,
@@ -88,7 +72,6 @@ export default function WearLogModal({
     form.setSaving(true)
     form.setError(null)
 
-    const effectiveUserId = userId ?? getOrCreateAnonId()
     const temporalCurve = temporal.toTemporalCurve()
     const contextTags = form.toContextTags()
     const avgVector = temporal.getAverageVector()
@@ -102,7 +85,6 @@ export default function WearLogModal({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          user_id: effectiveUserId,
           fragrance_id: fragranceId,
           worn_on: new Date().toISOString().slice(0, 10),
           occasion: form.occasion || null,
@@ -135,7 +117,7 @@ export default function WearLogModal({
     } finally {
       form.setSaving(false)
     }
-  }, [form, userId, fragranceId, temporal, onSaved, onClose])
+  }, [form, fragranceId, temporal, onSaved, onClose])
 
   if (!isOpen) return null
 

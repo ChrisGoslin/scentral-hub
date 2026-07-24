@@ -4,8 +4,8 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import type { SavedSchedule, ScheduleFragrance } from '@/app/(main)/schedule/types'
 
-function getPublicSupabase() {
-  return createClient(
+async function getPublicSupabase() {
+  return await createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
   )
@@ -33,7 +33,8 @@ type RawScheduleRow = {
 }
 
 async function fetchSchedule(id: string): Promise<SavedSchedule | null> {
-  const { data, error } = await getPublicSupabase()
+  const supabase = await getPublicSupabase()
+  const { data, error } = await supabase
     .from('spritz_schedules')
     .select(`
       id, name, occasion, created_at,

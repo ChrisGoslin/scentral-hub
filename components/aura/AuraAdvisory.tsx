@@ -105,7 +105,31 @@ export default function AuraAdvisory({
   }
 
   if (error || !advice) {
-    return null
+    return (
+      <div
+        className={`
+          rounded-lg px-4 py-3
+          bg-gradient-to-r from-aura-surface to-transparent
+          border border-aura-border
+          shadow-sm backdrop-blur-sm
+          ${className}
+        `}
+        style={{
+          boxShadow: '0 0 1px var(--aura-border), inset 0 1px 2px var(--aura-surface)',
+        }}
+      >
+        <p
+          className="text-sm leading-relaxed text-text-muted"
+          style={{
+            fontFamily: 'var(--font-instrument-serif)',
+            fontStyle: 'italic',
+            fontWeight: 500,
+          }}
+        >
+          Aura is quiet right now. Try again in a little while.
+        </p>
+      </div>
+    )
   }
 
   return (

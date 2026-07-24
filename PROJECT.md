@@ -20,7 +20,7 @@ Design Tokens & Fonts:
 | M2 | Primitives & Tokens Setup | Install/verify Caveat font, add theme variables, construct PostItNote & SketchAnnotation | M1 | DONE |
 | M3 | Moodboard DiscoverGrid | Transform discover grid into staggered/tactile moodboard using subgrid/container queries | M2 | DONE |
 | M4 | Personalization Sweep | Apply workshop vibes & annotations to WardrobeShelf, InsightsPanel, Empty States | M3 | DONE |
-| M5 | Verification & Hardening | Run builds, Playwright tests (`discover.spec.ts`, `onboarding.spec.ts`), adversarial tests, and Forensic Audit | M4 | IN_PROGRESS (Reviewer: 68162e6e, Challenger: 2d0af11e, Auditor: a812261c) |
+| M5 | Verification & Hardening | Run builds, Playwright tests (`discover.spec.ts`, `onboarding.spec.ts`), adversarial tests, and Forensic Audit | M4 | DONE |
 
 ## Interface Contracts
 ### `PostItNote` / `SketchAnnotation` Components

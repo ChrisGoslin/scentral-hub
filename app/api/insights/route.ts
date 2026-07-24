@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
+import { fetchUserTraces, fetchUserCollections, fetchShelfEvents } from '@/lib/insightsQueries'
 
 /**
  * GET /api/insights
@@ -11,19 +12,19 @@ export async function GET(request: NextRequest) {
   try {
     const cookieStore = await cookies()
     const supabase = await createClient(cookieStore)
+    const { data: { user } } = await supabase.auth.getUser()
+    const userId = user?.id
 
-    // Get anon_id from request (passed via query param or header)
-    const anonId = request.nextUrl.searchParams.get('anon_id') || request.headers.get('x-anon-id')
-
-    if (!anonId) {
-      return NextResponse.json({ error: 'Missing anon_id' }, { status: 400 })
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Fetch cached insights
     const { data: cached, error: fetchError } = await supabase
       .from('insights_cache')
       .select('*')
-      .eq('anon_id', anonId)
+      .eq('user_id', userId)
+      .eq('period', 'latest')
       .maybeSingle()
 
     if (fetchError) {
@@ -40,20 +41,27 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         source: 'cache',
         insights: {
-          your_impact: cached.your_impact,
-          best_traces: cached.best_traces,
-          scentiment_vision: cached.scentiment_vision,
-          taste_evolution: cached.taste_evolution,
-          trajectory: cached.trajectory,
+          your_impact: cached.payload?.your_impact,
+          best_traces: cached.payload?.best_traces,
+          scentiment_vision: cached.payload?.scentiment_vision,
+          taste_evolution: cached.payload?.taste_evolution,
+          trajectory: cached.payload?.trajectory,
         },
         computed_at: cached.computed_at,
       })
     }
 
     // Compute fresh insights
-    const insights = await computeInsights(supabase, anonId)
+    const insights = await computeInsights(supabase, userId)
 
     if (!insights) {
+      if (cached) {
+        return NextResponse.json({
+          source: 'cache-stale',
+          insights: cached.payload,
+          computed_at: cached.computed_at,
+        })
+      }
       return NextResponse.json(
         { error: 'Failed to compute insights' },
         { status: 500 }
@@ -64,15 +72,11 @@ export async function GET(request: NextRequest) {
     const { error: upsertError } = await supabase
       .from('insights_cache')
       .upsert({
-        anon_id: anonId,
-        your_impact: insights.your_impact,
-        best_traces: insights.best_traces,
-        scentiment_vision: insights.scentiment_vision,
-        taste_evolution: insights.taste_evolution,
-        trajectory: insights.trajectory,
+        user_id: userId,
+        period: 'latest',
+        payload: insights,
         computed_at: new Date().toISOString(),
       })
-      .eq('anon_id', anonId)
 
     if (upsertError) {
       console.error('Failed to cache insights:', upsertError)
@@ -93,7 +97,7 @@ type InsightsResult = {
   your_impact: {
     interactions_count: number
     reactions_received: number
-    saves_count: number
+    too_real_count: number
     summary: string
   }
   best_traces: Array<{ id: string; reaction_count: number; content: string }>
@@ -104,31 +108,34 @@ type InsightsResult = {
 
 async function computeInsights(
   supabase: Awaited<ReturnType<typeof createClient>>,
-  anonId: string
+  userId: string
 ): Promise<InsightsResult | null> {
   try {
     // Fetch all user data in parallel
-    const [tracesResult, reactionsResult, collectionsResult, shelfEventsResult] = await Promise.all([
-      supabase.from('traces').select('id, anon_id, content').eq('anon_id', anonId).limit(100),
-      supabase.from('trace_reactions').select('id, trace_id, reaction_type').eq('anon_id', anonId),
-      supabase.from('collections').select('id, fragrance_id, affinity_score').eq('anon_id', anonId),
-      supabase.from('shelf_events').select('id, fragrance_id, event_type, created_at').eq('anon_id', anonId).order('created_at', { ascending: true }),
+    const [tracesResult, collectionsResult, shelfEventsResult] = await Promise.all([
+      fetchUserTraces(supabase, userId),
+      fetchUserCollections(supabase, userId),
+      fetchShelfEvents(supabase, userId),
     ])
 
     const traces = tracesResult.data ?? []
-    const reactions = reactionsResult.data ?? []
     const collections = collectionsResult.data ?? []
     const shelfEvents = shelfEventsResult.data ?? []
+    const traceIds = traces.map(t => t.id)
+    const reactionsResult = traceIds.length > 0
+      ? await supabase.from('trace_reactions').select('trace_id, reaction').in('trace_id', traceIds)
+      : { data: [] as Array<{ trace_id: string; reaction: string }> }
+    const reactions = reactionsResult.data ?? []
 
     // Compute Your Impact
     const interactionsCount = traces.length
     const reactionsReceived = reactions.length
-    const savesCount = reactions.filter(r => r.reaction_type === 'saved').length
+    const tooRealCount = reactions.filter(r => r.reaction === 'too_real').length
 
     const yourImpact = {
       interactions_count: interactionsCount,
       reactions_received: reactionsReceived,
-      saves_count: savesCount,
+      too_real_count: tooRealCount,
       summary:
         interactionsCount > 0
           ? `You've described ${interactionsCount} scent${interactionsCount === 1 ? '' : 's'} so far.`
@@ -146,7 +153,7 @@ async function computeInsights(
       .map(t => ({
         id: t.id,
         reaction_count: traceReactionMap.get(t.id) ?? 0,
-        content: t.content ?? '',
+        content: t.body ?? '',
       }))
       .sort((a, b) => (b.reaction_count ?? 0) - (a.reaction_count ?? 0))
       .slice(0, 3)
@@ -233,7 +240,7 @@ async function computeInsights(
       trajectory,
     }
   } catch (error) {
-    console.error('Failed to compute insights:', error)
+    console.error(`Failed to compute insights for ${userId}:`, error)
     return null
   }
 }

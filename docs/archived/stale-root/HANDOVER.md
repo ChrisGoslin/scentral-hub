@@ -1,3 +1,7 @@
+# ARCHIVED / SUPERSEDED
+
+This document is historical and must not be used as current project truth. It is superseded by `AGENTS.md`, `CLAUDE.md`, `docs/index.md`, and `docs/HANDOVER.md` in the live nota. repo. Several claims below, including "100% complete" and App Store readiness, are stale.
+
 # Scentral Hub — Session Handover
 
 **Date:** 2026-06-18  

@@ -16,15 +16,10 @@
 - **Consolidation (2026-07-08):** Two repos (`scentral`, `scentral-hub`) merged into single canonical repo. `scentral` archived (read-only). See MERGE_SUMMARY.md.
 - **⚠️ Rebrand debt (RESOLVED 2026-07-08):** All display strings updated to nota. (was: BaseNote in metadata, lib/affiliates.ts; AnotherSense in docs).
 
-## 2. Stack (verified from repo, 2026-07-04; updated 2026-07-16 post-DNS-cutover)
+## 2. Stack (verified from repo, 2026-07-04; updated 2026-07-08 post-merge)
 
 Next.js 16.2.9 (App Router, route groups `(main)` `(community)` `(account)`), React 19.2.7, Tailwind 4 + CSS variables, Supabase JS 2.110 + `@supabase/ssr`, `@anthropic-ai/sdk` 0.110, `@google/genai` 2.10, Playwright 1.60 (e2e). TypeScript 6.
-
-**Domain & DNS:**
-- `notalabs.io` purchased 2026-07-04 via Shopify; DNS hosted on Google Cloud (Shopify infrastructure, inaccessible to our GCP account).
-- **A record:** Changed 2026-07-16 from Shopify IP (23.227.38.73) → Vercel IP (216.198.79.1). Live at authoritative nameservers; HTTP works; HTTPS TLS pending cert issuance.
-- **⚠️ Cleanup pending:** AAAA record still points to Shopify (2620:127:f00f:d::). www CNAME still points to shops.myshopify.com. Update via Shopify admin if IPv6 or www should land on Vercel.
-- **Action:** Once HTTPS cert live, set `NEXT_PUBLIC_SITE_URL=https://notalabs.io` in Vercel env. Verify with `npx vercel domains inspect notalabs.io`.
+**Domain:** `notalabs.io` purchased 2026-07-04 via Shopify — NOT yet pointed at Vercel. Until DNS cutover, code fallback = `nota.vercel.app` (post-consolidation); after cutover, set `NEXT_PUBLIC_SITE_URL=https://notalabs.io` in Vercel env.
 
 ## 3. Identity model — ⚠️ MIXED, needs resolution
 
@@ -74,7 +69,7 @@ Next.js 16.2.9 (App Router, route groups `(main)` `(community)` `(account)`), Re
 
 ## 8. Design primitives (verified in code)
 
-- **Fonts:** Unbounded (nav/functional, next/font) + **Cormorant Garamond italic** (emotional/display, self-hosted woff2, `--font-display`). NOTE: older docs say Instrument Serif — code says Cor[...]
+- **Fonts:** Unbounded + Space Grotesk (nav/functional, next/font) + **Instrument Serif** (emotional/display, next/font/google, `--font-display`), falling back to self-hosted Cormorant Garamond woff2 then Georgia if Instrument Serif fails to load. Verified 2026-07-23 against `app/layout.tsx` + `app/globals.css`: DESIGN.md's typography canon (Instrument Serif Italic / body-sans) now matches code on the display font; DESIGN.md's prior "Geist" body-sans claim was fictional and has been corrected there to Unbounded.
 - **Colour:** light parchment palette in `:root` (`--color-bg #F7F3EE`, primary gold `#B8913A`) but `app/layout.tsx` hardcodes `data-theme="dark"` → effective default is dark slate `#0F172A` + g[...]
 - **Motion tokens:** `--motion-instant` 80ms / `--motion-responsive` 200ms / `--motion-ceremonial` 480ms / `--motion-organic` 800ms (+ legacy `--motion-fast/base`). Brief's motion verbs: reveal, d[...]
 - **Other:** glassmorphism (`--glass-*`), 8-layer `--shadow-object`, radius `--r-card 12px`/pill buttons, spacing `--sp-1..5`, fluid type scale (`--text-display` etc.), family gradient tokens.
@@ -103,6 +98,9 @@ Next.js 16.2.9 (App Router, route groups `(main)` `(community)` `(account)`), Re
 7. No secrets in code; `.env.local` only. Scripts follow §8.5 security rules in AGENTS.md.
 8. Never remove the `cabinetSnapshot` CustomEvent in WardrobeShelf.
 9. Batch scripts need a yield circuit-breaker (enrich-images.mjs pattern: <1% hit rate after 1k rows → stop).
+10. Verify before trusting any agent, handover, or remediation claim. Current file presence is not proof of prior existence; respect tool-scope limits, and when timing matters confirm provenance with live checks such as `git status --porcelain`, `git log --follow`, direct file reads, and build or filesystem evidence before promoting a claim to fact. See `docs/nota/HANDOVER-2026-07-19-verification-audit.md`.
+11. When a new canonical source is imported or promoted, complete the import in the same turn: update read order, ownership/routing docs, and remove stale "missing" language before calling the work done.
+12. For substantial cross-CLI tasks, invoke `.claude/skills/loop-orchestrator/SKILL.md` and finish at Version 3: initial output plus one accepted bounded stretch, one evidence-led critique and remediation cycle to Version 2, then a second independent critique and remediation cycle to Version 3. Treat versions as checkpoints of one evolving artifact, not three duplicated deliverables. Each pass must record its critique, material delta, verification, and reusable lesson (or `none`). If critique finds no justified patch, record `no patch required`; never manufacture churn. For a trivial task, declare the reduced loop before execution and still verify the result.
 
 ## 12. Phase log
 
@@ -114,8 +112,3 @@ Next.js 16.2.9 (App Router, route groups `(main)` `(community)` `(account)`), Re
 - **Phase 4 (2026-07-04):** Backlog + safe diffs → `docs/nota/05-recommendations-backlog.md`. Applied: full display-layer rebrand BaseNote→nota. (~30 files, display strings/metadata/OG only),[...]
 - **Phase 5 (2026-07-04):** Testing/security/abuse layer → `docs/nota/06-testing-security-abuse.md` + three living skills (`.claude/skills/{qe-automation,security-hardening,resilience-abuse}/`,[...]
 - **Phase 6 (2026-07-08):** Repository consolidation: `scentral` + `scentral-hub` → **nota** (single canonical repo). Deduplicated code/deps, archived legacy docs to `docs/ARCHIVE/`, updated Sentry org ID. See MERGE_SUMMARY.md.
-- **Lint zero-error baseline (2026-07-10, PR #54):** All 231 lint errors fixed (99 `any`s properly typed, 58 JSX entities escaped, 3 CJS scripts → `.mjs`, unused vars cleared, dead Vertex AI pipeline in `app/api/generate-image` removed). CI `lint` check green on main. Two open items: (1) react-hooks React Compiler rules (`set-state-in-effect` ×45 etc.) downgraded to **warnings** in `eslint.config.mjs` — fixing needs behavioral component refactors, own PR; (2) 11 chromium e2e failures pre-exist on 476c604 (brand-handover copy vs text selectors — L17 again), NOT caused by lint work; (3) `Supabase Preview` CI check fails on any PR touching `supabase/**` because migration 001 references `layering_combinations` which no migration creates — needs a guarded migration fix.
-- **Phase 7 (2026-07-16):** Domain & infrastructure — DNS A record for notalabs.io moved from Shopify to Vercel (216.198.79.1). HTTPS TLS cert pending issuance. Three diagnostic skills added to `.claude/skills/`: claude-in-chrome-bridge-diagnostics, dns-propagation-under-cache-interference, vercel-domain-tls-workflow. Browser native-host config fixed (Claude Code CLI only, not Cowork). AAAA + www records still Shopify-bound — pending cleanup.
-- **Phase 8 (2026-07-16):** Domain cutover readiness finalized. Prod + GDPR + DNS infrastructure complete. **Verified:** No hardcoded *primary* domain references in tests/code — reads `NEXT_PUBLIC_SITE_URL` first. An intentional `https://scentral-hub.vercel.app` historical fallback still exists in `app/layout.tsx`, `app/noseprint/NoseprintClient.tsx`, and `scripts/smoke-test.mjs` for when that env var is unset. **Pending:** (1) HTTPS cert live verification (`npx vercel domains inspect notalabs.io`), (2) AAAA/www DNS cleanup via Shopify admin if needed, (3) `NEXT_PUBLIC_SITE_URL=https://notalabs.io` set in Vercel post-HTTPS-live, (4) OG/share link retest. **Blockers resolved:** ABunDance webhook clarification (nota. and household-finance remain separate), TypeScript warnings non-blocking (runtime works), dev server flakiness non-blocking (tested working). Ready for: asset generation → legal Privacy Policy review → final domain verification.
-- **Phase 9 (2026-07-16):** Repo-name/domain decoupling follow-through. `test:smoke:prod` now follows `NEXT_PUBLIC_SITE_URL` with `scentral-hub.vercel.app` as the verified fallback, scheduled smoke-test reporting uses the same source, app-store screenshot capture no longer points at stale `scentral-seven`, and handover docs now flag repo/domain lines as re-verification points during the nota. rename + `notalabs.io` cutover.
-- **Phase 10 (2026-07-16):** Customer, competitor, and acquisition teardown -> `docs/nota/10-customer-competitor-acquisition-teardown.md`. Current verdict: protect nota. as a standalone private scent-intelligence product; consolidate identity, collection, recurring-use, and community models; repair privacy/schema/rights trust blockers; prove retention and recommendation calibration before native-scale, advertising, partnership, or acquisition claims. The June `COMPETITIVE_INTELLIGENCE.md` remains historical context and is superseded where this dated refresh conflicts.

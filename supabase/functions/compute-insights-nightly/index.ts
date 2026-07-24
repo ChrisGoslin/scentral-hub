@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.40.0'
+import { fetchUserTraces, fetchUserCollections, fetchShelfEvents } from '../../lib/insightsQueries.ts'
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
@@ -9,7 +10,7 @@ interface CachedInsights {
   your_impact: {
     interactions_count: number
     reactions_received: number
-    saves_count: number
+    too_real_count: number
     summary: string
   }
   best_traces: Array<{
@@ -33,45 +34,75 @@ interface CachedInsights {
   }
 }
 
+function redactId(id: string): string {
+  if (typeof id !== 'string') return String(id)
+  return id.substring(0, 8) + '-****-****-****-************'
+}
+
 export async function handler(): Promise<Response> {
   try {
-    // Fetch all unique anon_ids from profiles
-    const { data: profiles, error: profilesError } = await supabase
-      .from('profiles')
-      .select('anon_id')
+    const results: { user_id: string; status: 'success' | 'error'; error?: string }[] = []
+    let page = 0
+    const pageSize = 500
+    let hasMore = true
+    let totalProfilesFetched = 0
 
-    if (profilesError) throw profilesError
-    if (!profiles || profiles.length === 0) {
-      return new Response(JSON.stringify({ message: 'No profiles to process' }), { status: 200 })
+    while (hasMore) {
+      const fromRange = page * pageSize
+      const toRange = (page + 1) * pageSize - 1
+
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id')
+        .range(fromRange, toRange)
+
+      if (profilesError) throw profilesError
+      if (!profiles || profiles.length === 0) {
+        hasMore = false
+        break
+      }
+
+      totalProfilesFetched += profiles.length
+      const userIds = profiles.map(p => p.id)
+
+      const batchConcur = 5
+      for (let i = 0; i < userIds.length; i += batchConcur) {
+        const batchUserIds = userIds.slice(i, i + batchConcur)
+        await Promise.all(
+          batchUserIds.map(async (userId) => {
+            try {
+              const insights = await computeUserInsights(userId)
+              if (insights) {
+                const { error: upsertError } = await supabase
+                  .from('insights_cache')
+                  .upsert({
+                    user_id: userId,
+                    period: 'latest',
+                    payload: insights,
+                    computed_at: new Date().toISOString(),
+                  })
+                if (upsertError) throw upsertError
+                results.push({ user_id: redactId(userId), status: 'success' })
+              } else {
+                throw new Error('computeUserInsights returned null or empty')
+              }
+            } catch (error) {
+              console.error(`Error computing insights for ${redactId(userId)}:`, error)
+              results.push({ user_id: redactId(userId), status: 'error', error: String(error) })
+            }
+          })
+        )
+      }
+
+      if (profiles.length < pageSize) {
+        hasMore = false
+      } else {
+        page++
+      }
     }
 
-    const anonIds = profiles.map(p => p.anon_id)
-
-    // Process insights for each user
-    const results: { anon_id: string; status: 'success' | 'error'; error?: string }[] = []
-
-    for (const anonId of anonIds) {
-      try {
-        const insights = await computeUserInsights(anonId)
-        if (insights) {
-          await supabase
-            .from('insights_cache')
-            .upsert({
-              anon_id: anonId,
-              your_impact: insights.your_impact,
-              best_traces: insights.best_traces,
-              scentiment_vision: insights.scentiment_vision,
-              taste_evolution: insights.taste_evolution,
-              trajectory: insights.trajectory,
-              computed_at: new Date().toISOString(),
-            })
-            .eq('anon_id', anonId)
-          results.push({ anon_id: anonId, status: 'success' })
-        }
-      } catch (error) {
-        console.error(`Error computing insights for ${anonId}:`, error)
-        results.push({ anon_id: anonId, status: 'error', error: String(error) })
-      }
+    if (totalProfilesFetched === 0) {
+      return new Response(JSON.stringify({ message: 'No profiles to process' }), { status: 200 })
     }
 
     return new Response(JSON.stringify({ processed: results.length, results }), {
@@ -84,30 +115,33 @@ export async function handler(): Promise<Response> {
   }
 }
 
-async function computeUserInsights(anonId: string): Promise<CachedInsights | null> {
+async function computeUserInsights(userId: string): Promise<CachedInsights | null> {
   try {
     // Fetch all user data in parallel
-    const [tracesResult, reactionsResult, collectionsResult, shelfEventsResult] = await Promise.all([
-      supabase.from('traces').select('id, anon_id, content').eq('anon_id', anonId).limit(100),
-      supabase.from('trace_reactions').select('id, trace_id, reaction_type').eq('anon_id', anonId),
-      supabase.from('collections').select('id, fragrance_id, affinity_score').eq('anon_id', anonId),
-      supabase.from('shelf_events').select('id, fragrance_id, event_type, created_at').eq('anon_id', anonId).order('created_at', { ascending: true }),
+    const [tracesResult, collectionsResult, shelfEventsResult] = await Promise.all([
+      fetchUserTraces(supabase, userId),
+      fetchUserCollections(supabase, userId),
+      fetchShelfEvents(supabase, userId),
     ])
 
     const traces = tracesResult.data ?? []
-    const reactions = reactionsResult.data ?? []
     const collections = collectionsResult.data ?? []
     const shelfEvents = shelfEventsResult.data ?? []
+    const traceIds = traces.map(t => t.id)
+    const reactionsResult = traceIds.length > 0
+      ? await supabase.from('trace_reactions').select('trace_id, reaction').in('trace_id', traceIds)
+      : { data: [] as Array<{ trace_id: string; reaction: string }> }
+    const reactions = reactionsResult.data ?? []
 
     // Compute Your Impact
     const interactionsCount = traces.length
     const reactionsReceived = reactions.length
-    const savesCount = reactions.filter(r => r.reaction_type === 'saved').length
+    const tooRealCount = reactions.filter(r => r.reaction === 'too_real').length
 
     const yourImpact = {
       interactions_count: interactionsCount,
       reactions_received: reactionsReceived,
-      saves_count: savesCount,
+      too_real_count: tooRealCount,
       summary:
         interactionsCount > 0
           ? `You've described ${interactionsCount} scent${interactionsCount === 1 ? '' : 's'} so far.`
@@ -125,7 +159,7 @@ async function computeUserInsights(anonId: string): Promise<CachedInsights | nul
       .map(t => ({
         id: t.id,
         reaction_count: traceReactionMap.get(t.id) ?? 0,
-        content: t.content ?? '',
+        content: t.body ?? '',
       }))
       .sort((a, b) => (b.reaction_count ?? 0) - (a.reaction_count ?? 0))
       .slice(0, 3)
@@ -212,7 +246,7 @@ async function computeUserInsights(anonId: string): Promise<CachedInsights | nul
       trajectory,
     }
   } catch (error) {
-    console.error(`Failed to compute insights for ${anonId}:`, error)
+    console.error(`Failed to compute insights for ${redactId(userId)}:`, error)
     return null
   }
 }
