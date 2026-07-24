@@ -22,6 +22,7 @@ export default async function LabPage() {
     .from('fragrances')
     .select('id, brand, name, phase, phase_label, family, projection, application_zone, application_method, anosmia_risk, lean, rating, image_url')
     .order('brand', { ascending: true })
+    .range(0, 299)
 
   if (error) {
     return (
