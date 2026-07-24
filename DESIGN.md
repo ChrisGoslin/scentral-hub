@@ -90,6 +90,14 @@ Navigation, body copy, labels, chemistry, timestamps, system feedback, forms and
 
 Do not introduce additional geometric display fonts without explicit brand review. Satoshi and Unbounded are **not** part of the core system.
 
+> **Target vs shipped (verified 2026-07-24 against `app/layout.tsx`):** Geist is the
+> *intended* body font. The code currently ships **Unbounded** (`app/layout.tsx`
+> imports it via `next/font/google`; no Geist import exists yet). Unbounded is a
+> **retired** font per `NOTA-BRAND-UIUX-PACK.md` §4 — the migration to Geist is
+> pending, not done. This doc describes the target; treat the Unbounded→Geist swap
+> as outstanding implementation work, not doc drift. See
+> `docs/nota/14-brand-token-drift-verification.md`.
+
 ## 4. Layout and spacing
 
 Generous negative space. Separate concepts through composition before borders. 8px base spacing system. A 12-column grid may guide responsive web layouts, but mobile screens should use practical mobile columns rather than forcing a literal 12-column implementation.

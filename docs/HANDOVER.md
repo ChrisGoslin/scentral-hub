@@ -46,7 +46,9 @@
 >
 > **2026-07-24 update:** the root `DESIGN.md` (249 lines) and `NOTA-BRAND-UIUX-PACK.md` (327 lines) were upgraded from earlier skeletal/front-matter-only versions (64 and 28 lines) to the fuller, route-reconciled versions — same file, same path, same canonical status, content only. `docs/BRAND-RULING-hero-video.md` and `docs/lessons.md` were added. §5b was merged into `AGENTS.md` (UI/UX implementation operating rules — cognitive-load gate, self-review checklist, voice, surface-names pointer) as new, non-duplicative content.
 >
-> **Unresolved — flagged, not resolved:** `NOTA_MANIFESTO.md` (brand constitution, owns positioning per the table above) and `DESIGN.md` both state colour tokens and typography rules, and their hex values disagree in places (e.g. taupe/secondary-ink: Manifesto's `#766E64` vs DESIGN.md's `taupe-ink` `#756A5C`; Manifesto also states `body-sans: Geist` implicitly via "The System" while CLAUDE.md §8 records the shipped body font as Unbounded). This is a token-ownership overlap between two canon docs that needs a human call on which value is current — not resolved here.
+> **Token drift — partially resolved 2026-07-24** (see `docs/nota/14-brand-token-drift-verification.md`, verified against shipped code):
+> - **Body font — RESOLVED.** Geist is the deliberate *target*; Unbounded currently ships but is a *retired* font per `NOTA-BRAND-UIUX-PACK.md` §4. Docs are intentionally ahead of code; the Unbounded→Geist migration is outstanding implementation work, not doc drift. DESIGN.md §3 and CLAUDE.md §8 now say so. (An earlier note here claiming a `#756A5C` vs `#766E64` DESIGN/Manifesto split was stale — both docs agree at `#766E64`.)
+> - **Taupe hex — STILL A DECISION.** Both docs say `#766E64`; shipped `app/globals.css` renders `--taupe: #B8AC9C` (live in derived text colours). Neither doc matches code. Needs Christopher's call on whether the docs are the target (migrate code) or drift (fix docs) — unlike the font, there's no "retired" marker to disambiguate.
 >
 > ### Deferred by design, not blockers
 >
