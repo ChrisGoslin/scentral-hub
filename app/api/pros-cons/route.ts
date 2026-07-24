@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { createClient } from '@/utils/supabase/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { clientIp, enforce, makeLimiter } from '@/lib/rate-limit'
+import { parseVerdict } from '@/lib/parseVerdict'
 
 const prosConsLimiter = makeLimiter('pros-cons', 20, '1 m')
 
@@ -44,7 +45,12 @@ export async function POST(req: Request) {
     })
 
     const text = (message.content[0] as { type: 'text'; text: string }).text
-    const result = JSON.parse(text)
+    const result = parseVerdict(text)
+
+    if (!result) {
+      console.error('pros-cons: could not parse verdict from Claude response:', text)
+      return NextResponse.json({ success: false, unavailable: true }, { status: 200 })
+    }
 
     // Cache the result
     await supabase.from('chemist_cache').upsert({
@@ -55,6 +61,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true, ...result })
   } catch (error) {
     console.error('pros-cons error:', error)
-    return NextResponse.json({ error: 'Failed to generate verdict' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Service unavailable' },
+      { status: 503 }
+    )
   }
 }
