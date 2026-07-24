@@ -5,7 +5,7 @@ import { createClient as createServerClient } from '@/utils/supabase/server'
 import { buildLikeRequest } from '@/lib/security/likes'
 
 export async function POST(request: NextRequest) {
-  const supabase = createClient(
+  const supabase = await createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_KEY!
   )
