@@ -24,7 +24,10 @@ test.describe('Shelf Page', () => {
 
     await page.getByRole('link', { name: 'Read' }).evaluate(el => (el as HTMLAnchorElement).click());
 
-    await expect(page).toHaveURL(/\/login\?next=(%2F|\/)read$/);
+    // BottomNav's "The Read" item links to /welcome (app/components/BottomNav.tsx),
+    // and /welcome's own guest gate (app/welcome/page.tsx) redirects to
+    // /login?next=/welcome — not /read — for a signed-out visitor.
+    await expect(page).toHaveURL(/\/login\?next=(%2F|\/)welcome$/);
     await expect(page.getByText('Your identity is waiting.')).toBeVisible({ timeout: 10_000 });
   });
 });

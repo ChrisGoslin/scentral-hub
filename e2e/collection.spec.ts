@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Collection (Living Wardrobe)', () => {
+test.describe('The Cabinet (Living Wardrobe)', () => {
   test.beforeEach(async ({ page }) => {
     // Set onboarding complete to avoid redirects
     await page.addInitScript(() => {
@@ -9,10 +9,10 @@ test.describe('Collection (Living Wardrobe)', () => {
   });
 
   test('can load living wardrobe and toggle view modes', async ({ page }) => {
-    await page.goto('/collection');
+    await page.goto('/cabinet');
 
-    // Confirm that we are on the collection page
-    await expect(page).toHaveURL(/\/collection/);
+    // Confirm that we are on the cabinet page (/collection permanently redirects here)
+    await expect(page).toHaveURL(/\/cabinet/);
 
     // Wait for content to load
     await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {
@@ -35,8 +35,8 @@ test.describe('Collection (Living Wardrobe)', () => {
     }
   });
 
-  test('collection UI renders without errors', async ({ page }) => {
-    await page.goto('/collection');
+  test('cabinet UI renders without errors', async ({ page }) => {
+    await page.goto('/cabinet');
 
     const errors: string[] = [];
     page.on('console', (msg) => {
