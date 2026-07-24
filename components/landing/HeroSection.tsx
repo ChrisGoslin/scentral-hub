@@ -153,6 +153,19 @@ function useLivingAtelierSequence({
   return { activeIndex, isPaused, setIsPaused }
 }
 
+function useIsMobileViewport() {
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 700)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+
+  return isMobile
+}
+
 function usePersona() {
   const [personaId, setPersonaId] = useState<string | null>(null)
   const [personaName, setPersonaName] = useState<string | null>(null)
@@ -180,6 +193,7 @@ export default function HeroSection() {
     shouldReduceMotion,
   })
   const { personaId, personaName } = usePersona()
+  const isMobileViewport = useIsMobileViewport()
 
   const note = useMemo(() => buildPersonalNote({ personaId, personaName }), [personaId, personaName])
   const isStaticPoster = hasMounted && shouldReduceMotion
@@ -255,7 +269,7 @@ export default function HeroSection() {
             loop
             playsInline
             preload="metadata"
-            poster="/media/atelier-matter-poster.jpg"
+            poster={isMobileViewport ? '/media/atelier-matter-mobile-poster.jpg' : '/media/atelier-matter-poster.jpg'}
             aria-label="Dark ink blooms and disperses through clear water"
           >
             <source media="(max-width: 700px)" src="/media/atelier-matter-mobile.mp4" type="video/mp4" />
