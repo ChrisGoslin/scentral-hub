@@ -3,6 +3,7 @@
   --ink: var(--charcoal);
   --faded: var(--secondary-ink);
   --amber: var(--amber-glow);
+
   width: 100%;
   overflow: hidden;
   color: var(--ink);

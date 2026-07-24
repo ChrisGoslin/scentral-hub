@@ -5,6 +5,7 @@
   --hero-faded: var(--secondary-ink);
   --hero-olive: var(--olive);
   --hero-amber: var(--amber-glow);
+
   width: 100%;
   min-height: 100svh;
   display: grid;
