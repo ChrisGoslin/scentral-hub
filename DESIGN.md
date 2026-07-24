@@ -195,6 +195,18 @@ Performance is a brand attribute. Working budgets:
 
 Silence is the default state.
 
+### Homepage LCP — verified 2026-07-23 (PageSpeed Insights, mobile, `scentral-hub.vercel.app`)
+
+Performance 95 / Accessibility 100 / Best Practices 100 / SEO passing. LCP breakdown: **TTFB 0ms, element render delay ~1,690ms** (no resource-load sub-parts, because of the finding below) — total LCP ≈1.7s, inside the <2.5s budget.
+
+**Correction to a code-review-only hypothesis floated earlier in this work:** reading `HeroSection.tsx` alone suggested the un-preloaded hero `<video poster>` was the likely LCP risk. Real measurement shows otherwise — the actual LCP element is a **text node**, the analytics-disclosure paragraph ("We use analytics to understand how you use nota. No personal data is shared."), not the poster image. This is exactly the reviewed-vs-verified trap `docs/CANONICAL-GUARDRAILS.md` L5 warns about: a plausible code-level guess that real measurement overturned. Do not carry the poster-preload theory forward as fact.
+
+**Real findings from the same report, not yet fixed (follow-up engineering, not a doc change):**
+- Render-blocking CSS chunks costing ~590ms (`3_rsc5q6t5lns.css`, `045mg3epgbg48.css`, `0jfxdacurx06h.css`).
+- One long main-thread task at 3,751ms (`2rx9uw4fuec9m.js`) — the likely driver of the 1,690ms element render delay above.
+- ~199KB of unused/legacy JS across four chunks (`3sjg_d_tgxr7n.js`, `0f15944kah5nf.js`, `2r91l71wbh_5e.js`, `3a4mlcf25ym7g.js`), including unnecessary ES5 polyfills (`Array.from`, `Object.hasOwn`, etc.) for a target audience that doesn't need them.
+- Both Google Fonts preconnects (`fonts.googleapis.com`, `fonts.gstatic.com`) are flagged unused by this report — worth re-checking whether they're load-bearing for `Instrument Serif`/`Space Grotesk` before removing.
+
 ### Open conflict: the hold vs. LCP
 
 The `1200ms` hold followed by `1400ms` materialisation means the Noseprint — the largest contentful element on The Read — is not visually complete until ~2.6s. The LCP budget on this page is 2.5s. **These two rules cannot both hold.**
