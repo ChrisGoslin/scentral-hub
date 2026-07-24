@@ -2,6 +2,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { randomUUID } from 'node:crypto'
 import dotenv from 'dotenv'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -72,7 +73,7 @@ if (!fs.existsSync(dataDir)) {
 }
 
 const timestamp = brief.recordedAt.replace(/[:.]/g, '-')
-const uniqueSuffix = Math.random().toString(36).slice(2, 8)
+const uniqueSuffix = randomUUID().slice(0, 8)
 const filename = `research-brief-${timestamp}-${uniqueSuffix}.json`
 const filepath = path.join(dataDir, filename)
 
