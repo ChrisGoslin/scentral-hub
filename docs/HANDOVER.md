@@ -42,7 +42,11 @@
 >
 > **Conflict resolution:** identify the concern first, follow that row's owner, verify current implementation, then record any unresolved mismatch here. Do not resolve a conflict by choosing whichever file was read first.
 >
-> **Import status (2026-07-23):** `DESIGN.md` and `NOTA-BRAND-UIUX-PACK.md` are present at the repo root, the additive topology guidance has been integrated into `AGENTS.md`, the new reconciliation workflow has been codified, and the existing `.claude/skills/verify-cli-claims` and `.claude/skills/repo-tidy` entries have been reconciled against the new doctrine. Remaining unresolved work is implementation drift in code, not missing canon files.
+> **Import status (2026-07-23, content upgraded 2026-07-24):** `DESIGN.md` and `NOTA-BRAND-UIUX-PACK.md` are present at the repo root, the additive topology guidance has been integrated into `AGENTS.md`, the new reconciliation workflow has been codified, and the existing `.claude/skills/verify-cli-claims` and `.claude/skills/repo-tidy` entries have been reconciled against the new doctrine. Remaining unresolved work is implementation drift in code, not missing canon files.
+>
+> **2026-07-24 update:** the root `DESIGN.md` (249 lines) and `NOTA-BRAND-UIUX-PACK.md` (327 lines) were upgraded from earlier skeletal/front-matter-only versions (64 and 28 lines) to the fuller, route-reconciled versions — same file, same path, same canonical status, content only. `docs/BRAND-RULING-hero-video.md` and `docs/lessons.md` were added. §5b was merged into `AGENTS.md` (UI/UX implementation operating rules — cognitive-load gate, self-review checklist, voice, surface-names pointer) as new, non-duplicative content.
+>
+> **Unresolved — flagged, not resolved:** `NOTA_MANIFESTO.md` (brand constitution, owns positioning per the table above) and `DESIGN.md` both state colour tokens and typography rules, and their hex values disagree in places (e.g. taupe/secondary-ink: Manifesto's `#766E64` vs DESIGN.md's `taupe-ink` `#756A5C`; Manifesto also states `body-sans: Geist` implicitly via "The System" while CLAUDE.md §8 records the shipped body font as Unbounded). This is a token-ownership overlap between two canon docs that needs a human call on which value is current — not resolved here.
 >
 > ### Deferred by design, not blockers
 >

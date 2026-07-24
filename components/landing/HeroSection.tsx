@@ -237,14 +237,14 @@ export default function HeroSection() {
       </div>
 
       <div className={styles.mediaPanel}>
-        {/* Source footage: MART PRODUCTION / Pexels (free to use). */}
+        {/* Source footage: black ink in water, Mixkit (Mixkit Free License, commercial use). */}
         {isStaticPoster ? (
           <picture>
             <source media="(max-width: 700px)" srcSet="/media/atelier-matter-mobile-poster.jpg" />
             <img
               className={styles.film}
               src="/media/atelier-matter-poster.jpg"
-              alt="A perfumer measuring amber liquid among labelled glass bottles"
+              alt="Dark ink blooming and dispersing through clear water"
             />
           </picture>
         ) : (
@@ -256,7 +256,7 @@ export default function HeroSection() {
             playsInline
             preload="metadata"
             poster="/media/atelier-matter-poster.jpg"
-            aria-label="A perfumer measures amber liquid among labelled glass bottles"
+            aria-label="Dark ink blooms and disperses through clear water"
           >
             <source media="(max-width: 700px)" src="/media/atelier-matter-mobile.mp4" type="video/mp4" />
             <source src="/media/atelier-matter.webm" type="video/webm" />

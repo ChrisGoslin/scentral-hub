@@ -225,6 +225,33 @@ confirmed 2026-07-23 when DESIGN.md's typography.body-sans flipped `Geist` → `
    -p <file>` first. If you disagree with a prior correction, say so in your own commit
    message rather than silently overwriting it.
 
+## 5b. UI/UX implementation operating rules (read before any UI/feature work)
+
+Merged 2026-07-24 from a parallel brand-doc reconciliation pass. Read `DESIGN.md` before any UI work — it is the canonical token and material system; do not duplicate its rules here.
+
+**Before implementation:**
+1. Inspect the existing screen, components, tokens, and established patterns.
+2. Identify the user's single primary goal for the screen.
+3. Describe the most likely generic AI solution and explicitly reject it.
+4. Identify any conflict between the request, usability, accessibility, performance, and the nota. design system.
+5. Reuse existing components and tokens before creating new ones.
+
+**Cognitive-load gate** — for the area being changed, report: primary user decision, primary action, secondary actions, information that can be inferred rather than requested, possible dead ends or ambiguous states. Prefer one clear primary action; do not enforce arbitrary universal counts.
+
+**Implementation rules:**
+- Use Geist for system UI and Instrument Serif Italic only for identity, memory, and major emotional moments.
+- Use semantic colour and motion tokens; do not hard-code new visual values without justification.
+- Preserve existing layout unless the task explicitly requires structural change. Make focused patches — do not redraw an entire screen to add one component.
+- Apply tactile materials through subtle texture, composition, and consequence — not decorative clutter. Analog dissonance is optional and must never damage alignment, responsiveness, or accessibility.
+- Support keyboard navigation, visible focus, semantic HTML, sufficient contrast, reduced motion, loading, empty, error, and success states.
+- Keep glass and blur effects within performance budgets (≤3 glass layers per viewport, one fixed grain compositor layer, LCP < 2.5s).
+
+**Self-review before completion** — does this look like a generic startup or beauty marketplace? Is any element decorative without helping comprehension, emotion, or action? Are typography, spacing, alignment, and overlays consistent? Does it work at narrow mobile width, large text, reduced motion, and keyboard navigation? Did the change reuse the design system or create unnecessary divergence? What is the weakest part of the result, and can it be corrected now? Keep the review proportional to task size; state remaining trade-offs or assumptions rather than claiming certainty.
+
+**Voice:** observational second person, present tense. Short sentences that land and stop. The product notices; it never announces. Prefer inference over instruction, warmth over enthusiasm. The brand is always written `nota.` — lowercase, with the dot, in every context including sentence starts and headlines.
+
+**Surface names:** use the canonical surface glossary in `DESIGN.md` §12 — treat rows marked unconfirmed as hypotheses, not facts, until verified against the actual route.
+
 ## 6. Prompt delegation and agent batching (read before running parallel agents)
 
 When multiple prompts are delegated in one session, order them by dependency — do not run all in parallel:
