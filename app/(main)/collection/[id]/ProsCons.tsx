@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useProsCons } from '@/hooks/useProsCons'
 import LoadingShimmer from '@/components/ui/LoadingShimmer'
 
 interface ProsConsProps {
@@ -11,38 +11,41 @@ interface ProsConsProps {
 }
 
 export default function ProsCons({ fragranceId, brand, name, description }: ProsConsProps) {
-  const [loading, setLoading] = useState(true)
-  const [pros, setPros] = useState<string[]>([])
-  const [cons, setCons] = useState<string[]>([])
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    const fetchVerdict = async () => {
-      try {
-        const res = await fetch('/api/pros-cons', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ fragranceId, brand, name, description }),
-        })
-        if (!res.ok) throw new Error('Failed to fetch')
-        const data = await res.json()
-        setPros(data.pros ?? [])
-        setCons(data.cons ?? [])
-      } catch (err) {
-        console.error('ProsCons error:', err)
-        setError('Could not load verdict')
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchVerdict()
-  }, [fragranceId, brand, name, description])
+  const { pros, cons, loading, error, retry } = useProsCons({
+    endpoint: '/api/pros-cons',
+    body: { fragranceId, brand, name, description },
+  })
 
   if (loading) {
     return <LoadingShimmer variant="line" count={2} />
   }
 
-  if (error || (pros.length === 0 && cons.length === 0)) {
+  if (error) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <p style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic', margin: 0 }}>
+          The AI verdict isn&apos;t available right now — check back later.
+        </p>
+        <button
+          onClick={retry}
+          style={{
+            alignSelf: 'flex-start',
+            fontSize: 10,
+            background: 'none',
+            border: 'none',
+            color: 'var(--color-primary, #B8913A)',
+            textDecoration: 'underline',
+            cursor: 'pointer',
+            padding: 0,
+          }}
+        >
+          Retry
+        </button>
+      </div>
+    )
+  }
+
+  if (pros.length === 0 && cons.length === 0) {
     return null
   }
 
