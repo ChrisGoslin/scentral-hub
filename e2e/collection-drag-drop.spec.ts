@@ -18,10 +18,10 @@ test.describe('Collection Drag-and-Drop (Living Wardrobe)', () => {
   });
 
   test('collection page loads without errors', async ({ page }) => {
-    await page.goto('/collection');
+    await page.goto('/cabinet');
 
     // Verify main content loads
-    await expect(page).toHaveURL(/\/collection/);
+    await expect(page).toHaveURL(/\/cabinet/);
 
     // Check for page structure (heading or main container)
     const content = page.locator('main, [role="main"], h1, h2').first();
@@ -29,7 +29,7 @@ test.describe('Collection Drag-and-Drop (Living Wardrobe)', () => {
   });
 
   test('sidebar view mode buttons are accessible', async ({ page }) => {
-    await page.goto('/collection');
+    await page.goto('/cabinet');
 
     // Look for buttons with common view mode names (case-insensitive)
     const buttons = page.getByRole('button');
@@ -48,9 +48,9 @@ test.describe('Collection Drag-and-Drop (Living Wardrobe)', () => {
       }
     });
 
-    await page.goto('/collection');
+    await page.goto('/cabinet');
     await page.waitForLoadState('domcontentloaded');
-    await expect(page).toHaveURL(/\/collection/);
+    await expect(page).toHaveURL(/\/cabinet/);
     await expect(page.locator('main, [role="main"], h1, h2').first()).toBeVisible({ timeout: 10_000 });
 
     // Verify there are no app-level runtime errors after the page becomes interactive.

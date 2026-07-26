@@ -2,13 +2,16 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { randomUUID } from 'node:crypto'
 import dotenv from 'dotenv'
-
-dotenv.config({ path: '.env.local' })
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const repoRoot = path.resolve(__dirname, '..')
 const dataDir = path.join(repoRoot, 'scripts', 'data', 'research-briefs')
+
+dotenv.config({ path: path.join(repoRoot, '.env.local') })
+
+const VALID_TOOLS = ['firecrawl', 'agent-reach', 'opencli', 'last30days']
 
 const args = process.argv.slice(2)
 const flags = args.reduce((acc, raw) => {
@@ -17,13 +20,15 @@ const flags = args.reduce((acc, raw) => {
   return acc
 }, {})
 
+const stringFlag = value => (typeof value === 'string' ? value.trim() : '')
+
 const dryRun = flags.apply === undefined
-const title = flags.title || ''
-const tool = flags.tool || ''
-const source = flags.source || ''
-const confidence = flags.confidence || ''
-const notes = flags.notes || ''
-const tags = (flags.tags || '').split(',').map(tag => tag.trim()).filter(Boolean)
+const title = stringFlag(flags.title)
+const tool = stringFlag(flags.tool)
+const source = stringFlag(flags.source)
+const confidence = stringFlag(flags.confidence)
+const notes = stringFlag(flags.notes)
+const tags = stringFlag(flags.tags).split(',').map(tag => tag.trim()).filter(Boolean)
 
 if (!title) {
   console.error('❌ Missing required flag: --title="Your research brief title"')
@@ -31,17 +36,24 @@ if (!title) {
 }
 
 if (!tool) {
-  console.error('❌ Missing required flag: --tool="firecrawl,agent-reach,opencli,last30days"')
+  console.error(`❌ Missing required flag: --tool="${VALID_TOOLS.join(',')}"`)
+  process.exit(1)
+}
+
+const requestedTools = tool.split(',').map(t => t.trim()).filter(Boolean)
+const unknownTools = requestedTools.filter(t => !VALID_TOOLS.includes(t))
+if (unknownTools.length > 0) {
+  console.error(`❌ Unknown tool(s): ${unknownTools.join(', ')}. Valid tools: ${VALID_TOOLS.join(', ')}`)
   process.exit(1)
 }
 
 const brief = {
-  title: String(title).trim(),
-  tool: String(tool).trim(),
-  source: source ? String(source).trim() : null,
-  confidence: confidence ? String(confidence).trim() : null,
+  title,
+  tool,
+  source: source || null,
+  confidence: confidence || null,
   tags,
-  notes: notes ? String(notes).trim() : null,
+  notes: notes || null,
   recordedAt: new Date().toISOString(),
   repository: 'scentral-hub',
   branch: process.env.GIT_BRANCH || null,
@@ -60,8 +72,9 @@ if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true })
 }
 
-const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
-const filename = `research-brief-${timestamp}.json`
+const timestamp = brief.recordedAt.replace(/[:.]/g, '-')
+const uniqueSuffix = randomUUID().slice(0, 8)
+const filename = `research-brief-${timestamp}-${uniqueSuffix}.json`
 const filepath = path.join(dataDir, filename)
 
 fs.writeFileSync(filepath, JSON.stringify(brief, null, 2) + '\n', 'utf8')

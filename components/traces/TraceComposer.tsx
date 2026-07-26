@@ -150,8 +150,7 @@ export default function TraceComposer({ fragranceId, onPosted }: TraceComposerPr
         gap: 20,
         padding: 'clamp(20px, 5vw, 56px)',
         overflow: 'hidden',
-        background:
-          'linear-gradient(180deg, color-mix(in srgb, var(--ivory) 92%, var(--amber-glow) 8%) 0%, color-mix(in srgb, var(--ivory) 84%, var(--charcoal) 16%) 100%)',
+        background: 'var(--ivory)',
         color: 'var(--charcoal)',
         borderRadius: 0,
         isolation: 'isolate',
@@ -344,8 +343,11 @@ export default function TraceComposer({ fragranceId, onPosted }: TraceComposerPr
             <SupabaseAuth />
           </div>
         ) : (
-          <Button onClick={handleSubmit} disabled={isSubmitting || body.trim().length === 0}>
-            {submitLabel}
+          <Button
+            onClick={handleSubmit}
+            disabled={isSignedIn === null || isSubmitting || body.trim().length === 0}
+          >
+            {isSignedIn === null ? 'Checking…' : submitLabel}
           </Button>
         )}
       </div>
@@ -362,10 +364,10 @@ export default function TraceComposer({ fragranceId, onPosted }: TraceComposerPr
         }}
       >
         <p style={{ margin: 0, fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-          People like you also said...
+          Need a prompt?
         </p>
         <p style={{ margin: 0, fontFamily: 'var(--font-display)', fontStyle: 'italic', letterSpacing: '-0.01em', fontSize: 18, color: 'color-mix(in srgb, var(--charcoal) 66%, transparent)' }}>
-          rain on wool, a dry orange peel, the lift door at dusk
+          What did it remind you of, just now?
         </p>
       </div>
 

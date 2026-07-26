@@ -1,23 +1,23 @@
 # Branch deletion recovery record — 2026-07-23
 # Recover any branch with: git branch <name> <sha>
 # Category A (merged into origin/main / dead dependabot — also in reflog ~90d):
-claude/amazing-edison-56cd64              cd02abb
-claude/dreamy-cerf-bd901a                 9dd0a5b
-claude/frosty-cerf-66e28b                 9119065
-claude/gracious-jennings-761c51           9dd0a5b
-claude/intelligent-mendel-476105          9119065
-claude/modest-agnesi-83743b               67e3285
-claude/upbeat-bassi-d7bb76                729f8c7
-claude/vigorous-liskov-5150b6             abdd920
-codex/nota-prelaunch-ready                b2efd6c
-nota-rebrand-and-audit                    249873a
-local-react-bump                          e4515cc
-local-dependabot/npm_and_yarn/eslint-10.6.0        b3b4922
-local-dependabot/npm_and_yarn/framer-motion-12.42.2 be1dd2f
-local-dependabot/npm_and_yarn/react-19.2.7         b362e00
-local-dependabot/npm_and_yarn/react-dom-19.2.7     b22c070
+claude/amazing-edison-56cd64              cd02abb96410f21ffc320dc58f8a9bc40fc3e687
+claude/dreamy-cerf-bd901a                 9dd0a5bcf68ef135b3c45c53decca019fd1df12a
+claude/frosty-cerf-66e28b                 9119065752d1df8eb5acd708d88a0320633c94ea
+claude/gracious-jennings-761c51          9dd0a5bcf68ef135b3c45c53decca019fd1df12a
+claude/intelligent-mendel-476105         9119065752d1df8eb5acd708d88a0320633c94ea
+claude/modest-agnesi-83743b              67e3285e595bdd6a95e2295cf8fcf27222f3d48a
+claude/upbeat-bassi-d7bb76               729f8c75cd8b580512f579980842f6db8432489d
+claude/vigorous-liskov-5150b6            abdd920629e8fbe45ef2c721ea5ee653222d7fba
+codex/nota-prelaunch-ready               b2efd6cbc3f65fbbf44e79b2e83b33bb3918a898
+nota-rebrand-and-audit                   249873aebebd65c9753aae7645ffbbb9ec88c0e0
+local-react-bump                        e4515cc8734113c27d30fe6474c587aef850b521
+local-dependabot/npm_and_yarn/eslint-10.6.0         b3b4922f1b143ec7b71f251dcec5179cd58964eb
+local-dependabot/npm_and_yarn/framer-motion-12.42.2 be1dd2ffbd9cb51c641cb67fbe8825a729c02244
+local-dependabot/npm_and_yarn/react-19.2.7          b362e008b5421d58075377be666aa11777907d2b
+local-dependabot/npm_and_yarn/react-dom-19.2.7      b22c070b9f64ff9d92ba3ae2014687bd3a05b792
 # Category B (UNMERGED — unique commits; recover from these SHAs if needed):
-feat/knowledge-engine                     978eb47
-chore/decouple-hardcoded-repo-paths       5db9b53
-claude/sad-nobel-037339                   2170f43
-copilot/worktree-2026-07-13T20-43-30      e0aa37a
+feat/knowledge-engine                    978eb47f14c0f673911d5a895fe8ad38f80eb08f
+chore/decouple-hardcoded-repo-paths      5db9b533bf17e4e8b2450fe204935cb5829224c6
+claude/sad-nobel-037339                  2170f43d798bf2d2c9906e86bba8cc85c03f1447
+copilot/worktree-2026-07-13T20-43-30     e0aa37a13b7bd4ed37239f0ef5510109d0fb1260

@@ -54,7 +54,7 @@ Every surface must resolve into heavy paper, liquid glass, or physical objects.
 *   **The Palette:** 
     *   `--surface` (Ivory #F7F4EE): Raw linen canvas.
     *   `--on-surface` (Charcoal #2B2926): Wet ink. 
-    *   `--secondary-ink` (Taupe #766E64): Faded ink for history.
+    *   `--taupe` (Taupe #B8AC9C): Faded history, atmospheric. `--taupe-ink` (#756A5C) for load-bearing historical text (titles, timestamps). See DESIGN.md §2.
     *   `--alignment` (Olive #6B7250): Progress.
     *   `--primary` (Amber #A0622A): Biological heat. Pulse points, dot glows.
 *   **The Typography:** 
@@ -68,7 +68,7 @@ Every surface must resolve into heavy paper, liquid glass, or physical objects.
 ## 7. THE BIOLOGICAL CORE & SYMPHONIC HAPTICS
 The period in `nota.` is a biological signal of presence. 
 
-*   **The Four States of The Dot:** Idle (static), Save (200ms ink fill), Active (breathing pulse), Alignment (amber glow).
+*   **The Four States of The Dot:** Idle (static), Save (200ms ink fill), Active (breathing pulse), Alignment (olive glow).
 *   **Acoustic Contract:** Silence is default. Sounds must be analog (paper rustle, glass clink) capped at -18 LUFS.
 *   **Haptic Architecture:**
     *   *Class A Affirmation:* Saving a Trace triggers a golden ripple, a heavy 200ms resonant thud, and the text "Trace left."
