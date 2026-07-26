@@ -194,6 +194,13 @@ async function run() {
     console.log()
     process.exit(1)
   }
+
+  // Explicitly terminate after a clean run. Node's built-in fetch can leave
+  // keep-alive handles open long enough to make this script look hung in CI.
+  process.exit(0)
 }
 
-run()
+run().catch((err) => {
+  console.error(err)
+  process.exit(1)
+})
