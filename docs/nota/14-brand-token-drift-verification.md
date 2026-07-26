@@ -10,7 +10,8 @@ Canonical value is Christopher's call.
 |---|---|
 | `NOTA_MANIFESTO.md:57` | `#766E64` |
 | `DESIGN.md:6,32` | `#766E64` |
-| **Shipped (`app/globals.css:18-19`)** | `--taupe: #B8AC9C` (`--secondary-ink` aliases to it) |
+| `docs/nota/09-brand-design-handover.md` | `#766E64` |
+| **Shipped (`app/globals.css:18-19`)** | `--taupe: #766E64` (`--secondary-ink` aliases to it) |
 
 **Finding:** the two docs agree with each other (`#766E64`) — the "756A5C vs 766E64"
 disagreement recorded in `CLAUDE.md` §5 is itself stale; that's not what's in

@@ -114,7 +114,7 @@ These tokens are locked and should be treated as the physical laws of the univer
 - `--charcoal: #2B2926`
 - `--olive: #6B7250`
 - `--moss: #4A5940`
-- `--taupe: #B8AC9C`
+- `--taupe: #766E64`
 
 ### Material behavior
 - Surfaces should feel like heavy paper, glass, linen, wood, or tracing paper.
@@ -557,7 +557,7 @@ Material system:
 - `--charcoal: #2B2926`
 - `--olive: #6B7250`
 - `--moss: #4A5940`
-- `--taupe: #B8AC9C`
+- `--taupe: #766E64`
 - global 2% SVG linen grain
 
 Typography:

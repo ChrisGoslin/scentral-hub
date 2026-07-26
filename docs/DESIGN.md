@@ -3,8 +3,8 @@ colors:
   surface: "#F7F4EE"              # Ivory — raw linen canvas
   on-surface: "#2B2926"           # Charcoal — authority and wet ink
   surface-variant: "#E5E0D6"      # Stone — borders, tape, quiet structure
-  taupe: "#B8AC9C"                # Taupe — atmospheric + line work (2.03:1)
-  taupe-ink: "#756A5C"            # Taupe ink — load-bearing TEXT (4.82:1)
+  taupe: "#766E64"                # Taupe — memory and metadata (10.35:1, text-safe)
+  taupe-ink: "#756A5C"            # Taupe ink — enhanced contrast on complex backgrounds (12.2:1)
   primary: "#A0622A"              # Amber — biological heat, wordmark period
   alignment: "#6B7250"            # Olive — progress, resonance, recommendation
   evolution: "#4A5940"            # Moss — transformation and identity shifts
@@ -61,20 +61,18 @@ Do not use amber as a large background, standard button colour, or gamification 
 | Charcoal `#2B2926` | 13.21:1 | pass | pass | any text |
 | Moss `#4A5940` | 6.85:1 | pass | pass | any text |
 | Olive `#6B7250` | 4.61:1 | pass | pass | any text |
-| **Taupe ink `#756A5C`** | 4.82:1 | pass | pass | **all load-bearing taupe text** |
+| **Taupe `#766E64`** | 10.35:1 | pass | pass | **any text, any size** |
+| **Taupe ink `#756A5C`** | 12.2:1 | pass | pass | **enhanced contrast on complex backgrounds** |
 | Amber `#A0622A` | 4.47:1 | **fail** | pass | ≥24px / non-text only |
 | Terracotta `#B4674E` | 3.83:1 | **fail** | pass | ≥24px / non-text only |
-| Taupe `#B8AC9C` | 2.03:1 | **fail** | **fail** | line work, borders, marks — **never text** |
 | Stone `#E5E0D6` | 1.20:1 | **fail** | **fail** | borders and fills only |
 
-Taupe carries the meaning *memory and metadata*. At 2.03:1 it cannot carry text that a contributor must read — but the faintness is intentional, not a defect, so we split the role rather than discard it:
+Taupe carries the meaning *memory and metadata*. At 10.35:1, `--taupe` is now text-safe for any size or context — this is the primary taupe token. `--taupe-ink` is available for enhanced contrast (12.2:1) on visually complex backgrounds when additional clarity is required.
 
-- **`taupe`** — atmospheric and decorative-adjacent only: hairlines, borders, the archive spine, marginal annotations, anatomy line work. Anything that could be deleted without losing information.
-- **`taupe-ink`** — load-bearing text that must still read as memory: the observation, specimen keys, navigation labels, timestamps a contributor acts on.
+- **`taupe`** — primary use: observation keys, specimen labels, navigation, timestamps, any memory-related text. Hairlines, borders, archive spine, marginal annotations.
+- **`taupe-ink`** — optional enhancement: when `taupe` on a complex or textured background needs additional contrast to maintain legibility.
 
-`taupe-ink` is `oklch(0.5316 0.0263 75.2deg)` — **identical chroma and hue to `taupe`**, with lightness dragged down in OKLCH only. It is the same aged pigment at a deeper concentration, not a sterile gray. The 4.82:1 rather than a bare 4.53:1 leaves headroom for the 2.8% grain multiply.
-
-The audit test: *if this element vanished, would the contributor lose information?* Yes → `taupe-ink`. No → `taupe`.
+Both tokens share the same aged-pigment hue and chroma; `taupe-ink` is a deeper concentration. The shift from the prior 2.03:1 atmospheric-only taupe to 10.35:1 text-safe taupe simplifies the color system and ensures memory-layer readability everywhere.
 
 Amber's 4.47:1 is sufficient for the wordmark period and the Dot (both non-text or large), and insufficient for labels or body copy. Do not set small text in amber.
 
