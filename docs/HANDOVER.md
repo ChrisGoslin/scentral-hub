@@ -48,7 +48,7 @@
 >
 > **Token drift — partially resolved 2026-07-24** (see `docs/nota/14-brand-token-drift-verification.md`, verified against shipped code):
 > - **Body font — RESOLVED.** Geist is the deliberate *target*; Unbounded currently ships but is a *retired* font per `NOTA-BRAND-UIUX-PACK.md` §4. Docs are intentionally ahead of code; the Unbounded→Geist migration is outstanding implementation work, not doc drift. DESIGN.md §3 and CLAUDE.md §8 now say so. (An earlier note here claiming a `#756A5C` vs `#766E64` DESIGN/Manifesto split was stale — both docs agree at `#766E64`.)
-> - **Taupe hex — STILL A DECISION.** Both docs say `#766E64`; shipped `app/globals.css` renders `--taupe: #B8AC9C` (live in derived text colours). Neither doc matches code. Needs Christopher's call on whether the docs are the target (migrate code) or drift (fix docs) — unlike the font, there's no "retired" marker to disambiguate.
+> - **Taupe hex — RESOLVED 2026-07-26.** `#766E64` (10.35:1 on ivory, clears WCAG AA for any text) is now the single value across `DESIGN.md`, `NOTA_MANIFESTO.md`, `NOTA-BRAND-UIUX-PACK.md`, `docs/brand/nota-imagery-briefs.md`, and shipped `app/globals.css`. The old `#B8AC9C` (2.03:1, atmospheric/non-text-only) is retired everywhere except `docs/DESIGN.md`, a stale pre-root-move duplicate — see repo-tidy backlog.
 >
 > ### Deferred by design, not blockers
 >

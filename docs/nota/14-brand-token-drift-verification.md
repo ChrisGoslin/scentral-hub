@@ -42,3 +42,12 @@ and `NOTA_MANIFESTO.md` need updating to match code, and `CLAUDE.md` §8's "reso
 claim needs re-verifying at the next doc edit. If the docs describe an intended
 *future* rebrand not yet shipped, that should be stated explicitly in both files
 rather than left ambiguous — as-is, a reader can't tell which case they're in.
+
+## Taupe hex — RESOLVED 2026-07-26
+
+Code was migrated to `#766E64` (`app/globals.css` verified live). Docs and
+code now agree: `DESIGN.md`, `NOTA_MANIFESTO.md`, `NOTA-BRAND-UIUX-PACK.md`,
+and `docs/brand/nota-imagery-briefs.md` all read `#766E64`, 10.35:1 on ivory.
+`NOTA-BRAND-UIUX-PACK.md` still had the stale `#B8AC9C`/2.03:1 rule until this
+date — fixed alongside the rest. Font drift (Geist target vs. shipped
+Unbounded) remains open and separate; see `docs/HANDOVER.md`.

@@ -71,8 +71,8 @@ semantic roles, never raw pigments.
 --pig-ivory       #F7F4EE   raw linen paper / bench surface
 --pig-stone       #E5E0D6   structure, tape, quiet borders
 --pig-charcoal    #2B2926   wet ink, authority
---pig-taupe       #B8AC9C   memory, history, anatomy line work
---pig-taupe-ink   #756A5C   taupe at text-safe depth (see §2.2)
+--pig-taupe       #766E64   memory, metadata, history — text-safe (see §2.2)
+--pig-taupe-ink   #756A5C   deeper taupe for complex backgrounds (see §2.2)
 --pig-olive       #6B7250   alignment, progress, resonance, recommendation
 --pig-moss        #4A5940   transformation, evolution, identity shift
 --pig-amber       #A0622A   biological heat — wordmark period, pulse points
@@ -89,8 +89,8 @@ use pure white `#FFFFFF` or pure black `#000000`.
 | Role | Light (ivory) | ratio | Dark (#1F1D1A) | ratio |
 |---|---|---|---|---|
 | body ink `--on-surface` | charcoal | 13.2:1 | ivory | 15.3:1 |
-| metadata `--ink-quiet` | taupe-ink `#756A5C` | 4.82:1 | taupe `#B8AC9C` | 7.54:1 |
-| atmospheric `--ink-faint` (NON-TEXT) | taupe `#B8AC9C` | 2.03:1 | taupe@60% | — |
+| metadata `--ink-quiet` | taupe `#766E64` | 10.35:1 | taupe `#766E64` | — |
+| deepened metadata `--ink-quiet` (complex bg) | taupe-ink `#756A5C` | 4.82:1 | taupe-ink `#756A5C` | 7.54:1 |
 | alignment edge `--line-resonant` | olive | 4.61:1 | olive | 3.32:1 † |
 | heat accent `--accent-heat` | amber `#A0622A` | 4.47:1 ‡ | amber-glow `#B98A58` | 5.48:1 |
 
@@ -98,9 +98,10 @@ use pure white `#FFFFFF` or pure black `#000000`.
 ‡ Amber on ivory is AA-large only — wordmark period and Dot (non-text/large)
 only; never small text. Moss is never text on either ground.
 
-**Rule:** taupe `#B8AC9C` is 2.03:1 on ivory — never set readable text in it on
-light. Use `--ink-quiet` for text, `--ink-faint` for pure atmosphere. If an
-element carries information, it must clear 4.5:1 against its ground.
+**Rule:** taupe `#766E64` is 10.35:1 on ivory — safe for any text size. Use
+`--ink-quiet` (taupe) for metadata text, `--ink-quiet` deepened to `#756A5C`
+when a complex background needs extra headroom. If an element carries
+information, it must clear 4.5:1 against its ground.
 
 ---
 

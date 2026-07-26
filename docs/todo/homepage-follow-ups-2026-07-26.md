@@ -69,21 +69,11 @@
 
 ---
 
-## 4. Resolve taupe hex decision (docs vs. code)
+## 4. Resolve taupe hex decision (docs vs. code) — RESOLVED 2026-07-26
 
-**Priority:** Low (styling, not functional)  
-**Effort:** 1 hour (decision) + 1 hour (implementation if fixing code)  
-**Owner:** Christopher (decision) + builder (execution)
+**What:** `app/globals.css` already ships `--taupe: #766E64`. `DESIGN.md`, `NOTA_MANIFESTO.md`, and `docs/brand/nota-imagery-briefs.md` were updated to `#766E64` (10.35:1 on ivory, clears WCAG AA for any text); `NOTA-BRAND-UIUX-PACK.md`, which still had the old `#B8AC9C`/2.03:1 rule, was brought in line the same day. Code and canonical docs now agree.
 
-**What:** DESIGN.md and NOTA_MANIFESTO.md specify taupe hex as `#766E64`. Code ships `#B8AC9C`. Neither doc matches reality. Already flagged in `docs/nota/14-brand-token-drift-verification.md` as "STILL A DECISION."
-
-**Task:**
-- **Decision:** Is `#B8AC9C` the correct shipped taupe (docs are aspirational/target) or should code be updated to `#766E64`?
-- If code should change: update `app/globals.css` and re-run tests to confirm no regressions (taupe is used in text color tokens via `color-mix()`)
-- If docs should change: update DESIGN.md and NOTA_MANIFESTO.md to match `#B8AC9C` as the shipped value
-- Update CLAUDE.md §8 to clarify the final state
-
-**Evidence needed:** Taupe token reference in shipped CSS, visual comparison (old vs. new if changed), confirmation that no text contrast issues result.
+Remaining stale reference: `docs/DESIGN.md` (a pre-root-move duplicate, not canonical) still shows the old value — separate repo-tidy cleanup, not a decision.
 
 ---
 
