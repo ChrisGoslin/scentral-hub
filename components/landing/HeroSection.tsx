@@ -253,21 +253,22 @@ export default function HeroSection() {
 
       <div className={styles.mediaPanel}>
         {/* Source footage: black ink in water, Mixkit (Mixkit Free License, commercial use). */}
-        {isStaticPoster ? (
-          <Image
-            className={styles.film}
-            src={isMobileViewport ? '/media/atelier-matter-mobile-poster.jpg' : '/media/atelier-matter-poster.jpg'}
-            alt="Dark ink blooming and dispersing through clear water"
-            width={isMobileViewport ? 720 : 1280}
-            height={isMobileViewport ? 1280 : 676}
-            priority
-            fetchPriority="high"
-            sizes="(max-width: 700px) 100vw, (max-width: 1400px) 60vw, 800px"
-          />
-        ) : (
+        {/* Image is always rendered with priority for LCP; video is progressive enhancement for motion-enabled users. */}
+        <Image
+          className={styles.film}
+          src={isMobileViewport ? '/media/atelier-matter-mobile-poster.jpg' : '/media/atelier-matter-poster.jpg'}
+          alt="Dark ink blooming and dispersing through clear water"
+          width={isMobileViewport ? 720 : 1280}
+          height={isMobileViewport ? 1280 : 676}
+          priority
+          fetchPriority="high"
+          sizes="(max-width: 700px) 100vw, (max-width: 1400px) 60vw, 800px"
+        />
+        {!shouldReduceMotion && hasMounted && (
           <video
             ref={videoRef}
             className={styles.film}
+            style={{ position: 'absolute', top: 0, left: 0 }}
             muted
             loop
             playsInline
