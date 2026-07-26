@@ -1,61 +1,105 @@
 ---
 name: loop-orchestrator
-description: >-
-  Run the three-version adversarial loop on any substantial task. Referenced by
-  CLAUDE.md rule 12 — this file makes that rule executable. Trigger for any
-  substantial cross-CLI task, any UI/feature build, "run the loop", "assured
-  mode", or before declaring significant work complete. V1 build → critique →
-  V2 → independent critique → V3, with every pass recording its critique,
-  delta, verification, and reusable lesson into docs/lessons.md.
+description: Orchestrate evidence-gated delivery loops for substantial, cross-CLI, canonical, risky, or release-affecting work. Use when a task needs coordinated building, independent critique, remediation through Version 2 or Version 3, verified completion claims, or reusable lesson routing; also use when deciding whether a request needs quick, standard, or assured loop depth.
 ---
 
 # Loop Orchestrator
 
-The loop always runs to **Version 3**. Versions are checkpoints of one evolving
-artifact, not three duplicated deliverables.
+Coordinate one evolving artifact through proportionate build, critique, remediation, and verification checkpoints. Keep product truth in canonical docs; this skill owns sequencing and evidence only.
 
-## The loop
+## 1. Orient
 
-**V1 — build.** Initial output plus one accepted, bounded stretch (~20% beyond
-the ask). Before building, run `implementation-preflight` (six gates) and, for
-any user-facing surface, `screen-state-completeness`.
+Before delegation or edits:
 
-**Critique 1 → V2.** Evidence-led adversarial review of V1 by a different
-persona/lens than the builder. Attack: correctness, brand doctrine
-(DESIGN.md / NOTA-BRAND-UIUX-PACK.md), the full state matrix, accessibility,
-performance budgets, and every claim marked "verified" (was it actually built
-and tested, or merely reviewed?). Patch what the critique justifies.
+1. Read `AGENTS.md` first, then follow `docs/HANDOVER.md` concern ownership and `docs/index.md` routing. For conflicts, identify the concern owner and verify current implementation; do not choose whichever file was read first.
+2. Verify repository, branch, HEAD, dirty-tree boundary, and requested scope.
+3. Convert the request into observable acceptance criteria.
+4. Identify actions requiring human approval. Never widen authority through orchestration.
+5. Create an in-memory findings ledger; do not add progress files unless requested or required by the environment.
 
-**Critique 2 → V3.** Second, independent critique — different lens again
-(e.g. if Critique 1 was engineering, make Critique 2 CX/brand, or vice versa).
-Patch. V3 is the deliverable.
+## 2. Select loop depth
 
-## Per-pass record (mandatory, no exceptions)
+Choose the lowest mode justified by risk:
 
-Each pass appends to the task's completion record:
+| Mode | Use for | Required checkpoints |
+|---|---|---|
+| `quick` | Trivial, reversible, single-surface work | Version 1 + verification |
+| `standard` | Bounded multi-step work with moderate regression risk | Version 1 → independent critique → Version 2 → verification |
+| `assured` | Cross-CLI, canonical, security/auth/data, release, migration-planning, or high-blast-radius work | Version 1 → independent Critic 1 → Version 2 → different independent Critic 2 → Version 3 → independent verification |
 
+Escalate one level when acceptance criteria are unclear, the worktree is shared, claims depend on external state, or failure would be difficult to reverse. Declare the selected mode and rationale before execution. If using less than the table requires, state residual risk.
+
+## 3. Establish the contract
+
+Record:
+
+- requested outcome
+- builder identity
+- non-goals and authority boundary
+- acceptance criteria
+- bounded +20 percent stretch
+- checks that could falsify completion
+- selected mode and required reviewers
+- coordination budget: why each delegated role is worth its context and latency cost
+
+Propose one stretch to quality, resilience, accessibility, observability, or automation. Implement it only when it is explicitly inside the accepted criteria; otherwise record `declined`. It is never permission to add product scope or touch extra paths implicitly.
+
+If required information or authority is missing, stop before Version 1 and issue a blocker handoff with the missing decision, evidence gathered, and next safe action. Do not validate or label that record complete.
+
+## 4. Run the loop
+
+Treat versions as checkpoints of the same artifact, not duplicated deliverables.
+
+### Version 1
+
+Have the builder implement the requested outcome and any accepted bounded stretch. Capture changed paths and raw verification output.
+
+### Critique 1
+
+Give an independent reviewer the acceptance criteria, artifact or diff, canonical constraints, and raw evidence. Do not give the builder's confidence statement as ground truth. Ask the reviewer to find counterexamples, regressions, overclaims, scope drift, missing tests, and automation opportunities.
+
+Classify every finding as:
+
+- `accepted` — patch it
+- `rejected` — retain the artifact and record an evidence-based reason
+- `unresolved` — name the blocker or required decision
+
+### Version 2
+
+Patch accepted findings only. Re-run the smallest checks that could falsify the revised claims. Route genuinely reusable learning to its single canonical owner; use `none` when the observation is task-specific.
+
+### Critique 2 and Version 3
+
+Required in `assured` mode. Use a second reviewer who is independent of the builder and Critic 1. Review Version 2 rather than the original narrative, patch accepted residual findings, and run final verification. `No patch required` is valid when supported by evidence; never manufacture churn. If the required independent reviewers are unavailable, downgrade the declared mode and state the residual risk; never call the result `assured`.
+
+## 5. Delegate economically
+
+- Stay inline when delegation costs more than the review value; `quick` mode normally needs no subagent.
+- Run dependent passes sequentially; never fan out Version 2 before Version 1 critique is complete.
+- Parallelise only genuinely independent review lenses.
+- In `quick` mode, the builder may verify with direct automated or filesystem evidence and must state the residual risk. In `standard` and `assured`, the builder must not be a required reviewer or final verifier.
+- `standard` requires one reviewer independent of the builder. `assured` requires two different independent reviewers. If they are unavailable, downgrade the mode and state the residual confidence limitation.
+- Give reviewers raw artifacts and criteria, not expected findings.
+- Re-run decisive verification in the orchestrator context before accepting a builder's claim.
+- Do not delegate a separate builder merely because one is available. Delegate when specialisation, isolation, or parallel discovery materially exceeds handoff cost.
+
+## 6. Close with evidence
+
+Use [references/completion-record.md](references/completion-record.md). Report the selected mode, checkpoint reached, findings ledger, material deltas, exact checks, lesson destination, dirty-tree boundary, unresolved risk, and next safe action.
+
+Before claiming completion, run:
+
+```bash
+repo_root="$(git rev-parse --show-toplevel)"
+bash "$repo_root/.claude/skills/loop-orchestrator/scripts/validate-completion-record.sh" <quick|standard|assured> <record.md>
 ```
-Pass: <V1|V2|V3>
-Critique: <the strongest objections found, or "n/a" for V1>
-Delta: <what materially changed, or "no patch required">
-Verification: <build/lint/test/screenshot evidence — "verified" only if it ran>
-Lesson: <reusable lesson, or "none">
-```
 
-- If a critique finds no justified patch, record `no patch required` — never
-  manufacture churn to look thorough.
-- Any pass whose Lesson is not `none` MUST also be appended to
-  `docs/lessons.md` in the standard format (what happened → rule → enforced
-  by). Lessons that stay in a completion record die there; lessons.md is the
-  memory that compounds.
+The script validates record structure, not the truth of its contents. Direct inspection and real checks remain mandatory.
 
-## Trivial tasks
+## Guardrails
 
-Declare the reduced loop BEFORE execution ("trivial: single-pass with
-self-review"), then still verify the result. Never retroactively decide a task
-was trivial after skipping the loop.
-
-## Vocabulary
-
-"Verified" = built, type-checked, tests ran. Anything else is "reviewed".
-State which one, every time.
+- Do not become a source of product, brand, schema, or release truth.
+- Do not let a builder approve its own completion claim.
+- Do not write every critique into permanent lessons.
+- Do not infer permission for commits, pushes, deployments, migrations, destructive changes, or external messages.
+- Do not hide `unresolved` findings to achieve a clean verdict.
