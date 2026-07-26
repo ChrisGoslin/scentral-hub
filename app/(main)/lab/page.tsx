@@ -24,7 +24,7 @@ export default async function LabPage() {
     .order('image_url', { ascending: false, nullsFirst: false })
     .order('rating', { ascending: false, nullsFirst: false })
     .order('brand', { ascending: true })
-    .range(0, 499)
+    .range(0, 299)
 
   if (error) {
     return (
