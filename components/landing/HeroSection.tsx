@@ -125,6 +125,7 @@ function useLivingAtelierSequence({
 }) {
   const [activeIndex, setActiveIndex] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
+  const [isAutoplayBlocked, setIsAutoplayBlocked] = useState(false)
   const isVisible = useSectionVisibility(sectionRef)
   const isPageVisible = usePageVisibility()
   const isSequenceActive = hasMounted && hasImageLoaded && !shouldReduceMotion && !isPaused && isVisible && isPageVisible
@@ -138,8 +139,8 @@ function useLivingAtelierSequence({
       return
     }
 
-    void video.play().catch(() => {
-      // The poster remains the intentional fallback when autoplay is unavailable.
+    void video.play().catch((err) => {
+      setIsAutoplayBlocked(true)
     })
   }, [isSequenceActive, videoRef])
 
@@ -153,7 +154,7 @@ function useLivingAtelierSequence({
     return () => window.clearInterval(interval)
   }, [isSequenceActive])
 
-  return { activeIndex, isPaused, setIsPaused }
+  return { activeIndex, isPaused, setIsPaused, isAutoplayBlocked }
 }
 
 function useIsMobileViewport() {
@@ -205,7 +206,7 @@ export default function HeroSection() {
     return () => img.removeEventListener('load', onLoad)
   }, [])
 
-  const { activeIndex, isPaused, setIsPaused } = useLivingAtelierSequence({
+  const { activeIndex, isPaused, setIsPaused, isAutoplayBlocked } = useLivingAtelierSequence({
     sectionRef,
     videoRef,
     hasMounted,
@@ -273,7 +274,7 @@ export default function HeroSection() {
       <div className={styles.mediaPanel}>
         {/* Source footage: black ink in water, Mixkit (Mixkit Free License, commercial use). */}
         {/* Poster rendered with WebP + JPEG fallback for LCP; video is progressive enhancement for motion-enabled users. */}
-        <picture>
+        <picture style={{ background: 'rgb(60, 55, 48)' }}>
           <source
             media="(max-width: 700px)"
             srcSet="/media/atelier-matter-mobile-poster.webp"
@@ -335,16 +336,21 @@ export default function HeroSection() {
         <div className={styles.mediaCaption}>
           <span>Film study / matter becoming memory</span>
           {!isStaticPoster && (
-            <button
-              type="button"
-              className={styles.pauseButton}
-              onClick={() => setIsPaused(current => !current)}
-              aria-pressed={isPaused}
-              aria-label={isPaused ? 'Play the Living Atelier sequence' : 'Pause the Living Atelier sequence'}
-            >
-              <span aria-hidden="true">{isPaused ? '▶' : 'Ⅱ'}</span>
-              {isPaused ? 'Play' : 'Pause'}
-            </button>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              {isAutoplayBlocked && (
+                <span style={{ fontSize: '0.875rem', opacity: 0.7 }}>Autoplay blocked —</span>
+              )}
+              <button
+                type="button"
+                className={styles.pauseButton}
+                onClick={() => setIsPaused(current => !current)}
+                aria-pressed={isPaused}
+                aria-label={isPaused ? 'Play the Living Atelier sequence' : 'Pause the Living Atelier sequence'}
+              >
+                <span aria-hidden="true">{isPaused || isAutoplayBlocked ? '▶' : 'Ⅱ'}</span>
+                {isPaused || isAutoplayBlocked ? 'Play' : 'Pause'}
+              </button>
+            </div>
           )}
         </div>
       </div>
