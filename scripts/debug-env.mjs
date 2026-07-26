@@ -1,7 +1,8 @@
+// Diagnostic utility: print environment variable status for development/debugging.
+// Useful when scripts behave unexpectedly and env vars may be misconfigured.
 import dotenv from 'dotenv';
 import path from 'path';
 
-// Load .env.local explicitly to match how the real scripts load it
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
 console.log('--- Diagnostic Environment Inspection ---');
