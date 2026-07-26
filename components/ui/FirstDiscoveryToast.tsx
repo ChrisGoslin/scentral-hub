@@ -25,6 +25,9 @@ export function FirstDiscoveryToast({ fragranceId, ownerCount }: { fragranceId: 
 
   return (
     <div
+      role="status"
+      aria-live="polite"
+      data-testid="first-discovery-toast"
       style={{
         position: 'fixed',
         bottom: 'calc(env(safe-area-inset-bottom, 0px) + 96px)',

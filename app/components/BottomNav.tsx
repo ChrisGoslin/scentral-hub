@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { NoseprintInkIcon, ReadInkIcon, ShelfInkIcon, TracesInkIcon, YouInkIcon } from '@/components/ui/InkIcons'
+import { CabinetIcon, NoseprintInkIcon, ReadInkIcon, ShelfInkIcon, TracesInkIcon, YouInkIcon } from '@/components/ui/InkIcons'
 import { getRouteExperienceMeta } from '@/lib/experience'
 
 type NavItem = {
@@ -16,6 +16,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'The Read', href: '/welcome', Icon: ReadInkIcon },
   { label: 'Identity', href: '/noseprint', Icon: NoseprintInkIcon },
   { label: 'Shelf', href: '/shelf', Icon: ShelfInkIcon },
+  { label: 'Cabinet', href: '/cabinet', Icon: CabinetIcon },
   { label: 'Traces', href: '/traces', Icon: TracesInkIcon },
   { label: 'Archive', href: '/archive', Icon: YouInkIcon },
 ]
@@ -84,7 +85,7 @@ export default function BottomNav() {
             aria-hidden={!expanded}
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
+              gridTemplateColumns: 'repeat(6, minmax(0, 1fr))',
               gap: expanded ? 8 : 0,
               flex: 1,
               overflow: 'hidden',

@@ -169,6 +169,9 @@ export default async function ShelfPage() {
             <Link href="/study" style={{ width: '100%' }}>
               <Button fullWidth variant="secondary">Enter The Study first</Button>
             </Link>
+            <Link href="/cabinet" style={{ width: '100%' }}>
+              <Button fullWidth variant="secondary">View The Cabinet</Button>
+            </Link>
           </div>
         </div>
       </div>

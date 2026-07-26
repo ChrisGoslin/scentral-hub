@@ -582,7 +582,7 @@ export default function OnboardingPage() {
               }} />
             ))}
             {step <= 3 && (
-              <p style={{ fontSize: 11, color: 'var(--text-muted)', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 0 8px' }}>
+              <p data-testid="step-indicator" style={{ fontSize: 11, color: 'var(--text-muted)', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 0 8px' }}>
                 {stepLabel}
               </p>
             )}
@@ -752,8 +752,8 @@ export default function OnboardingPage() {
               <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 32, lineHeight: 1.6 }}>
                 Pick all that apply.
               </p>
-              <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 16, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                {hasContextSelection ? `${selectedContextCount} context${selectedContextCount !== 1 ? 's' : ''} selected` : 'Choose at least one to unlock the reveal.'}
+              <p role="status" aria-live="polite" data-testid="context-status" style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 16, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                {hasContextSelection ? `${selectedContextCount} context selected` : 'Choose at least one to unlock the reveal.'}
               </p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 40 }}>
                 {CONTEXTS.map(c => {

@@ -68,3 +68,14 @@ export function YouInkIcon(props: IconProps) {
     </svg>
   )
 }
+
+export function CabinetIcon(props: IconProps) {
+  return (
+    <svg {...baseProps(props.size)} {...props}>
+      <path d="M5.5 6h13v11.8H5.5z" />
+      <path d="M5.5 11h13" />
+      <path d="M9.8 6v11.8" />
+      <path d="M14.2 6v11.8" opacity="0.55" />
+    </svg>
+  )
+}

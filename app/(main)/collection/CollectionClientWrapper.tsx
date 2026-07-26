@@ -1,10 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { createClient } from '@/utils/supabase/client'
 import WardrobeShelf from './WardrobeShelf'
 import { type CollectionFragrance } from './CollectionClient'
 import EmptyState from '@/components/ui/EmptyState'
+import Button from '@/components/ui/Button'
 
 export default function CollectionClientWrapper() {
   const [fragrances, setFragrances] = useState<CollectionFragrance[]>([])
@@ -139,6 +141,42 @@ export default function CollectionClientWrapper() {
                 }}
               />
             ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (fragrances.length === 0) {
+    return (
+      <div style={{ minHeight: '100dvh', paddingTop: 'calc(44px + env(safe-area-inset-top, 0px))', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div
+          style={{
+            textAlign: 'center',
+            maxWidth: 380,
+            width: '100%',
+            padding: 24,
+            borderRadius: 20,
+            border: '1px solid color-mix(in srgb, var(--accent) 20%, var(--line))',
+            background: 'linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%)',
+          }}
+        >
+          <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--text-muted)', margin: '0 0 10px' }}>
+            Cabinet
+          </p>
+          <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 24, color: 'var(--text)', marginBottom: 8 }}>
+            Begin somewhere.
+          </p>
+          <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: '22px', marginBottom: 16 }}>
+            Explore fragrances, find your next bottle, and build your collection. Every scent tells a story.
+          </p>
+          <div style={{ display: 'flex', gap: '12px', flexDirection: 'column' }}>
+            <Link href="/discover" style={{ width: '100%', display: 'block' }}>
+              <Button fullWidth>Discover fragrances</Button>
+            </Link>
+            <Link href="/shelf" style={{ width: '100%', display: 'block' }}>
+              <Button fullWidth variant="secondary">View your shelf</Button>
+            </Link>
           </div>
         </div>
       </div>
