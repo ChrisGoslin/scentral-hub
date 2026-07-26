@@ -9,7 +9,7 @@ test.describe('You Tab', () => {
 test('shows signed-out state with identity prompt', async ({ page }) => {
   await page.goto('/you');
   // No persona set: signed-out state shows identity quiz prompt
-  await expect(page.locator('text=Your identity is waiting.')).toBeVisible({ timeout: 10000 });
+  await expect(page.locator('text=Your dossier is waiting.')).toBeVisible({ timeout: 10000 });
   await expect(page.getByRole('link', { name: /Find Your Base Note/i })).toBeVisible();
 });
 

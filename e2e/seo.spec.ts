@@ -9,7 +9,7 @@ test.describe('SEO Titles', () => {
 
   test('shelf and traces have page-specific titles', async ({ page }) => {
     await page.goto('/shelf')
-    await expect(page).toHaveTitle(/My Shelf \| nota\./)
+    await expect(page).toHaveTitle(/Shelf \| nota\./)
 
     await page.goto('/traces')
     await expect(page).toHaveTitle(/Traces \| nota\./)
