@@ -115,17 +115,19 @@ function useLivingAtelierSequence({
   videoRef,
   hasMounted,
   shouldReduceMotion,
+  hasImageLoaded,
 }: {
   sectionRef: RefObject<HTMLElement | null>
   videoRef: RefObject<HTMLVideoElement | null>
   hasMounted: boolean
   shouldReduceMotion: boolean | null
+  hasImageLoaded: boolean
 }) {
   const [activeIndex, setActiveIndex] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
   const isVisible = useSectionVisibility(sectionRef)
   const isPageVisible = usePageVisibility()
-  const isSequenceActive = hasMounted && !shouldReduceMotion && !isPaused && isVisible && isPageVisible
+  const isSequenceActive = hasMounted && hasImageLoaded && !shouldReduceMotion && !isPaused && isVisible && isPageVisible
 
   useEffect(() => {
     const video = videoRef.current
@@ -186,12 +188,29 @@ export default function HeroSection() {
   const shouldReduceMotion = useReducedMotion()
   const sectionRef = useRef<HTMLElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
+  const [hasImageLoaded, setHasImageLoaded] = useState(false)
   const hasMounted = useSyncExternalStore(subscribeToHydration, () => true, () => false)
+
+  useEffect(() => {
+    const img = sectionRef.current?.querySelector('img') as HTMLImageElement | null
+    if (!img) return
+
+    if (img.complete) {
+      setHasImageLoaded(true)
+      return
+    }
+
+    const onLoad = () => setHasImageLoaded(true)
+    img.addEventListener('load', onLoad)
+    return () => img.removeEventListener('load', onLoad)
+  }, [])
+
   const { activeIndex, isPaused, setIsPaused } = useLivingAtelierSequence({
     sectionRef,
     videoRef,
     hasMounted,
     shouldReduceMotion,
+    hasImageLoaded,
   })
   const { personaId, personaName } = usePersona()
   const isMobileViewport = useIsMobileViewport()
@@ -253,17 +272,29 @@ export default function HeroSection() {
 
       <div className={styles.mediaPanel}>
         {/* Source footage: black ink in water, Mixkit (Mixkit Free License, commercial use). */}
-        {/* Image is always rendered with priority for LCP; video is progressive enhancement for motion-enabled users. */}
-        <Image
-          className={styles.film}
-          src={isMobileViewport ? '/media/atelier-matter-mobile-poster.jpg' : '/media/atelier-matter-poster.jpg'}
-          alt="Dark ink blooming and dispersing through clear water"
-          width={isMobileViewport ? 720 : 1280}
-          height={isMobileViewport ? 1280 : 676}
-          priority
-          fetchPriority="high"
-          sizes="(max-width: 700px) 100vw, (max-width: 1400px) 60vw, 800px"
-        />
+        {/* Poster rendered with WebP + JPEG fallback for LCP; video is progressive enhancement for motion-enabled users. */}
+        <picture>
+          <source
+            media="(max-width: 700px)"
+            srcSet="/media/atelier-matter-mobile-poster.webp"
+            type="image/webp"
+          />
+          <source
+            media="(max-width: 700px)"
+            srcSet="/media/atelier-matter-mobile-poster.jpg"
+          />
+          <source
+            srcSet="/media/atelier-matter-poster.webp"
+            type="image/webp"
+          />
+          <img
+            className={styles.film}
+            src="/media/atelier-matter-poster.jpg"
+            alt="Dark ink blooming and dispersing through clear water"
+            loading="eager"
+            fetchPriority="high"
+          />
+        </picture>
         {!shouldReduceMotion && hasMounted && (
           <video
             ref={videoRef}
@@ -272,7 +303,7 @@ export default function HeroSection() {
             muted
             loop
             playsInline
-            preload="metadata"
+            preload="none"
             poster={isMobileViewport ? '/media/atelier-matter-mobile-poster.jpg' : '/media/atelier-matter-poster.jpg'}
             aria-label="Dark ink blooms and disperses through clear water"
           >

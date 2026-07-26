@@ -102,6 +102,7 @@ export default function RootLayout({
       className={`h-[100dvh] antialiased ${spaceGrotesk.variable} ${unbounded.variable} ${caveat.variable} ${instrumentSerif.variable}`}
     >
       <head>
+        <link rel="preconnect" href="https://cdn.vercel.com" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
