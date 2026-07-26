@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type RefObject } from 'react'
 import { decode } from 'blurhash'
@@ -77,17 +76,33 @@ function BlurhashSVG({ hash, width = 100, height = 100 }: Readonly<{ hash: strin
   )
 }
 
+type NetworkInformationLike = {
+  effectiveType?: string
+  addEventListener: (type: string, listener: () => void) => void
+  removeEventListener: (type: string, listener: () => void) => void
+}
+
+type NavigatorWithConnection = Navigator & {
+  connection?: NetworkInformationLike
+  mozConnection?: NetworkInformationLike
+  webkitConnection?: NetworkInformationLike
+}
+
 function useConnectionType() {
-  const [connectionType, setConnectionType] = useState<string>('4g')
+  const [connectionType, setConnectionType] = useState<string | null>(null)
 
   useEffect(() => {
     if (typeof navigator === 'undefined') return
 
-    const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection
-    if (!connection) return
+    const browserNavigator = navigator as NavigatorWithConnection
+    const connection = browserNavigator.connection || browserNavigator.mozConnection || browserNavigator.webkitConnection
+    if (!connection) {
+      setConnectionType('4g')
+      return
+    }
 
-    setConnectionType(connection.effectiveType)
-    const handleChange = () => setConnectionType(connection.effectiveType)
+    setConnectionType(connection.effectiveType || '4g')
+    const handleChange = () => setConnectionType(connection.effectiveType || '4g')
     connection.addEventListener('change', handleChange)
     return () => connection.removeEventListener('change', handleChange)
   }, [])
@@ -199,12 +214,14 @@ function useLivingAtelierSequence({
   hasMounted,
   shouldReduceMotion,
   hasImageLoaded,
+  disableVideo,
 }: {
   sectionRef: RefObject<HTMLElement | null>
   videoRef: RefObject<HTMLVideoElement | null>
   hasMounted: boolean
   shouldReduceMotion: boolean | null
   hasImageLoaded: boolean
+  disableVideo: boolean
 }) {
   const [activeIndex, setActiveIndex] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
@@ -212,25 +229,40 @@ function useLivingAtelierSequence({
   const [videoError, setVideoError] = useState<string | null>(null)
   const isVisible = useSectionVisibility(sectionRef)
   const isPageVisible = usePageVisibility()
-  const isSequenceActive = hasMounted && hasImageLoaded && !shouldReduceMotion && !isPaused && isVisible && isPageVisible
+  const isSequenceActive = hasMounted && hasImageLoaded && !shouldReduceMotion && !disableVideo && !isPaused && isVisible && isPageVisible
 
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
 
-    const handleError = () => setVideoError('Video failed to load')
+    const handleError = () => setVideoError('Video unavailable. Viewing static mode.')
     video.addEventListener('error', handleError)
 
     if (!isSequenceActive) {
       video.pause()
-      return
+      return () => {
+        video.removeEventListener('error', handleError)
+      }
     }
 
-    void video.play().catch((err) => {
+    const timeoutId = window.setTimeout(() => {
+      if (video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {
+        setVideoError('Video taking too long. Viewing static mode.')
+        video.pause()
+      }
+    }, 7000)
+    const handleLoadedData = () => window.clearTimeout(timeoutId)
+    video.addEventListener('loadeddata', handleLoadedData)
+
+    void video.play().catch((_err) => {
       setIsAutoplayBlocked(true)
     })
 
-    return () => video.removeEventListener('error', handleError)
+    return () => {
+      if (timeoutId) window.clearTimeout(timeoutId)
+      video.removeEventListener('error', handleError)
+      video.removeEventListener('loadeddata', handleLoadedData)
+    }
   }, [isSequenceActive, videoRef])
 
   useEffect(() => {
@@ -281,7 +313,7 @@ export default function HeroSection() {
   const [hasImageLoaded, setHasImageLoaded] = useState(false)
   const hasMounted = useSyncExternalStore(subscribeToHydration, () => true, () => false)
   const connectionType = useConnectionType()
-  const isSlow = isSlowConnection(connectionType)
+  const isSlow = connectionType === null || isSlowConnection(connectionType)
 
   useEffect(() => {
     const img = sectionRef.current?.querySelector('img') as HTMLImageElement | null
@@ -303,12 +335,13 @@ export default function HeroSection() {
     hasMounted,
     shouldReduceMotion,
     hasImageLoaded,
+    disableVideo: isSlow,
   })
   const { personaId, personaName } = usePersona()
   const isMobileViewport = useIsMobileViewport()
 
   const note = useMemo(() => buildPersonalNote({ personaId, personaName }), [personaId, personaName])
-  const isStaticPoster = hasMounted && shouldReduceMotion
+  const isStaticPoster = hasMounted && (shouldReduceMotion || isSlow)
   const displayedIndex = isStaticPoster ? 2 : activeIndex
   const activeChapter = CHAPTERS[displayedIndex]
 
@@ -365,7 +398,7 @@ export default function HeroSection() {
       <div className={styles.mediaPanel}>
         {/* Source footage: black ink in water, Mixkit (Mixkit Free License, commercial use). */}
         {/* Poster rendered with WebP + JPEG fallback for LCP; video is progressive enhancement for motion-enabled users. */}
-        <picture style={{ background: 'rgb(60, 55, 48)', position: 'relative', display: 'block' }}>
+        <picture className={styles.poster}>
           {/* Blurhash placeholder — visible at 0ms */}
           {hasMounted && <BlurhashSVG hash={BLURHASH_POSTER} width={32} height={32} />}
 
@@ -397,7 +430,7 @@ export default function HeroSection() {
             }}
           />
         </picture>
-        {!shouldReduceMotion && hasMounted && (
+        {!shouldReduceMotion && hasMounted && !isSlow && (
           <video
             ref={videoRef}
             className={styles.film}

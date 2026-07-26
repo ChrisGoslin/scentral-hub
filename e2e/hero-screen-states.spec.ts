@@ -88,6 +88,41 @@ test.describe('Hero Screen States', () => {
     expect(style).toBeTruthy();
   });
 
+  test('slow connections receive a poster-only experience', async ({ page, context }) => {
+    await context.addInitScript(() => {
+      Object.defineProperty(navigator, 'connection', {
+        configurable: true,
+        value: {
+          effectiveType: '3g',
+          addEventListener() {},
+          removeEventListener() {},
+        },
+      });
+    });
+
+    await page.goto('/');
+
+    await expect(page.locator('video')).toHaveCount(0);
+    await expect(page.getByText('Film study / matter becoming memory')).toBeVisible();
+  });
+
+  test('video failure explains the static fallback', async ({ page }) => {
+    await page.route('**/media/atelier-matter*.mp4', route => route.abort());
+    await page.route('**/media/atelier-matter.webm', route => route.abort());
+    await page.goto('/');
+    const video = page.locator('video');
+    await video.waitFor({ state: 'attached' });
+    // Chromium does not consistently emit media errors for aborted source requests;
+    // the aborted request exercises the network path, then this verifies the handler.
+    await video.evaluate(element => {
+      const media = element as HTMLVideoElement;
+      media.load();
+      media.dispatchEvent(new Event('error'));
+    });
+
+    await expect(page.getByText('Video unavailable. Viewing static mode.')).toBeVisible({ timeout: 7000 });
+  });
+
   test('image fades in smoothly after loading', async ({ page }) => {
     await page.goto('/');
 

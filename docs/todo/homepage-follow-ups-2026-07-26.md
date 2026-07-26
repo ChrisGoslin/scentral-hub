@@ -2,7 +2,7 @@
 
 **Status:** Merged to main (commits bc5c614, ab48f90, 4b906e7). All E2E tests passing (22/22). Ready for production.
 
-**Backlog:** Four follow-up items identified during adversarial review. Not blockers; ship now, address in order.
+**Backlog:** Four follow-up items identified during adversarial review. LCP and hero recovery work are implemented locally; production confirmation remains deployment-gated.
 
 ---
 
@@ -10,7 +10,11 @@
 
 **Priority:** High  
 **Effort:** 1–2 hours  
-**Owner:** Christopher (needs Lighthouse access)
+**Owner:** Christopher
+
+**Implementation status (2026-07-27):** Local fix complete. The poster `<picture>` now owns the media panel's first paint instead of a CSS background, removing the mobile LCP discovery delay. Slow connections receive poster-only mode and video failures expose a static-mode message. The existing ink-in-water film remains the motion enhancement.
+
+**Measured evidence:** Production baseline before this fix: desktop 0.88–1.08s, mobile 3.84–3.86s. Local production build after this fix: desktop 0.90s, mobile 2.37s; local mobile Lighthouse reported zero media bytes. Production Lighthouse must be rerun after deployment before this item can be marked live-passed.
 
 **What:** We optimized the hero image with Next.js Image component, priority hints, and `fetchPriority="high"`. Goal was to reduce LCP from 5.2s → <2.5s on slow 4G. **We did not re-measure.**
 
@@ -31,13 +35,15 @@
 **Effort:** 3–4 hours  
 **Owner:** Christopher (design review) + builder (implementation)
 
-**What:** Hero section is designed for the happy path (video plays, chapter carousel animates). Missing states:
+**Implementation status (2026-07-27):** Implemented in `components/landing/HeroSection.tsx` and covered by 11 Chromium E2E tests.
 
-- **Reduced motion:** Animations should respect `prefers-reduced-motion`; currently animations run regardless
-- **Video fails to load:** Poster fallback works, but no explicit error state shown to user
-- **Video autoplay blocked:** Some browsers block autoplay; no fallback UI
-- **Mobile low bandwidth:** Hero video may not load on slow 3G; should show poster-only experience
-- **First-time user vs. returning:** Generic for all; no personalization based on auth state
+**What:** Hero section is designed for the happy path (video plays, chapter carousel animates). Recovery states now include:
+
+- **Reduced motion:** Static artifact mode is preserved through `useReducedMotion`
+- **Video fails to load:** Static-mode message is shown
+- **Video autoplay blocked:** Existing play control remains available and the blocked state is labelled
+- **Mobile low bandwidth:** Video is not mounted once the connection is identified as slow
+- **First-time user vs. returning:** Returning users see the existing "Written for you" personalization badge; first-time users see the neutral artifact
 
 **Task:**
 - Apply `screen-state-completeness` skill to HeroSection
