@@ -126,6 +126,7 @@ function useLivingAtelierSequence({
   const [activeIndex, setActiveIndex] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
   const [isAutoplayBlocked, setIsAutoplayBlocked] = useState(false)
+  const [videoError, setVideoError] = useState<string | null>(null)
   const isVisible = useSectionVisibility(sectionRef)
   const isPageVisible = usePageVisibility()
   const isSequenceActive = hasMounted && hasImageLoaded && !shouldReduceMotion && !isPaused && isVisible && isPageVisible
@@ -133,6 +134,9 @@ function useLivingAtelierSequence({
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
+
+    const handleError = () => setVideoError('Video failed to load')
+    video.addEventListener('error', handleError)
 
     if (!isSequenceActive) {
       video.pause()
@@ -142,6 +146,8 @@ function useLivingAtelierSequence({
     void video.play().catch((err) => {
       setIsAutoplayBlocked(true)
     })
+
+    return () => video.removeEventListener('error', handleError)
   }, [isSequenceActive, videoRef])
 
   useEffect(() => {
@@ -154,7 +160,7 @@ function useLivingAtelierSequence({
     return () => window.clearInterval(interval)
   }, [isSequenceActive])
 
-  return { activeIndex, isPaused, setIsPaused, isAutoplayBlocked }
+  return { activeIndex, isPaused, setIsPaused, isAutoplayBlocked, videoError }
 }
 
 function useIsMobileViewport() {
@@ -206,7 +212,7 @@ export default function HeroSection() {
     return () => img.removeEventListener('load', onLoad)
   }, [])
 
-  const { activeIndex, isPaused, setIsPaused, isAutoplayBlocked } = useLivingAtelierSequence({
+  const { activeIndex, isPaused, setIsPaused, isAutoplayBlocked, videoError } = useLivingAtelierSequence({
     sectionRef,
     videoRef,
     hasMounted,
@@ -334,21 +340,38 @@ export default function HeroSection() {
         </div>
 
         <div className={styles.mediaCaption}>
-          <span>Film study / matter becoming memory</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span>Film study / matter becoming memory</span>
+            {personaName && (
+              <span
+                style={{
+                  fontSize: '0.75rem',
+                  opacity: 0.6,
+                  fontStyle: 'italic',
+                  marginLeft: 'auto',
+                }}
+                title="This chapter is personalized based on your scent profile"
+              >
+                Written for you
+              </span>
+            )}
+          </div>
           {!isStaticPoster && (
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              {isAutoplayBlocked && (
-                <span style={{ fontSize: '0.875rem', opacity: 0.7 }}>Autoplay blocked —</span>
+              {(isAutoplayBlocked || videoError) && (
+                <span style={{ fontSize: '0.875rem', opacity: 0.7 }}>
+                  {videoError || 'Autoplay blocked'} —
+                </span>
               )}
               <button
                 type="button"
                 className={styles.pauseButton}
                 onClick={() => setIsPaused(current => !current)}
                 aria-pressed={isPaused}
-                aria-label={isPaused ? 'Play the Living Atelier sequence' : 'Pause the Living Atelier sequence'}
+                aria-label={isPaused || isAutoplayBlocked || videoError ? 'Play the Living Atelier sequence' : 'Pause the Living Atelier sequence'}
               >
-                <span aria-hidden="true">{isPaused || isAutoplayBlocked ? '▶' : 'Ⅱ'}</span>
-                {isPaused || isAutoplayBlocked ? 'Play' : 'Pause'}
+                <span aria-hidden="true">{isPaused || isAutoplayBlocked || videoError ? '▶' : 'Ⅱ'}</span>
+                {isPaused || isAutoplayBlocked || videoError ? 'Play' : 'Pause'}
               </button>
             </div>
           )}
