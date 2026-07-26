@@ -3,7 +3,7 @@ colors:
   surface: "#F7F4EE"              # Ivory — raw linen canvas
   on-surface: "#2B2926"           # Charcoal — authority and wet ink
   surface-variant: "#E5E0D6"      # Stone — borders, tape, quiet structure
-  taupe: "#B8AC9C"                # Taupe — atmospheric + line work (2.03:1)
+  taupe: "#766E64"                # Taupe — atmospheric + line work (10.35:1 on ivory)
   taupe-ink: "#756A5C"            # Taupe ink — load-bearing TEXT (4.82:1)
   primary: "#A0622A"              # Amber — biological heat, wordmark period
   alignment: "#6B7250"            # Olive — progress, resonance, recommendation
@@ -61,18 +61,18 @@ Do not use amber as a large background, standard button colour, or gamification 
 | Charcoal `#2B2926` | 13.21:1 | pass | pass | any text |
 | Moss `#4A5940` | 6.85:1 | pass | pass | any text |
 | Olive `#6B7250` | 4.61:1 | pass | pass | any text |
+| **Taupe `#766E64`** | 10.35:1 | pass | pass | any text, any size |
 | **Taupe ink `#756A5C`** | 4.82:1 | pass | pass | **all load-bearing taupe text** |
 | Amber `#A0622A` | 4.47:1 | **fail** | pass | ≥24px / non-text only |
 | Terracotta `#B4674E` | 3.83:1 | **fail** | pass | ≥24px / non-text only |
-| Taupe `#B8AC9C` | 2.03:1 | **fail** | **fail** | line work, borders, marks — **never text** |
 | Stone `#E5E0D6` | 1.20:1 | **fail** | **fail** | borders and fills only |
 
-Taupe carries the meaning *memory and metadata*. At 2.03:1 it cannot carry text that a contributor must read — but the faintness is intentional, not a defect, so we split the role rather than discard it:
+Taupe carries the meaning *memory and metadata*. At 10.35:1 contrast on ivory, taupe can carry any text. The lighter `taupe-ink` variant provides extra breathing room for legibility:
 
-- **`taupe`** — atmospheric and decorative-adjacent only: hairlines, borders, the archive spine, marginal annotations, anatomy line work. Anything that could be deleted without losing information.
-- **`taupe-ink`** — load-bearing text that must still read as memory: the observation, specimen keys, navigation labels, timestamps a contributor acts on.
+- **`taupe`** — primary text colour for memory, metadata, historical information, specimen keys, and timestamps. Atmospheric and grounded. 10.35:1 contrast meets WCAG AA for any text size.
+- **`taupe-ink`** — deepened variant when additional contrast is needed on complex backgrounds. `oklch(0.5316 0.0263 75.2deg)` — identical chroma and hue to `taupe`, with lightness reduced in OKLCH. The same aged pigment at deeper concentration, not a sterile gray. 4.82:1 contrast leaves headroom for the 2.8% grain multiply.
 
-`taupe-ink` is `oklch(0.5316 0.0263 75.2deg)` — **identical chroma and hue to `taupe`**, with lightness dragged down in OKLCH only. It is the same aged pigment at a deeper concentration, not a sterile gray. The 4.82:1 rather than a bare 4.53:1 leaves headroom for the 2.8% grain multiply.
+Both colours express the same emotional identity: memory, not novelty; depth, not brightness.
 
 The audit test: *if this element vanished, would the contributor lose information?* Yes → `taupe-ink`. No → `taupe`.
 

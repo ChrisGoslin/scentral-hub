@@ -54,7 +54,7 @@ Every surface must resolve into heavy paper, liquid glass, or physical objects.
 *   **The Palette:** 
     *   `--surface` (Ivory #F7F4EE): Raw linen canvas.
     *   `--on-surface` (Charcoal #2B2926): Wet ink. 
-    *   `--taupe` (Taupe #B8AC9C): Faded history, atmospheric. `--taupe-ink` (#756A5C) for load-bearing historical text (titles, timestamps). See DESIGN.md §2.
+    *   `--taupe` (Taupe #766E64): Memory and metadata, meets WCAG AA for any text. `--taupe-ink` (#756A5C) for extra contrast on complex backgrounds. See DESIGN.md §2.
     *   `--alignment` (Olive #6B7250): Progress.
     *   `--primary` (Amber #A0622A): Biological heat. Pulse points, dot glows.
 *   **The Typography:** 

@@ -4,7 +4,7 @@
 
 ## Global rules (apply to every brief)
 
-- Palette world: ivory `#F7F4EE`, stone `#E5E0D6`, charcoal `#2B2926`, taupe `#B8AC9C`, olive `#6B7250`, moss `#4A5940`, amber `#A0622A` accents only. Nothing pure white, nothing pure black.
+- Palette world: ivory `#F7F4EE`, stone `#E5E0D6`, charcoal `#2B2926`, taupe `#766E64`, olive `#6B7250`, moss `#4A5940`, amber `#A0622A` accents only. Nothing pure white, nothing pure black.
 - Mood: dimly lit apothecary, perfumer's workbench, archival dossier. Imperfect, human, tactile.
 - Universal negative prompt (append to every generation): `no gold, no brass as dominant material, no flowers as glamour, no black marble, no gradients, no glossy luxury advertising, no influencer aesthetics, no faces, no logos, no text, no watermark, not clean vector art, not 3D render`
 - Selection criteria: would it pass in 2036? Does it feel like evidence of human presence? If it could sit in a Sephora campaign, reject it.
