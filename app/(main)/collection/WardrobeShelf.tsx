@@ -258,7 +258,6 @@ function WishlistView({ items, filterActive = false }: { items: CollectionFragra
 
 interface WardrobeShelfProps {
   fragrances: CollectionFragrance[]
-  filterActive?: boolean
 }
 
 export default function WardrobeShelf({ fragrances }: WardrobeShelfProps) {
@@ -562,7 +561,7 @@ export default function WardrobeShelf({ fragrances }: WardrobeShelfProps) {
                   locked={def.locked}
                   activeId={activeId}
                   isMobile={isMobile}
-                  filterActive={activeLens !== null}
+                  filterActive={lensFilters !== null}
                 />
               ))}
             </div>
@@ -570,9 +569,9 @@ export default function WardrobeShelf({ fragrances }: WardrobeShelfProps) {
           </DndContext>
         )}
 
-        {viewMode === 'byHouse' && <ByHouseView items={applyLensFilter(owned)} filterActive={activeLens !== null} />}
-        {viewMode === 'bySeason' && <BySeasonView items={applyLensFilter(owned)} filterActive={activeLens !== null} />}
-        {viewMode === 'wishlist' && <WishlistView items={applyLensFilter(wishlist)} filterActive={activeLens !== null} />}
+        {viewMode === 'byHouse' && <ByHouseView items={applyLensFilter(owned)} filterActive={lensFilters !== null} />}
+        {viewMode === 'bySeason' && <BySeasonView items={applyLensFilter(owned)} filterActive={lensFilters !== null} />}
+        {viewMode === 'wishlist' && <WishlistView items={applyLensFilter(wishlist)} filterActive={lensFilters !== null} />}
 
         {isMounted && (
           <div style={{
