@@ -1,7 +1,5 @@
-# CI Stages 1+2 — typecheck + lint (no secrets) and production build (repo
-# secrets NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY, set 2026-07-05).
-# Stage 3 (chromium e2e) is specified in docs/nota/06-testing-security-abuse.md
-# §1.2 — add it only once the suite is verified green locally.
+# CI Stages 1–3 — typecheck + lint (no secrets), production build, and E2E tests.
+# E2E catches copy drift and UI regressions. Repo secrets required for build/test.
 name: CI
 on:
   push:
@@ -39,6 +37,20 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - run: npx playwright install --with-deps
+      - run: npm run test:e2e
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
