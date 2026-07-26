@@ -9,7 +9,7 @@ import type { ShelfSlot, ShelfFragrance, ShelfSource } from './types'
 export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {
   title: 'Shelf | nota.',
-  description: 'Arrange your physical scent shelf in nota. with patina, memory, and what is ready to wear next.',
+  description: 'Your curated top 20: the fragrances you reach for most. Ranked, refined, and ready to wear next.',
 }
 
 const SHELF_SIZE = 20

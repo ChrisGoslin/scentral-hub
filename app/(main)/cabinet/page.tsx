@@ -3,7 +3,7 @@ import CollectionClientWrapper from '../collection/CollectionClientWrapper'
 
 export const metadata: Metadata = {
   title: 'The Cabinet | nota.',
-  description: 'The Cabinet gathers your bottles, shelves, and scent history into one physical-feeling archive.',
+  description: 'Your complete scent inventory: everything you own, tested, or wish to try. Browse, organize, and track your collection.',
   alternates: { canonical: '/cabinet' },
 }
 
