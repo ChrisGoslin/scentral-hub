@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type RefObject } from 'react'
 import { buildPersonalNote } from '@/lib/personalization'
@@ -253,14 +254,16 @@ export default function HeroSection() {
       <div className={styles.mediaPanel}>
         {/* Source footage: black ink in water, Mixkit (Mixkit Free License, commercial use). */}
         {isStaticPoster ? (
-          <picture>
-            <source media="(max-width: 700px)" srcSet="/media/atelier-matter-mobile-poster.jpg" />
-            <img
-              className={styles.film}
-              src="/media/atelier-matter-poster.jpg"
-              alt="Dark ink blooming and dispersing through clear water"
-            />
-          </picture>
+          <Image
+            className={styles.film}
+            src={isMobileViewport ? '/media/atelier-matter-mobile-poster.jpg' : '/media/atelier-matter-poster.jpg'}
+            alt="Dark ink blooming and dispersing through clear water"
+            width={isMobileViewport ? 720 : 1280}
+            height={isMobileViewport ? 1280 : 676}
+            priority
+            fetchPriority="high"
+            sizes="(max-width: 700px) 100vw, (max-width: 1400px) 60vw, 800px"
+          />
         ) : (
           <video
             ref={videoRef}
