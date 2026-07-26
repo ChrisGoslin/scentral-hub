@@ -12,7 +12,7 @@ export default async function ReadPage() {
   const supabase = await createClient(cookieStore)
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) redirect('/login?next=/welcome')
+  if (!user) redirect('/login?next=/read')
 
   // If they already have a current noseprint, skip to /noseprint
   const { data: existing } = await supabase

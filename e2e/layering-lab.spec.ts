@@ -8,10 +8,10 @@ test.describe('Layering Lab', () => {
   });
 
   test('can view layering lab page', async ({ page }) => {
-    await page.goto('/layering');
+    await page.goto('/lab');
 
-    // Verify page loaded without errors
-    await expect(page).toHaveURL(/\/layering/);
+    // Verify page loaded without errors (was /layering — now a 308 redirect to /lab)
+    await expect(page).toHaveURL(/\/lab/);
 
     // Wait for page content to load
     await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {
@@ -24,7 +24,7 @@ test.describe('Layering Lab', () => {
   });
 
   test('can search for fragrances to layer', async ({ page }) => {
-    await page.goto('/layering');
+    await page.goto('/lab');
 
     // Look for search input
     const searchInput = page.getByPlaceholder(/search|layer|combine/i).first();
@@ -39,7 +39,7 @@ test.describe('Layering Lab', () => {
   });
 
   test('can save a layering combination (if feature exists)', async ({ page }) => {
-    await page.goto('/layering');
+    await page.goto('/lab');
 
     // Try to find save button
     const saveBtn = page.getByRole('button', { name: /Save|Create/i }).first();

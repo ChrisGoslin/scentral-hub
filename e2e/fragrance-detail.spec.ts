@@ -9,17 +9,17 @@ test.describe('Fragrance Detail Page', () => {
   });
 
   test('can view fragrance detail from discover', async ({ page }) => {
-    await page.goto('/discover');
+    await page.goto('/study');
 
     // Click first available link/card (looking for a brand name or card container)
     const firstCard = page.locator('a').first();
     if (await firstCard.isVisible()) {
       await firstCard.click();
 
-      // Should navigate to collection detail page or error gracefully
+      // Should navigate to cabinet detail page or error gracefully
       // Note: This test is conditional on there being at least one fragrance
       const url = page.url();
-      if (url.includes('/collection/')) {
+      if (url.includes('/cabinet/')) {
         // Verify detail page has expected sections
         await expect(page.locator('h1, h2')).toBeVisible({ timeout: 3000 });
       }
@@ -27,7 +27,7 @@ test.describe('Fragrance Detail Page', () => {
   });
 
   test('social proof and wishlist function on discover', async ({ page }) => {
-    await page.goto('/discover');
+    await page.goto('/study');
 
     // Look for a heart/wishlist button (generic role-based selector)
     const wishlistBtn = page.locator('button[aria-label="Add to wishlist"]').first();

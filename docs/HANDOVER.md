@@ -42,7 +42,13 @@
 >
 > **Conflict resolution:** identify the concern first, follow that row's owner, verify current implementation, then record any unresolved mismatch here. Do not resolve a conflict by choosing whichever file was read first.
 >
-> **Import status (2026-07-23):** `DESIGN.md` and `NOTA-BRAND-UIUX-PACK.md` are present at the repo root, the additive topology guidance has been integrated into `AGENTS.md`, the new reconciliation workflow has been codified, and the existing `.claude/skills/verify-cli-claims` and `.claude/skills/repo-tidy` entries have been reconciled against the new doctrine. Remaining unresolved work is implementation drift in code, not missing canon files.
+> **Import status (2026-07-23, content upgraded 2026-07-24):** `DESIGN.md` and `NOTA-BRAND-UIUX-PACK.md` are present at the repo root, the additive topology guidance has been integrated into `AGENTS.md`, the new reconciliation workflow has been codified, and the existing `.claude/skills/verify-cli-claims` and `.claude/skills/repo-tidy` entries have been reconciled against the new doctrine. Remaining unresolved work is implementation drift in code, not missing canon files.
+>
+> **2026-07-24 update:** the root `DESIGN.md` (249 lines) and `NOTA-BRAND-UIUX-PACK.md` (327 lines) were upgraded from earlier skeletal/front-matter-only versions (64 and 28 lines) to the fuller, route-reconciled versions — same file, same path, same canonical status, content only. `docs/BRAND-RULING-hero-video.md` and `docs/lessons.md` were added. §5b was merged into `AGENTS.md` (UI/UX implementation operating rules — cognitive-load gate, self-review checklist, voice, surface-names pointer) as new, non-duplicative content.
+>
+> **Token drift — partially resolved 2026-07-24** (see `docs/nota/14-brand-token-drift-verification.md`, verified against shipped code):
+> - **Body font — RESOLVED.** Geist is the deliberate *target*; Unbounded currently ships but is a *retired* font per `NOTA-BRAND-UIUX-PACK.md` §4. Docs are intentionally ahead of code; the Unbounded→Geist migration is outstanding implementation work, not doc drift. DESIGN.md §3 and CLAUDE.md §8 now say so. (An earlier note here claiming a `#756A5C` vs `#766E64` DESIGN/Manifesto split was stale — both docs agree at `#766E64`.)
+> - **Taupe hex — STILL A DECISION.** Both docs say `#766E64`; shipped `app/globals.css` renders `--taupe: #B8AC9C` (live in derived text colours). Neither doc matches code. Needs Christopher's call on whether the docs are the target (migrate code) or drift (fix docs) — unlike the font, there's no "retired" marker to disambiguate.
 >
 > ### Deferred by design, not blockers
 >

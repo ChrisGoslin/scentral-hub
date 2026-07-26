@@ -21,7 +21,10 @@ export default async function LabPage() {
   const { data, error } = await supabase
     .from('fragrances')
     .select('id, brand, name, phase, phase_label, family, projection, application_zone, application_method, anosmia_risk, lean, rating, image_url')
+    .order('image_url', { ascending: false, nullsFirst: false })
+    .order('rating', { ascending: false, nullsFirst: false })
     .order('brand', { ascending: true })
+    .range(0, 499)
 
   if (error) {
     return (
