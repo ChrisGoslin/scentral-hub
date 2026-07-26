@@ -4,11 +4,13 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type RefObject } from 'react'
+import { decode } from 'blurhash'
 import { buildPersonalNote } from '@/lib/personalization'
 import styles from './HeroSection.module.css'
 
 const CHAPTER_DURATION = 4400
 const subscribeToHydration = () => () => undefined
+const BLURHASH_POSTER = 'LjD,4Y~q~q-;t7t7t7t7IUM{M{Rj'
 
 const CHAPTERS = [
   {
@@ -29,6 +31,87 @@ const CHAPTERS = [
 ] as const
 
 type Chapter = (typeof CHAPTERS)[number]
+
+function BlurhashSVG({ hash, width = 100, height = 100 }: Readonly<{ hash: string; width?: number; height?: number }>) {
+  const [pixels, setPixels] = useState<string>('')
+
+  useEffect(() => {
+    try {
+      const pixelArray = decode(hash, width, height)
+      const canvas = document.createElement('canvas')
+      canvas.width = width
+      canvas.height = height
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return
+
+      const imageData = ctx.createImageData(width, height)
+      for (let i = 0; i < pixelArray.length; i++) {
+        imageData.data[i * 4] = pixelArray[i * 3]
+        imageData.data[i * 4 + 1] = pixelArray[i * 3 + 1]
+        imageData.data[i * 4 + 2] = pixelArray[i * 3 + 2]
+        imageData.data[i * 4 + 3] = 255
+      }
+      ctx.putImageData(imageData, 0, 0)
+      setPixels(canvas.toDataURL('image/png'))
+    } catch (error) {
+      console.error('Failed to decode blurhash:', error)
+    }
+  }, [hash, width, height])
+
+  if (!pixels) return null
+
+  return (
+    <img
+      src={pixels}
+      alt=""
+      style={{
+        position: 'absolute',
+        inset: 0,
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+        filter: 'blur(16px)',
+        opacity: 0.8,
+      }}
+    />
+  )
+}
+
+function useConnectionType() {
+  const [connectionType, setConnectionType] = useState<string>('4g')
+
+  useEffect(() => {
+    if (typeof navigator === 'undefined') return
+
+    const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection
+    if (!connection) return
+
+    setConnectionType(connection.effectiveType)
+    const handleChange = () => setConnectionType(connection.effectiveType)
+    connection.addEventListener('change', handleChange)
+    return () => connection.removeEventListener('change', handleChange)
+  }, [])
+
+  return connectionType
+}
+
+function isSlowConnection(connectionType: string): boolean {
+  return connectionType === '3g' || connectionType === '2g' || connectionType === 'slow-4g'
+}
+
+function SkeletonLoader() {
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        inset: 0,
+        background: 'linear-gradient(90deg, rgba(60,55,48,0.6) 25%, rgba(60,55,48,0.8) 50%, rgba(60,55,48,0.6) 75%)',
+        backgroundSize: '200% 100%',
+        animation: 'skeleton-pulse 1.5s infinite',
+      }}
+    />
+  )
+}
 
 function ChapterArtifact({ chapter, title, annotation }: Readonly<{
   chapter: Chapter
@@ -197,6 +280,8 @@ export default function HeroSection() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [hasImageLoaded, setHasImageLoaded] = useState(false)
   const hasMounted = useSyncExternalStore(subscribeToHydration, () => true, () => false)
+  const connectionType = useConnectionType()
+  const isSlow = isSlowConnection(connectionType)
 
   useEffect(() => {
     const img = sectionRef.current?.querySelector('img') as HTMLImageElement | null
@@ -280,7 +365,13 @@ export default function HeroSection() {
       <div className={styles.mediaPanel}>
         {/* Source footage: black ink in water, Mixkit (Mixkit Free License, commercial use). */}
         {/* Poster rendered with WebP + JPEG fallback for LCP; video is progressive enhancement for motion-enabled users. */}
-        <picture style={{ background: 'rgb(60, 55, 48)' }}>
+        <picture style={{ background: 'rgb(60, 55, 48)', position: 'relative', display: 'block' }}>
+          {/* Blurhash placeholder — visible at 0ms */}
+          {hasMounted && <BlurhashSVG hash={BLURHASH_POSTER} width={32} height={32} />}
+
+          {/* Skeleton loader for slow connections */}
+          {hasMounted && isSlow && !hasImageLoaded && <SkeletonLoader />}
+
           <source
             media="(max-width: 700px)"
             srcSet="/media/atelier-matter-mobile-poster.webp"
@@ -300,6 +391,10 @@ export default function HeroSection() {
             alt="Dark ink blooming and dispersing through clear water"
             loading="eager"
             fetchPriority="high"
+            style={{
+              transition: hasImageLoaded ? 'opacity 0.6s ease-out' : 'none',
+              opacity: hasImageLoaded ? 1 : 0.95,
+            }}
           />
         </picture>
         {!shouldReduceMotion && hasMounted && (

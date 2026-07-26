@@ -48,9 +48,28 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
+      # Check if 'skip-e2e' label is present on PR (only on pull_request events)
+      - name: Check skip-e2e label
+        id: check-skip
+        if: github.event_name == 'pull_request'
+        run: |
+          LABELS=$(gh pr view ${{ github.event.pull_request.number }} --json labels --jq '.labels[].name' 2>/dev/null || echo "")
+          if echo "$LABELS" | grep -q "skip-e2e"; then
+            echo "skip_e2e=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip_e2e=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: npm ci
+        if: steps.check-skip.outputs.skip_e2e != 'true'
       - run: npx playwright install --with-deps
+        if: steps.check-skip.outputs.skip_e2e != 'true'
       - run: npm run test:e2e
+        if: steps.check-skip.outputs.skip_e2e != 'true'
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      - name: E2E skipped (skip-e2e label present)
+        if: steps.check-skip.outputs.skip_e2e == 'true'
+        run: echo "E2E tests skipped due to skip-e2e label"

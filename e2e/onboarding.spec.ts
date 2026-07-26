@@ -4,7 +4,7 @@ test.describe('Onboarding Flow (Sanctuary Profiler)', () => {
   test('redirects truly new users into onboarding', async ({ page }) => {
     await page.goto('/study');
     await expect(page).toHaveURL(/\/onboarding/);
-    await expect(page.getByText('Step 1 of 3')).toBeVisible();
+    await expect(page.getByTestId('step-indicator')).toContainText(/Step 1 of 3/);
     await expect(page.getByRole('button', { name: 'Skip' })).toBeVisible();
   });
 
@@ -12,20 +12,20 @@ test.describe('Onboarding Flow (Sanctuary Profiler)', () => {
     await page.goto('/onboarding');
 
     // Step 1: Sanctuary
-    await expect(page.getByText('Step 1 of 3')).toBeVisible();
+    await expect(page.getByTestId('step-indicator')).toContainText(/Step 1 of 3/);
     await expect(page.locator('h1')).toContainText("Where do you go when the world gets loud?");
     await page.getByRole('button', { name: /The Lost Archive/ }).click();
 
     // Step 2: Projection
-    await expect(page.getByText('Step 2 of 3')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId('step-indicator')).toContainText(/Step 2 of 3/, { timeout: 10_000 });
     await expect(page.locator('h1')).toContainText("How close do you want to be felt?");
     await page.getByRole('button', { name: /Up Close/ }).click();
 
     // Step 3: Context
-    await expect(page.getByText('Step 3 of 3')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId('step-indicator')).toContainText(/Step 3 of 3/, { timeout: 10_000 });
     await expect(page.locator('h1')).toContainText("When do you usually reach for it?");
     await page.getByRole('button', { name: 'Workday' }).click();
-    await expect(page.getByText('1 context selected')).toBeVisible();
+    await expect(page.getByRole('status', { name: /context selected/ })).toBeVisible();
     await page.getByRole('button', { name: 'Find my scent identity →' }).click();
 
     // Step 4: Persona Reveal

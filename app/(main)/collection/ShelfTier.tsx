@@ -15,6 +15,7 @@ interface ShelfTierProps {
   locked: boolean
   activeId: string | null
   isMobile?: boolean
+  filterActive?: boolean
 }
 
 const TIER_EXPLAINERS: Record<TierKey, string> = {
@@ -24,7 +25,7 @@ const TIER_EXPLAINERS: Record<TierKey, string> = {
   tier3: 'Not yet rated. Give them time.',
 }
 
-export default function ShelfTier({ tierId, label, sublabel, items, locked, activeId, isMobile = false }: ShelfTierProps) {
+export default function ShelfTier({ tierId, label, sublabel, items, locked, activeId, isMobile = false, filterActive = false }: ShelfTierProps) {
   const { setNodeRef, isOver } = useDroppable({ id: tierId })
 
   return (
@@ -140,7 +141,7 @@ export default function ShelfTier({ tierId, label, sublabel, items, locked, acti
                 letterSpacing: '0.06em',
                 textTransform: 'uppercase',
               }}>
-                {locked ? 'Rate a fragrance 1–20 to move it to the right tier.' : 'Drag bottles here'}
+                {filterActive ? 'No fragrances match this lens' : (locked ? 'Rate a fragrance 1–20 to move it to the right tier.' : 'Drag bottles here')}
               </div>
             ) : (
               items.map(f => (

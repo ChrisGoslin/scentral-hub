@@ -9,7 +9,7 @@ test.describe('You Tab', () => {
 test('shows signed-out state with identity prompt', async ({ page }) => {
   await page.goto('/you');
   // No persona set: signed-out state shows identity quiz prompt
-  await expect(page.locator('text=Your dossier is waiting.')).toBeVisible({ timeout: 10000 });
+  await expect(page.getByRole('status', { name: /Your dossier is waiting/ })).toBeVisible({ timeout: 10000 });
   await expect(page.getByRole('link', { name: /Find Your Base Note/i })).toBeVisible();
 });
 
@@ -95,6 +95,6 @@ test('shows wishlist if not empty', async ({ page }) => {
 
   await page.goto('/you');
   // More patient check for any wishlist indicator
-  await expect(page.locator('text=MY WISHLIST')).toBeVisible({ timeout: 20000 });
+  await expect(page.getByRole('heading', { name: /MY WISHLIST/i })).toBeVisible({ timeout: 20000 });
 });
 });

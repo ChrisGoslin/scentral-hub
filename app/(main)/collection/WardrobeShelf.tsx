@@ -91,7 +91,7 @@ function findContainer(tiers: TierState, id: string): TierKey | undefined {
 
 // ─── Sub-views ───────────────────────────────────────────────────────────────
 
-function GroupShelf({ label, items, isHighlighted = false }: { label: string; items: CollectionFragrance[], isHighlighted?: boolean }) {
+function GroupShelf({ label, items, isHighlighted = false, filterActive = false }: { label: string; items: CollectionFragrance[], isHighlighted?: boolean, filterActive?: boolean }) {
   return (
     <div style={{ marginBottom: 20 }}>
       <div style={{ marginBottom: 6, paddingLeft: 4, display: 'flex', alignItems: 'baseline', gap: 8 }}>
@@ -115,7 +115,7 @@ function GroupShelf({ label, items, isHighlighted = false }: { label: string; it
       }}>
         {items.length === 0 ? (
           <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', textTransform: 'uppercase', letterSpacing: '0.06em', alignSelf: 'center', width: '100%', textAlign: 'center' }}>
-            None in collection
+            {filterActive ? 'No fragrances match this lens' : 'None in collection'}
           </p>
         ) : items.map(f => (
           <div key={f.id} style={{
@@ -158,7 +158,7 @@ function MiniBottle({ f }: { f: CollectionFragrance }) {
   )
 }
 
-function ByHouseView({ items }: { items: CollectionFragrance[] }) {
+function ByHouseView({ items, filterActive = false }: { items: CollectionFragrance[], filterActive?: boolean }) {
   const [activePersona, setActivePersona] = useState<string | null>(null)
 
   useEffect(() => {
@@ -183,13 +183,13 @@ function ByHouseView({ items }: { items: CollectionFragrance[] }) {
   return (
     <div style={{ paddingTop: 4, paddingBottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }}>
       {brands.map(brand => (
-        <GroupShelf key={brand} label={brand} items={byBrand[brand]} isHighlighted={shouldHighlight(brand)} />
+        <GroupShelf key={brand} label={brand} items={byBrand[brand]} isHighlighted={shouldHighlight(brand)} filterActive={filterActive} />
       ))}
     </div>
   )
 }
 
-function BySeasonView({ items }: { items: CollectionFragrance[] }) {
+function BySeasonView({ items, filterActive = false }: { items: CollectionFragrance[], filterActive?: boolean }) {
   return (
     <div style={{ paddingTop: 4, paddingBottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }}>
       {SEASON_GROUPS.map(sg => (
@@ -197,13 +197,14 @@ function BySeasonView({ items }: { items: CollectionFragrance[] }) {
           key={sg.label}
           label={sg.label}
           items={items.filter(f => sg.values.includes(f.optimal_season ?? null))}
+          filterActive={filterActive}
         />
       ))}
     </div>
   )
 }
 
-function WishlistView({ items }: { items: CollectionFragrance[] }) {
+function WishlistView({ items, filterActive = false }: { items: CollectionFragrance[], filterActive?: boolean }) {
   return (
     <div style={{ paddingTop: 4, paddingBottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }}>
       <div style={{ marginBottom: 8, paddingLeft: 4, display: 'flex', alignItems: 'baseline', gap: 8 }}>
@@ -229,7 +230,7 @@ function WishlistView({ items }: { items: CollectionFragrance[] }) {
       }}>
         {items.length === 0 ? (
           <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.06em', alignSelf: 'center', width: '100%', textAlign: 'center' }}>
-            All catalogued fragrances are in your collection
+            {filterActive ? 'No fragrances match this lens' : 'All catalogued fragrances are in your collection'}
           </p>
         ) : items.slice(0, 40).map(f => (
           <div key={f.id} style={{
@@ -257,6 +258,7 @@ function WishlistView({ items }: { items: CollectionFragrance[] }) {
 
 interface WardrobeShelfProps {
   fragrances: CollectionFragrance[]
+  filterActive?: boolean
 }
 
 export default function WardrobeShelf({ fragrances }: WardrobeShelfProps) {
@@ -560,6 +562,7 @@ export default function WardrobeShelf({ fragrances }: WardrobeShelfProps) {
                   locked={def.locked}
                   activeId={activeId}
                   isMobile={isMobile}
+                  filterActive={activeLens !== null}
                 />
               ))}
             </div>
@@ -567,9 +570,9 @@ export default function WardrobeShelf({ fragrances }: WardrobeShelfProps) {
           </DndContext>
         )}
 
-        {viewMode === 'byHouse' && <ByHouseView items={applyLensFilter(owned)} />}
-        {viewMode === 'bySeason' && <BySeasonView items={applyLensFilter(owned)} />}
-        {viewMode === 'wishlist' && <WishlistView items={applyLensFilter(wishlist)} />}
+        {viewMode === 'byHouse' && <ByHouseView items={applyLensFilter(owned)} filterActive={activeLens !== null} />}
+        {viewMode === 'bySeason' && <BySeasonView items={applyLensFilter(owned)} filterActive={activeLens !== null} />}
+        {viewMode === 'wishlist' && <WishlistView items={applyLensFilter(wishlist)} filterActive={activeLens !== null} />}
 
         {isMounted && (
           <div style={{

@@ -47,7 +47,8 @@ test.describe('Layering Lab', () => {
       await saveBtn.click();
 
       // Verify confirmation (toast, modal, or redirect)
-      await expect(page.locator('text=/Saved|Created/i')).toBeVisible({ timeout: 2000 });
+      // Use alert or status role for confirmation messages (requires role="alert" or role="status" on toast)
+      await expect(page.getByRole('alert').or(page.getByRole('status')).filter({ hasText: /Saved|Created/i })).toBeVisible({ timeout: 2000 });
     }
   });
 });
