@@ -25,7 +25,7 @@ test.describe('Onboarding Flow (Sanctuary Profiler)', () => {
     await expect(page.getByTestId('step-indicator')).toContainText(/Step 3 of 3/, { timeout: 10_000 });
     await expect(page.locator('h1')).toContainText("When do you usually reach for it?");
     await page.getByRole('button', { name: 'Workday' }).click();
-    await expect(page.getByRole('status', { name: /context selected/ })).toBeVisible();
+    await expect(page.getByTestId('context-status')).toContainText(/context selected/);
     await page.getByRole('button', { name: 'Find my scent identity →' }).click();
 
     // Step 4: Persona Reveal

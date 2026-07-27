@@ -615,6 +615,27 @@ export default function YouClient(props: YouClientProps) {
 
         <RitualCalendar auraStreak={auraStreak} />
 
+        <Card>
+          <div style={{ display: 'grid', gap: 12 }}>
+            <div>
+              <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.14em', color: 'var(--text-muted)', margin: 0 }}>
+                Portability concierge
+              </p>
+              <p style={{ fontSize: 16, color: 'var(--text)', margin: '6px 0 0' }}>
+                Preview a fragrance export before anything touches your archive.
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+              <Link href="/archive/import" style={{ width: 'fit-content' }}>
+                <Button>Preview an import</Button>
+              </Link>
+              <p style={{ margin: 0, fontSize: 12, lineHeight: '20px', color: 'var(--text-muted)', alignSelf: 'center' }}>
+                CSV, TSV, or pasted lists only for now. Review first, write later.
+              </p>
+            </div>
+          </div>
+        </Card>
+
         {cabinetSummary}
         {scentHistorySummary}
 

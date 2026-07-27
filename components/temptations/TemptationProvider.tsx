@@ -22,7 +22,7 @@ interface Fragrance {
 }
 
 const ALLOWED_ROUTES = ['/study', '/cabinet', '/archive', '/discover', '/collection', '/you']
-const BLOCKED_ROUTES = ['/traces', '/trails', '/read', '/shelf']
+const BLOCKED_ROUTES = ['/archive/import', '/traces', '/trails', '/read', '/shelf']
 
 export default function TemptationProvider() {
   const pathname = usePathname()

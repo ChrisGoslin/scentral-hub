@@ -1,6 +1,6 @@
 # Portability Concierge: PRD and Execution Contract
 
-**Status:** Foundation implemented; customer-facing import and database commit are not yet shipped.
+**Status:** Foundation and preview-only Archive surface implemented; database commit is not yet shipped.
 **Product boundary:** nota. only. This work has no runtime, data, webhook, or identity connection to Household Finance or ABunDance.
 
 ## Problem
@@ -40,6 +40,8 @@ People can want to leave another fragrance service while remaining dependent on 
 ## Implemented Foundation
 
 - `lib/portability/preview.js` parses quoted CSV/TSV-style text, maps common headers, normalises names, and produces a no-write match preview.
+- `/archive/import` is a post-onboarding, signed-in preview surface for pasted text and CSV/TSV-as-text imports.
+- `/api/portability/preview` is an authenticated, no-write preview route with bounded payload size, bounded request size, bounded row count, content-type checks, and per-user rate limiting.
 - `lib/security/wear-log.js` derives ownership from the authenticated nota. user and validates wear-log input.
 - `/api/wear-log` now uses the request-scoped Supabase client and row-level security instead of a service-role key and browser-supplied user ID.
 - `npm run test:unit` runs the portability and security regression suite.

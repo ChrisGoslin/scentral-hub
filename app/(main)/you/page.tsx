@@ -2,10 +2,10 @@ import { Metadata } from 'next'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { permanentRedirect } from 'next/navigation'
-import { createClient } from '@/utils/supabase/server'
 import Button from '@/components/ui/Button'
 import YouClient, { type SavedCombination, type WeekWearEntry } from './YouClient'
 import { mapSearchParamsToString } from '@/lib/rebrand'
+import { getArchiveSession } from '../archive/archive-session'
 
 export const metadata: Metadata = {
   title: 'Archive | nota.',
@@ -26,18 +26,7 @@ interface RawWearLogRow {
 }
 
 export async function ArchivePageContent() {
-  const cookieStore = await cookies()
-  const supabase = await createClient(cookieStore)
-
-  let session = null
-  const authCookie = cookieStore.get('sb-lrkdwobnemczvhpixpky-auth-token')
-  const testCookie = cookieStore.get('fake-session')
-  if (testCookie?.value === 'true' || (authCookie && authCookie.value.includes('fake-access-token'))) {
-    session = { user: { id: 'test-user-id', email: 'test@example.com' } }
-  } else {
-    const { data } = await supabase.auth.getSession()
-    session = data.session
-  }
+  const { supabase, session } = await getArchiveSession()
 
   if (!session) {
     return (
@@ -78,7 +67,7 @@ export async function ArchivePageContent() {
             </div>
             <div style={{ display: 'grid', gap: 10, marginTop: 8 }}>
               <Link href="/onboarding" style={{ width: '100%' }}>
-                <Button fullWidth>Find Your Base Note</Button>
+                <Button fullWidth>Begin your Read</Button>
               </Link>
               <Link href="/login?next=/archive" style={{ width: '100%' }}>
                 <Button fullWidth variant="secondary">Sign in to continue</Button>

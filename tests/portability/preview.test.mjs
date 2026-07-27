@@ -10,10 +10,24 @@ test('parses common collection headers and quoted notes', () => {
     brand: 'Dior',
     name: 'Sauvage',
     fullName: 'Dior Sauvage',
+    source: {
+      headers: ['House', 'Perfume', 'Status', 'Rating', 'Notes'],
+      values: ['Dior', 'Sauvage', 'Owned', '4', 'Easy, daily wear'],
+    },
     status: 'Owned',
     rating: 4,
     notes: 'Easy, daily wear',
   }])
+})
+
+test('preserves raw values for formula-like cells during preview parsing', () => {
+  const rows = parseImportText('brand,name,notes\n=@SUM(A1),Sauvage,+still text')
+
+  assert.equal(rows[0].brand, '=@SUM(A1)')
+  assert.deepEqual(rows[0].source, {
+    headers: ['brand', 'name', 'notes'],
+    values: ['=@SUM(A1)', 'Sauvage', '+still text'],
+  })
 })
 
 test('auto-selects only one exact catalogue match', () => {

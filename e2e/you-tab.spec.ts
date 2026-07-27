@@ -8,9 +8,9 @@ test.describe('You Tab', () => {
   });
 test('shows signed-out state with identity prompt', async ({ page }) => {
   await page.goto('/you');
-  // No persona set: signed-out state shows identity quiz prompt
-  await expect(page.getByRole('status', { name: /Your dossier is waiting/ })).toBeVisible({ timeout: 10000 });
-  await expect(page.getByRole('link', { name: /Find Your Base Note/i })).toBeVisible();
+  await expect(page).toHaveURL(/\/archive/);
+  await expect(page.getByRole('heading', { name: /Your dossier is waiting/i })).toBeVisible({ timeout: 10000 });
+  await expect(page.getByRole('link', { name: /Begin your Read/i })).toBeVisible();
 });
 
 test('shows wishlist if not empty', async ({ page }) => {
@@ -94,7 +94,8 @@ test('shows wishlist if not empty', async ({ page }) => {
   }, testId);
 
   await page.goto('/you');
-  // More patient check for any wishlist indicator
-  await expect(page.getByRole('heading', { name: /MY WISHLIST/i })).toBeVisible({ timeout: 20000 });
+  await expect(page.getByText('MY WISHLIST')).toBeVisible({ timeout: 20000 });
+  await expect(page.getByRole('link', { name: /Lattafa Asad/i })).toBeVisible();
+  await expect(page.getByRole('link', { name: /Preview an import/i })).toBeVisible();
 });
 });

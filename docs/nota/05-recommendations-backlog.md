@@ -20,6 +20,12 @@
 
 Post-launch queue: 'close' Read adjustment (UX-009), evolution ceremony (UX-010), discover feel-first sections (UX-011), swap UI + trust tooling (UX-012), daylight theme (DS-007), anon→auth XP claim (DB-006), interactions retention.
 
+### 1c. Portability concierge follow-ups — added 2026-07-27
+
+1. **Clean generated build backups** — remove `.next.preverify-20260726-archive-import` and `.next.preverify-20260727-clean-e2e` after confirming no active debugging session needs them.
+2. **Real authenticated preview API integration test** — add coverage for `/api/portability/preview` once Supabase test auth is available. It should verify `401`, `415`, oversized body rejection, happy-path preview, and no database writes.
+3. **Approved commit/import tranche** — design and implement the separate write step only after explicit approval. Required properties: idempotency, authenticated ownership, audit log, rollback receipt, and a visible customer review step before writes.
+
 ### 1b. Domain cutover — notalabs.io (purchased 2026-07-04 via Shopify)
 
 Run in this order; the app needs no code changes beyond one env var:
@@ -47,7 +53,7 @@ Run in this order; the app needs no code changes beyond one env var:
 | Salesy/price-war voice | Landing Inspired-By section, PressMarquee copy | Backlog #4 |
 | "If it's not personalised, it shouldn't exist" | `/social` static embeds; generic discover grid | Deprecate/fold to Trails (UX-014); UX-011 |
 | Loud display type as body (anti-restraint) | Unbounded everywhere | DS-002 |
-| Brand name integrity | "BASENOTE" all-caps nav; BaseNote metadata | Backlog #3–4 (metadata fixed in this session's diffs) |
+| Brand name integrity | "nota." all-caps nav; nota. metadata | Backlog #3–4 (metadata fixed in this session's diffs) |
 | Enforce-in-model rule | Shelf eligibility only visual (nonexistent) | DB-003 |
 
 ## 4. Recommended Playwright specs (critical uncovered flows)
@@ -66,7 +72,7 @@ Existing e2e coverage: collection, discover, layering, onboarding, you-tab — *
 
 - `CLAUDE.md` — created as nota. system memory (Phase 0).
 - `docs/nota/01–05` — this audit suite.
-- `app/layout.tsx` + `app/page.tsx` — display-layer rebrand BaseNote → nota. (metadata, OG, footer), tone-aligned descriptions. *Display strings only; no logic.*
+- `app/layout.tsx` + `app/page.tsx` — display-layer rebrand to nota. (metadata, OG, footer), tone-aligned descriptions. *Display strings only; no logic.*
 - `app/(main)/shelf/ShelfClient.tsx` — heading "The Shelf" → "My Shelf" (brief-sanctioned rename).
 - Verified with `npm run build` (see session report).
 
