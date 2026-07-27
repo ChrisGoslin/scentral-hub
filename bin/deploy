@@ -90,10 +90,14 @@ if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
   exit 1
 fi
 
-# 5. Run smoke tests against the deployment just created
+# 5. Run smoke tests against the public production alias. Deployment URLs are
+# SSO-protected on this Vercel project, so unauthenticated health checks must
+# exercise the aliased user-facing surface after the deployment reaches READY.
 echo ""
 echo "Running smoke tests..."
-if ! NEXT_PUBLIC_SITE_URL="$DEPLOY_URL" npm run test:smoke:prod; then
+SMOKE_URL="${NEXT_PUBLIC_SITE_URL:-https://scentral-hub.vercel.app}"
+echo "Smoke URL: $SMOKE_URL"
+if ! NEXT_PUBLIC_SITE_URL="$SMOKE_URL" npm run test:smoke:prod; then
   echo ""
   echo "❌ Smoke tests failed. Deployment succeeded but health check failed."
   echo "   Check https://vercel.com/dashboard for recent deployments."
