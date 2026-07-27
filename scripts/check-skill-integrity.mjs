@@ -8,10 +8,6 @@
 // message named both affected skills while lying about what it did to them
 // (docs/lessons.md L26-L29). Only content hashes are checked here.
 //
-// Deliberately uses only fs, not child_process/git — no OS command execution
-// surface at all, avoiding the generic "OS command" security hotspot entirely
-// rather than trying to prove a specific invocation is safe.
-//
 // Known limits (see docs/lessons.md L30 / docs/todo/README.md):
 // - This is a LOCAL pre-push hook only. A merge performed through the GitHub UI
 //   never runs it — the same path 55b2d2d could have taken. A GitHub Actions
@@ -23,39 +19,32 @@
 //   guaranteeing intent.
 
 import { createHash } from "node:crypto";
-import { readFileSync, existsSync, readdirSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import { listSkillFiles } from "./lib/skill-files.mjs";
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const lockPath = join(root, "docs", "skills.lock.json");
-
-function findSkillFiles(skillsDir) {
-  if (!existsSync(skillsDir)) return [];
-  return readdirSync(skillsDir, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => join(skillsDir, entry.name, "SKILL.md"))
-    .filter((p) => existsSync(p));
-}
-
-const absoluteFiles = [
-  ...findSkillFiles(join(root, ".claude", "skills")),
-  ...findSkillFiles(join(root, ".agents", "skills")),
-  ...findSkillFiles(join(root, ".gemini", "skills")),
-].sort();
-
-const files = absoluteFiles.map((p) => p.slice(root.length + 1));
+const { absoluteFiles, relativeFiles } = listSkillFiles(root);
 
 if (!existsSync(lockPath)) {
   console.error("❌ docs/skills.lock.json is missing. Run: node scripts/relock-skills.mjs");
   process.exit(1);
 }
 
-const lock = JSON.parse(readFileSync(lockPath, "utf8"));
+let lock;
+try {
+  lock = JSON.parse(readFileSync(lockPath, "utf8"));
+} catch (err) {
+  console.error(`❌ docs/skills.lock.json is not valid JSON: ${err.message}`);
+  console.error("Run: node scripts/relock-skills.mjs to regenerate it.");
+  process.exit(1);
+}
 let failed = false;
 
-for (let i = 0; i < files.length; i++) {
-  const f = files[i];
+for (let i = 0; i < relativeFiles.length; i++) {
+  const f = relativeFiles[i];
   const content = readFileSync(absoluteFiles[i]);
   const hash = createHash("sha256").update(content).digest("hex");
   if (!(f in lock)) {
