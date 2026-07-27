@@ -31,6 +31,8 @@
 
 **Evidence needed:** Lighthouse JSON before/after, or screenshot of the metrics.
 
+**Guardrail scope:** `npm run check:performance-criteria` protects the acceptance contract and its active references in CI. It does not measure runtime LCP. Production p75/p95 monitoring remains a follow-up when a telemetry source is selected.
+
 ---
 
 ## 2. Apply screen-state-completeness to hero
