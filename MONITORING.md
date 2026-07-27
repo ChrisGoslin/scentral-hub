@@ -283,7 +283,7 @@ track('social_content_viewed', { type: 'tiktok' | 'youtube' })
 ### Hour 0 (Pre-launch)
 - [ ] PostHog dashboards open in browser tabs (Launch Day, Funnel, Feature Adoption, Errors)
 - [ ] Sentry error dashboard open
-- [ ] Vercel deployment page open (`scentral-seven.vercel.app`)
+- [ ] Vercel deployment page open (`scentral-hub.vercel.app`)
 - [ ] Slack notifications enabled for PostHog + Sentry alerts
 - [ ] Email alerts configured (send to `christophergoslin@outlook.com`)
 - [ ] Test a sample event: do a quick onboarding flow and verify events appear in PostHog

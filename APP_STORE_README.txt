@@ -74,7 +74,7 @@ Complete set of high-resolution screenshots for iOS App Store and Google Play St
 
 Screenshots were captured using Playwright automation:
 - Script: `scripts/capture-app-store-screenshots.mjs`
-- Source: https://scentral-seven.vercel.app
+- Source: https://scentral-hub.vercel.app
 - Date: 2026-06-21
 - Network idle wait: 1500ms per screen
 
