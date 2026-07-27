@@ -2,7 +2,7 @@
 
 **Status:** Merged to main (commits bc5c614, ab48f90, 4b906e7). All E2E tests passing (22/22). Ready for production.
 
-**Backlog:** Four follow-up items identified during adversarial review. LCP and hero recovery work are implemented locally; production confirmation remains deployment-gated.
+**Backlog:** Four follow-up items identified during adversarial review. LCP and hero recovery work are deployed; the mobile LCP gate remains open pending a deeper hydration/rendering change.
 
 ---
 
@@ -14,7 +14,9 @@
 
 **Implementation status (2026-07-27):** Local fix complete. The poster `<picture>` now owns the media panel's first paint instead of a CSS background, removing the mobile LCP discovery delay. Slow connections receive poster-only mode and video failures expose a static-mode message. The existing ink-in-water film remains the motion enhancement.
 
-**Measured evidence:** Production baseline before this fix: desktop 0.88–1.08s, mobile 3.84–3.86s. Local production build after this fix: desktop 0.90s, mobile 2.37s; local mobile Lighthouse reported zero media bytes. Production Lighthouse must be rerun after deployment before this item can be marked live-passed.
+**Measured evidence:** Production baseline before this fix: desktop 0.88–1.08s, mobile 3.84–3.86s. Final deployed samples: desktop remains under 1s, mobile 2.74–2.83s, and mobile video transfer is 0 B. The 4 KB poster completes in about 1.0s, but client-side element render delay remains about 1.0–1.2s. Verdict: **improved, but gate still failed** (`<2.5s` target).
+
+**Next recommendation:** Split the server-rendered poster/LCP surface from the client-only motion and personalization layer. Do not replace the ink film yet; the measured bottleneck is hydration/render delay, not video transfer.
 
 **What:** We optimized the hero image with Next.js Image component, priority hints, and `fetchPriority="high"`. Goal was to reduce LCP from 5.2s → <2.5s on slow 4G. **We did not re-measure.**
 
