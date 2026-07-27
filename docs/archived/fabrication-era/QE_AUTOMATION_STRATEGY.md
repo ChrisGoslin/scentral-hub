@@ -1,4 +1,4 @@
-# Scentral Hub: QE & Automation Strategy
+# nota. Hub: QE & Automation Strategy
 
 ## 🕵️ Current Quality Audit (June 2026)
 

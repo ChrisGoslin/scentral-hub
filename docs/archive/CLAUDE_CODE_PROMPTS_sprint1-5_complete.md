@@ -1,4 +1,4 @@
-# BaseNote — Claude Code Implementation Prompts
+# nota. — Claude Code Implementation Prompts
 ### Sprint 1–5 · Full UX Fix + Brand Build
 ### Generated: 2026-06-27
 
@@ -18,7 +18,7 @@ Fix `lib/design/tokens.css`:
 
 1. Change line 60: `--font-display: var(--font-fraunces, "Fraunces", Georgia, serif);` → `--font-display: var(--font-cormorant, "Cormorant Garamond", Georgia, serif);`
 2. Change line 43: `--r-card: 0px;` → `--r-card: 12px;`
-3. Remove the AnotherSense/Aura tokens block (lines 63-65): `--aura:`, `--aura-surface:`, `--aura-border:`, `--xp-color:` — these are dead tokens from a retired design language.
+3. Remove the nota./Aura tokens block (lines 63-65): `--aura:`, `--aura-surface:`, `--aura-border:`, `--xp-color:` — these are dead tokens from a retired design language.
 
 Fix `app/layout.tsx`:
 
@@ -160,7 +160,7 @@ Requirements:
 - Centre-aligned headline in Cormorant Garamond Italic, white, `clamp(3rem, 8vw, 6rem)`:
   > *You already have*
   > *a scent identity.*
-  > *BaseNote finds it.*
+  > *nota. finds it.*
 - Each line fades in sequentially (CSS animation, 400ms delay between lines)
 - Single gold CTA button: **Begin →** using `var(--accent)` background, `#1A1208` text, pill shape
 - Remove the "Find Your Identity →" and "Explore Collection →" dual CTAs
@@ -283,7 +283,7 @@ git commit -m "feat(onboarding): cinematic reveal — word-by-word name, typewri
 In `app/(main)/spritz/SpritzClient.tsx`:
 
 1. Find the `<h1>` that says "Aura" — change it to "Today's Brief"
-2. Find the page `<title>` or document.title assignment — change to "Your Brief | BaseNote"
+2. Find the page `<title>` or document.title assignment — change to "Your Brief | nota."
 
 Add swipe affordance to the card:
 - Below the main card, add a row with three elements in a flex layout:
@@ -422,24 +422,24 @@ git commit -m "feat(strip): rename Wear & Share → The Strip, constrained post 
 
 ---
 
-### Prompt 15: BaseNote name sweep — kill AnotherSense
+### Prompt 15: nota. name sweep — kill nota.
 
-Search the entire codebase for "AnotherSense" and "Sensus" — replace all occurrences with "BaseNote".
+Search the entire codebase for "nota." and "nota." — replace all occurrences with "nota.".
 
 Key locations known:
-- `lib/design/tokens.css` line 63: comment `/* AnotherSense — Aura Design Language tokens */` → `/* BaseNote — Design Language tokens */`
+- `lib/design/tokens.css` line 63: comment `/* nota. — Aura Design Language tokens */` → `/* nota. — Design Language tokens */`
 - Any metadata, OG tags, or manifest.json references
-- AGENTS.md if it still says AnotherSense
+- AGENTS.md if it still says nota.
 
 DO NOT rename or change:
 - localStorage keys: `scentral_anon_id`, `scentral_persona`, `scentral_wishlist`, `scentral_collection`, `scentral_discover_sort`, `scentral_discover_vibe`, `scentral_brief_tutorialSeen` — these stay as-is. Renaming them breaks existing users' stored data.
 - Route paths: `/spritz`, `/you`, `/layering` — keep as-is
 - The repo name `scentral-hub` or any Supabase project references
 
-After sweeping, verify `app/layout.tsx` metadata has `title: "BaseNote"` (it already does — just confirm it's clean).
+After sweeping, verify `app/layout.tsx` metadata has `title: "nota."` (it already does — just confirm it's clean).
 
 ```
-git commit -m "chore(brand): full name sweep — AnotherSense → BaseNote, keep all localStorage keys unchanged"
+git commit -m "chore(brand): full name sweep — nota. → nota., keep all localStorage keys unchanged"
 ```
 
 ---
@@ -522,9 +522,9 @@ After all prompts run, verify:
 3. All `var(--accent)` renders as `#B8913A` in both light + dark
 4. `var(--r-card)` renders as `12px` everywhere
 5. Nav shows: Discover | Wardrobe | Lab | Brief | Identity
-6. No "AnotherSense" or "Sensus" visible in the app UI
+6. No "nota." or "nota." visible in the app UI
 7. Discover grid shows 2 columns on mobile
 8. Cards without images show gradient fallbacks, not blank
 9. Scent DNA Search card appears above filters
 
-Run: `grep -r "AnotherSense\|Sensus" app/ components/ lib/ --include="*.tsx" --include="*.ts" --include="*.css"` — should return zero results.
+Run: `grep -r "nota.\|nota." app/ components/ lib/ --include="*.tsx" --include="*.ts" --include="*.css"` — should return zero results.

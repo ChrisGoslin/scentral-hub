@@ -1,4 +1,4 @@
-# AnotherSense — Feature Roadmap (Reference-Site Synthesis)
+# nota. — Feature Roadmap (Reference-Site Synthesis)
 
 > Created 2026-06-23. The inspiration-driven backlog. Companion to [`GAP_ANALYSIS.md`](GAP_ANALYSIS.md) and [`PRODUCT_TRUTH.md`](PRODUCT_TRUTH.md).
 > **Vision in one line:** Fragrantica/Parfumo's data depth + wikiparfum's ingredient-led discovery + clonespreadsheet's dupe utility + Perfume Society/EPC's education & subscription commerce — in a clean, evolving PWA monetized with ads + affiliate + Shopify.

@@ -89,7 +89,7 @@ export default async function BlindRankingSharePage({ params }: PageProps) {
         ))}
       </div>
       <p style={{ fontSize: 12, color: 'var(--text-muted)', textAlign: 'center', marginTop: 24 }}>
-        Ranked blind, on notes and accords alone. Find your own Top 10 on nota..
+        Ranked blind, on notes and accords alone. Find your own Top 10 on nota.
       </p>
     </div>
   )

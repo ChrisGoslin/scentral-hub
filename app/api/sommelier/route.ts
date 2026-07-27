@@ -13,7 +13,7 @@ export async function POST(req: Request) {
     }
 
     const { mode, lat, lon, time_of_day = 'evening' } = await req.json()
-    
+
     const cookieStore = await cookies()
     const supabase = await createClient(cookieStore)
 
@@ -57,7 +57,7 @@ export async function POST(req: Request) {
       const p3Count = frags.filter(f => f.phase === 3).length
       const p1Pct = p1Count / total
       const p3Pct = p3Count / total
-      
+
       const imbalances = []
       if (p1Pct > 0.6) imbalances.push('anchor-heavy')
       if (p3Pct < 0.15) imbalances.push('top-note deficient')
@@ -79,7 +79,7 @@ export async function POST(req: Request) {
       }
 
       const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-      const prompt = `You are the Scentral Collection Sommelier. Analyze this fragrance wardrobe's data and provide strategic intelligence.
+      const prompt = `You are the nota. Collection Sommelier. Analyze this fragrance wardrobe's data and provide strategic intelligence.
 
       COLLECTION DATA:
       ${JSON.stringify(gapContext, null, 2)}
@@ -131,15 +131,15 @@ export async function POST(req: Request) {
       // Simple scoring for daily pick
       const temp = weather.current.temperature_2m
       const humidity = weather.current.relative_humidity_2m
-      
+
       const scored = frags.map(f => {
         let score = (f.rating || 5) * 5
-        
+
         // Weather fit
         if (temp > 25 && f.optimal_season === 'High Heat') score += 20
         if (temp < 10 && f.optimal_season === 'Winter/Fall') score += 20
         if (f.optimal_season === 'All-Year') score += 10
-        
+
         // Time of day fit
         if (time_of_day === 'evening' && f.phase === 1) score += 15
         if (time_of_day === 'morning' && f.phase === 3) score += 15
@@ -149,8 +149,8 @@ export async function POST(req: Request) {
 
       const top3 = scored.sort((a, b) => b.daily_score - a.daily_score).slice(0, 3)
 
-      return NextResponse.json({ 
-        success: true, 
+      return NextResponse.json({
+        success: true,
         weather: { temp, humidity },
         recommendations: top3.map(r => ({
           ...r,
@@ -176,7 +176,7 @@ export async function POST(req: Request) {
         const matches = (frags || [])
           .filter(f => f.use_case?.toLowerCase().includes(occ.toLowerCase()))
           .sort((a, b) => (b.rating || 0) - (a.rating || 0))
-        
+
         coverage[occ] = {
           count: matches.length,
           top: matches.slice(0, 2),

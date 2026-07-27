@@ -1,16 +1,16 @@
-# SENSUS UI/UX OVERHAUL — Complete Strategy & Execution Plan
+# nota. UI/UX OVERHAUL — Complete Strategy & Execution Plan
 
-**Version:** 1.0  
-**Date:** 2026-06-22  
-**Status:** Ready for Production Execution  
-**Timeline:** 10 Weeks  
+**Version:** 1.0
+**Date:** 2026-06-22
+**Status:** Ready for Production Execution
+**Timeline:** 10 Weeks
 **Design Philosophy:** Dark Ambient Material 3 (M3 + Luxury Moodiness)
 
 ---
 
 ## Executive Summary
 
-After focus group feedback that the current MVP feels "novice and vibe-coded," SENSUS (formerly Scentral) is undergoing a complete UI/UX overhaul to become the **"Spotify of Fragrance"** — a premium, visually striking, gamified PWA that validates the collector's sensory journey while delivering world-class Material Design 3 usability.
+After focus group feedback that the current MVP feels "novice and vibe-coded," nota. (formerly nota.) is undergoing a complete UI/UX overhaul to become the **"Spotify of Fragrance"** — a premium, visually striking, gamified PWA that validates the collector's sensory journey while delivering world-class Material Design 3 usability.
 
 **Key Pivot Points:**
 - **Grid:** 2-col stretched → 12-col responsive Collector's Wall
@@ -27,7 +27,7 @@ After focus group feedback that the current MVP feels "novice and vibe-coded," S
 ### The Landscape
 - **Incumbents** (Fragrantica/Parfumo): Functional but visually archaic. Treat fragrance like Excel spreadsheets.
 - **Luxury Benchmarks** (Byredo/Maison Margiela): Master emotional storytelling via stark typography and premium aesthetics.
-- **SENSUS** (The Disruptor): Intersection of premium catalog + interactive sensory notebook. Guides choice without imposing rigid classifications.
+- **nota.** (The Disruptor): Intersection of premium catalog + interactive sensory notebook. Guides choice without imposing rigid classifications.
 
 ### Target Consumer: Gavin, "The Conscious Collector"
 - **Age:** 24–35, urban professional
@@ -269,7 +269,7 @@ Transform search from simple name matching into an intelligent proximity engine.
 
 ```sql
 -- Query 1: Exact matches (name, brand, description)
-SELECT * FROM fragrances 
+SELECT * FROM fragrances
 WHERE name % $1 OR brand % $1 OR plain_description % $1
 ORDER BY similarity(name, $1) DESC
 LIMIT 20;
@@ -367,7 +367,7 @@ Each card shows:
 **Push Notifications:**
 - "Time for your midday spritz!" (4h after morning, if enabled)
 - "Evening option ready!" (8h after morning)
-- "Don't break your streak! 🔥 Open Sensus to log today's wear"
+- "Don't break your streak! 🔥 Open nota. to log today's wear"
 - Notification includes quick action: "Log Now" → pre-fills wear log
 
 ### Acceptance Criteria
@@ -423,7 +423,7 @@ Move core value prop (Scent Identity Profiler, Aura, Fragrance Wheel) above the 
 **Footer (Minimal):**
 - Links: Privacy Policy, Terms of Service, Contact
 - Social: Twitter, Instagram, TikTok
-- Copyright: "Sensus © 2026. Celebrating your scent fingerprint."
+- Copyright: "nota. © 2026. Celebrating your scent fingerprint."
 - Background: `bg-slate-950`
 
 **Typography Fixes:**
@@ -476,7 +476,7 @@ After each Epic:
 
 ## Post-Launch: Phase 8-D Affiliate Integration (Weeks 11–12, Concurrent with Monitoring)
 
-Once SENSUS ships:
+Once nota. ships:
 - Wire Awin affiliate links into detail page "Where to Buy" section
 - Deploy `/api/prices` endpoint
 - Implement SKU matching using `pg_trgm` + LLM tier
@@ -522,4 +522,4 @@ git push origin main
 
 ---
 
-**SENSUS is ready for takeoff. Let's build something legendary.**
+**nota. is ready for takeoff. Let's build something legendary.**

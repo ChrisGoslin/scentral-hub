@@ -1,4 +1,4 @@
-// Generates PWA icons for Scentral: amber resin-drop on parchment.
+// Generates PWA icons for nota.: amber resin-drop on parchment.
 // Run locally: node scripts/generate-icons.mjs
 import fs from 'node:fs';
 import path from 'node:path';

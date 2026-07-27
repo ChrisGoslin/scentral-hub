@@ -1,4 +1,4 @@
-# Phase 2 Handover — Scentral Discovery & DNA-Match Polish
+# Phase 2 Handover — nota. Discovery & DNA-Match Polish
 
 **Status:** Phase 1 complete and **greenlit**. Phase 2 (execution) not started.
 **Grounded on:** `AGENTS.md` ground truth, `app/globals.css`, `lib/design/tokens.css`, and direct reads of every file listed below (paths + line numbers verified on read).

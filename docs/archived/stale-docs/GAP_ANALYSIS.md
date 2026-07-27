@@ -1,4 +1,4 @@
-# AnotherSense — Master Gap Analysis
+# nota. — Master Gap Analysis
 
 > **Status:** Living scorecard. Created 2026-06-23.
 > **Method:** Every "built" claim verified by reading the actual source file / DB table list — **not** by trusting documentation. Where docs and code disagree, **code wins.**
@@ -32,7 +32,7 @@
 - **PWA** — installable, offline.
 - **Monetization (agreed-ish):** Pro tier via ProGate; Awin affiliate "Where to Buy" (post-launch); AdSense + Shopify storefront (proposed only).
 
-**Design system (nominally agreed):** "AnotherSense Aura Design Language" — OKLCH tokens (`--aura`, `--xp-color`), motion tokens, Instrument Serif italic + Unbounded, glassmorphism. **Competes with 3 other palettes — see Part D.**
+**Design system (nominally agreed):** "nota. Aura Design Language" — OKLCH tokens (`--aura`, `--xp-color`), motion tokens, Instrument Serif italic + Unbounded, glassmorphism. **Competes with 3 other palettes — see Part D.**
 
 **Data:** 282 fragrances; tables `fragrances`, `collections` (+`scent_memory`), `wear_logs`, `layering_combinations`, `layer_recipes`, `spritz_schedules`, `profiles`, `waitlist`, `user_xp`, `user_streaks` — all verified live.
 
@@ -76,7 +76,7 @@
 
 1. **Design system: 4 incompatible palettes; intended one never activated.** Warm-cream (`#A0622A`/`#F7F3EE`) vs Dark Ambient M3 (`#0F172A`/`#06B6D4`, all 4 mockups) vs Aura amber-OKLCH (AGENTS.md) vs landing-specific (`#06070a`/`#F5B76A`). Dark Ambient tokens written into `[data-theme="dark"]` but never made default — **live app still renders warm cream.** TAD says "no Tailwind" while every Epic brief uses Tailwind.
 2. **Two "canonical" spec files don't exist** — AGENTS.md cites `docs/specs/AnotherSense_Final_UX_Overhaul.md` and `docs/AnotherSense_Execution_Brief.md`; `find` confirms neither exists.
-3. **4 competing Epic schemes with collisions** — SENSUS 1–5 vs AnotherSense 0–12 vs RELEASE_NOTES 7–12 vs Phase 0–8. Epic 9 = "Spritz" in one, "Aura Evolution" in another.
+3. **4 competing Epic schemes with collisions** — nota. 1–5 vs nota. 0–12 vs RELEASE_NOTES 7–12 vs Phase 0–8. Epic 9 = "Spritz" in one, "Aura Evolution" in another.
 4. **Persona count 2 vs 3 vs 6, two *kinds* conflated** — customer personas (Gavan/Christopher) vs fragrance-identity personas (6 in `lib/personas.ts`). No doc names them distinctly.
 5. **`/schedule` vs `/spritz` overlap** — see Decision #2.
 6. **Free/Pro tier disagreement** — Spritz moved Pro→Free between docs; "Rotation Intelligence" Pro in one doc, absent in another.
@@ -84,7 +84,7 @@
 8. **`architecture.md` badly stale** — 76 fragrances (real: 282), 3-tab nav (real: 5+), magic-link auth (real: no-auth).
 9. **`DIRECTORY_STRUCTURE.md` stale** — lists non-existent `DynamicAura.tsx`/`ScentBloom.tsx`/`AccordCreator.tsx`.
 10. **Epic "complete" status self-contradicts within 24h** — Playbook ✅ vs Handover 🔴 for same Epics 1–5.
-11. **Parallel/legacy codebase in Google Drive** — `…/My Drive/Scentral/app/` + `20260529_phase_3_auth.sql` with auth components.
+11. **Parallel/legacy codebase in Google Drive** — `…/My Drive/nota./app/` + `20260529_phase_3_auth.sql` with auth components.
 12. **CLAUDE.md / GEMINI.md / AGENTS.md describe three different "current sprints."**
 
 ---

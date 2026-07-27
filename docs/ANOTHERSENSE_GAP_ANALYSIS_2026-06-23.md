@@ -1,5 +1,5 @@
-# AnotherSense — Full Gap Analysis & Feature Brief
-**Prepared:** 2026-06-23 (overnight audit)  
+# nota. — Full Gap Analysis & Feature Brief
+**Prepared:** 2026-06-23 (overnight audit)
 **Purpose:** Complete picture of what was agreed, what is actually built, what is visually broken, and what the reference sites suggest we should build next. Ready for morning planning session.
 
 ---
@@ -9,7 +9,7 @@
 ### ✅ Routes that exist and have real content
 | Route | Status | Notes |
 |---|---|---|
-| `/` (landing) | ✅ Built | HeroSection + PersonaTeasers + Christopher Moment card. AnotherSense branded. |
+| `/` (landing) | ✅ Built | HeroSection + PersonaTeasers + Christopher Moment card. nota. branded. |
 | `/discover` | ✅ Built | Full filter system (carousels), search, Smells Like mode, persona theming, wishlist |
 | `/collection` | ✅ Built | WardrobeShelf, 4-tier affinity layout, dnd-kit drag-drop, WardrobeSidebar |
 | `/collection/[id]` | ✅ Built | Detail view, AffinityRater, InspiredByClones, SimilarFragrances, LogWearButton |
@@ -49,8 +49,8 @@
 This is the most important issue. Everything else is secondary.
 
 ### What was agreed
-Epic 1 (SENSUS_COMPLETE_PLAYBOOK.md, epic-1-collectors-wall.md) specified:
-- **Default background:** `#0F172A` (Deep Slate) 
+Epic 1 (`docs/nota/`, epic-1-collectors-wall.md) specified:
+- **Default background:** `#0F172A` (Deep Slate)
 - **Accent:** `#06B6D4` (Electric Cyan)
 - **All surfaces:** glassmorphism with `rgba(255,255,255,0.03–0.12)`
 - **All text:** `#E2E8F0` / `#94A3B8`
@@ -74,7 +74,7 @@ Epic 1 (SENSUS_COMPLETE_PLAYBOOK.md, epic-1-collectors-wall.md) specified:
 **The dark theme tokens are DEFINED but NEVER ACTIVATED.** No code anywhere sets `data-theme="dark"` on the `html` or `body` element by default. The `:root` block (which is always active) still has the old warm cream palette.
 
 ### What the user sees
-The app looks **identical** to before the SENSUS overhaul. Every colour on every page — background, cards, buttons, text — renders in warm cream tones because `:root` is warm cream.
+The app looks **identical** to before the nota. overhaul. Every colour on every page — background, cards, buttons, text — renders in warm cream tones because `:root` is warm cream.
 
 ### The fix (straightforward, one change)
 **Option A — Make dark the default (recommended for MVP):**
@@ -160,7 +160,7 @@ In `app/layout.tsx`, add `data-theme="dark"` to the `<html>` tag: `<html lang="e
 - 500k+ users — proof this is the #1 thing the market wants
 - Affiliate monetisation through CJ/Jomashop
 
-**Gap in AnotherSense:**
+**Gap in nota.:**
 - We have `inspired_by` data in the DB — this maps each fragrance to what it clones
 - We have a "Christopher Moment" card on the landing ("Your £140 bottle has an £18 clone")
 - But there's **no dedicated clone lookup UI** — just a text link to `/discover?query=clones`
@@ -174,7 +174,7 @@ In `app/layout.tsx`, add `data-theme="dark"` to the `<html>` tag: `<html lang="e
 - Perfumer attribution, brand history
 - News, interviews, educational content
 
-**Gap in AnotherSense:**
+**Gap in nota.:**
 - We have 282 fragrances — dramatically fewer
 - We don't surface note pyramids (top/heart/base) — only `family` and `lean`
 - No community reviews — only internal affinity ratings
@@ -206,7 +206,7 @@ In `app/layout.tsx`, add `data-theme="dark"` to the `<html>` tag: `<html lang="e
 - Strong "crafted by you, bottled by us" narrative
 
 **What to steal:**
-- Discovery set concept → AnotherSense could partner with a retailer to offer sample kits linked to our recommended fragrances
+- Discovery set concept → nota. could partner with a retailer to offer sample kits linked to our recommended fragrances
 - Layering as a product concept (our Lab already does this conceptually)
 - Education content model — fragrance course or guide within the app
 - "Fragrance Finder" quiz — we have personas but could make them more EPC-style (answer 5 questions → here are your 3 best fragrances)
@@ -221,7 +221,7 @@ In `app/layout.tsx`, add `data-theme="dark"` to the `<html>` tag: `<html lang="e
 - Community through Instagram/TikTok
 
 **What to steal:**
-- Seasonal subscription box concept — AnotherSense could be the digital companion to a physical sample subscription (affiliate play)
+- Seasonal subscription box concept — nota. could be the digital companion to a physical sample subscription (affiliate play)
 - Perfume house profiles — brand/house pages add SEO and depth
 - Ingredient deep-dives (educational content = SEO + retention)
 - Seasonality angle — "What to wear this summer" editorial content within the app
@@ -239,7 +239,7 @@ In `app/layout.tsx`, add `data-theme="dark"` to the `<html>` tag: `<html lang="e
 - Olfactory profile as the primary onboarding experience (we have personas, could go deeper)
 - Ingredient catalogue — searchable ingredient pages (bergamot, oud, amber etc.) as SEO engine
 - "Recommended because you liked X" logic for discovery
-- B2B integration angle — long-term: license AnotherSense's recommendation engine to retailers
+- B2B integration angle — long-term: license nota.'s recommendation engine to retailers
 
 ---
 
@@ -268,7 +268,7 @@ In `app/layout.tsx`, add `data-theme="dark"` to the `<html>` tag: `<html lang="e
 ### Shopify Storefront
 **What makes sense:**
 - Physical discovery kits: 5-sample set matched to user's persona (£15–25)
-- "AnotherSense x [Brand]" curated collection boxes
+- "nota. x [Brand]" curated collection boxes
 - Branded accessories: fragrance journal, sample vials, decant kit
 - **Realistic path:** Shopify store connected to the PWA via "Shop" section. Shopify handles fulfilment; we drive traffic from the PWA via persona-matched product recommendations.
 - **Simpler short-term:** Affiliate to existing retailers (Parfumo partner model) before building own inventory.
@@ -283,20 +283,20 @@ In `app/layout.tsx`, add `data-theme="dark"` to the `<html>` tag: `<html lang="e
 ## PART 7 — REQUIREMENTS CONFLICTS & CLARIFICATIONS
 
 ### Conflict 1: /schedule vs /spritz — which is the "daily ritual"?
-- SENSUS Playbook Epic 4 calls for "Aura Spritz Schedule" — this became `/spritz`
+- nota. Playbook Epic 4 calls for "Aura Spritz Schedule" — this became `/spritz`
 - `/schedule` is the legacy "plan morning/midday/evening" feature (Pro-gated)
 - **Clarification needed:** Is `/schedule` being deprecated in favour of `/spritz`? Or are they different enough to co-exist? Current BottomNav links to `/schedule` (Ritual) but `/spritz` is the newer, better-designed experience.
 - **Recommendation:** Make `/spritz` the primary nav item. Rename "Ritual" tab → "Spritz". Keep `/schedule` accessible but unlisted. Deprecate over time.
 
-### Conflict 2: SENSUS Epics "✅ Complete" vs actual state
-- The SENSUS_COMPLETE_PLAYBOOK.md marks all 5 Epics as ✅
+### Conflict 2: nota. Epics "✅ Complete" vs actual state
+- The active nota. docs mark all 5 Epics as ✅
 - Epic 1 dark theme is NOT applied as default
 - **Clarification:** The tokens and components were built, but the theme switch from light → dark as default was never committed. Epics are ~80% complete — components built but not visually unified under dark theme.
 
 ### Conflict 3: Display name confusion
-- AGENTS.md §1 says: Display name = "AnotherSense". Internal names unchanged.
-- The landing page, layout.tsx, and metadata all say "AnotherSense" ✅
-- CLAUDE.md still refers to "Scentral"/"SENSUS" in places — not a code problem, just doc debt.
+- AGENTS.md §1 says: Display name = "nota.". Internal names unchanged.
+- The landing page, layout.tsx, and metadata all say "nota." ✅
+- CLAUDE.md still refers to "nota."/"nota." in places — not a code problem, just doc debt.
 
 ### Conflict 4: /wheel specified but not built
 - AGENTS.md §1 lists `/wheel` as a route and §10 (LLM briefing block) describes it
@@ -351,9 +351,9 @@ In `app/layout.tsx`, add `data-theme="dark"` to the `<html>` tag: `<html lang="e
 
 **Suggested first Claude Code prompt** (after reading this):
 ```
-Apply the AnotherSense dark theme as default. In app/layout.tsx, add data-theme="dark" 
-to the html element. Then audit every page for hardcoded light-mode colours and replace 
-with CSS variables. Verify: next build passes, scentral-hub.vercel.app shows dark slate 
+Apply the nota. dark theme as default. In app/layout.tsx, add data-theme="dark"
+to the html element. Then audit every page for hardcoded light-mode colours and replace
+with CSS variables. Verify: next build passes, scentral-hub.vercel.app shows dark slate
 background on all routes.
 ```
 

@@ -1,6 +1,6 @@
 
 ## 🎨 The Atelier UI Framework (nota. Aesthetic)
-Whenever building or modifying User Interfaces in Scentral Hub, you MUST strictly adhere to the "perfumery's workshop" aesthetic:
+Whenever building or modifying User Interfaces in nota. Hub, you MUST strictly adhere to the "perfumery's workshop" aesthetic:
 
 1. **Tactile Primitives:** Never use generic colored divs for warnings, insights, or tooltips. You MUST use the `PostItNote.tsx` and `SketchAnnotation.tsx` components.
 2. **Handwritten Personalization:** Empty states, hints, and system intelligence should always feel like personalized notes written for the user. Utilize the `Caveat` font (via existing Tailwind utility classes) for these elements.

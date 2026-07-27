@@ -1,5 +1,5 @@
 /**
- * Scentral Fragrance Education Library
+ * nota. Fragrance Education Library
  * Static data dictionaries for fun facts, layering rules, and persona tips.
  * Content sourced from LAUNCH_PLAN.md (verified 2026-06-21)
  */

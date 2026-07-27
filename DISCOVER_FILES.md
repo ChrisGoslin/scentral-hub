@@ -1,4 +1,4 @@
-# AnotherSense Discover Module — Source Files
+# nota. Discover Module — Source Files
 
 **Repo:** `/Users/christophergoslin/Projects/scentral-hub`
 
@@ -142,7 +142,7 @@ export default function DiscoverClient({ fragrances, error, hasMore: initialHasM
   }, [])
 
   useEffect(() => {
-    document.title = activePersona ? `Discover · For ${activePersona.name}` : 'Discover | AnotherSense'
+    document.title = activePersona ? `Discover · For ${activePersona.name}` : 'Discover | nota.'
   }, [activePersona])
 
   // Track search usage

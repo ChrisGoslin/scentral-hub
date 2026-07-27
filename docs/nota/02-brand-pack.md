@@ -12,7 +12,7 @@ Three routes considered:
 
 **Recommendation: Route A.** The name itself is already the idea (a note, taken; a note, smelled; the full-stop of recognition). The only permitted flourish is the dot — see the dot system below. Route A is the only route that works identically at favicon, nav, OG card, and app-store icon scale, and it matches the Apple Notes/Aesop DNA. Routes B/C can live inside *artefacts* (Noseprint OG cards) without being the mark.
 
-**Immediate implication [V]:** the live nav renders `BASENOTE` in Unbounded all-caps — the exact opposite energy (loud, display, techno). The wordmark should be lowercase `nota.` in the humanist sans, never uppercase, never in Unbounded.
+**Immediate implication [V]:** the live nav renders `nota.` in Unbounded all-caps — the exact opposite energy (loud, display, techno). The wordmark should be lowercase `nota.` in the humanist sans, never uppercase, never in Unbounded.
 
 ## 2. The dot system — a state machine for recognition
 
@@ -57,5 +57,5 @@ Rules: one dot on screen at a time; never faster than `--motion-ceremonial`; `pr
 ## 6. Voice guardrails (observed violations to fix)
 
 - "Stop blind buying." / "The $18 answer to the $140 question." [V — PressMarquee] → salesy; violates tone. nota. never tells the user to stop anything.
-- "BaseNote finds it." → becomes "nota. already noticed." (observational, not service-y).
+- "nota. finds it." → becomes "nota. already noticed." (observational, not service-y).
 - Keep: "Room to be wrong." / "Once placed, it's locked. No undo." / "Does this feel like you?" — this is the house voice; write everything else to match these three.

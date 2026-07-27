@@ -73,7 +73,7 @@ async function forEachRow(table, columns, onRow) {
   }
 }
 
-console.log('\n🎯 BaseNote — NULL-image priority ranking (read-only)\n')
+console.log('\n🎯 nota. — NULL-image priority ranking (read-only)\n')
 
 // Signal: discovery box membership
 const boxCounts = new Map()

@@ -1,8 +1,8 @@
-# SCENTRAL MASTER ARCHITECTURE & EXPERIENCE SPECIFICATION (V1-LAUNCH)
+# nota. MASTER ARCHITECTURE & EXPERIENCE SPECIFICATION (V1-LAUNCH)
 
-**System Target:** Production Launch Blueprint (Google Play Store)  
-**Consuming CLI Agents:** Claude Code (UX Frontend), Antigravity (Data & Core Logic)  
-**Operational Philosophy:** Person-Centred (Choice Theory & Motivational Interviewing)  
+**System Target:** Production Launch Blueprint (Google Play Store)
+**Consuming CLI Agents:** Claude Code (UX Frontend), Antigravity (Data & Core Logic)
+**Operational Philosophy:** Person-Centred (Choice Theory & Motivational Interviewing)
 **Core Maxim:** "Yes, And..." — Absolute validation of the unique olfactory fingerprint.
 
 > ⚠️ **AGENTS: This is a vision spec, not a build directive.** Cross-reference AGENTS.md §1 before implementing any feature. Many sections describe future state. Known fabrications from prior sessions (Hegemony, NFTs, Shadow Branching, etc.) must never be reintroduced even if they appear to align with language here.
@@ -240,7 +240,7 @@ Every morning, the AI Coach outputs a layout payload defining an optimal wear ta
 
 ## 6. THE COMMUNITY CONSCIENCE ENGINE (MODERATION & DESIGN)
 
-Scentral prioritizes honest, raw debate, rejecting standard censorship loops in favour of structural accountability based entirely on Choice Theory.
+nota. prioritizes honest, raw debate, rejecting standard censorship loops in favour of structural accountability based entirely on Choice Theory.
 
 ### 6.1 The Sentiment Intent Parser
 
@@ -270,7 +270,7 @@ When text inputs trigger the identity toxicity flag, the system retains the entr
 +-------------------------------------------------------------+
 |                     THE VIBE CHECK                          |
 |                                                             |
-| Scentral is a sanctuary for unique olfactory fingerprints.  |
+| nota. is a sanctuary for unique olfactory fingerprints.  |
 | Passionate debate moves our world forward, but personal     |
 | friction fractures our home.                                |
 |                                                             |
@@ -329,11 +329,11 @@ If the user waits out the 60-second cooldown and selects `Post anyway`, the payl
 
 ### 8.1 The Three Scented Constitution Tenets
 
-1. **The Race Where Everyone Wins:** Scentral is a space where we all want each other to come first. This platform exists to bring joy. It is never that serious. Elitism, pretension, and corporate metric-chasing are systematically rejected.
+1. **The Race Where Everyone Wins:** nota. is a space where we all want each other to come first. This platform exists to bring joy. It is never that serious. Elitism, pretension, and corporate metric-chasing are systematically rejected.
 
 2. **Radical Authenticity ("Yes, And..."):** Your presence on this earth is a statistical miracle, and so is your olfactory fingerprint. Nobody smells things exactly like you, and nobody's skin reacts the same way. Our universal operational mantra is **"Yes, And..."** — never "but" or "no."
 
-3. **Audacious Fun:** It's just fragrance! Scentral encourages users to take massive creative chances, build their voice, post unfiltered reactions, and share their raw impressions. Your unique taste might be the exact spark that inspires someone else to be brave.
+3. **Audacious Fun:** It's just fragrance! nota. encourages users to take massive creative chances, build their voice, post unfiltered reactions, and share their raw impressions. Your unique taste might be the exact spark that inspires someone else to be brave.
 
 ### 8.2 The Unified ERD (Future State Reference)
 

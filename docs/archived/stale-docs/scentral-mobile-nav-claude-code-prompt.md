@@ -4,7 +4,7 @@ Paste this exactly into Claude Code from your ~/projects/scentral folder.
 
 ---
 
-Add a mobile-first bottom navigation bar to Scentral with 4 tabs: Collection, Layering Lab, Schedule, Profile.
+Add a mobile-first bottom navigation bar to nota. with 4 tabs: Collection, Layering Lab, Schedule, Profile.
 
 ## What to build
 
@@ -95,11 +95,11 @@ import BottomNav from './components/BottomNav'
   <nav className="hidden md:block bg-slate-900 border-b border-slate-800 px-6 py-3">
     {/* existing top nav content */}
   </nav>
-  
+
   <main className="pb-20 md:pb-0">
     {children}
   </main>
-  
+
   {/* Bottom nav — mobile only, hidden on md+ */}
   <div className="md:hidden">
     <BottomNav />

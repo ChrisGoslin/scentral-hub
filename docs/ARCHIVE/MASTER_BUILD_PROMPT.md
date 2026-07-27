@@ -1,4 +1,4 @@
-# BaseNote — Master Build Prompt
+# nota. — Master Build Prompt
 ### Single source of truth for all Claude Code sessions
 ### Version 3.0 — Complete merged edition
 ### Generated: 2026-06-27
@@ -25,8 +25,8 @@
 ## ═══════════════════════════════════════
 
 ```
-# BaseNote — Session Start
-# Repo: scentral-hub | DB: scentral-mvp | Display: BaseNote (display-layer only)
+# nota. — Session Start
+# Repo: scentral-hub | DB: scentral-mvp | Display: nota. (display-layer only)
 
 ## Ground yourself in this order — no code until all four are read:
 1. cat AGENTS.md
@@ -40,7 +40,7 @@
 - git log --oneline -5
 
 ## The brand throughline — apply to every pixel:
-"You already have a scent identity. BaseNote finds it."
+"You already have a scent identity. nota. finds it."
 
 ## Our three moats vs WhatScent (launched June 2026):
 1. No auth — frictionless from first tap. WhatScent requires signup.
@@ -84,7 +84,7 @@ npm run build → zero errors → git commit -m "[message]" → npx vercel --pro
 
 *From Marlowe, Studio Marlowe — written after competitive intelligence review:*
 
-WhatScent launched June 2026. They have mechanics but no throughline. "Spotify of perfume" is a borrowed metaphor. "You already have a scent identity. BaseNote finds it." is original. That is the differentiator and it must be visible in every feature.
+WhatScent launched June 2026. They have mechanics but no throughline. "Spotify of perfume" is a borrowed metaphor. "You already have a scent identity. nota. finds it." is original. That is the differentiator and it must be visible in every feature.
 
 **Three rules for this build:**
 
@@ -137,7 +137,7 @@ The moat is not any one feature. It is the compounding of persona identity + wea
 | 31 | X1 | The Nose Report | Polish | Monthly identity digest |
 | 32 | X2 | Inspired By Value Counter | Polish | Landing social proof |
 | 33 | X3 | Affinity Score Explainer | Polish | Shelf legibility |
-| 34 | Z1 | BaseNote Name Sweep | Cleanup | Kill AnotherSense everywhere |
+| 34 | Z1 | nota. Name Sweep | Cleanup | Kill nota. everywhere |
 | 35 | Z2 | AdSlot Fallback | Cleanup | No blank rectangles |
 | 36 | Z3 | Streak Day-1 Toast | Cleanup | Day-1 encouragement |
 | 37 | Z4 | Context-Aware Back Link | Cleanup | Layering UX fix |
@@ -162,13 +162,13 @@ tokens.css loads after so its values WIN and override globals.css.
 Current bugs:
   - tokens.css sets --font-display: var(--font-fraunces) → wrong font everywhere
   - tokens.css sets --r-card: 0px → no border radius anywhere
-  - Dead AnotherSense tokens polluting the file: --aura, --aura-surface, --aura-border, --xp-color
+  - Dead nota. tokens polluting the file: --aura, --aura-surface, --aura-border, --xp-color
 
 FIX lib/design/tokens.css:
 1. Change: --font-display: var(--font-fraunces, ...) → --font-display: var(--font-cormorant, "Cormorant Garamond", Georgia, serif)
 2. Change: --r-card: 0px → --r-card: 12px
 3. Remove entirely: --aura, --aura-surface, --aura-border, --xp-color, any --font-fraunces reference
-4. Remove comment: "/* AnotherSense — Aura Design Language */" → "/* BaseNote — Design Language */"
+4. Remove comment: "/* nota. — Aura Design Language */" → "/* nota. — Design Language */"
 
 FIX app/layout.tsx:
 Replace Instrument_Serif import with Cormorant_Garamond:
@@ -366,7 +366,7 @@ CONTEXT:
 TASK: Add a memory capture field to the Spritz swipe-right flow. This:
 - Closes the WhatScent diary gap
 - Seeds The Strip before it launches
-- Makes BaseNote the only app that builds a private memory record of the user's relationship with scent
+- Makes nota. the only app that builds a private memory record of the user's relationship with scent
 
 STEP 1 — Bottom sheet after swipe-right in app/(main)/spritz/SpritzClient.tsx:
 After the wear log fires, slide up a bottom sheet:
@@ -418,7 +418,7 @@ Read AGENTS.md, BASENOTE_BRAND.md, COMPETITIVE_INTELLIGENCE.md, lib/personas.ts.
 
 Ground yourself: one line.
 
-TASK: Ship a Fit Narrative that tells users WHY a fragrance fits — in BaseNote's brand voice.
+TASK: Ship a Fit Narrative that tells users WHY a fragrance fits — in nota.'s brand voice.
 
 STEP 1 — Create lib/fitNarrative.ts:
 
@@ -828,7 +828,7 @@ Container: 375×500 proportion, background #1A1208
   IF inspired_by:
     "◆ Inspired By alternative available" — 10px, var(--accent)
     "From [inspired_by] · a fraction of the price" — 11px, var(--accent)
-  BaseNote wordmark: 10px, rgba(255,255,255,0.3), bottom-right
+  nota. wordmark: 10px, rgba(255,255,255,0.3), bottom-right
   Gold score line bottom: 2px, full width
 
 SHARE OPTIONS (bottom sheet):
@@ -936,7 +936,7 @@ Background: #1A1208 with CSS noise grain texture:
 Centre-aligned headline — Cormorant Garamond italic, white, clamp(3rem, 8vw, 6rem):
   "You already have"
   "a scent identity."
-  "BaseNote finds it."
+  "nota. finds it."
 
 Each line fades in sequentially (CSS animation, 400ms delay between lines, 600ms each).
 
@@ -1227,7 +1227,7 @@ git commit -m "feat(brand): Inspired By language sweep — kill clone/dupe in al
 
 ### B2 — Coherence Score + Missing Note
 
-*Marlowe: "The Velvet Intellectual reads: 'Your collection runs dark and resinous — the scent of candlelit rooms.' Then: 'You're missing a citrus top note.' They tap. They find it. Then they find an Inspired By alternative for £18. That is the BaseNote loop at full power."*
+*Marlowe: "The Velvet Intellectual reads: 'Your collection runs dark and resinous — the scent of candlelit rooms.' Then: 'You're missing a citrus top note.' They tap. They find it. Then they find an Inspired By alternative for £18. That is the nota. loop at full power."*
 
 ```
 Read AGENTS.md, BASENOTE_BRAND.md, lib/personas.ts.
@@ -1310,7 +1310,7 @@ Below: "[N] days this month" — no emoji, no gamification language (Ritual Keep
 Month navigation (prev/next arrows): shows wear history across months.
 
 Share month →: generates share image of calendar grid (gold dots on dark background,
-month label, BaseNote wordmark). Web Share API.
+month label, nota. wordmark). Web Share API.
 
 npm run build → zero errors.
 git commit -m "feat(you): Ritual Calendar — monthly wear dots, fragrance tooltip, month nav, share"
@@ -1343,7 +1343,7 @@ Formula Card (9:16 portrait — Instagram Stories native):
   Fragrance 3 name: Cormorant italic, 20px, 0.7 opacity
     "FINISH" — 9px mono, var(--accent)
   Gold score line: 1px, full width, bottom
-  "BaseNote · Find your base note" — 10px Vetiver Grey
+  "nota. · Find your base note" — 10px Vetiver Grey
 
 Allow user to name the formula before sharing. Default: "Formula No. [N]". Tap to rename.
 Store formula names in localStorage.
@@ -1552,7 +1552,7 @@ Compare dominant family from this month's wear_logs vs last month's.
 If family → persona mapping changed: show drift line.
 "Your taste is shifting toward [darker/lighter/warmer/fresher] territory this month."
 
-SHARE CARD: dark background, identity bar, breakdown text in Cormorant italic, BaseNote wordmark, gold score lines. Web Share API → PNG.
+SHARE CARD: dark background, identity bar, breakdown text in Cormorant italic, nota. wordmark, gold score lines. Web Share API → PNG.
 
 npm run build → zero errors.
 git commit -m "feat(identity): Scent Identity Score — persona %, identity bar, taste drift, share card"
@@ -1660,17 +1660,17 @@ git commit -m "feat(collection): shelf tier subtitles — each tier now self-exp
 ## SPRINT CLEANUP
 ## ═══════════════════════════════════════
 
-### Z1 — BaseNote Name Sweep
+### Z1 — nota. Name Sweep
 
 ```
 Read AGENTS.md.
 
 Ground yourself: one line.
 
-Search entire codebase for "AnotherSense" and "Sensus":
-grep -r "AnotherSense\|Sensus" app/ components/ lib/ --include="*.tsx" --include="*.ts" --include="*.css"
+Search entire codebase for "nota." and "nota.":
+grep -r "nota.\|nota." app/ components/ lib/ --include="*.tsx" --include="*.ts" --include="*.css"
 
-Replace all occurrences with "BaseNote" in display strings and comments.
+Replace all occurrences with "nota." in display strings and comments.
 
 DO NOT rename or change:
 - localStorage keys (any scentral_* key) — renaming breaks existing user data
@@ -1678,14 +1678,14 @@ DO NOT rename or change:
 - Repo name scentral-hub or any Supabase project references
 - Variable names or function names
 
-Verify metadata in app/layout.tsx has title: "BaseNote".
+Verify metadata in app/layout.tsx has title: "nota.".
 
 After sweep:
-grep -r "AnotherSense\|Sensus" app/ components/ lib/ --include="*.tsx" --include="*.ts" --include="*.css"
+grep -r "nota.\|nota." app/ components/ lib/ --include="*.tsx" --include="*.ts" --include="*.css"
 → must return zero results
 
 npm run build → zero errors.
-git commit -m "chore(brand): name sweep — AnotherSense → BaseNote, localStorage keys unchanged"
+git commit -m "chore(brand): name sweep — nota. → nota., localStorage keys unchanged"
 ```
 
 ---
@@ -1772,7 +1772,7 @@ git commit -m "fix(layering): context-aware back link reads ?from= query param"
 - var(--r-card) renders as 12px everywhere ✓
 - Nav order: Discover | Wardrobe | Lab | Brief | Identity ✓
 - 2-column grid on mobile with gradient fallback cards ✓
-- grep -r "AnotherSense\|Sensus\|font-fraunces" → zero results ✓
+- grep -r "nota.\|nota.\|font-fraunces" → zero results ✓
 
 **After Gap Prompts (G1–G3):**
 Viktor test: does no-auth + bottle scanner + fit narrative close the WhatScent gap?
@@ -1782,7 +1782,7 @@ Can a user in a fragrance shop scan a bottle, see the Fit Narrative, find the In
 Solar Minimalist test: can they get from "I need to pick a fragrance for work" to "worn and logged" in under 10 seconds?
 
 **After Strip (S1) ships:**
-Nadia test: run Nadia trigger prompt from PERSONAS_AI.md. Does she post about BaseNote today?
+Nadia test: run Nadia trigger prompt from PERSONAS_AI.md. Does she post about nota. today?
 Required yes on: Inspired By engine, Scent DNA search, wear log note field, Strip format.
 
 **Final — The 5-star review test:**

@@ -21,7 +21,7 @@ For verification-discipline history and the three-round audit that motivated the
 For future handoffs, use [docs/nota/HANDOVER-TEMPLATE-verification-first.md](./nota/HANDOVER-TEMPLATE-verification-first.md) as the default scaffold.
 For substantial multi-pass work, use [the loop orchestrator](../.claude/skills/loop-orchestrator/SKILL.md) to select the appropriate depth and enforce independent critique and completion evidence.
 
-Older Scentral, AnotherSense, and BaseNote docs may be useful history, but treat them as stale unless one of the files above points to them.
+Older legacy docs may be useful history, but treat them as stale unless one of the files above points to them.
 
 ## External Context
 
@@ -29,6 +29,9 @@ These live outside the repo and are useful for planning, priorities, and Christo
 
 - `/Users/christophergoslin/Projects/Claude/AI Studio/PROJECTS.md`
 - `/Users/christophergoslin/Projects/Claude/AI Studio/profile.md`
+- `/Users/christophergoslin/.claude/CLAUDE.md`
+- `/Users/christophergoslin/.claude/PROJECTS.md`
+- `/Users/christophergoslin/.claude/LESSONS.md`
 
 Do not copy long content from those files into this repo. Link or cite the path, then update the canonical source when direction changes.
 

@@ -1,4 +1,4 @@
-# Scentral v1.0 + v1.1 Complete Work Manifest
+# nota. v1.0 + v1.1 Complete Work Manifest
 > All 50 prompts for launch orchestration
 > Generated: 2026-06-19
 
@@ -152,7 +152,7 @@ Task: Add a web push notification opt-in for daily wear reminders.
    - Receives the PushSubscription object
    - Stores it in Supabase (create table push_subscriptions with columns: id, endpoint, keys JSONB, created_at — provide the SQL to run)
    - Uses SUPABASE_SERVICE_KEY from env (server-side only)
-4. Check public/sw.js or next.config.js — does a service worker exist? If not, create a minimal public/sw.js that handles push events: shows a notification with title "Scentral" and body from event.data.text()
+4. Check public/sw.js or next.config.js — does a service worker exist? If not, create a minimal public/sw.js that handles push events: shows a notification with title "nota." and body from event.data.text()
 5. Register the SW in app/layout.tsx (client-side useEffect)
 
 CSS variables only. Run tsc --noEmit --skipLibCheck. Flag if service worker registration conflicts with Next.js PWA setup. Report files created/modified.
@@ -249,7 +249,7 @@ Context: The current WearLogModal (app/(main)/collection/WearLogModal.tsx) has 3
 Requirements:
 1. Replace the 3-stage step flow with a single screen showing a line chart with 5 plotted points:
    - Stage 1: First Spray (0 min)
-   - Stage 2: Opening (15 min)  
+   - Stage 2: Opening (15 min)
    - Stage 3: Heart (2–3 hrs)
    - Stage 4: Dry Down (6 hrs)
    - Stage 5: Skin Scent (8–12 hrs)
@@ -414,7 +414,7 @@ Read AGENTS.md §1 first. Project: ~/Projects/scentral-hub. Supabase: scentral-m
 Task: Add a beta feedback collection system.
 
 1. Create app/(main)/you/FeedbackForm.tsx — 'use client' modal/drawer
-   - Heading: "Help us improve Scentral"
+   - Heading: "Help us improve nota."
    - Three sections:
      a. Feedback type: "Bug" / "Feature idea" / "General comment" (radio)
      b. Message: text area, 50–500 chars

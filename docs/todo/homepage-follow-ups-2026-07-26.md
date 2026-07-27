@@ -9,7 +9,7 @@
 ## 1. Maintain LCP gate — PASSED
 
 **Priority:** Medium (maintenance)
-**Effort:** 1–2 hours  
+**Effort:** 1–2 hours
 **Owner:** Christopher
 
 **Implementation status (2026-07-27):** Production gate passed. The poster `<picture>` now owns the media panel's first paint instead of a CSS background, removing the mobile LCP discovery delay. Slow connections receive poster-only mode and video failures expose a static-mode message. The existing ink-in-water film remains the motion enhancement.
@@ -39,8 +39,8 @@
 
 ## 2. Apply screen-state-completeness to hero
 
-**Priority:** Medium  
-**Effort:** 3–4 hours  
+**Priority:** Medium
+**Effort:** 3–4 hours
 **Owner:** Christopher (design review) + builder (implementation)
 
 **Implementation status (2026-07-27):** Implemented in `components/landing/HeroSection.tsx` and covered by 11 Chromium E2E tests.

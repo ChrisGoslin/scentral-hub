@@ -1,7 +1,7 @@
-# Project Plan — Scentral Hub Design & Experience Sweep
+# Project Plan — nota. Design & Experience Sweep
 
 ## Objective
-Imbue the "perfumery's workshop" vibe (ink, clay, brass, smoked glass, handwritten Caveat font, moodboard layout) into Scentral Hub (nota.), personalized to the user's Scent Identity.
+Imbue the "perfumery's workshop" vibe (ink, clay, brass, smoked glass, handwritten Caveat font, moodboard layout) into nota., personalized to the user's Scent Identity.
 
 ## Milestones
 

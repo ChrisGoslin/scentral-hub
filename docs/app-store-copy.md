@@ -1,10 +1,10 @@
-# AnotherSense App Store Copy
+# nota. App Store Copy
 
 ## APPLE APP STORE
 
 ### Store Listing
 
-**Display Name:** AnotherSense
+**Display Name:** nota.
 
 **Subtitle:** Your Fragrance Wardrobe, Curated
 
@@ -15,7 +15,7 @@ Your fragrance wardrobe app.
 
 **Full Description (4000 characters max, British English):**
 
-AnotherSense is a fragrance app built for people who actually care about what they smell like. Not encyclopaedic collectors — just people with a growing wardrobe and a nose for what works.
+nota. is a fragrance app built for people who actually care about what they smell like. Not encyclopaedic collectors — just people with a growing wardrobe and a nose for what works.
 
 ✦ DISCOVER 280+ FRAGRANCES
 Find dupes, Middle Eastern gems, designer alternatives, and hidden niche brands. Written for beginners, not enthusiasts. Search by brand, vibe, or plain-English descriptions.
@@ -54,16 +54,16 @@ fragrance,perfume,wardrobe,cologne,scent,oud,lattafa,dupe,layering,collection,pa
 **Content Rights:** Owned or licensed
 
 **Support URL:**
-https://scentral-seven.vercel.app
+https://scentral-hub.vercel.app
 
 **Privacy Policy URL:**
-https://scentral-seven.vercel.app/privacy
+https://scentral-hub.vercel.app/privacy
 
 **Terms of Service URL:**
-https://scentral-seven.vercel.app/terms
+https://scentral-hub.vercel.app/terms
 
 **Marketing URL:**
-https://scentral-seven.vercel.app
+https://scentral-hub.vercel.app
 
 ---
 
@@ -71,7 +71,7 @@ https://scentral-seven.vercel.app
 
 ### Store Listing
 
-**App Name:** AnotherSense
+**App Name:** nota.
 
 **Short Description (80 characters max):**
 Build your fragrance wardrobe. Layer. Discover. Find your scent identity.
@@ -88,10 +88,10 @@ Use the same content as Apple App Store (above). Google Play displays this in fu
 christophergoslin@outlook.com
 
 **Privacy Policy URL:**
-https://scentral-seven.vercel.app/privacy
+https://scentral-hub.vercel.app/privacy
 
 **Terms of Service URL:**
-https://scentral-seven.vercel.app/terms
+https://scentral-hub.vercel.app/terms
 
 ---
 
@@ -147,7 +147,7 @@ https://scentral-seven.vercel.app/terms
 ### Version 1.0 – Initial Launch
 
 **New:**
-- AnotherSense rebrand and UI overhaul
+- nota. rebrand and UI overhaul
 - Living Wardrobe (Apothecary Grid collection page)
 - Spritz Schedule with XP progression system
 - Fragrance Wheel (9-axis polar scent mapping)
@@ -187,7 +187,7 @@ https://scentral-seven.vercel.app/terms
 
 ## NOTES FOR REVIEWERS
 
-1. **No Authentication Required:** AnotherSense uses anonymous UUID identity.
-2. **Affiliate Disclosure:** Some links earn AnotherSense commission at no cost to user.
+1. **No Authentication Required:** nota. uses anonymous UUID identity.
+2. **Affiliate Disclosure:** Some links earn nota. commission at no cost to user.
 3. **AI Features:** Layering recommendations use Anthropic Claude (Haiku). No personal data retained for training.
 4. **Privacy-First:** Most data stored locally on device. Server-stored data anonymous, keyed to UUID only.

@@ -1,5 +1,5 @@
 -- ============================================================
--- Scentral Hub — Wear Logs & Reflections
+-- nota. — Wear Logs & Reflections
 -- Track how protocols performed to refine AI future logic.
 -- ============================================================
 

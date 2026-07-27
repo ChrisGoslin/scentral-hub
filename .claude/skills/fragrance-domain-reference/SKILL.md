@@ -24,7 +24,7 @@ below exists to serve that loop: understand the user → reflect them → evolve
 them to others. If a change makes the catalogue feel like a generic shop, it is off-doctrine.
 
 Brand: the product is **nota.** (lowercase, with the dot). The repo folder `scentral-hub` and
-DB project `scentral-mvp` are historical internal names — never call the *product* Scentral in
+DB project `scentral-mvp` are historical internal names — never call the *product* nota. in
 copy or user-facing text.
 
 As of 2026-07-05, the `fragrances` table has **127,595 rows** (bulk import 2026-07-03). Older
@@ -222,7 +222,7 @@ FENCE: it's `Christian Dior` and `Yves Saint Laurent` in code — NOT the short 
 
 ## 12. Two customer archetypes and the tone-bridging rule
 
-Per repo `CLAUDE.md` §10 and `SCENTRAL_PERSONAS.md`: two customer archetypes bound all
+Per repo `CLAUDE.md` §10 and `lib/personas.ts`: two customer archetypes bound all
 user-facing copy —
 
 - **Gavin** — newcomer, needs plain language, no jargon assumed.

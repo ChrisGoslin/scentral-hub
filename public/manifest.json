@@ -1,6 +1,6 @@
 {
-  "name": "BaseNote",
-  "short_name": "BaseNote",
+  "name": "nota.",
+  "short_name": "nota.",
   "description": "Your daily scent ritual",
   "start_url": "/?utm_source=pwa",
   "scope": "/",

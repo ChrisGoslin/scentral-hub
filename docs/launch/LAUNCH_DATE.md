@@ -1,4 +1,4 @@
-# Scentral Launch Date + Key Milestones
+# nota. Launch Date + Key Milestones
 
 **SET THIS FIRST. All timeline references are relative to T+0.**
 
@@ -6,8 +6,8 @@
 
 ## Launch Day (T+0)
 
-**Date:** June 28, 2026  
-**Time:** 12:01 AM PST (3:01 AM EST / 8:01 AM GMT)  
+**Date:** June 28, 2026
+**Time:** 12:01 AM PST (3:01 AM EST / 8:01 AM GMT)
 **Reason for time:** Midnight PST = start of Product Hunt voting window, optimal for hunter audience
 
 **Deliverables due by T-7 (__ days before):**

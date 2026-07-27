@@ -1,19 +1,19 @@
-# BaseNote Launch Marketing — Template & Copy Direction
+# nota. Launch Marketing — Template & Copy Direction
 
-**Campaign Period:** 2 weeks before → 4 weeks after app store launch  
-**Audience:** Fragrance enthusiasts, journal/habit trackers, indie beauty culture  
-**Budget Allocation (if any):** 60% social organic + earned media, 30% email, 10% paid social tests  
+**Campaign Period:** 2 weeks before → 4 weeks after app store launch
+**Audience:** Fragrance enthusiasts, journal/habit trackers, indie beauty culture
+**Budget Allocation (if any):** 60% social organic + earned media, 30% email, 10% paid social tests
 
 ---
 
 ## Marketing Strategy Foundation (1000+ Prompts Persona Mapping)
 
 ### Business Profile
-- **Organization:** nota. (BaseNote)
+- **Organization:** nota. (nota.)
 - **Product:** Personal fragrance identity & collection platform
 - **USP:** Track what *moves you*, not what *impresses others*. Anti-influencer, pro-intention
 - **Category Challenge:** Fragrance discovery is dominated by luxury marketing (Scentbird, Fragbuy, unbox subscriptions)
-- **BaseNote Angle:** Journal + mirror (not shopping cart)
+- **nota. Angle:** Journal + mirror (not shopping cart)
 
 ### Target Persona
 - **Name:** Aria (28, urban, independent; or Sam, 32, suburban, curious)
@@ -42,47 +42,47 @@
 ### 1. Pre-Launch Announcement (2 weeks before launch)
 
 **Subject Line Options:**
-- "You've been invited to BaseNote—your scent story starts here"
+- "You've been invited to nota.—your scent story starts here"
 - "The fragrance journal fragrance culture needs"
-- "Meet BaseNote: No login, no ads, just your collection"
+- "Meet nota.: No login, no ads, just your collection"
 
-**From:** Christopher Goslin (founder@basenote.co, not noreply@)
+**From:** Christopher Goslin (founder address, not noreply@)
 
 **Body:**
 
 ```
 Hey [First Name],
 
-I've been working on something for the fragrance community, and 
+I've been working on something for the fragrance community, and
 I think you'll get it.
 
-BaseNote launches [DATE] on iOS & Android. It's a fragrance 
-journal—a place to organize your collection, remember how you 
+nota. launches [DATE] on iOS & Android. It's a fragrance
+journal—a place to organize your collection, remember how you
 smell, and understand the scents that *move you*.
 
-No login required. No ads. No algorithm telling you what to buy. 
+No login required. No ads. No algorithm telling you what to buy.
 Just you and your scent story.
 
-What makes BaseNote different:
+What makes nota. different:
 • Track your collection like a journal, not a shopping cart
 • Blind-rank your favorites—discover what you actually love
 • Log moments with scents (morning ritual, date night, grief comfort)
 • See patterns in your taste over time
 • Understand your scent personality
 
-This isn't a subscription service or a shopping app. It's a tool 
+This isn't a subscription service or a shopping app. It's a tool
 for fragrance *understanding*.
 
 [BUTTON] Waitlist: Reserve your spot
-[BUTTON] Read the story: How BaseNote started
+[BUTTON] Read the story: How nota. started
 
 We're shipping with 6 core features. No paywalls in v1.0.
 
-If fragrance is more than a purchase to you, BaseNote is for you.
+If fragrance is more than a purchase to you, nota. is for you.
 
 —Christopher
 
-P.S. Waitlist gets earliest access on launch day + a special 
+P.S. Waitlist gets earliest access on launch day + a special
 in-app badge. Early access ships [DATE].
 ```
 
@@ -91,7 +91,7 @@ in-app badge. Early access ships [DATE].
 ### 2. Launch Day Announcement
 
 **Subject Line:**
-- "BaseNote is live—and it's free"
+- "nota. is live—and it's free"
 - "Your scent story is waiting (no login required)"
 
 **Timing:** Send 6 AM PT launch day
@@ -99,7 +99,7 @@ in-app badge. Early access ships [DATE].
 **Body:**
 
 ```
-BaseNote launches TODAY.
+nota. launches TODAY.
 
 Download link: [iOS App Store link]
                [Google Play link]
@@ -112,10 +112,10 @@ What you get in v1.0:
 ✦ Fragrance Wheel — Visual gap analysis of your collection
 ✦ Spritz Schedule — Daily AI suggestions (via Aura)
 
-Zero login. Zero ads. Zero paywalls. You own your data; it lives 
+Zero login. Zero ads. Zero paywalls. You own your data; it lives
 on your phone.
 
-Download BaseNote
+Download nota.
 [App Store link]
 [Google Play link]
 
@@ -123,9 +123,9 @@ Questions? Reply to this email.
 
 Thanks for being part of our launch.
 
-—Christopher & the BaseNote team
+—Christopher & the nota. team
 
-P.S. Struggling to organize your collection? Try Blind Ranking 
+P.S. Struggling to organize your collection? Try Blind Ranking
 first—it's the fastest way to see your true preferences.
 ```
 
@@ -134,7 +134,7 @@ first—it's the fastest way to see your true preferences.
 ### 3. Day-7 Retention Email (Post-Launch Check-In)
 
 **Subject:**
-- "How's your BaseNote collection growing?"
+- "How's your nota. collection growing?"
 - "Your scent story: A week in"
 
 **Timing:** Send to all app openers (exclude crashes/uninstalls)
@@ -142,14 +142,14 @@ first—it's the fastest way to see your true preferences.
 **Body:**
 
 ```
-A week in, we're seeing amazing BaseNote collections:
+A week in, we're seeing amazing nota. collections:
 • 📏 Average shelf: 12 fragrances
 • 🏆 Most-used feature: Blind Ranking (43% of users)
 • 📝 Scent Traces created: 1,200+ (stories people are logging!)
 
-Your BaseNote wisdom so far:
-"I've been wearing fragrance for 20 years and thought I knew my 
-taste. BaseNote's blind ranking surprised me—my favorites aren't 
+Your nota. wisdom so far:
+"I've been wearing fragrance for 20 years and thought I knew my
+taste. nota.'s blind ranking surprised me—my favorites aren't
 my 'status' fragrances. That was worth the app alone." — Marcus
 
 Stuck? Here's what to try:
@@ -181,16 +181,16 @@ Hey [First Name],
 
 Just shipped: Spritz Schedule.
 
-Every morning, Aura (our AI) suggests a fragrance from your shelf 
-based on the weather and your past preferences. No ads. No agenda. 
+Every morning, Aura (our AI) suggests a fragrance from your shelf
+based on the weather and your past preferences. No ads. No agenda.
 Just: "This might be nice for today."
 
 Think of it as your fragrance intuition, but faster.
 
-Open BaseNote and check today's suggestion:
+Open nota. and check today's suggestion:
 [App link]
 
-Still figuring out BaseNote? Start here:
+Still figuring out nota.? Start here:
 • Already know your style? → Try Blind Ranking
 • Want to remember your moments? → Add a Scent Trace
 • Curious about your taste patterns? → Check Your Insights
@@ -209,7 +209,7 @@ We're here to help. Reply to this email.
 | Platform | Frequency | Best Time | Tone | Content Mix |
 |----------|-----------|-----------|------|-------------|
 | **Instagram** | 2-3x/week | 7–9 AM, 5–7 PM PT | Soft, poetic, educational | 40% Behind-the-scenes, 40% User stories, 20% Feature tips |
-| **TikTok** | 3-5x/week | 12–2 PM, 7–9 PM PT | Casual, real, humor-OK | 50% User POV, 30% BaseNote demos, 20% Fragrance culture hot takes |
+| **TikTok** | 3-5x/week | 12–2 PM, 7–9 PM PT | Casual, real, humor-OK | 50% User POV, 30% nota. demos, 20% Fragrance culture hot takes |
 | **Twitter/X** | Daily | 9–10 AM, 4–5 PM PT | Direct, witty, opinionated | 50% Fragrance takes, 30% Product updates, 20% Community retweets |
 | **LinkedIn** | 1-2x/week | 8 AM, 12 PM PT | Founder voice, thoughtful | 60% Founding story, 40% Product philosophy |
 | **YouTube Shorts** | 2x/week | 6 AM, 5 PM PT | Educational, high-quality | 100% Feature deep-dives (1-min each) |
@@ -225,16 +225,16 @@ Caption template:
 ```
 we spend $60–$200 on a fragrance we'll never wear again.
 
-the problem: most recommendations come from people paid to 
-recommend. so you're not picking based on what *you* love—you're 
+the problem: most recommendations come from people paid to
+recommend. so you're not picking based on what *you* love—you're
 picking based on what influencers were paid to love.
 
-basenote removes the noise. track your actual preferences. rank 
+nota. removes the noise. track your actual preferences. rank
 blindly. see patterns over time.
 
 what's a fragrance you love that surprised you? (comment below)
 
-—@basenote | no login, no ads, no agenda
+—current nota. handle | no login, no ads, no agenda
 ```
 
 #### Pillar 2: "User Stories" (Real collection spotlights)
@@ -242,12 +242,12 @@ what's a fragrance you love that surprised you? (comment below)
 
 Caption template:
 ```
-maria built her collection over 10 years. before basenote, she 
-thought she liked florals. 
+maria built her collection over 10 years. before nota., she
+thought she liked florals.
 
-blind-ranked in basenote: her top 5 are all woods & musks.
+blind-ranked in nota.: her top 5 are all woods & musks.
 
-"i was buying based on prestige, not preference. basenote showed 
+"i was buying based on prestige, not preference. nota. showed
 me what i actually love."
 
 what surprised you about your taste?
@@ -260,18 +260,18 @@ what surprised you about your taste?
 
 Caption template:
 ```
-quick tip: blind ranking is the cheat code for understanding your 
+quick tip: blind ranking is the cheat code for understanding your
 taste.
 
 how it works:
 1. add your fragrances to your shelf
 2. compare 2 at a time (don't look at the labels)
 3. pick the one you love more
-4. basenote learns your patterns
+4. nota. learns your patterns
 
 why it works: your brain votes faster than your status anxiety.
 
-try it → basenote [link]
+try it → nota. [link]
 
 #fragrance #personalgrowth #scent
 ```
@@ -281,11 +281,11 @@ try it → basenote [link]
 ### TikTok Video Ideas
 
 #### Series 1: "Fragrance Personality Revealed" (Insight cards)
-- **Hook:** "POV: BaseNote just told you your scent personality"
+- **Hook:** "POV: nota. just told you your scent personality"
 - **Content:** Show Insight card reveal (persona name + description)
 - **Engagement:** Ask viewers to guess their persona before reveal
 - **Duration:** 15–30 sec
-- **CTA:** "Download BaseNote to discover yours"
+- **CTA:** "Download nota. to discover yours"
 
 #### Series 2: "I Blind-Ranked My Favorites" (Blind Ranking clips)
 - **Hook:** "I thought these were my top 5. I was wrong."
@@ -301,11 +301,11 @@ try it → basenote [link]
 - **Duration:** 15 sec
 - **CTA:** (Optional; let video stand alone for culture reach)
 
-#### Series 4: "BaseNote Feature Explainers" (Demos)
+#### Series 4: "nota. Feature Explainers" (Demos)
 - **Hook:** "this feature changed how i understand my taste"
 - **Content:** Screen recording or voiceover + demo of Shelf, Traces, or Wheel
 - **Duration:** 30–60 sec
-- **CTA:** "Download BaseNote"
+- **CTA:** "Download nota."
 
 ---
 
@@ -313,7 +313,7 @@ try it → basenote [link]
 
 #### Thread 1: Founding Story
 ```
-@basenote: we built BaseNote because fragrance culture is broken.
+current nota. handle: we built nota. because fragrance culture is broken.
 
 everyone's selling you a lifestyle. nobody's helping you *understand yourself*.
 
@@ -321,13 +321,13 @@ so we made a tool that does one thing: help you know your taste.
 
 [QUOTE TWEET]: (First post)
 
-1/ the fragrance industry is built on scarcity & influencers. 
+1/ the fragrance industry is built on scarcity & influencers.
    you buy based on hype, not preference.
 
-2/ result: average person buys $500+ in fragrances they'll 
+2/ result: average person buys $500+ in fragrances they'll
    never wear again.
 
-3/ BaseNote (free, no login, no ads) lets you track what 
+3/ nota. (free, no login, no ads) lets you track what
    you actually love.
 
 4/ blind rank. log moments. see patterns. understand yourself.
@@ -337,22 +337,22 @@ download ios/android [link]
 
 #### Thread 2: "What I Learned From 1,000 Fragrance Collections"
 ```
-@basenote: after our first week, 1,000+ people organized their 
-collections on BaseNote. here's what surprised us.
+current nota. handle: after our first week, 1,000+ people organized their
+collections on nota. here's what surprised us.
 
-1/ most people underestimate their love for woody/musky scents 
+1/ most people underestimate their love for woody/musky scents
    because they're not "instagrammable"
 
-2/ blind ranking is incredibly predictive—if you rank blindly, 
+2/ blind ranking is incredibly predictive—if you rank blindly,
    your top 3 are actual favorites, not prestige picks
 
-3/ the #1 logged mood with fragrance: "morning ritual" 
+3/ the #1 logged mood with fragrance: "morning ritual"
    (people use scent to *create intention*, not just smell good)
 
 4/ women blind-ranked 23% faster than men (interesting—
    possibly more familiar with sensory processing?)
 
-5/ 32% of collections are aspirational (scents people bought 
+5/ 32% of collections are aspirational (scents people bought
    to "become" but never actually wear—everyone does this)
 
 what's surprised you about your taste?
@@ -362,19 +362,19 @@ what's surprised you about your taste?
 
 ## Press Release
 
-**Headline:** "BaseNote Launches: The Fragrance App for People Who Distrust Fragrance Marketing"
+**Headline:** "nota. Launches: The Fragrance App for People Who Distrust Fragrance Marketing"
 
 **Subheader:** "Free iOS & Android app helps users build personal fragrance identity—no login, no ads, no agenda"
 
 **Body:**
 
 ```
-[CITY, STATE] — [DATE] — nota. announces the launch of BaseNote, 
-a free iOS and Android app designed to help fragrance enthusiasts 
-understand and organize their personal collection without the 
+[CITY, STATE] — [DATE] — nota. announces the launch of nota.,
+a free iOS and Android app designed to help fragrance enthusiasts
+understand and organize their personal collection without the
 influence of influencer marketing.
 
-BaseNote ships with six core features:
+nota. ships with six core features:
 • Personal Shelf: Organize and rate fragrances
 • Blind Ranking: Compare scents blindly to discover true preferences
 • Scent Traces: Journal moments and feelings tied to fragrances
@@ -382,28 +382,28 @@ BaseNote ships with six core features:
 • Fragrance Wheel: Visual gap analysis of collection
 • Spritz Schedule: Daily AI-suggested fragrances for the day
 
-"Fragrance culture is dominated by influencer recommendations and 
-luxury marketing," said Christopher Goslin, founder of BaseNote. 
-"We built BaseNote to flip that script. It's not about selling 
+"Fragrance culture is dominated by influencer recommendations and
+luxury marketing," said Christopher Goslin, founder of nota.
+"We built nota. to flip that script. It's not about selling
 you something. It's about helping you understand yourself."
 
-The app requires no login, contains no ads, and stores all user 
-data locally on the device. No user data is sold or shared with 
-third parties. BaseNote is funded by [your funding method, if any] 
-and will remain free in v1.0, with no paywalls planned for core 
+The app requires no login, contains no ads, and stores all user
+data locally on the device. No user data is sold or shared with
+third parties. nota. is funded by [your funding method, if any]
+and will remain free in v1.0, with no paywalls planned for core
 features.
 
-BaseNote targets a growing audience of conscious consumers aged 
-22–45 who value intentionality and transparency over trend-chasing. 
-Early adopters include fragrance collectors, journaling 
+nota. targets a growing audience of conscious consumers aged
+22–45 who value intentionality and transparency over trend-chasing.
+Early adopters include fragrance collectors, journaling
 practitioners, and users of indie beauty platforms.
 
-"Fragrance is deeply personal," Goslin continued. "Most apps ask 
-you to optimize for social proof or prestige. BaseNote asks: 
-what do *you* actually love? That's a revolutionary question in 
+"Fragrance is deeply personal," Goslin continued. "Most apps ask
+you to optimize for social proof or prestige. nota. asks:
+what do *you* actually love? That's a revolutionary question in
 this space."
 
-Download BaseNote: [iOS link] | [Android link]
+Download nota.: [iOS link] | [Android link]
 
 ---
 
@@ -412,7 +412,7 @@ nota. builds tools for personal identity and intentional living.
 
 CONTACT
 Christopher Goslin
-christopher@basenote.co
+current nota. press email
 https://scentral-hub.vercel.app
 
 ###
@@ -427,20 +427,20 @@ https://scentral-hub.vercel.app
 **Ad 1: Problem Awareness**
 - **Image:** Photo of expensive fragrance bottles with question mark overlay
 - **Headline:** "You spent $150 on a fragrance. Do you actually love it?"
-- **Body Text:** "Most people buy based on hype, not preference. BaseNote helps you understand what you *actually* love. Free. No login. iOS & Android."
+- **Body Text:** "Most people buy based on hype, not preference. nota. helps you understand what you *actually* love. Free. No login. iOS & Android."
 - **CTA:** "Download Free"
 - **Target:** Interests: fragrance, luxury, journaling, indie beauty; Ages 25–45; Income $50k+
 
 **Ad 2: Solution Showcase**
-- **Image:** Screenshot of BaseNote Shelf or Insight card
+- **Image:** Screenshot of nota. Shelf or Insight card
 - **Headline:** "Meet Your Scent Personality"
-- **Body Text:** "Track. Compare. Understand. BaseNote reveals your fragrance identity in 5 minutes."
+- **Body Text:** "Track. Compare. Understand. nota. reveals your fragrance identity in 5 minutes."
 - **CTA:** "Get Started Free"
 
 **Ad 3: Social Proof**
 - **Image:** User testimonial screenshot (e.g., "Blind ranking showed me my real favorites, not my 'status' scents")
 - **Headline:** "1,000+ People Blind-Ranked Their Collections"
-- **Body Text:** "See what they discovered. Download BaseNote free."
+- **Body Text:** "See what they discovered. Download nota. free."
 - **CTA:** "Download Now"
 
 ---
@@ -450,7 +450,7 @@ https://scentral-hub.vercel.app
 **Ad 1: Hook + Demo**
 - **Hook:** "this app changed my relationship with fragrance"
 - **Demo:** 15-sec screen recording of Blind Ranking (visual + text overlays)
-- **CTA:** "Download BaseNote"
+- **CTA:** "Download nota."
 
 **Ad 2: Relatability**
 - **Hook:** "POV: you have 20 fragrances but can't remember your actual favorites"
@@ -464,18 +464,18 @@ https://scentral-hub.vercel.app
 ### Landing Page (2 weeks before launch)
 - **URL:** https://scentral-hub.vercel.app/waitlist or dedicated landing
 - **Headline:** "Your scent story starts here"
-- **Subheadline:** "BaseNote launches [DATE]. Join 2,000+ waitlist members."
+- **Subheadline:** "nota. launches [DATE]. Join 2,000+ waitlist members."
 - **CTA:** "Reserve Your Spot"
 - **Social Proof:** "Joined by fragrance enthusiasts from r/fragrance, Indie Beauty Reddit, Fragrantica, Perfume.com"
 - **Perks (call out):** "Waitlist members get: (1) earliest access on launch day, (2) in-app 'Founding Member' badge, (3) [monthly insights or feature priority]"
 - **FAQ Section:** Why no login? How is data stored? What's included in v1.0? Is there a paywall?
 
 ### Email Sequence (Auto-responder)
-1. **Confirmation email** — "Welcome to BaseNote. Here's what to expect."
+1. **Confirmation email** — "Welcome to nota. Here's what to expect."
 2. **Day 3** — Behind-the-scenes founder story ("Why I built this")
 3. **Day 7** — "Meet the team" or feature deep-dive
 4. **Day 14** — "One week to launch. Here's what's coming."
-5. **Day 1 (Launch Day)** — "BaseNote is live! Download now + redeem your Founding Member badge"
+5. **Day 1 (Launch Day)** — "nota. is live! Download now + redeem your Founding Member badge"
 
 ---
 

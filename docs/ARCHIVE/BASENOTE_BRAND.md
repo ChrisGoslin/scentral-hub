@@ -1,4 +1,4 @@
-# BaseNote — Brand Vision & Strategy
+# nota. — Brand Vision & Strategy
 ### Creative Director Brief + Customer Immersion Research
 ### Last updated: 2026-06-27
 
@@ -6,12 +6,12 @@
 
 ## THE NORTH STAR
 
-> **BaseNote is the app that knows your nose.**
+> **nota. is the app that knows your nose.**
 
-Not your wishlist. Not your reviews. Your *nose*. The pattern of what you reach for, what you wear, when you wear it, how you layer it. Over time, BaseNote becomes the only system in the world that holds a complete record of your scent identity.
+Not your wishlist. Not your reviews. Your *nose*. The pattern of what you reach for, what you wear, when you wear it, how you layer it. Over time, nota. becomes the only system in the world that holds a complete record of your scent identity.
 
 **Single throughline, every surface, every word:**
-> *You already have a scent identity. BaseNote finds it.*
+> *You already have a scent identity. nota. finds it.*
 
 **Brand voice: The Knowing Friend.**
 Not a perfumery curator talking down to you. Not a DTC brand hyping you up. The friend who's worn everything, knows what works, tells you the truth, and remembers what you like. Warm. Specific. A little mysterious. Never clinical.
@@ -46,7 +46,7 @@ Embedded with 12 enthusiasts across Dublin, London, Amsterdam and Beirut. Ages 1
 ### What they don't have
 A digital home. Reddit is too broad. Fragrantica is too clinical. TikTok is too ephemeral. They want the place that's *for them* — holds their collection, knows their nose, connects them to people who get it.
 
-**That is BaseNote.**
+**That is nota.**
 
 ### Language note
 They say **"inspired by"** — never "dupe" or "clone." It matters to them. Use "Inspired By" in all product copy.
@@ -56,11 +56,11 @@ They say **"inspired by"** — never "dupe" or "clone." It matters to them. Use 
 ## BRAND IDENTITY
 
 ### The Name
-**BaseNote** is the base note of a fragrance — what remains after everything else has faded. The foundation. The truth underneath. *Find your base note.*
+**nota.** is the base note of a fragrance — what remains after everything else has faded. The foundation. The truth underneath. *Find your base note.*
 
 ### The Logo
 
-**Wordmark:** BaseNote set in a custom high-contrast editorial serif. Near-imperceptible hand-finished detail on the *B* — slightly irregular stroke weight, as if drawn with a calligraphic pen. The word reads in two weights on a single baseline:
+**Wordmark:** nota. set in a custom high-contrast editorial serif. Near-imperceptible hand-finished detail on the *B* — slightly irregular stroke weight, as if drawn with a calligraphic pen. The word reads in two weights on a single baseline:
 - **Base** — regular weight (the foundation)
 - **Note** — slightly lighter (the thing that floats above)
 
@@ -120,7 +120,7 @@ Near-black background with subtle warm grain texture (CSS noise, no image needed
 Centre screen — headline fades in word by word:
 > *You already have*
 > *a scent identity.*
-> *BaseNote finds it.*
+> *nota. finds it.*
 
 Single gold CTA: **Begin →**
 
@@ -224,7 +224,7 @@ One fragrance. One line. One reaction. The constraint is the brand.
 
 **Season Drops (4x/year):** *The Brief* — curated editorial on what the community is wearing this season. Push notification + feed post. Community-powered content strategy.
 
-**The Nose Leaderboard (monthly):** Most-worn fragrances across the community, by persona. Becomes press. *"BaseNote's Dark Alchemists reached for Amouage Interlude Man more than any other fragrance in May."*
+**The Nose Leaderboard (monthly):** Most-worn fragrances across the community, by persona. Becomes press. *"nota.'s Dark Alchemists reached for Amouage Interlude Man more than any other fragrance in May."*
 
 **Strip of the Week:** Most resonant community Strip, curated and featured in-app + social. Zero cost, infinite social proof.
 
@@ -236,7 +236,7 @@ One fragrance. One line. One reaction. The constraint is the brand.
 - Resolve token cascade conflict, unify accent to Parfumeur's Gold
 - Fix discover grid to 2-column
 - Implement gradient fallback cards (beautiful, not broken)
-- BaseNote name sweep — kill AnotherSense everywhere
+- nota. name sweep — kill nota. everywhere
 - Fix: `--r-card` conflict between tokens.css and globals.css
 
 ### Sprint 2 — Landing Page (Weeks 3–4)

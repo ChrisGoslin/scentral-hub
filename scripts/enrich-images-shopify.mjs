@@ -297,7 +297,7 @@ async function fetchJson(url, timeoutMs = 8000) {
     const res = await fetch(url, {
       signal: controller.signal,
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; BaseNote/1.0; image enrichment)',
+        'User-Agent': 'Mozilla/5.0 (compatible; nota./1.0; image enrichment)',
         'Accept': 'application/json',
       },
     })
@@ -646,7 +646,7 @@ const MANUAL_OVERRIDES = {
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
-  console.log(`\n🛍️  BaseNote — Shopify image enrichment`)
+  console.log(`\n🛍️  nota. — Shopify image enrichment`)
   console.log(`   Mode: ${isDryRun ? 'DRY RUN (no DB writes)' : 'LIVE'}`)
   console.log(`   Limit: ${limit || 'none (all)'}`)
   if (retailerFilter) {

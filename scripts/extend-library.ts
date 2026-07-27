@@ -39,7 +39,7 @@ async function extendLibrary() {
       // const response = await fetch(url);
       // const html = await response.text();
       // const $ = cheerio.load(html);
-      
+
       // Mocked extraction for demonstration based on Cheerio selector logic
       const scrapedData: ScrapedFragrance[] = [
         {
@@ -94,11 +94,11 @@ async function extendLibrary() {
         );
 
       if (error) throw error;
-      console.log(`💎 Successfully integrated ${scrapedData.length} new profiles into Scentral Hub.`);
+      console.log(`💎 Successfully integrated ${scrapedData.length} new profiles into nota.`);
 
       // Rate limiting / Throttling
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
     } catch (err) {
       console.error(`❌ Error extending library from ${url}:`, err);
     }

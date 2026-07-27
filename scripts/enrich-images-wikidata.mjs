@@ -39,7 +39,7 @@ const isDryRun = process.argv.includes('--dry-run');
 const limitArg = process.argv.find(arg => arg.startsWith('--limit='));
 const limit = limitArg ? parseInt(limitArg.split('=')[1], 10) : 0; // 0 = no limit
 
-const UA = 'BaseNoteFragranceApp/1.0 (contact: christophergoslin@outlook.com)';
+const UA = 'nota-fragrance-app/1.0 (contact: christophergoslin@outlook.com)';
 
 function normalizeFragranceImageUrl(imageUrl) {
   if (typeof imageUrl !== 'string') return null;

@@ -1,6 +1,6 @@
-# 🏛️ SCENTRAL HUB: THE MASTER SPECIFICATION (JUNE 2026)
+# 🏛️ nota. HUB: THE MASTER SPECIFICATION (JUNE 2026)
 
-Welcome to the definitive source of truth for the Scentral Hub ecosystem. This master document serves as the high-level entry point for the "Masterpiece Ready" Morocco Demo. It aligns all Product Owners on the current architectural state, the intelligent resonance logic, and the strategic roadmap for the "Infinite Wardrobe."
+Welcome to the definitive source of truth for the nota. Hub ecosystem. This master document serves as the high-level entry point for the "Masterpiece Ready" Morocco Demo. It aligns all Product Owners on the current architectural state, the intelligent resonance logic, and the strategic roadmap for the "Infinite Wardrobe."
 
 ---
 

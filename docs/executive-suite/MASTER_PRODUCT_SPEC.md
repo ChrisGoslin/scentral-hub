@@ -1,15 +1,15 @@
-# AnotherSense — Master Product Specification (June 2026)
+# nota. — Master Product Specification (June 2026)
 
 > ⚠️ Previous vision ("Sensory Sovereignty", "Morocco Sprint", "Resonance Engine") is retired.
-> This document reflects the AnotherSense rebrand and 4-week App Store sprint locked 2026-06-20.
-> Full spec + Epic prompts: `docs/specs/AnotherSense_Final_UX_Overhaul.md`
-> Sprint plan + daily session map: `docs/AnotherSense_Execution_Brief.md`
+> This document reflects the nota. rebrand and 4-week App Store sprint locked 2026-06-20.
+> Full spec + Epic prompts: active nota. docs live under `docs/nota/`.
+> Sprint plan + latest handover: `docs/HANDOVER.md`.
 
 ---
 
 ## 🏛️ Vision: "The Product That Remembers How You Smell"
 
-AnotherSense is a daily scent ritual app. It remembers your collection, recommends what to wear today (Aura), and maps your olfactory identity over time. The core loop is a dating-app-style swipe card that earns XP — habit-forming, Duolingo-meets-Tinder for fragrance.
+nota. is a daily scent ritual app. It remembers your collection, recommends what to wear today (Aura), and maps your olfactory identity over time. The core loop is a dating-app-style swipe card that earns XP — habit-forming, Duolingo-meets-Tinder for fragrance.
 
 **Target persona:** Gavin — the curious newcomer who has 3–10 bottles and wants to feel confident about wearing fragrance. Not the collector hobbyist. The person who bought a bottle and doesn't know when to wear it.
 
@@ -45,7 +45,7 @@ AnotherSense is a daily scent ritual app. It remembers your collection, recommen
 
 | Epic | Name | Week | Status |
 |---|---|---|---|
-| 0 | AnotherSense rebrand (display strings, manifest, --aura tokens) | 1 | ⬜ TONIGHT |
+| 0 | nota. rebrand (display strings, manifest, --aura tokens) | 1 | ⬜ TONIGHT |
 | 1 | Motion + material foundation (CSS tokens, .surface-glass, shadows) | 1 | ⬜ |
 | 12 | ToastProvider + ButtonAsync + AuraBubble | 1 | ⬜ |
 | 2 | PresenceNav (floating pill, scroll-aware collapse) | 1 | ⬜ |
@@ -74,7 +74,7 @@ AnotherSense is a daily scent ritual app. It remembers your collection, recommen
 
 ---
 
-## 4. Design System — AnotherSense Aura Design Language
+## 4. Design System — nota. Aura Design Language
 
 All tokens in `app/globals.css` or `lib/design/tokens.css`. No hardcoded hex. Ever.
 
@@ -88,7 +88,7 @@ All tokens in `app/globals.css` or `lib/design/tokens.css`. No hardcoded hex. Ev
 
 ## 5. Governance
 
-- **The Golden Source:** `AGENTS.md` + `docs/specs/AnotherSense_Final_UX_Overhaul.md`
+- **The Golden Source:** `AGENTS.md` + `docs/HANDOVER.md` + `docs/nota/`
 - **cabinetSnapshot:** The `CustomEvent('cabinetSnapshot')` in `WardrobeShelf.tsx` is sacred. Never remove.
 - **No secrets in code:** Keys in `.env.local`. `ANTHROPIC_API_KEY` in Supabase Vault only.
 - **CSS variables only:** No hardcoded hex in any new or edited file.

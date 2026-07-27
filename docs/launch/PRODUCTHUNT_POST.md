@@ -1,7 +1,7 @@
-# Scentral Launch — Product Hunt Post (Enhanced)
+# nota. Launch — Product Hunt Post (Enhanced)
 
-**Launch date:** T+0, 12:01 AM PST (midnight East Coast time—prime for European/UK audience)  
-**Goal:** Top 5 finish on Product Hunt (requires 500–800 upvotes + sustained engagement)  
+**Launch date:** T+0, 12:01 AM PST (midnight East Coast time—prime for European/UK audience)
+**Goal:** Top 5 finish on Product Hunt (requires 500–800 upvotes + sustained engagement)
 **Strategy:** Live comment monitoring, genuine responses, showcase data + social proof
 
 ---
@@ -16,12 +16,12 @@ Your fragrance wardrobe in 15 seconds—curated for your personality, no account
 ### Description (Main post body)
 
 **Headline:**
-Scentral: Your Fragrance DNA in 15 Seconds
+nota.: Your Fragrance DNA in 15 Seconds
 
 **Lead paragraph:**
 I kept blind-buying the same fragrance under five different names. £150 Creed Royal Oud. £35 Niche House. £18 Lattafa. Same scent. Different price.
 
-So I built **Scentral**—a free fragrance wardrobe app that answers one question and curates your entire collection.
+So I built **nota.**—a free fragrance wardrobe app that answers one question and curates your entire collection.
 
 ---
 
@@ -39,16 +39,16 @@ So what if fragrance discovery started with personality—not algorithm?
 
 **[Section 2: How It Works]**
 
-1. **Take the Sanctuary Profiler (15 seconds)**  
+1. **Take the Sanctuary Profiler (15 seconds)**
    One question: where are you when the world gets loud?
 
-2. **Get your persona**  
+2. **Get your persona**
    Velvet Intellectual (moody, niche-loving), Solar Minimalist (bright, decisive), or Dark Alchemist (experimental, sensual)
 
-3. **See your wardrobe**  
+3. **See your wardrobe**
    50+ fragrances curated for your personality, season, and mood
 
-4. **Discover dupes**  
+4. **Discover dupes**
    Every bottle has a price alternative. Your £150 Creed? We found five Lattafas at £18–35 that do 85% of the job.
 
 ---
@@ -65,7 +65,7 @@ So what if fragrance discovery started with personality—not algorithm?
 
 ✦ **Fragrance Wheel** — Your olfactory profile visualized as a 9-axis polar graph. Share as PNG.
 
-✦ **Social Proof** — % of Scentral users who own each bottle (builds community context)
+✦ **Social Proof** — % of nota. users who own each bottle (builds community context)
 
 ✦ **No Account** — localStorage UUID. Privacy by default.
 
@@ -79,7 +79,7 @@ Most people spend £40–150 per fragrance. A £150 bottle per month = £1800/ye
 
 But 80% of fragrance pleasure comes from scent fit—matching personality and moment, not price tag.
 
-Scentral cuts through that. Your personality reveals your wardrobe. Dupes cut your cost. You get the same smell for £100 less.
+nota. cuts through that. Your personality reveals your wardrobe. Dupes cut your cost. You get the same smell for £100 less.
 
 ---
 
@@ -100,7 +100,7 @@ Try the **Sanctuary Profiler**. It takes 15 seconds. Let me know if it nails you
 
 Then browse your wardrobe. See if the dupes make sense. Break something. Tell me what sucks.
 
-**→ scentral-seven.vercel.app**
+**→ scentral-hub.vercel.app**
 
 Or download: iOS / Android (both live today)
 
@@ -108,8 +108,8 @@ Or download: iOS / Android (both live today)
 
 **[Section 7: Next (Roadmap teaser)]**
 
-Week 2: Barcode scanner (scan a bottle, see dupes)  
-Week 3: Creator partnerships (influencer curated collections)  
+Week 2: Barcode scanner (scan a bottle, see dupes)
+Week 3: Creator partnerships (influencer curated collections)
 Week 4: Dark mode + personalized rituals
 
 ---
@@ -117,7 +117,7 @@ Week 4: Dark mode + personalized rituals
 ## Gallery Items (Upload in PH editor)
 
 1. **Cover image** (Hero)
-   - Scentral logo + main tagline
+   - nota. logo + main tagline
    - Background: Subtle fragrance bottle silhouettes, amber/gold color palette
    - Text: "Your fragrance DNA in 15 seconds"
 
@@ -127,7 +127,7 @@ Week 4: Dark mode + personalized rituals
    - CTA: "Next"
 
 3. **App screenshot 2** (Persona reveal)
-   - Card showing "VELVET INTELLECTUAL" 
+   - Card showing "VELVET INTELLECTUAL"
    - Tagline + personality description
    - Wardrobe tiles below (6–8 bottle cards)
 
@@ -150,12 +150,12 @@ Week 4: Dark mode + personalized rituals
 
 **Q: "How is this different from Fragrantica?"**
 ```
-A: Fragrantica is a reference—6M+ reviews, amazing database. Scentral is trying something different:
+A: Fragrantica is a reference—6M+ reviews, amazing database. nota. is trying something different:
 1. Personality-first discovery (not algorithm/filter-based)
 2. Instant wardrobe (50+ curated bottles, not 6000 to browse)
 3. Built-in dupe chains (price alternatives, not separate research)
 
-Think of it as: Fragrantica = Wikipedia. Scentral = Personal stylist.
+Think of it as: Fragrantica = Wikipedia. nota. = Personal stylist.
 ```
 
 **Q: "How accurate are your dupes?"**
@@ -190,14 +190,14 @@ A: Not yet. Good idea—adding that this week. Want CSV, JSON, or PDF?
 
 **Q: "Fragrance is subjective. How do you scale this?"**
 ```
-A: Completely true. That's why Scentral isn't prescriptive—it's suggestive.
+A: Completely true. That's why nota. isn't prescriptive—it's suggestive.
 
 The Profiler reveals a wardrobe of bottles that *statistically* align with your personality. You're in control. Don't like a bottle? Drag it out. Add your own. The app adapts.
 
 Think of it as a starting point, not a final answer.
 ```
 
-**Q: "Do you have data on dupes being purchased by Scentral users?"**
+**Q: "Do you have data on dupes being purchased by nota. users?"**
 ```
 A: Not yet (launched today). But once affiliate links are live, we'll track purchase intent + brand switching. That's the data that'll prove whether dupes actually convert.
 
@@ -219,10 +219,10 @@ For now, I'm betting that the research I did (blind testing, Fragrantica cross-r
 
 ## Success Metrics (Launch Day)
 
-✓ **Target:** 500–800 upvotes (Top 5 on PH)  
-✓ **Engagement:** 150+ comments (30% comment-to-upvote ratio is good)  
-✓ **CTR:** 10%+ of upvoters click through to app (measured via Vercel analytics)  
-✓ **Conversion:** 20%+ of visitors add a bottle to wardrobe  
+✓ **Target:** 500–800 upvotes (Top 5 on PH)
+✓ **Engagement:** 150+ comments (30% comment-to-upvote ratio is good)
+✓ **CTR:** 10%+ of upvoters click through to app (measured via Vercel analytics)
+✓ **Conversion:** 20%+ of visitors add a bottle to wardrobe
 ✓ **Sentiment:** 80%+ positive comments (minor edge cases, no ratio'd)
 
 If you hit 500 upvotes by noon, you're on pace for Top 3.

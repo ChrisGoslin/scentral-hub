@@ -13,7 +13,7 @@ Review Milestone 5 UI/UX changes in scentral-hub for design quality, clean UI/Re
 
 ## 🔒 Key Constraints
 - Review-only — do NOT modify implementation code
-- Scentral Hub standard compliance (Quiet Luxury style: Stone-50 background, editorial typography, Fragrance Gold #c49a3c accents)
+- nota. standard compliance (Quiet Luxury style: Stone-50 background, editorial typography, Fragrance Gold #c49a3c accents)
 - Clean UI & React principles (no hydration mismatches, correct CSS variable mapping, proper z-indexes for clickability, clear responsive behaviors)
 
 ## Current Parent

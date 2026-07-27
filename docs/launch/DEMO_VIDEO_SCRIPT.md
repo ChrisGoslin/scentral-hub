@@ -1,8 +1,8 @@
-# Scentral Launch — 15-Second Demo Video Script
+# nota. Launch — 15-Second Demo Video Script
 
-**Format:** Vertical video (9:16, TikTok/Instagram Reels format)  
-**Platform:** Twitter, Instagram, Product Hunt, TikTok  
-**Music:** Instrumental, ambient, 100–120 BPM (royalty-free: Epidemic Sound, Artlist, or similar)  
+**Format:** Vertical video (9:16, TikTok/Instagram Reels format)
+**Platform:** Twitter, Instagram, Product Hunt, TikTok
+**Music:** Instrumental, ambient, 100–120 BPM (royalty-free: Epidemic Sound, Artlist, or similar)
 **Voiceover:** Calm, conversational. No rush.
 
 ---
@@ -45,9 +45,9 @@
 - **Music:** Builds slightly
 
 **[11–13s] CTA + BRANDING**
-- **Visual:** App logo. Text: "SCENTRAL" in large letters.
-- **URL underlay:** "scentral-seven.vercel.app"
-- **VO:** "Scentral. Find your fragrance DNA."
+- **Visual:** App logo. Text: "nota." in large letters.
+- **URL underlay:** "scentral-hub.vercel.app"
+- **VO:** "nota. Find your fragrance DNA."
 - **Music:** Peaks, holds
 
 **[13–15s] CLOSING SHOT**
@@ -77,7 +77,7 @@
 - **Timeline:** 15s exactly (no padding)
 - **Transitions:** Crossfades or swipe (2–3 frames, 200ms max—keep it snappy)
 - **Text:** White sans-serif (no shadows, high contrast). Use Unbounded or Instrument Serif (brand fonts).
-- **Color grading:** Slight warm shift (Scentral brand feel—amber/gold tint, not oversaturated)
+- **Color grading:** Slight warm shift (nota. brand feel—amber/gold tint, not oversaturated)
 
 ### Audio
 - **Voiceover:** Recorded separately in quiet room
@@ -103,7 +103,7 @@
 
 ### Twitter / X
 - Upload directly as video tweet (max 2.2 GB, 15 min max—you're well under)
-- Tweet copy: "Here's Scentral in 15 seconds. 3 questions. One persona. 280 fragrances. No BS. scentral-seven.vercel.app"
+- Tweet copy: "Here's nota. in 15 seconds. 3 questions. One persona. 280 fragrances. No BS. scentral-hub.vercel.app"
 
 ### Instagram Reels
 - Exact 9:16 format (no cropping needed)

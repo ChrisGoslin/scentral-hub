@@ -59,7 +59,7 @@ Migration workflow used here: apply via Supabase MCP **after explicit founder ap
 
 - Hooks live in `.husky/` (`core.hooksPath=.husky`) — a hook in `.git/hooks/` silently never runs. Fresh clone: run the two "Local Dev Setup" commands in AGENTS.md.
 - `npm run build` locally before pushing to main; the pre-push hook catches tsc failures + module-scope `createClient()` in `app/api` (that class of bug broke 19 consecutive Vercel builds once, and `tsc` alone does NOT catch it).
-- Deploy explicitly: `npx vercel --prod`, then read the `▲ Aliased` line — the GitHub webhook goes silent, and stale aliases (`scentral-seven`) have bitten share links already.
+- Deploy explicitly: `npx vercel --prod`, then read the `▲ Aliased` line — the GitHub webhook goes silent, and stale aliases have bitten share links already.
 - Every new external image hostname → `next.config.ts` remotePatterns **in the same commit** — next/image throws at render time and the ErrorBoundary takes the whole page down (happened with wikimedia).
 - E2e: `getByRole`, never copy-string selectors — copy churns.
 - **Concurrent agent sessions edit this repo simultaneously.** Never `git add -A`, never plain `git commit`, never `git reset --hard`; stage and commit by explicit pathspec; check `git status` for foreign staged work first (`.claude/skills/safe-commit-shared-repo/`).
@@ -70,7 +70,7 @@ Migration workflow used here: apply via Supabase MCP **after explicit founder ap
 1. **Server-render `/discover`'s first page** — it's client-fetched today; on a 127k catalogue this is the SEO front door and it renders empty HTML.
 2. **Server-side cap on `/api/read/generate`** — the regen limit lives only in the client; one curl loop = unbounded Haiku spend. Cheap fix: count `interactions.event_type='read_generated'` per user per hour. (Also on Deliverable F's list.)
 3. **Admin routes** (`/admin/enrichment`, `/admin/feedback`) — verify they're actually gated by more than obscurity before public traffic; I did not confirm an auth check on them. **[Unverified — check first]**
-4. **Delete or archive the superseded docs** (`docs/PRODUCT_TRUTH.md`, `docs/executive-suite/`, old sprint briefs) — they contradict CLAUDE.md and will mislead any agent or human who lands on them first. AGENTS.md itself still says "BaseNote" and should get a header note pointing at CLAUDE.md.
+4. **Delete or archive the superseded docs** (`docs/PRODUCT_TRUTH.md`, `docs/executive-suite/`, old sprint briefs) — they contradict CLAUDE.md and will mislead any agent or human who lands on them first. AGENTS.md itself still says "nota." and should get a header note pointing at CLAUDE.md.
 5. **Recognition micro-moment** (`05` §2.2): one serif line on the third visit to the same fragrance detail. Data's already in `interactions`; it's a day of work and it's the cheapest possible proof of "this understands me" — worth doing before any bigger delight work.
 6. **The Read's 'close' reaction** currently saves identically to 'that's me' — the single highest-leverage UX refinement in the identity loop once Shelf v2 lands.
 

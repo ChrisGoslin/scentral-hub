@@ -1,7 +1,7 @@
 # Project: nota. Design & Experience Sweep (Perfumery's Workshop Vibe)
 
 ## Architecture
-nota. (Scentral Hub) is a Next.js 16 app with Tailwind CSS 4, utilizing a Supabase backend and Tailwind CSS variables for its design system.
+nota. is a Next.js 16 app with Tailwind CSS 4, utilizing a Supabase backend and Tailwind CSS variables for its design system.
 The core views to update are:
 - `DiscoverGrid` (`app/(main)/discover/DiscoverGrid.tsx`) - Rebuild as staggered/overlapping tactile moodboard layout.
 - `WardrobeShelf` (`app/(main)/collection/WardrobeShelf.tsx`) - Personalize to user's Scent Identity, integrating ink, clay, brass, and smoked glass elements.

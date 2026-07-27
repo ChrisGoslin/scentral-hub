@@ -1,4 +1,4 @@
-# AnotherSense — Agent Instructions
+# nota. — Agent Instructions
 
 > **Read AGENTS.md first.** That is the single source of truth for this project.
 > All rules, stack facts, routes, DB schema, and safeguards are defined there.

@@ -362,7 +362,7 @@ function ShareButton({ sessionId, revealed }: { sessionId: string; revealed: Rev
   const topThree = revealed.slice(0, 3)
 
   const handleShare = useCallback(async () => {
-    const shareText = `That's what I prefer?\n${topThree.map((f, i) => `${i + 1}. ${f.brand} ${f.name}`).join('\n')}\n\nFind your blind Top 10 on nota..`
+    const shareText = `That's what I prefer?\n${topThree.map((f, i) => `${i + 1}. ${f.brand} ${f.name}`).join('\n')}\n\nFind your blind Top 10 on nota.`
     const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}/shelf/blind/${sessionId}` : undefined
 
     if (typeof navigator !== 'undefined' && navigator.share) {

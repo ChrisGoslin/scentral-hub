@@ -1,4 +1,4 @@
-# BaseNote — Feature Build Prompts
+# nota. — Feature Build Prompts
 ### Synthesised from: Marlowe (Creative Director), Viktor (Competitor CEO), Nadia (Community Insider), JTBD Analysis
 ### Generated: 2026-06-27 | +25% experience push on every feature
 
@@ -120,7 +120,7 @@ Tapping opens a bottom sheet with a pre-rendered share card:
 // Description line: plain_description truncated to 100 chars, italic, 13px, Vetiver Grey
 // Bottom section (separated by thin line):
 //   Left: "Inspired By" price if inspired_by exists — "From £[X] Inspired By"
-//   Right: BaseNote wordmark in 10px
+//   Right: nota. wordmark in 10px
 // Gold score line at very bottom
 ```
 
@@ -234,7 +234,7 @@ Label above the grid: *"Your ritual, [Month] [Year]"* in 10px uppercase Vetiver 
 
 Below the grid: *"[N] days this month"* — no emoji, no gamification language for this persona.
 
-**+25% push:** Add a month navigation arrow (`← [prev month]` / `[next month] →`) so the user can look back across their history. Seeing 3 months of dots is profoundly motivating — it's a visual record of a practice. Also add a subtle "Share your month →" option that generates a share image of the calendar grid (gold dots on dark background, month label, BaseNote wordmark). Ritual Keepers who share this will bring in other Ritual Keepers — the most valuable acquisition loop.
+**+25% push:** Add a month navigation arrow (`← [prev month]` / `[next month] →`) so the user can look back across their history. Seeing 3 months of dots is profoundly motivating — it's a visual record of a practice. Also add a subtle "Share your month →" option that generates a share image of the calendar grid (gold dots on dark background, month label, nota. wordmark). Ritual Keepers who share this will bring in other Ritual Keepers — the most valuable acquisition loop.
 
 ```
 git commit -m "feat(you): Ritual Calendar — monthly wear dot grid, fragrance tooltip, month navigation, share"
@@ -321,7 +321,7 @@ Top: gold score line (full width, 2px)
 [9px mono, gold]  FINISH
 
 Bottom: gold score line (full width, 1px)
-[10px, Vetiver Grey]  BaseNote · Find your base note
+[10px, Vetiver Grey]  nota. · Find your base note
 ```
 
 Allow user to name the formula before sharing. Default name: *"Formula No. [N]"* — tap to rename. Rename stored in localStorage alongside the combination.
@@ -346,7 +346,7 @@ The signed-out state in `YouClient.tsx` shows `state: 'signed-out'` — upgrade 
 ```tsx
 // Full-height centred layout
 // Large Cormorant italic: "Your identity is waiting."
-// Small text: "Take the 2-minute quiz to discover your scent identity."  
+// Small text: "Take the 2-minute quiz to discover your scent identity."
 // Gold pill button: "Find Your Base Note →" → href="/onboarding"
 ```
 
@@ -386,7 +386,7 @@ git commit -m "feat(identity): full signed-out upgrade — persona card, local h
 
 Search the entire codebase for:
 - `"clone"` → replace with `"Inspired By"` in all user-facing strings
-- `"dupe"` → replace with `"Inspired By alternative"` in all user-facing strings  
+- `"dupe"` → replace with `"Inspired By alternative"` in all user-facing strings
 - `"Clone Finder"` → `"Inspired By Engine"` in all user-facing strings and route labels
 - `/clones` route display label → `"Inspired By"` (keep the route path `/clones` unchanged)
 
@@ -437,7 +437,7 @@ When Scent DNA is active and the user has typed 2+ characters, show results in a
 
 The DNA match percentage comes from the existing semantic search similarity score (already returned by `/api/search?mode=smells_like`). If no score returned, omit the percentage.
 
-**+25% push:** At the bottom of the Scent DNA results, add a "Describe another →" nudge that clears the input but keeps the overlay open. And add a "Save this search →" that stores the query in localStorage as `scentral_dna_searches` (array, max 5). Show saved searches as chips when the overlay opens with an empty input — *"Recent: [query 1] [query 2]"*. This is the feature that makes Nadia post about BaseNote: "I can describe a scent I smelled at a wedding 3 years ago and it finds matches. No other app does this."
+**+25% push:** At the bottom of the Scent DNA results, add a "Describe another →" nudge that clears the input but keeps the overlay open. And add a "Save this search →" that stores the query in localStorage as `scentral_dna_searches` (array, max 5). Show saved searches as chips when the overlay opens with an empty input — *"Recent: [query 1] [query 2]"*. This is the feature that makes Nadia post about nota.: "I can describe a scent I smelled at a wedding 3 years ago and it finds matches. No other app does this."
 
 ```
 git commit -m "feat(discover): Scent DNA full overlay — dark fullscreen, match %, saved searches, recent queries"
@@ -610,7 +610,7 @@ In `app/(main)/you/YouClient.tsx`, below the identity card, compute and display 
 
 Visual: a horizontal bar split by persona accent colours, proportional to percentages. Below: *"Based on [N] fragrances in your collection."*
 
-Share button generates a card: dark background, bar chart, persona breakdown text in Cormorant italic, BaseNote wordmark. Web Share API.
+Share button generates a card: dark background, bar chart, persona breakdown text in Cormorant italic, nota. wordmark. Web Share API.
 
 **+25% push:** Below the score, show a drift indicator if the user has been active for 30+ days. Compare this month's wear families to last month's. If shifted: *"Your taste is shifting toward [new direction] this month."* This is the seasonal identity drift insight from the JTBD analysis — the only app in the world that can tell a fragrance enthusiast their taste is evolving in real time.
 

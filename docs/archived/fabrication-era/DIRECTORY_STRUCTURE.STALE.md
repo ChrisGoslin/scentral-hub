@@ -180,12 +180,12 @@
  | | |-visual-heartbeat.mjs
  | | |-generate-batch-final.mjs
  | | |-retry-failed-images.mjs
- | | |-SCENTRAL-SCHEDULER-PROMPT.md
+ | | |-nota.-SCHEDULER-PROMPT.md
  | | |-generate-avatars.mjs
  | | |-test-migration.mjs
  | | |-fetch-images.mjs
  | | |-generate-all-images.mjs
- | | |-SCENTRAL-SCHEDULER-PRD.md
+ | | |-nota.-SCHEDULER-PRD.md
  | | |-test-models.mjs
  | | |-test-image-model.mjs
  | | |-generate-all-images-with-fallback.mjs

@@ -1,7 +1,7 @@
 # BRIEFING — 2026-07-08T02:26:39+01:00
 
 ## Mission
-Orchestrate the design and experience sweep to imbue the "perfumery's workshop" vibe (ink, clay, brass, smoked glass, handwritten Caveat font, moodboard layout) into Scentral Hub, ensuring 100% test pass.
+Orchestrate the design and experience sweep to imbue the "perfumery's workshop" vibe (ink, clay, brass, smoked glass, handwritten Caveat font, moodboard layout) into nota., ensuring 100% test pass.
 
 ## 🔒 My Identity
 - Archetype: teamwork_preview_orchestrator
@@ -35,7 +35,7 @@ Orchestrate the design and experience sweep to imbue the "perfumery's workshop" 
 ## 🔒 Key Constraints
 - NEVER write, modify, or create source code files directly.
 - NEVER run build/test commands yourself — require workers to do so.
-- Keep Scentral Hub aesthetics as "Quiet Luxury" (Stone-50 background, editorial typography, Fragrance Gold #c49a3c accents) while integrating "perfumery's workshop" vibe (ink, clay, brass, smoked glass, post-its, sketches).
+- Keep nota. aesthetics as "Quiet Luxury" (Stone-50 background, editorial typography, Fragrance Gold #c49a3c accents) while integrating "perfumery's workshop" vibe (ink, clay, brass, smoked glass, post-its, sketches).
 - Do not reuse a subagent after it has delivered its handoff.
 
 ## Current Parent

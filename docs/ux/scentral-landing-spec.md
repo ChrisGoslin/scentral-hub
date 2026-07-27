@@ -1,4 +1,4 @@
-# Scentral Landing — Design Spec (Concise)
+# nota. Landing — Design Spec (Concise)
 
 Purpose: provide a compact, developer-friendly design spec to hand off to designers and to guide implementation.
 

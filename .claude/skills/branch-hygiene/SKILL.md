@@ -3,7 +3,7 @@ name: branch-hygiene
 description: "Session-start checklist to prevent duplicate features and stale branches in scentral-hub. Run before writing any code: sync state, check what already exists, decide branch-vs-main, and commit safely at the end."
 ---
 
-# Skill: Branch Hygiene — Scentral
+# Skill: Branch Hygiene — nota.
 
 Run this checklist at the START of every session before writing any code.
 Prevents duplicate features, stale branches, and wasted work.

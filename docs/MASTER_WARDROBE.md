@@ -1,6 +1,6 @@
-# Scentral: Master Wardrobe Intelligence
+# nota.: Master Wardrobe Intelligence
 
-This document contains the definitive olfactory data for the Scentral collection and expert layering protocols. It is structured for semantic analysis and reasoning by the Scentral Alchemist.
+This document contains the definitive olfactory data for the nota. collection and expert layering protocols. It is structured for semantic analysis and reasoning by the nota. Alchemist.
 
 ## Olfactory Phase Model
 - **Phase 1 (Anchor):** Base-heavy scents (Oud, Amber, Musk, Leather). Provide the foundation and longevity.

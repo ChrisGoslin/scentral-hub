@@ -1,4 +1,4 @@
-# Scentral Hub — Technical Architecture Document
+# nota. — Technical Architecture Document
 
 **Last updated:** 2026-06-15
 **Status:** Accurate. Verified against package.json and git log. No fabricated features.
@@ -183,7 +183,7 @@ Always use these variables — never hardcode colours:
 
 - **Repo:** `ChrisGoslin/scentral-hub` on GitHub
 - **Vercel project:** `scentral` (`prj_M9i6d6V9JfV626sNWH2ROGMH3eTw`)
-- **Live URL:** `scentral-seven.vercel.app`
+- **Live URL:** `scentral-hub.vercel.app`
 - **Deploy trigger:** push to `main` → Vercel auto-deploys
 - **Secrets:** `.env.local` only — gitignored. Never in source, docs, or logs.
 - **Smoke test:** `node scripts/smoke-test.mjs` (or `BASE_URL=https://... node scripts/smoke-test.mjs`)

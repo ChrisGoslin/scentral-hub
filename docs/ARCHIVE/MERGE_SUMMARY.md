@@ -1,6 +1,6 @@
 # Consolidation Summary: scentral + scentral-hub → nota
 
-**Date:** 2026-07-08  
+**Date:** 2026-07-08
 **Status:** ✅ Complete (parallel consolidation)
 
 ---
@@ -25,13 +25,13 @@ Keep **scentral-hub** as the source of truth; archive **scentral** (read-only).
 
 ### From `scentral` → Preserved in `nota/docs/`
 
-- `GENERATION_PROGRESS.md` → `docs/ARCHIVE/GENERATION_PROGRESS_ARCHIVE.md`  
+- `GENERATION_PROGRESS.md` → `docs/ARCHIVE/GENERATION_PROGRESS_ARCHIVE.md`
   *Log of batch generation runs (2026-05-31) for Gemini image enrichment; saved for reference but not active.*
 
-- `DIRECTORY_STRUCTURE.md` → `docs/ARCHIVE/DIRECTORY_STRUCTURE_ARCHIVE.md`  
+- `DIRECTORY_STRUCTURE.md` → `docs/ARCHIVE/DIRECTORY_STRUCTURE_ARCHIVE.md`
   *Legacy structure map; superseded by current `app/` layout.*
 
-- `household-finance-pipeline-spec.md` → `docs/ARCHIVE/`  
+- `household-finance-pipeline-spec.md` → `docs/ARCHIVE/`
   *Unrelated project scope doc; archived for completeness.*
 
 ### Deduplicated
@@ -56,15 +56,15 @@ All user-facing strings updated to reflect new product name **nota.**
 ### Files Updated
 
 1. **`app/layout.tsx`** — Metadata, title, OpenGraph, Apple app config
-   - Before: "BaseNote — Your Scent Identity"
+   - Before: "nota. — Your Scent Identity"
    - After: "nota. — Your Scent Identity"
 
 2. **`lib/affiliates.ts`** — Affiliate program header branding
-   - Before: BaseNote brand attribution
+   - Before: nota. brand attribution
    - After: nota. brand attribution
 
 3. **`docs/PRODUCT_TRUTH.md`** — Brand doctrine and messaging
-   - Before: "AnotherSense"
+   - Before: "nota."
    - After: "nota." (per founder brief, 2026-07-04)
 
 4. **`next.config.ts`** — Sentry config organization
@@ -76,7 +76,7 @@ All user-facing strings updated to reflect new product name **nota.**
    - Before: `scentral-hub.vercel.app`
    - After: `nota.vercel.app` (temporary); `notalabs.io` post-DNS
 
-6. **Metadata in docs/** — All references to "Scentral"/"BaseNote" → "nota."
+6. **Metadata in docs/** — All references to "nota."/"nota." → "nota."
 
 ---
 
@@ -132,16 +132,16 @@ All user-facing strings updated to reflect new product name **nota.**
 
 ## Q&A
 
-**Q: Why keep scentral-hub as primary?**  
+**Q: Why keep scentral-hub as primary?**
 A: It was actively maintained, larger (more complete feature set), and newer. Archiving scentral preserves its history while unambiguously pointing to the canonical repo.
 
-**Q: Will this affect production?**  
+**Q: Will this affect production?**
 A: No. This consolidation is code/doc only. Live data (Supabase, user accounts, analytics) is untouched. Branding changes are display-layer; they'll roll out with the next deploy.
 
-**Q: Can I still access scentral after it's archived?**  
+**Q: Can I still access scentral after it's archived?**
 A: Yes. GitHub archives are readable; they're just read-only and hidden from searches. Full history is preserved.
 
-**Q: When does the repo get renamed to `nota`?**  
+**Q: When does the repo get renamed to `nota`?**
 A: After this commit is merged and tested. Renaming is a separate GitHub operation (Settings → Rename). Current name `scentral-hub` will be final intermediate name; the rename is documented in Phase 2 above.
 
 ---

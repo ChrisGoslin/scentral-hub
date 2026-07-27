@@ -124,6 +124,11 @@
   background: var(--stone);
 }
 
+.readSection .kicker,
+.readCopy > p {
+  color: var(--ink);
+}
+
 .inkLink,
 .inkLinkDark {
   min-height: 48px;
@@ -276,7 +281,11 @@
 }
 
 .alternativeCard > span {
-  color: var(--faded);
+  color: var(--ink);
+}
+
+.alternativeCard > p {
+  color: var(--ink);
 }
 
 .lineageThread {

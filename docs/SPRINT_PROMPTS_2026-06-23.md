@@ -1,4 +1,4 @@
-# AnotherSense — Sprint Prompts (2026-06-23)
+# nota. — Sprint Prompts (2026-06-23)
 # Run these in Claude Code (CLI) in order. Each is a self-contained prompt.
 # Dependency order: Sprint 1 must finish before 2. Sprints 3–6 can run after Sprint 1.
 
@@ -9,7 +9,7 @@
 ### Run this first, alone. Everything looks wrong until this is done.
 
 ```
-Read AGENTS.md first. Ground yourself on the AnotherSense stack.
+Read AGENTS.md first. Ground yourself on the nota. stack.
 
 ## Task: Apply dark theme as the default
 
@@ -18,7 +18,7 @@ app/globals.css defines two palettes:
 - `:root` → warm cream `#F7F3EE` (OLD, should not be the default)
 - `[data-theme="dark"]` → `#0F172A` deep slate (CORRECT — should be default)
 
-No code ever sets `data-theme="dark"` so the app looks identical to before the SENSUS overhaul.
+No code ever sets `data-theme="dark"` so the app looks identical to before the nota. overhaul.
 
 ### Changes required
 
@@ -67,7 +67,7 @@ Fragrances without `image_url` show completely blank cards until hover reveals t
 
 **Root cause:** `FragranceCardMedia` component (at `components/discover/FragranceCardMedia.tsx`) or `OptimizedBottleCard` — whichever handles missing images — is not rendering a visible fallback.
 
-**Fix:** 
+**Fix:**
 1. Read `components/discover/FragranceCardMedia.tsx`
 2. When `image_url` is null/empty, render a gradient placeholder that is ALWAYS visible (not hover-dependent). Use the family-based gradient pattern:
    - Woody/Oud → `linear-gradient(135deg, oklch(0.45 0.12 60) 0%, oklch(0.18 0.04 240) 100%)`
@@ -265,7 +265,7 @@ A beautiful polar/radar chart showing the user's fragrance collection across 9 s
 
 **The 9 axes (map from our `family` + `lean` + `projection` data):**
 1. Woody
-2. Floral  
+2. Floral
 3. Fresh/Citrus
 4. Oriental/Amber
 5. Gourmand
@@ -363,7 +363,7 @@ Read AGENTS.md first.
 
 **DB change required — SHOW THIS SQL AND WAIT FOR EXPLICIT APPROVAL before applying:**
 ```sql
-ALTER TABLE fragrances 
+ALTER TABLE fragrances
 ADD COLUMN IF NOT EXISTS buy_url text,
 ADD COLUMN IF NOT EXISTS buy_label text DEFAULT 'Buy Now';
 ```

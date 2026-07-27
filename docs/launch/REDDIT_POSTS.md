@@ -1,4 +1,4 @@
-# Scentral Launch — Reddit Post Templates
+# nota. Launch — Reddit Post Templates
 
 **Posting strategy:**
 - Post to r/fragrance on **T+2** (let Product Hunt die down first, don't spam)
@@ -16,7 +16,7 @@
 
 I kept blind-buying duplicates. Same scent, five names, £50 difference each time.
 
-So I built **Scentral**—a free app that maps your fragrance DNA and builds your wardrobe in 15 seconds. No account, no algorithm.
+So I built **nota.**—a free app that maps your fragrance DNA and builds your wardrobe in 15 seconds. No account, no algorithm.
 
 **The hook:**
 You answer one question: where are you when the world gets loud? That becomes your persona (Velvet Intellectual, Solar Minimalist, Dark Alchemist). Your persona reveals 50+ bottles curated for you.
@@ -27,13 +27,13 @@ Every fragrance has its price dupe. Your £150 Creed Royal Oud? We found five La
 **What's in the app:**
 - Your curated wardrobe (based on your persona + season)
 - Every bottle's dupe chain (price alternatives)
-- Social proof (% of Scentral users who own it)
+- Social proof (% of nota. users who own it)
 - The Layering Lab (mix scents, see what happens)
 - Fragrance Wheel (your olfactory profile visualized)
 
 **Built for:** people who love fragrance but hate guessing. Collectors who want dupes. Newcomers who don't know where to start.
 
-**Live now:** scentral-seven.vercel.app
+**Live now:** scentral-hub.vercel.app
 
 **Open to feedback.** If you try it, tell me what broke or what I should add.
 
@@ -54,13 +54,13 @@ If someone asks:
 
 ## r/IndieApps (100K members) — Post 2
 
-**Title:** "Scentral—fragrance wardrobe app with a persona reveal engine (built solo, shipped to iOS/Android)"
+**Title:** "nota.—fragrance wardrobe app with a persona reveal engine (built solo, shipped to iOS/Android)"
 
 **Body:**
 
 Hi IndieHackers,
 
-I shipped **Scentral** yesterday—a free fragrance app for iOS and Android. Wanted to share the build and hear what breaks.
+I shipped **nota.** yesterday—a free fragrance app for iOS and Android. Wanted to share the build and hear what breaks.
 
 **The problem:**
 Fragrance discovery is broken. Apps are grids. Blogs are 10K words. Everyone's algorithm is garbage. And dupes? Unmarked. Unpriced. Scattered across Reddit threads.
@@ -92,7 +92,7 @@ Free forever for core features (Discover, My Wardrobe, Layering, You). Pro featu
 **The ask:**
 Try it. Break it. Tell me what sucks.
 
-→ scentral-seven.vercel.app
+→ scentral-hub.vercel.app
 
 Feedback welcome. Happy to answer Q's about the build, the DB, the personas, or the biz model.
 

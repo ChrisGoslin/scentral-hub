@@ -1,8 +1,8 @@
-# BaseNote Launch Readiness Checklist — Phase 7
+# nota. Launch Readiness Checklist — Phase 7
 
-**Target Launch Date:** [END OF PHASE 7]  
-**Current Date:** July 3, 2026  
-**Status:** PRE-LAUNCH PREPARATION  
+**Target Launch Date:** [END OF PHASE 7]
+**Current Date:** July 3, 2026
+**Status:** PRE-LAUNCH PREPARATION
 
 ---
 
@@ -97,7 +97,7 @@
 
 ### iOS App Store
 - [ ] Apple Developer account active + provisioning profiles set up
-- [ ] App ID registered (`com.basenote.app` or similar)
+- [ ] App ID registered (`com.nota.app` or similar)
 - [ ] Certificates valid (not expired)
 - [ ] Privacy manifest updated (`PrivacyInfo.xcprivacy` if using certain SDKs)
 - [ ] Privacy policy live and accessible (https://scentral-hub.vercel.app/disclaimer)
@@ -110,7 +110,7 @@
 - [ ] Build number incremented (must be higher than any previous build)
 - [ ] Version string set (e.g., "1.0.0")
 - [ ] Release notes written and approved
-- [ ] Support email set up (support@basenote.co or similar)
+- [ ] Support email set up (current nota. support email)
 - [ ] No hardcoded test data or debug UI visible in build
 
 ### Android Google Play
@@ -180,7 +180,7 @@
 ## Part E: Metadata & SEO
 
 ### Meta Tags (app/layout.tsx)
-- [ ] `<title>` set (e.g., "BaseNote — Your Daily Scent Ritual")
+- [ ] `<title>` set (e.g., "nota. — Your Daily Scent Ritual")
 - [ ] `<meta name="description">` set (160 chars, compelling)
 - [ ] `og:title` set (same as title)
 - [ ] `og:description` set (compelling, not duplicate of meta description)
@@ -249,7 +249,7 @@
 - [ ] Email list imported into email service (HubSpot, ConvertKit, Mailchimp, etc.)
 
 ### Social Media & Press
-- [ ] Twitter account created or updated (@basenote or @basenoteapp)
+- [ ] Twitter/X account created or updated (current nota. social handle)
 - [ ] Instagram account created or updated (bio + link to waitlist)
 - [ ] TikTok account created (if targeting Gen Z fragrance audience)
 - [ ] Press release drafted and ready to send
@@ -261,7 +261,7 @@
 - [ ] Landing page copywriting locked and approved
 - [ ] App store screenshots uploaded to design tool (Figma or similar) for review
 - [ ] App description copy reviewed for tone, brand voice, accuracy
-- [ ] Support email configured (support@basenote.co), auto-responder set
+- [ ] Support email configured (current nota. support email), auto-responder set
 - [ ] Discount/promo code (if any) generated for early users
 
 ---

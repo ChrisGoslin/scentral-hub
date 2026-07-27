@@ -60,7 +60,7 @@ Rules:
 }
 
 async function main() {
-  console.log('🌸 Scentral — Note Enrichment Script');
+  console.log('🌸 nota. — Note Enrichment Script');
   console.log('=====================================\n');
 
   const { data: fragrances, error } = await supabase

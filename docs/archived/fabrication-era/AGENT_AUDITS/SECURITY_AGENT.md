@@ -2,7 +2,7 @@
 
 ## 🛡️ Vulnerability & Perimeter Scan
 
-As the Security Agent, I have audited the credentials and data sovereignty layers of Scentral.
+As the Security Agent, I have audited the credentials and data sovereignty layers of nota.
 
 ### Security Milestones:
 - **Credential Masking:** Verified. All API keys (Gemini AQ-format and Supabase service roles) are stored in `.env.local` and excluded from the repository via `.gitignore`.

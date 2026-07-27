@@ -1,6 +1,6 @@
-# AnotherSense — QA Checklist
-**Last updated:** 2026-06-21  
-**For:** Pre-release verification before Phase deployment  
+# nota. — QA Checklist
+**Last updated:** 2026-06-21
+**For:** Pre-release verification before Phase deployment
 **Platforms:** Desktop (Chrome/Safari), Mobile (iOS/Android)
 
 ---
@@ -195,15 +195,15 @@
 ---
 
 ## SIGN-OFF
-**Tested by:** [Name]  
-**Date:** [YYYY-MM-DD]  
-**Devices tested:**  
-- [ ] Desktop Chrome  
-- [ ] Desktop Safari  
-- [ ] iPhone 14/15  
-- [ ] Android Pixel  
+**Tested by:** [Name]
+**Date:** [YYYY-MM-DD]
+**Devices tested:**
+- [ ] Desktop Chrome
+- [ ] Desktop Safari
+- [ ] iPhone 14/15
+- [ ] Android Pixel
 
-**Notes:**  
+**Notes:**
 ```
 [Add any observations, edge cases, or deferred fixes]
 ```

@@ -252,9 +252,9 @@ hypothesis, verify against the repo before use in copy or code: Noseprint,
 Blind Ranking, Traces, Trails, Insights, Scentiment, Temptations, Aura, Houses,
 Mood Canvas, Today's Arc.
 
-**Retired — never ship:** Scentral, BaseNote, AnotherSense, ScentOI, NosePrint™,
+**Retired — never ship:** BaseNote, Scentral, AnotherSense, Fragrance Community, Sensus, ScentOI, NosePrint™,
 ScentBloom™, Scent Tarot™, nota.lab, Trace Composer, and the UI labels "Shelf"
-and "Discover" (routes renamed to Cabinet/Study). Feature names are short,
+and "Discover" (routes renamed to Cabinet/Study). This guardrail intentionally names retired brands; do not mechanically rewrite this line. Feature names are short,
 concrete, slightly literary nouns — never tech compounds (ScentMatch,
 FragranceAI) or gamified labels (Streaks, XP, Badges).
 

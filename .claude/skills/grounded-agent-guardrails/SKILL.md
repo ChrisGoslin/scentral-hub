@@ -47,7 +47,7 @@ Run: `ls <path>` or `Read <path>` before citing it.
 Build only what the source-of-truth docs specify. If you have an idea beyond scope: **propose it, don't build it.**
 
 Source-of-truth docs for nota. (repo `scentral-hub`) — **verify these paths still exist before
-trusting them, they have moved before** (`docs/SCENTRAL-BASELINE.md`, `-HANDOVER.md`,
+trusting them, they have moved before** (`docs/nota.-BASELINE.md`, `-HANDOVER.md`,
 `-CLAUDE-CODE-PACK.md` were the old names and no longer exist as of 2026-06-24):
 - `CLAUDE.md` (this repo, root — living memory, supersedes contradictions in older docs; read first)
 - `AGENTS.md` (this repo, root — binding operational rules + lessons L1–L17)
@@ -55,14 +55,14 @@ trusting them, they have moved before** (`docs/SCENTRAL-BASELINE.md`, `-HANDOVER
 - `docs/nota/01-cx-journey-audit.md` through `07-engineering-handover.md` (7 phase docs)
 
 #### Corrections (2026-07-05)
-`docs/AnotherSense_Execution_Brief.md` and `docs/specs/AnotherSense_Final_UX_Overhaul.md` (the two
+`docs/HANDOVER.md` and `docs/nota/` (the two
 paths previously listed here) **no longer exist** — `docs/specs/` is now an empty directory and the
 brief file is gone. This is itself an instance of the "docs move" pattern this section warns about.
 The project's binding-docs order is now, per `CLAUDE.md` itself: `CLAUDE.md` (wins on contradiction)
 > `AGENTS.md` (operational rules L1–L17, git hygiene, deploy — still binding) > `README.md` >
 `docs/HANDOVER.md` > `docs/nota/` phase docs. `docs/PRODUCT_TRUTH.md` still exists on disk but is
 explicitly flagged stale in `CLAUDE.md` §1 (wrong brand name, wrong fragrance count) — don't cite it
-as source-of-truth. Re-verify: `ls docs/AnotherSense_Execution_Brief.md docs/specs/ CLAUDE.md
+as source-of-truth. Re-verify: `ls docs/HANDOVER.md docs/nota/ CLAUDE.md
 AGENTS.md docs/HANDOVER.md docs/nota/*.md`.
 
 ### S5 — Flag confidence honestly
@@ -82,7 +82,7 @@ Format for any claim with uncertainty:
 ```
 □ Read AGENTS.md
 □ Read the relevant source-of-truth doc for today's task
-□ State in one line what I grounded on: "Grounded on: AGENTS.md + docs/AnotherSense_Execution_Brief.md"
+□ State in one line what I grounded on: "Grounded on: AGENTS.md + docs/HANDOVER.md"
 □ Verify Next.js version from package.json (not memory)
 □ Confirm target file paths exist before referencing them
 ```
@@ -105,7 +105,7 @@ These were invented by prior agents and must never appear again:
 - "Hegemony / Sovereignty / Shadow Branching / autopilot-shadow" as *product/feature* framing
   (note: a Gemini-authored meta-agent persona skill legitimately uses "Sovereign Orchestrator"
   branding at `.gemini/skills/sovereign-orchestrator/` — that's a tool persona, not a fabricated
-  Scentral feature; don't confuse the two)
+  nota. feature; don't confuse the two)
 - "Olfactory NFTs / Invisible Commerce"
 - "Elite Council breakthrough" framing
 
@@ -126,7 +126,7 @@ If any answer is unsatisfactory: fix it before declaring done.
 
 ---
 
-## Ground Truth (Scentral)
+## Ground Truth (nota.)
 
 Facts that decay (row counts, nav structure, scope) are listed here as **verify commands
 only**, not hardcoded values — every prior hardcoded number in this table has gone stale and

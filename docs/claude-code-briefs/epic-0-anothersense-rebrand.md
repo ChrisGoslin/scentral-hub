@@ -1,4 +1,4 @@
-# Claude Code Session: Epic 0 — AnotherSense Rebrand
+# Claude Code Session: Epic 0 — nota. Rebrand
 ### Est. time: 30 minutes | Week 1, Day 1
 
 ---
@@ -6,13 +6,13 @@
 ## Context (read before writing a single line)
 
 ```
-Product: AnotherSense (codebase: scentral-hub, DB: scentral-mvp — names unchanged internally)
+Product: nota. (codebase: scentral-hub, DB: scentral-mvp — names unchanged internally)
 Stack: Next.js 16.2.9 App Router, React 19.2.4, Supabase JS 2.x, Tailwind CSS, Vercel
 Design system: CSS variables only — app/globals.css + lib/design/tokens.css. No hardcoded hex. Ever.
 No secrets in code. npm run build must pass at session end.
 The cabinetSnapshot CustomEvent in WardrobeShelf.tsx must NEVER be removed.
-Full spec: docs/specs/AnotherSense_Final_UX_Overhaul.md
-Sprint plan: docs/AnotherSense_Execution_Brief.md
+Full spec: docs/nota/
+Sprint plan: docs/HANDOVER.md
 ```
 
 ---
@@ -22,7 +22,7 @@ Sprint plan: docs/AnotherSense_Execution_Brief.md
 Before writing any code, run:
 ```bash
 git log --oneline -5
-grep -r "Scentral" app/layout.tsx app/page.tsx public/manifest.json 2>/dev/null | head -20
+grep -r "nota." app/layout.tsx app/page.tsx public/manifest.json 2>/dev/null | head -20
 cat app/globals.css | grep -E "^\s*--" | head -30
 ```
 
@@ -30,7 +30,7 @@ State what you found in your first reply.
 
 ---
 
-## Task: Epic 0 — AnotherSense Display Rebrand
+## Task: Epic 0 — nota. Display Rebrand
 
 This is a display-layer-only rebrand. Every internal name stays the same (repo, DB, tables, env vars, localStorage keys, component names). Only what users SEE changes.
 
@@ -39,7 +39,7 @@ This is a display-layer-only rebrand. Every internal name stays the same (repo, 
 Add these to the `:root` block. Do NOT overwrite existing tokens — append:
 
 ```css
-/* AnotherSense — Aura Design Language tokens */
+/* nota. — Aura Design Language tokens */
 --aura: oklch(0.72 0.08 60);
 --aura-surface: oklch(0.18 0.04 60 / 0.6);
 --aura-border: oklch(0.45 0.06 60 / 0.3);
@@ -81,13 +81,13 @@ Also add this utility class:
 ### 2. App metadata — `app/layout.tsx`
 
 Update the `<title>` and `metadata` export. Change:
-- Title: `AnotherSense`
+- Title: `nota.`
 - Description: `Your daily scent ritual. Remember how you smell.`
 - Keep all existing font variables unchanged (Instrument_Serif + Unbounded are already there)
 
 ### 3. Landing page — `app/page.tsx` (or `app/(main)/page.tsx` — verify which exists)
 
-Find all instances of "Scentral" in user-facing copy (headings, subheadings, CTAs, `<title>`) and replace with "AnotherSense". Do NOT change:
+Find all instances of "nota." in user-facing copy (headings, subheadings, CTAs, `<title>`) and replace with "nota.". Do NOT change:
 - Import paths
 - Component names
 - Variable names
@@ -97,15 +97,15 @@ Find all instances of "Scentral" in user-facing copy (headings, subheadings, CTA
 ### 4. Web manifest — `public/manifest.json` (if it exists)
 
 Update:
-- `"name"`: `"AnotherSense"`
-- `"short_name"`: `"AnotherSense"`
+- `"name"`: `"nota."`
+- `"short_name"`: `"nota."`
 - `"description"`: `"Your daily scent ritual"`
 
-### 5. Any other user-visible "Scentral" strings
+### 5. Any other user-visible "nota." strings
 
-Run: `grep -r "Scentral" app/ components/ public/ --include="*.tsx" --include="*.ts" --include="*.json" --include="*.html" -l`
+Run: `grep -r "nota." app/ components/ public/ --include="*.tsx" --include="*.ts" --include="*.json" --include="*.html" -l`
 
-For each file found: replace user-facing copy occurrences with "AnotherSense". Skip any occurrence that is:
+For each file found: replace user-facing copy occurrences with "nota.". Skip any occurrence that is:
 - A variable name, function name, or import path
 - Inside a `localStorage.getItem('scentral_...')` call
 - A CSS class name
@@ -116,7 +116,7 @@ For each file found: replace user-facing copy occurrences with "AnotherSense". S
 ## Definition of done
 
 - [ ] `npm run build` passes with 0 errors
-- [ ] `grep -r '"Scentral"' app/ public/` returns 0 results for user-visible strings
+- [ ] `grep -r '"nota."' app/ public/` returns 0 results for user-visible strings
 - [ ] `--aura`, `--motion-instant`, `--shadow-object` exist in CSS output
 - [ ] `cabinetSnapshot` CustomEvent still present in `WardrobeShelf.tsx` (verify: `grep cabinetSnapshot app/\(main\)/collection/WardrobeShelf.tsx`)
 - [ ] No hardcoded hex values added

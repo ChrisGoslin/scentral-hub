@@ -1,13 +1,13 @@
-# Scentral — Claude Code Delegate Prompts (LEGACY — PRE-ANOTHERSENSE)
+# nota. — Claude Code Delegate Prompts (LEGACY — PRE-nota.)
 
-> ⚠️ **SUPERSEDED** — These 32 prompts were written before the AnotherSense overhaul (2026-06-20).
+> ⚠️ **SUPERSEDED** — These 32 prompts were written before the nota. overhaul (2026-06-20).
 > For the active sprint, use the **12 Epic prompts** in `docs/specs/AnotherSense_Final_UX_Overhaul.md`.
 > For the session handoff template and sprint schedule, see `docs/AnotherSense_Execution_Brief.md`.
 > The prompts below are preserved for reference only. Do NOT run them — they reference old architecture.
 
 ---
 
-> Generated: 2026-06-19 | Superseded: 2026-06-20 (AnotherSense overhaul)
+> Generated: 2026-06-19 | Superseded: 2026-06-20 (nota. overhaul)
 
 ---
 
@@ -126,7 +126,7 @@ Problem: public/icons/icon-192.png and public/icons/icon-512.png are 1×1 pixel 
 
 Task: Generate real brand icons.
 
-Brand: Scentral. Aesthetic: quiet luxury, warm parchment (#F7F3EE background, #A0622A amber accent).
+Brand: nota. Aesthetic: quiet luxury, warm parchment (#F7F3EE background, #A0622A amber accent).
 Icon concept: stylised letter "S" in Instrument Serif style, amber on parchment — or a simple amber resin drop / bottle silhouette.
 
 Use the canvas-design skill or any available image generation to create SVG-based icons, then export/convert to:
@@ -208,7 +208,7 @@ Project: ~/Projects/scentral-hub
 
 Task: Write the complete app store listing copy and save it to docs/APP_STORE_LISTING.md
 
-The app: Scentral — a fragrance wardrobe PWA. "Letterboxd for fragrance."
+The app: nota. — a fragrance wardrobe PWA. "Letterboxd for fragrance."
 Target user: Gavan — newcomer collector, 5–10 bottles, plain language. Not an elitist forum.
 Core philosophy: "Yes, And..." — every olfactory fingerprint is valid.
 Privacy URL: https://scentral-hub.vercel.app/privacy
@@ -236,7 +236,7 @@ Format: Screen name | URL path | What to set up before screenshotting | Why this
 
 --- ASO NOTES ---
 3 competitor apps to position against (search fragrance apps on App Store).
-2 keyword gaps they're likely missing that Scentral owns.
+2 keyword gaps they're likely missing that nota. owns.
 
 Save everything to docs/APP_STORE_LISTING.md. No placeholders — write the actual copy.
 ```
@@ -459,7 +459,7 @@ Read AGENTS.md §1 first. Project: ~/Projects/scentral-hub
 Task: Improve the onboarding flow at app/onboarding/page.tsx.
 
 1. Read the full file first.
-2. Add a progress indicator: 4 small dots at the top (steps 1–4 including reveal). Active dot = var(--color-primary) filled. Past dots = filled muted. Future dots = empty circle outline. 
+2. Add a progress indicator: 4 small dots at the top (steps 1–4 including reveal). Active dot = var(--color-primary) filled. Past dots = filled muted. Future dots = empty circle outline.
 3. Add a Back button on steps 2, 3, 4 (not step 1). Back goes to previous step. Do not reset selections when going back — preserve them.
 4. Add a Skip link on steps 1 and 2 only: small "Skip" text link bottom-right. Skipping sends user directly to /discover with no persona pre-set (clears localStorage persona keys).
 5. The reveal step (step 4) should NOT have a Back or Skip — it's the payoff. Only the two CTAs: "Start Exploring" and "Show me everything".
@@ -614,7 +614,7 @@ Task: Generate dynamic Open Graph images for fragrance detail pages so sharing a
    - Render: fragrance name (large, Instrument Serif if available via font loading), brand, family, projection badge
    - Background: parchment #F7F3EE, accent amber #A0622A — hardcoded hex is acceptable ONLY in ImageResponse (it runs in Edge runtime, CSS variables don't apply)
    - Dimensions: 1200×630 (standard OG)
-   - Fallback: if fragrance not found, render the Scentral logo/name generic card
+   - Fallback: if fragrance not found, render the nota. logo/name generic card
 
 3. Also check app/page.tsx — add static OG metadata to the root layout for the landing page (title, description, og:image pointing to a static /og-image.png placeholder for now).
 
@@ -636,7 +636,7 @@ Task: Polish the /waitlist page to maximise sign-up conversion before App Store 
 2. Read the waitlist table structure via AGENTS.md or by checking existing query code
 3. Improvements:
    a. Headline: "Be first in." (short, direct)
-   b. Sub-text: "Scentral is coming to iOS and Android. Drop your email and we'll let you know the moment it lands."
+   b. Sub-text: "nota. is coming to iOS and Android. Drop your email and we'll let you know the moment it lands."
    c. Email input: large, centred, placeholder "your@email.com"
    d. CTA button: "Reserve my spot" — var(--color-primary) background, white text
    e. After submit: replace form with "You're in. We'll be in touch." — no page reload, just swap the component state
@@ -671,7 +671,7 @@ Task: Add a web push notification opt-in for daily wear reminders.
    - Receives the PushSubscription object
    - Stores it in Supabase (create table push_subscriptions with columns: id, endpoint, keys JSONB, created_at — provide the SQL to run)
    - Uses SUPABASE_SERVICE_KEY from env (server-side only)
-4. Check public/sw.js or next.config.js — does a service worker exist? If not, create a minimal public/sw.js that handles push events: shows a notification with title "Scentral" and body from event.data.text()
+4. Check public/sw.js or next.config.js — does a service worker exist? If not, create a minimal public/sw.js that handles push events: shows a notification with title "nota." and body from event.data.text()
 5. Register the SW in app/layout.tsx (client-side useEffect)
 
 CSS variables only. Run tsc --noEmit --skipLibCheck. Flag if service worker registration conflicts with Next.js PWA setup. Report files created/modified.
@@ -767,7 +767,7 @@ Context: The current WearLogModal (app/(main)/collection/WearLogModal.tsx) has 3
 Requirements:
 1. Replace the 3-stage step flow with a single screen showing a line chart with 5 plotted points:
    - Stage 1: First Spray (0 min)
-   - Stage 2: Opening (15 min)  
+   - Stage 2: Opening (15 min)
    - Stage 3: Heart (2–3 hrs)
    - Stage 4: Dry Down (6 hrs)
    - Stage 5: Skin Scent (8–12 hrs)

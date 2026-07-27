@@ -1,8 +1,8 @@
-# Motion Audit Checklist — BaseNote Phase 7
+# Motion Audit Checklist — nota. Phase 7
 
 **Purpose:** Verify every animation serves clarity or emphasis, never gratuitous distraction. Map each to motion tokens and confirm easing/duration support user intent.
 
-**Tested:** July 2026 (Phase 7)  
+**Tested:** July 2026 (Phase 7)
 **Scope:** All pages: /discover, /collection, /you, /insights, /spritz, /wheel, /traces, /trails, /onboarding
 
 ---
@@ -118,13 +118,13 @@ For each component/animation, fill:
   - Easing: cubic-bezier(0.4, 0, 0.2, 1)
   - Keyframes: outline/border color shift
   - **Verdict:** ✓ Keep — instant feedback for form interaction
-  
+
 - **Filter chip toggle:** Morph
   - Token: `--motion-instant` (80ms)
   - Easing: cubic-bezier(0.4, 0, 0.2, 1)
   - Keyframes: background color, text color invert
   - **Verdict:** ✓ Keep — immediate visual feedback on selection
-  
+
 - **Fragrance card scale (card-hover):** Morph
   - Token: `--motion-responsive` (180ms, see note above)
   - **Verdict:** ⚠ See audit note above (standardize to token)

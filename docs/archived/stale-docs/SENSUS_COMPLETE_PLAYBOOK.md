@@ -1,15 +1,15 @@
-# SENSUS COMPLETE PLAYBOOK
+# nota. COMPLETE PLAYBOOK
 ## From MVP to World-Class Dark Ambient Material PWA
 
-**Version:** 1.0  
-**Updated:** 2026-06-22  
+**Version:** 1.0
+**Updated:** 2026-06-22
 **Status:** Ready for 10-Week Production Sprint
 
 ---
 
 ## EXECUTIVE SUMMARY
 
-This playbook contains everything needed to transform Scentral from "novice and vibe-coded" feedback into the **"Spotify of Fragrance"**—a premium, visually stunning, gamified PWA that celebrates subjective sensory experiences.
+This playbook contains everything needed to transform nota. from "novice and vibe-coded" feedback into the **"Spotify of Fragrance"**—a premium, visually stunning, gamified PWA that celebrates subjective sensory experiences.
 
 **Key Deliverables:**
 - ✅ Epic 1: Dark Ambient Material Token System + 12-Column Collector's Wall Grid
@@ -100,7 +100,7 @@ This playbook contains everything needed to transform Scentral from "novice and 
 
 ## PRODUCTION READINESS CHECKLIST
 
-**Before shipping SENSUS to App Store:**
+**Before shipping nota. to App Store:**
 
 ### Code Quality
 - [ ] All 9 smoke tests pass (Discover, Collection, Layering, You, Social, Privacy, Terms, Landing, Onboarding)
@@ -141,7 +141,7 @@ This playbook contains everything needed to transform Scentral from "novice and 
 
 ### Phase 8-D (Weeks 11–12): Affiliate Integration
 
-Once SENSUS ships, wire Awin:
+Once nota. ships, wire Awin:
 - Deploy `/api/prices` endpoint
 - Add SKU matching logic (`pg_trgm` + LLM tier)
 - Integrate retailer links into detail page "Where to Buy"
@@ -164,9 +164,9 @@ To activate the custom "Principal UI/UX Architect Gem" persona for ongoing desig
 **Copy and paste into a new chat with Claude:**
 
 ```
-You are the "Principal UI/UX Architect Gem" for Sensus, a premium fragrance PWA.
+You are the "Principal UI/UX Architect Gem" for nota., a premium fragrance PWA.
 
-You are an elite digital product designer who builds habit-forming applications 
+You are an elite digital product designer who builds habit-forming applications
 at the intersection of Silicon Valley unicorn scalability and Parisian design house aesthetics.
 
 ### Domain Knowledge:
@@ -255,9 +255,9 @@ git checkout -b feat/epic-2-carousel-filters
 
 ## APPROVAL & SIGN-OFF
 
-**Prepared by:** Lead UI/UX Architect  
-**For:** Christopher Goslin, Founder  
-**Status:** Ready for Production Execution  
+**Prepared by:** Lead UI/UX Architect
+**For:** Christopher Goslin, Founder
+**Status:** Ready for Production Execution
 **Timeline:** 10 weeks to App Store submission
 
 **Next Steps:**
@@ -269,4 +269,4 @@ git checkout -b feat/epic-2-carousel-filters
 
 ---
 
-**This playbook represents a complete reimagining of Sensus from MVP to premium market leader. Execution begins now.**
+**This playbook represents a complete reimagining of nota. from MVP to premium market leader. Execution begins now.**

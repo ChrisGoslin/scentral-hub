@@ -1,7 +1,7 @@
-# Launch Day Checklist — AnotherSense
+# Launch Day Checklist — nota.
 
-**Launch Date:** [INSERT DATE]  
-**Owner:** Christopher  
+**Launch Date:** [INSERT DATE]
+**Owner:** Christopher
 **Estimated Duration:** 24 hours
 
 ---
@@ -88,7 +88,7 @@ Sentry — Errors Dashboard:
 
 ### Tweet / Discord Update
 If metrics on track:
-> 🎉 AnotherSense is LIVE! 50+ users exploring their scent profiles. Building your apothecary shelf in real-time. 💫
+> 🎉 nota. is LIVE! 50+ users exploring their scent profiles. Building your apothecary shelf in real-time. 💫
 
 ---
 
@@ -169,13 +169,13 @@ Analytics:
 
 ### Twitter/Discord Announcement
 If metrics successful:
-> 🚀 AnotherSense Day 1 Wrapped:
+> 🚀 nota. Day 1 Wrapped:
 > • [N]+ sessions
 > • [N]+ scents added to collections
 > • Zero critical outages
-> 
+>
 > Thank you early builders. We're just getting started. 💫
-> 
+>
 > Next: Spritz Schedule drops [DATE]
 
 ---
@@ -231,8 +231,8 @@ If metrics successful:
 
 ## Contacts & Escalation
 
-**Primary Owner:** Christopher  
-**Email:** christophergoslin@outlook.com  
+**Primary Owner:** Christopher
+**Email:** christophergoslin@outlook.com
 **Slack:** [Team Slack channel]
 
 **Escalation:**
@@ -242,6 +242,6 @@ If metrics successful:
 
 ---
 
-**Document Status:** Ready for launch  
-**Last Updated:** 2026-06-21  
+**Document Status:** Ready for launch
+**Last Updated:** 2026-06-21
 **Next Review:** Post-launch day 1

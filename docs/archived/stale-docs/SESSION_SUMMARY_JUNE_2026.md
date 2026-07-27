@@ -1,4 +1,4 @@
-# Scentral Hub — Session Summary (June 3, 2026)
+# nota. Hub — Session Summary (June 3, 2026)
 
 ## 🏛️ Project Status
 - **Root:** `Projects/scentral-hub` (Unified Next.js 16 Monorepo).
@@ -12,7 +12,7 @@
 - **Expansion:** 20 deep-dive brand dossiers in `docs/alchemist-knowledge/`.
 
 ## 🧠 Intellectual Handoff
-1. **Domain Isolation:** Scentral Hub (Execution) vs. Foresight (Intelligence). Never cross-reference.
+1. **Domain Isolation:** nota. Hub (Execution) vs. Foresight (Intelligence). Never cross-reference.
 2. **Empirical Mandate:** Always `curl` the key before trusting the SDK.
 3. **Pessimistic Guards:** Batch scripts must exit code 1 on >5% failure.
 

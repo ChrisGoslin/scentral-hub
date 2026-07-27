@@ -2,7 +2,7 @@
 
 ## 🕵️ Quality & Automation Audit
 
-While Scentral is visually flawless, its lack of automated regression is a "Silent Debt" that will bite us as we add more features like "The Community."
+While nota. is visually flawless, its lack of automated regression is a "Silent Debt" that will bite us as we add more features like "The Community."
 
 ### Current Assessment:
 - **Manual Verification:** High. The developers have done an excellent job of manual smoke-testing.

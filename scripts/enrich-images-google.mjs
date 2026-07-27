@@ -126,7 +126,7 @@ async function findImage(brand, name) {
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
-  console.log('\n🔍 BaseNote — Google Image Enrichment')
+  console.log('\n🔍 nota. — Google Image Enrichment')
   console.log(`   Mode:  ${isDryRun ? 'DRY RUN' : 'LIVE'}`)
   console.log(`   Limit: ${limit || 'none (max 100/day free tier)'}`)
 

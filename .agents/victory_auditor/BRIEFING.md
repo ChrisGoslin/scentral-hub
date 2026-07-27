@@ -1,7 +1,7 @@
 # BRIEFING — 2026-07-08T05:23:50Z
 
 ## Mission
-Conduct a 3-phase victory audit (timeline audit, cheating detection, and independent test execution) on the Scentral Hub implementation to confirm or reject the victory claim.
+Conduct a 3-phase victory audit (timeline audit, cheating detection, and independent test execution) on the nota. implementation to confirm or reject the victory claim.
 
 ## 🔒 My Identity
 - Archetype: victory_auditor
@@ -20,7 +20,7 @@ Conduct a 3-phase victory audit (timeline audit, cheating detection, and indepen
 - Updated: 2026-07-08T05:23:50Z
 
 ## Audit Scope
-- **Work product**: Scentral Hub implementation codebase and test suites
+- **Work product**: nota. implementation codebase and test suites
 - **Profile loaded**: General Project
 - **Audit type**: victory audit
 

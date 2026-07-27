@@ -1,4 +1,4 @@
-# AnotherSense Pre-Submission Checklist
+# nota. Pre-Submission Checklist
 
 ## Purpose
 Complete this checklist BEFORE submitting to Apple App Store or Google Play Store.
@@ -163,7 +163,7 @@ Each BLOCKING item must PASS. NON-BLOCKING items are post-launch hotfixes.
 
 ### Affiliate Disclosure
 - [ ] Affiliate disclosure visible on every fragrance detail page with outbound link
-- [ ] Disclosure text clear: "Some links earn AnotherSense a commission at no cost to you"
+- [ ] Disclosure text clear: "Some links earn nota. a commission at no cost to you"
 - [ ] Affiliate links consistent across all product pages
 - [ ] No hidden or misleading affiliate relationships
 
@@ -360,4 +360,4 @@ Once all above are verified:
 
 | Date | Version | Status |
 |------|---------|--------|
-| 2026-06-21 | 1.0 | Initial presubmission checklist for AnotherSense MVP |
+| 2026-06-21 | 1.0 | Initial presubmission checklist for nota. MVP |

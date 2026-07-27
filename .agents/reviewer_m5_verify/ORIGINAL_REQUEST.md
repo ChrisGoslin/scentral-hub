@@ -1,7 +1,7 @@
 ## 2026-07-08T05:14:02Z
 You are the teamwork_preview_reviewer. Your working directory is `/Users/christophergoslin/Projects/scentral-hub/.agents/reviewer_m5_verify`.
 
-Please review the changes made by the worker in the Scentral Hub codebase to fix ESLint warnings and E2E test failures:
+Please review the changes made by the worker in the nota. codebase to fix ESLint warnings and E2E test failures:
 - `/Users/christophergoslin/Projects/scentral-hub/app/(main)/collection/WardrobeShelf.tsx` (ESLint quote fixes, React hooks ordering fixes, and useRef positioning fixes)
 - `/Users/christophergoslin/Projects/scentral-hub/e2e/shelf.spec.ts` (URL encoding match)
 - `/Users/christophergoslin/Projects/scentral-hub/e2e/onboarding.spec.ts` (onboarding reveal wait timeout increase)

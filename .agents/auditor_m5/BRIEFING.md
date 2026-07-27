@@ -1,7 +1,7 @@
 # BRIEFING — 2026-07-08T01:44:00Z
 
 ## Mission
-Audit changes in Scentral Hub components for Milestone 5 to verify integrity and correctness.
+Audit changes in nota. components for Milestone 5 to verify integrity and correctness.
 
 ## 🔒 My Identity
 - Archetype: forensic_auditor
@@ -20,7 +20,7 @@ Audit changes in Scentral Hub components for Milestone 5 to verify integrity and
 - Updated: 2026-07-08T01:44:00Z
 
 ## Audit Scope
-- **Work product**: Scentral Hub Milestone 5 codebase changes
+- **Work product**: nota. Milestone 5 codebase changes
 - **Profile loaded**: General Project
 - **Audit type**: forensic integrity check
 

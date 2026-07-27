@@ -2,14 +2,14 @@
 
 This document is historical and must not be used as current project truth. It is superseded by `AGENTS.md`, `CLAUDE.md`, `docs/index.md`, and `docs/HANDOVER.md` in the live nota. repo. Several claims below, including "100% complete" and App Store readiness, are stale.
 
-# Scentral Hub — Session Handover
+# nota. Hub — Session Handover
 
-**Date:** 2026-06-18  
+**Date:** 2026-06-18
 **Purpose:** Paste this into a new Claude/Cowork chat to bootstrap full project context immediately.
 
 ---
 
-## What Scentral is
+## What nota. is
 
 A fragrance wardrobe PWA targeting App Store + Play Store launch. Think "Letterboxd for fragrance."
 - **Live:** https://scentral-hub.vercel.app
@@ -58,8 +58,8 @@ A fragrance wardrobe PWA targeting App Store + Play Store launch. Think "Letterb
 
 ## Next tasks (in priority order)
 
-🎉 **All pre-launch MVPs and stretch goals are completely finished.** 
-- 100% of the Scentral app is green and verified.
+🎉 **All pre-launch MVPs and stretch goals are completely finished.**
+- 100% of the nota. app is green and verified.
 - The build is stable and pushed to Vercel/GitHub.
 - Ready for immediate submission to User Acceptance Testing (UAT) and the App Store!
 

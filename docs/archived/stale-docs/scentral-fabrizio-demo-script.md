@@ -1,11 +1,11 @@
-# Scentral — Fabrizio Demo Script
+# nota. — Fabrizio Demo Script
 _Monday 19 May 2026_
 
 ---
 
 ## Before you start
 
-- Open Scentral on your phone (or share screen from laptop)
+- Open nota. on your phone (or share screen from laptop)
 - Make sure you're on the live Vercel URL — not localhost
 - Have His Confession and Liam Grey in mind as your hero combo
 - Keep it under 10 minutes — show, don't tell
@@ -40,11 +40,11 @@ Say: *"His Confession is my anchor — 10/10, Beast Mode projection, Chest + Nec
 
 Tap the Lab tab in the bottom nav. You're now on `/layering`.
 
-Say: *"The Layering Lab. I search for any fragrance in my collection, and Scentral shows me everything it's compatible with — based on olfactory phase, not just vibes."*
+Say: *"The Layering Lab. I search for any fragrance in my collection, and nota. shows me everything it's compatible with — based on olfactory phase, not just vibes."*
 
 Type "His Confession" in the search. Tap it.
 
-Say: *"Phase 1 Anchor selected. Now Scentral shows me all my Phase 2 and Phase 3 fragrances it can pair with — because you can't layer two Anchors, the chemistry clashes."*
+Say: *"Phase 1 Anchor selected. Now nota. shows me all my Phase 2 and Phase 3 fragrances it can pair with — because you can't layer two Anchors, the chemistry clashes."*
 
 Point to the Expert Protocols section on the right.
 
@@ -58,7 +58,7 @@ Select **Liam Grey** from the compatible pairings list.
 
 With His Confession + Liam Grey selected, set the context:
 - Time of day: Evening
-- Weather: Cool  
+- Weather: Cool
 - Occasion: Date
 
 Hit **✦ Formulate This Combo**.

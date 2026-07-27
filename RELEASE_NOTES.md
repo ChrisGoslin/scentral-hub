@@ -1,8 +1,8 @@
-# AnotherSense — Release Notes
+# nota. — Release Notes
 
 ## Version 0.1.0 — June 21, 2026
 
-**AnotherSense** is a fragrance discovery and collection management app for iOS, Android, and web. Built for scent enthusiasts to explore, collect, and curate their personal fragrance wardrobe.
+**nota.** is a fragrance discovery and collection management app for iOS, Android, and web. Built for scent enthusiasts to explore, collect, and curate their personal fragrance wardrobe.
 
 ### ✨ Core Features
 
@@ -54,7 +54,7 @@
 
 ### 🎨 **Design & Experience**
 
-- **AnotherSense Aura Design Language** — dark mode with amber-gold accents, walnut cabinet aesthetic
+- **nota. Aura Design Language** — dark mode with amber-gold accents, walnut cabinet aesthetic
 - **Ceremonial animations** — smooth transitions for persona reveals, shelf reorganization, profile discoveries
 - **Responsive design** — seamless experience on mobile (iOS/Android) and desktop (PWA)
 - **No login required** — anonymous identity via localStorage UUID
@@ -82,7 +82,7 @@
 
 ### 🚀 **Getting Started**
 
-1. **Visit**: [scentral-seven.vercel.app](https://scentral-seven.vercel.app)
+1. **Visit**: [scentral-hub.vercel.app](https://scentral-hub.vercel.app)
 2. **Onboard**: 3-step ceremony (sanctuary reveal → projection preference → context → persona match)
 3. **Discover**: Browse 282+ fragrances, add to collection
 4. **Collect**: Drag your bottles onto the Living Wardrobe shelf
@@ -112,4 +112,4 @@
 
 ---
 
-**AnotherSense** — *Discover the scent that resonates with you.* ✨
+**nota.** — *Discover the scent that resonates with you.* ✨

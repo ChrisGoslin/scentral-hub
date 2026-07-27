@@ -1,4 +1,4 @@
-# BaseNote — Claude Code Prompts
+# nota. — Claude Code Prompts
 
 **Sprint 1–5 COMPLETE** (2026-06-28). Archive: docs/archive/CLAUDE_CODE_PROMPTS_sprint1-5_complete.md
 **Sprint 6–7 COMPLETE** (2026-06-29). All four prompts landed via independent commits:

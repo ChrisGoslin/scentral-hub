@@ -1,7 +1,7 @@
 # BRIEFING — 2026-07-08T05:14:02Z
 
 ## Mission
-Review ESLint and E2E fixes in the Scentral Hub project, verify hooks correctness, run tests and lint, and provide approval verdict.
+Review ESLint and E2E fixes in the nota. project, verify hooks correctness, run tests and lint, and provide approval verdict.
 
 ## 🔒 My Identity
 - Archetype: reviewer_and_adversarial_critic

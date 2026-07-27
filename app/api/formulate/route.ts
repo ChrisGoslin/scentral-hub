@@ -1,5 +1,5 @@
 // app/api/formulate/route.ts
-// Scentral — Formulate engine
+// nota. — Formulate engine
 // POST /api/formulate
 // Input: fragrance1 (name+brand+phase+family), fragrance2 (same), context (time/weather/occasion)
 // Output: combo_name, application_steps[], sillage_prediction, occasion_tag, claude_note
@@ -52,7 +52,7 @@ type FormulateRequest = {
   };
 };
 
-const SYSTEM_PROMPT = `You are Scentral's Formulate engine — a fragrance chemistry expert and master perfumer.
+const SYSTEM_PROMPT = `You are nota.'s Formulate engine — a fragrance chemistry expert and master perfumer.
 
 Your role is to analyse two fragrances being layered together and generate:
 1. A creative, shareable combo name (2-4 words, evocative, TikTok-ready)
@@ -168,7 +168,7 @@ export async function POST(req: Request) {
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
-        { error: 'Formulate is not configured yet. Missing ANTHROPIC_API_KEY.' },
+        { error: 'Formulate is not configured yet. Please try again later.' },
         { status: 500 }
       );
     }

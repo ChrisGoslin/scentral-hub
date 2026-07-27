@@ -1,7 +1,7 @@
 APP STORE SCREENSHOTS - CAPTURE COMPLETE
 =========================================
 
-Project: AnotherSense (scentral-hub)
+Project: nota. (scentral-hub)
 Date Captured: 2026-06-21
 App URL: https://scentral-seven.vercel.app
 
@@ -16,7 +16,7 @@ Location: assets/app-store-screenshots/ios/
 
 Files captured (5 screens):
   1. ios_landing_1284x2778.png (35 KB)
-     - Landing page: AnotherSense branding, onboarding entry
+     - Landing page: nota. branding, onboarding entry
   2. ios_discover_1284x2778.png (44 KB)
      - Discovery & Search: Fragrance catalogue exploration
   3. ios_collection_1284x2778.png (44 KB)
@@ -34,7 +34,7 @@ Location: assets/app-store-screenshots/android/
 
 Files captured (5 screens):
   1. android_landing_1440x3200.png (36 KB)
-     - Landing page: AnotherSense branding, onboarding entry
+     - Landing page: nota. branding, onboarding entry
   2. android_discover_1440x3200.png (47 KB)
      - Discovery & Search: Fragrance catalogue exploration
   3. android_collection_1440x3200.png (47 KB)
@@ -105,7 +105,7 @@ iOS (App Store Connect):
   2. Screenshots must be: 1284×2778 px (PNG format) ✓
   3. Maximum 10 screenshots per language/locale
   4. Currently have: 5 screenshots (add more if desired)
-  
+
 Android (Google Play Console):
   1. Upload screenshots to Google Play Console
   2. Phone screenshots must be: 1440×3200 px (PNG format) ✓

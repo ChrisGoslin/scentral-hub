@@ -1,4 +1,4 @@
-# AnotherSense Skills Directory
+# nota. Skills Directory
 
 Catalog of skills for Claude Code (and reference material for other CLI tools) working on
 scentral-hub.
@@ -71,7 +71,7 @@ the `SKILL.md` directly; `AGENTS.md` points to the ones that matter at session s
 - `.gemini/skills/sovereign-orchestrator/SKILL.md` — a Gemini-CLI-specific meta-agent persona
   skill (not a Claude Code skill, different tool/format). Legitimate, not lore — despite the
   "Sovereign" branding echoing AGENTS.md's forbidden "Hegemony/Sovereignty" *product-feature*
-  fabrications, this is a tool persona, not an invented Scentral feature. Left as-is.
+  fabrications, this is a tool persona, not an invented nota. feature. Left as-is.
 - `.agents/skills/supabase/` and `.agents/skills/supabase-postgres-best-practices/` — vendor-
   maintained by Supabase (versioned, `metadata.author: supabase`), not project-authored. Don't
   edit these; they update via the Supabase plugin, not manually.

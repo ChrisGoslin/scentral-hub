@@ -1,5 +1,5 @@
 /**
- * Scentral Service Worker
+ * nota. Service Worker
  * Using Workbox via CDN for simplicity in dev/production without complex bundling.
  */
 

@@ -241,7 +241,7 @@ Until measured, the hold ships behind the three escape hatches documented in §8
 
 Naming register unchanged: short, concrete, slightly literary nouns. Never tech-y compounds (`nota.lab`, `ScentMatch`, `FragranceAI`) and never gamified labels (Streaks, XP, Badges).
 
-Retired product names — Scentral, BaseNote, AnotherSense, ScentOI, NosePrint™, ScentBloom™, Scent Tarot™ — never appear in new user-facing work.
+Retired product names — BaseNote, Scentral, AnotherSense, Fragrance Community, Sensus, ScentOI, NosePrint™, ScentBloom™, Scent Tarot™ — never appear in new user-facing work. This guardrail intentionally names retired brands; do not mechanically rewrite this line.
 
 ## 13. Definition of done
 

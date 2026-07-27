@@ -4,7 +4,7 @@ Paste this exactly into Claude Code from your ~/projects/scentral folder.
 
 ---
 
-I'm building Scentral — a personal fragrance intelligence tool. I need to wire the Formulate feature end-to-end.
+I'm building nota. — a personal fragrance intelligence tool. I need to wire the Formulate feature end-to-end.
 
 ## Step 1 — Install Anthropic SDK
 
@@ -53,7 +53,7 @@ const handleFormulate = async () => {
   setFormulating(true);
   setFormulateResult(null);
   setFormulateError(null);
-  
+
   try {
     const res = await fetch('/api/formulate', {
       method: 'POST',
@@ -68,7 +68,7 @@ const handleFormulate = async () => {
         }
       })
     });
-    
+
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Formulate failed');
     setFormulateResult(data.result);
@@ -180,7 +180,7 @@ Add ANTHROPIC_API_KEY to Vercel dashboard → Settings → Environment Variables
 
 ## What selectedPairing needs to contain
 
-The LayeringClient needs a second state `selectedPairing` that captures the full fragrance object (not just the ID) when the user clicks a compatible fragrance in the pairing list. 
+The LayeringClient needs a second state `selectedPairing` that captures the full fragrance object (not just the ID) when the user clicks a compatible fragrance in the pairing list.
 
 If `selectedPairing` doesn't exist yet, add:
 ```typescript

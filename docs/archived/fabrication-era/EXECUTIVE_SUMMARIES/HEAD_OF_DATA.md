@@ -2,7 +2,7 @@
 
 ## 🧠 Data Strategy & Resonance Accuracy
 
-Data is the lifeblood of Scentral. Our transition to vector-based resonance mapping is a massive leap forward for the industry.
+Data is the lifeblood of nota. Our transition to vector-based resonance mapping is a massive leap forward for the industry.
 
 ### Data Strengths:
 - **Semantic Mapping:** By using `gemini-embedding-001`, we are identifying pairings based on the *soul* of the fragrance (the notes) rather than just the label. This is "Sensory Sovereignty" in action.

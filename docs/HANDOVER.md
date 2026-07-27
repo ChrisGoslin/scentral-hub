@@ -146,13 +146,13 @@
 
 ## Historical implementation snapshot — 2026-07-04
 
-**Date:** 2026-07-04  
-**Status:** ✅ LAUNCHED (Tier 1 & 2 complete)  
-**PM Owner:** [Your Name]  
-**Tech Owner:** Christopher Goslin  
-**Repository:** https://github.com/ChrisGoslin/scentral-hub  
-**Deployment:** https://scentral-hub.vercel.app  
-**Vercel Project:** scentral-hub  
+**Date:** 2026-07-04
+**Status:** ✅ LAUNCHED (Tier 1 & 2 complete)
+**PM Owner:** [Your Name]
+**Tech Owner:** Christopher Goslin
+**Repository:** https://github.com/ChrisGoslin/scentral-hub
+**Deployment:** https://scentral-hub.vercel.app
+**Vercel Project:** scentral-hub
 **Database:** scentral-mvp (lrkdwobnemczvhpixpky) — Supabase
 
 ---
@@ -165,7 +165,7 @@ All critical pre-launch gaps resolved:
 - **Blind Buy Tracking:** Column + trigger to identify blind-ranking purchases
 - **Identity Migration:** user_id integration with dual-auth (anon_id + authenticated)
 - **Rate Limiting:** Server-side 1-per-hour cap on identity generation (/api/read/generate)
-- **Brand System:** Unified tone (BRAND.md), Dot component, all BaseNote/AnotherSense refs removed
+- **Brand System:** Unified tone (BRAND.md), Dot component, all legacy refs removed
 
 ### Tier 2 (High Priority) — ✅ COMPLETE
 - **3 Foundational Trails:** Spraying Technique, Longevity & Skin Chemistry, Anosmia
@@ -259,10 +259,10 @@ supabase migration list --project-id lrkdwobnemczvhpixpky
 | `app/api/shelf/route.ts` | SHELF_SIZE: 10→20 |
 | `app/api/read/generate/route.ts` | +Server-side hourly rate limit |
 | `app/auth/callback/route.ts` | +Legacy data claim on auth success |
-| `app/components/AuraShareCard.tsx` | BASENOTE→NOTA., ANOTHERSENSE→NOTA.APP |
-| `app/(main)/collection/[id]/GiftThis.tsx` | basenote.png→nota.png |
-| `app/(main)/terms/page.tsx` | BASENOTE→NOTA. |
-| `app/onboarding/page.tsx` | basenote.app→nota.app |
+| `app/components/AuraShareCard.tsx` | nota.→NOTA., nota.→NOTA.APP |
+| `app/(main)/collection/[id]/GiftThis.tsx` | legacy brand image→nota.png |
+| `app/(main)/terms/page.tsx` | nota.→NOTA. |
+| `app/onboarding/page.tsx` | legacy brand domain→nota.app |
 
 ---
 
@@ -316,8 +316,8 @@ Dual-auth RLS policies allow both:
 POST /api/read/generate
   ↓
 Check: have they generated in the last hour?
-  SELECT COUNT(*) FROM interactions 
-  WHERE user_id = ? AND event_type = 'read_generated' 
+  SELECT COUNT(*) FROM interactions
+  WHERE user_id = ? AND event_type = 'read_generated'
   AND created_at > now() - interval '1 hour'
   ↓
 If count ≥ 1 → return 429 (rate limited)
@@ -430,8 +430,8 @@ EOF
 1. Check if user's interactions have old `read_generated` events
 2. Clear old events if needed:
    ```sql
-   DELETE FROM interactions 
-   WHERE user_id = ? AND event_type = 'read_generated' 
+   DELETE FROM interactions
+   WHERE user_id = ? AND event_type = 'read_generated'
    AND created_at < now() - interval '24 hours';
    ```
 
@@ -496,5 +496,5 @@ EOF
 
 ---
 
-**Handover Date:** 2026-07-04  
+**Handover Date:** 2026-07-04
 **Status:** Ready for launch ✅

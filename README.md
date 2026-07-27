@@ -7,7 +7,7 @@
 
 ## 🔑 Ground Truth
 - **Current user-facing brand:** nota.
-- **Brand history:** Scentral Hub → AnotherSense → BaseNote → nota. Older names may remain in repo names, database names, localStorage keys, archived docs, or old prompts.
+- **Brand history:** current user-facing brand is nota. Older names may remain in repo names, database names, localStorage keys, archived docs, or old prompts.
 - **Repo / DB names:** Keep internal DB identifiers like `scentral-mvp` unchanged unless explicitly approved. Always verify the current Git remote and checkout name instead of assuming the repo is still called `scentral-hub`.
 - **Live app:** https://scentral-hub.vercel.app
 - **Latest source of truth:** `AGENTS.md`, `docs/HANDOVER.md`, and `docs/nota/`.

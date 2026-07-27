@@ -1,8 +1,8 @@
-# Scentral Hub: Retrospective V1 (June 2026)
+# nota. Hub: Retrospective V1 (June 2026)
 
 ## 🔍 "If it was built again from the beginning..."
 
-While the current Scentral Hub is a high-fidelity "Masterpiece Ready" platform, building it again from scratch would allow for several structural improvements based on our learnings during the Morocco Demo phase.
+While the current nota. Hub is a high-fidelity "Masterpiece Ready" platform, building it again from scratch would allow for several structural improvements based on our learnings during the Morocco Demo phase.
 
 ### 1. Data-First Architecture
 - **The Issue:** We relied on scraping Jomashop via Playwright, which is prone to selector drift and timeouts.

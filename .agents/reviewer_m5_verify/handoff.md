@@ -54,7 +54,7 @@ No visual snapshot validation was run in headed/browsed mode (headless only). Th
 
 ## 4. Conclusion
 **Verdict: APPROVE**
-The worker's changes to the Scentral Hub codebase to fix E2E tests, ESLint, React hook declarations, and ref accesses are correct, conformant to layout rules, type-safe, and ready for release.
+The worker's changes to the nota. codebase to fix E2E tests, ESLint, React hook declarations, and ref accesses are correct, conformant to layout rules, type-safe, and ready for release.
 
 ## 5. Verification Method
 To independently verify the codebase integrity:

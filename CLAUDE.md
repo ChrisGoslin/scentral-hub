@@ -12,9 +12,9 @@
 - **Emotional loop:** understands me → reflects me → evolves me → connects me to others.
 - **Tone:** calm, intelligent, observational, slightly playful, restrained. No hype, no luxury clichés, no generic AI language.
 - **2036 test:** reject anything trendy or clever-for-its-own-sake.
-- **Rebrand history:** Scentral → BaseNote → AnotherSense (docs only) → **nota.** (2026-07-04, per founder brief; the brief is the doctrine source — no separate handover doc exists in-repo[...])
+- **Rebrand history:** the current user-facing brand is **nota.** (2026-07-04, per founder brief; the brief is the doctrine source). Older names may still exist in archived history, but should not be reintroduced into current product surfaces.
 - **Consolidation (2026-07-08):** Two repos (`scentral`, `scentral-hub`) merged into single canonical repo. `scentral` archived (read-only). See MERGE_SUMMARY.md.
-- **⚠️ Rebrand debt (RESOLVED 2026-07-08):** All display strings updated to nota. (was: BaseNote in metadata, lib/affiliates.ts; AnotherSense in docs).
+- **Rebrand debt (RESOLVED 2026-07-08):** All display strings updated to nota. Current product surfaces should not reintroduce retired names.
 
 ## 2. Stack (verified from repo, 2026-07-04; updated 2026-07-08 post-merge)
 
@@ -85,7 +85,7 @@ Next.js 16.2.9 (App Router, route groups `(main)` `(community)` `(account)`), Re
 
 - 6 scent-identity personas in `lib/personas.ts` (canonical, never inline).
 - XP 6 levels (0/100/300/600/1000/1500); writes `user_xp` + `as_xp` localStorage.
-- Customer personas: Gavin (newcomer), Christopher (enthusiast) — `SCENTRAL_PERSONAS.md`.
+- Customer personas: Gavin (newcomer), Christopher (enthusiast) — `lib/personas.ts`.
 
 ## 11. Operational rules (binding, from AGENTS.md — do not relearn these the hard way)
 
@@ -109,6 +109,6 @@ Next.js 16.2.9 (App Router, route groups `(main)` `(community)` `(account)`), Re
 - **Phase 2 (2026-07-04):** Brand pack + DS audit → `docs/nota/02-brand-pack.md`, `03-design-system-audit.md`. Wordmark Route A (minimal humanist, gold dot); dot state machine defined; Unbounde[...]
 - **Phase 3 (2026-07-04):** Architecture → `docs/nota/04-architecture-plan.md`. RLS verified sound; 7 DB-### proposed changes (SQL shown, NOT applied — eligibility statuses, blind_buy, 20-ran[...]
 - **Migrations approved & applied (2026-07-04):** Founder approved Deliverable D §2. Live DB now has: collections status incl. 'tested'/'past_purchase' (pre-existed — Phase 0's "only owned/wis[...]
-- **Phase 4 (2026-07-04):** Backlog + safe diffs → `docs/nota/05-recommendations-backlog.md`. Applied: full display-layer rebrand BaseNote→nota. (~30 files, display strings/metadata/OG only),[...]
+- **Phase 4 (2026-07-04):** Backlog + safe diffs → `docs/nota/05-recommendations-backlog.md`. Applied: full display-layer rebrand to nota. (~30 files, display strings/metadata/OG only),[...]
 - **Phase 5 (2026-07-04):** Testing/security/abuse layer → `docs/nota/06-testing-security-abuse.md` + three living skills (`.claude/skills/{qe-automation,security-hardening,resilience-abuse}/`,[...]
 - **Phase 6 (2026-07-08):** Repository consolidation: `scentral` + `scentral-hub` → **nota** (single canonical repo). Deduplicated code/deps, archived legacy docs to `docs/ARCHIVE/`, updated Sentry org ID. See MERGE_SUMMARY.md.

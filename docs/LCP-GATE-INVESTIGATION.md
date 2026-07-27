@@ -47,7 +47,7 @@ The agent's prediction of 54% improvement was not realized. Possible causes:
 
 ## Current State
 
-**Production deployment:** All 5 optimizations live on main, auto-deployed to scentral-seven.vercel.app
+**Production deployment:** All 5 optimizations live on main, auto-deployed to scentral-hub.vercel.app
 **Git commits:** 7 commits since start of session (historical investigation; LCP gate now closed)
 **E2E tests:** 88/96 passing (hero-screen-states tests added, but don't measure LCP)  
 **Rollback status:** No documented rollback path exists

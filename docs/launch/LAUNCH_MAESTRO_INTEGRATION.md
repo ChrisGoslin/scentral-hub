@@ -1,7 +1,7 @@
 # Launch Maestro Integration Guide
 
-**Plugin location:** `~/.claude/plugins/launch-maestro/`  
-**Available agents:** `launch-coordinator`, `engagement-responder`  
+**Plugin location:** `~/.claude/plugins/launch-maestro/`
+**Available agents:** `launch-coordinator`, `engagement-responder`
 **Status:** Ready to use immediately
 
 ---
@@ -52,13 +52,13 @@ The agents pull template responses directly from your launch asset documents. Th
 Edit `/Users/christophergoslin/Projects/scentral-hub/docs/launch/LAUNCH_DATE.md`:
 
 ```markdown
-# Scentral Launch Date + Key Milestones
+# nota. Launch Date + Key Milestones
 
 **SET THIS FIRST. All timeline references are relative to T+0.**
 
 ## Launch Day (T+0)
 
-**Date:** [YOUR DATE HERE]  
+**Date:** [YOUR DATE HERE]
 **Time:** 12:01 AM PST (3:01 AM EST / 8:01 AM GMT)
 ```
 

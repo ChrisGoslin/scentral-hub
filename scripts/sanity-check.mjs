@@ -14,7 +14,7 @@ const COLORS = {
 };
 
 async function runCheck() {
-  console.log(`${COLORS.bold}🏛️ SCENTRAL HUB: EVP SANITY CHECK${COLORS.reset}\n`);
+  console.log(`${COLORS.bold}🏛️ nota. HUB: EVP SANITY CHECK${COLORS.reset}\n`);
 
   let totalFailures = 0;
 
@@ -37,15 +37,15 @@ async function runCheck() {
 
   // ── 2. Next.js 16 Architectural Scan ───────────────────────────────────────
   console.log(`\n${COLORS.cyan}[2/4] Scanning for Next.js 16 Violations...${COLORS.reset}`);
-  
+
   // Find all server-side files
   const serverFiles = execSync('find app utils proxy.ts -name "*.ts" -o -name "*.tsx" | grep -v ".client.tsx"').toString().split('\n').filter(Boolean);
-  
+
   let architectureDebt = 0;
 
   for (const file of serverFiles) {
     const content = fs.readFileSync(file, 'utf8');
-    
+
     // Skip client components
     if (content.includes("'use client'") || content.includes('"use client"')) continue;
 
@@ -53,7 +53,7 @@ async function runCheck() {
     // Pattern: not "await", followed by some optional space/comments, then "createClient("
     const unawaitedCreatePattern = /(?<!await\s+)\bcreateClient\(/g;
     const matches = content.match(unawaitedCreatePattern);
-    
+
     // Pattern: synchronous cookies()
     const syncCookiesPattern = /(?<!await\s+)\bcookies\(\)/g;
     const cookieMatches = content.match(syncCookiesPattern);
@@ -75,13 +75,13 @@ async function runCheck() {
 
   // ── 3. Schema Cache Verification ───────────────────────────────────────────
   console.log(`\n${COLORS.cyan}[3/4] Verifying Supabase Schema...${COLORS.reset}`);
-  
+
   try {
     // We use node-fetch or similar if available, but let's try a simple curl-like check via node
     const checkSql = "import { createClient } from '@supabase/supabase-js'; const s = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY); s.rpc('resonance_match', { query_embedding: Array(3072).fill(0), match_threshold: 0.1, match_count: 1 }).then(r => console.log(r.error ? 'FAIL:' + r.error.code : 'OK'))";
-    
+
     const schemaResult = execSync(`node --input-type=module -e "${checkSql}"`, { env: process.env }).toString().trim();
-    
+
     if (schemaResult === 'OK') {
       console.log(`${COLORS.green}✅ resonance_match function is active and dimensions match (3072).${COLORS.reset}`);
     } else if (schemaResult.includes('FAIL:PGRST202')) {

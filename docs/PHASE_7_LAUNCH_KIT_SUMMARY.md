@@ -1,8 +1,8 @@
 # Phase 7 Launch Kit — Complete Summary
 
-**Date Prepared:** July 3, 2026  
-**Scope:** BaseNote App Store launch (iOS + Android)  
-**Deliverables:** 6 comprehensive markdown documents + 1 dynamic OG route  
+**Date Prepared:** July 3, 2026
+**Scope:** nota. App Store launch (iOS + Android)
+**Deliverables:** 6 comprehensive markdown documents + 1 dynamic OG route
 
 ---
 
@@ -11,7 +11,7 @@
 ### A. Imagery Brief (`docs/IMAGERY_BRIEF.md`)
 **11.8 KB — Visual language direction for launch marketing**
 
-Defines BaseNote's anti-influencer, human-centered visual identity:
+Defines nota.'s anti-influencer, human-centered visual identity:
 - **Core principle:** Light through glass, trace not glamour
 - **Production briefs** for photographer/designer: Shelf Study, Trace Study, Morning Ritual, Hands Detail, Seasonal Moments
 - **Banned tropes:** Bottles-as-glamour, flowers, gold/marble, yachts, AI gradients, influencers, posed beauty
@@ -44,7 +44,7 @@ Comprehensive audit of every animation across all pages:
 
 Eliminates manual social preview image creation:
 - **Route:** `GET /api/og/template?type={type}&[brand=...&name=...&family=...]`
-- **Supported types:** home (BaseNote hero), fragrance (gradient + brand/name), insight (persona card), trace (moment in time)
+- **Supported types:** home (nota. hero), fragrance (gradient + brand/name), insight (persona card), trace (moment in time)
 - **Query parameters:**
   - `type`: home | fragrance | insight | trace
   - `brand`: Fragrance brand name (fragrance only)
@@ -240,8 +240,8 @@ Pre-launch & launch-day control checklist (to be completed before app store subm
 
 ---
 
-**Commit:** 2398d51  
-**Phase:** 7 (Launch Kit Preparation)  
+**Commit:** 2398d51
+**Phase:** 7 (Launch Kit Preparation)
 **Date:** July 3, 2026
 
-*This Launch Kit is the foundation for BaseNote's App Store debut. After Phase 7, it becomes the operations manual for Phase 8 (feedback integration, feature iteration, geographic expansion).*
+*This Launch Kit is the foundation for nota.'s App Store debut. After Phase 7, it becomes the operations manual for Phase 8 (feedback integration, feature iteration, geographic expansion).*

@@ -38,7 +38,7 @@ export default function TermsPage() {
       <section style={{ marginBottom: 32 }}>
         <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>3. Age Requirement</h2>
         <p>
-          You must be at least 13 years old to use nota.. If you are under 13, you must have
+          You must be at least 13 years old to use nota. If you are under 13, you must have
           parental or guardian consent. We do not knowingly collect personal information from users
           under 13 without such consent.
         </p>

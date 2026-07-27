@@ -8,8 +8,8 @@ export type SimilarityExplanation = {
 
 export function getSimilarityExplanation(
   scorePct: number,     // 0–100 from inspired_by confidence or manual
-  targetName: string,   // the designer original  
-  cloneName: string,    // the Scentral catalogue entry
+  targetName: string,   // the designer original
+  cloneName: string,    // the nota. catalogue entry
 ): SimilarityExplanation {
   if (scorePct >= 90) return {
     title: "Practically twins",

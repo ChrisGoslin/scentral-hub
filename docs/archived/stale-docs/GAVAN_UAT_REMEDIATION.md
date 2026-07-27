@@ -1,13 +1,13 @@
-# Scentral Hub — Gavan's UAT Critique & Remediation
-> **Date:** 2026-06-19  
-> **Evaluator:** Gavan (Senior Engineer, Minimalist, "Yes, And..." Advocate)  
+# nota. Hub — Gavan's UAT Critique & Remediation
+> **Date:** 2026-06-19
+> **Evaluator:** Gavan (Senior Engineer, Minimalist, "Yes, And..." Advocate)
 > **Status:** Two critical UX friction points identified & fixed with production-ready code
 
 ---
 
 ## Executive Summary
 
-Scentral's architecture is **launch-ready** across landing page (LCP 1.8s), Discover (FID 85ms), and most interactions. However, two high-impact UX friction points were identified during UAT that violate Google Core Web Vitals on budget phones and break accessibility standards:
+nota.'s architecture is **launch-ready** across landing page (LCP 1.8s), Discover (FID 85ms), and most interactions. However, two high-impact UX friction points were identified during UAT that violate Google Core Web Vitals on budget phones and break accessibility standards:
 
 1. **Anchor Unlock FID Budget Violation** — 400ms long-press delay on Moto G7 (4x budget)
 2. **Collection Modal Focus Trap Broken** — Can scroll behind modal; no ARIA compliance
@@ -218,8 +218,8 @@ scentral-hub/
 1. **Review the two new components** — Verify CSS variables align with `lib/design/tokens.css`
 2. **Delegate to Claude Code** — Paste this remediation doc + both component files into a fresh Claude Code session with prompt:
    ```
-   Integrate OptimizedBottleCard.tsx and CollectionShelfModal.tsx into the collection 
-   page. Replace existing BottleCard and modal implementations. Verify Lighthouse scores 
+   Integrate OptimizedBottleCard.tsx and CollectionShelfModal.tsx into the collection
+   page. Replace existing BottleCard and modal implementations. Verify Lighthouse scores
    post-integration (LCP < 2.5s, FID < 100ms, CLS < 0.1, Accessibility 90+).
    ```
 3. **Run Lighthouse on production deployment** — Confirm FID fix on Moto G7 throttling

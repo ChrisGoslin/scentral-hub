@@ -2,7 +2,7 @@
 
 ## 💎 The Prestige Audit: Aesthetic Integrity
 
-The "Quiet Luxury" overhaul is a triumph. Scentral no longer feels like a "software app"—it feels like a digital atelier. 
+The "Quiet Luxury" overhaul is a triumph. nota. no longer feels like a "software app"—it feels like a digital atelier.
 
 ### Audit Results:
 - **Background Compliance:** 100%. `Stone-50` provides the necessary "editorial" warmth.

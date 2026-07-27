@@ -1,8 +1,8 @@
-# AnotherSense — Monitoring & Analytics Stack
+# nota. — Monitoring & Analytics Stack
 
-**Status:** ✅ Production-ready  
-**Last verified:** 2026-06-21  
-**Owner:** Christopher  
+**Status:** ✅ Production-ready
+**Last verified:** 2026-06-21
+**Owner:** Christopher
 **Stack:** PostHog (behavioral) + Sentry (errors)
 
 ---
@@ -92,7 +92,7 @@ track('social_content_viewed', { type: 'tiktok' | 'youtube' })
 
 ### Prerequisites
 1. Create PostHog account: https://posthog.com
-2. Create project "AnotherSense"
+2. Create project "nota."
 3. Copy `NEXT_PUBLIC_POSTHOG_KEY` to `.env.local`
 4. Add to Vercel production env vars
 
@@ -117,17 +117,17 @@ track('social_content_viewed', { type: 'tiktok' | 'youtube' })
    - Event: $pageview
    - Time range: Last 24h
    - Breakdown: None
-   
+
    NEW INSIGHT: Persona Revealed
    - Type: Trend
    - Event: persona_revealed
    - Time range: Last 24h
-   
+
    NEW INSIGHT: Bottles Added
    - Type: Trend
    - Event: bottle_added
    - Time range: Last 24h
-   
+
    NEW INSIGHT: Session Duration
    - Type: Trend
    - Event: $pageview
@@ -184,18 +184,18 @@ track('social_content_viewed', { type: 'tiktok' | 'youtube' })
    - Filter: pathname = "/discover"
    - Breakdown: None
    - Time range: Last 7 days
-   
+
    NEW INSIGHT: Collection Usage
    - Type: Trend
    - Event: bottle_added
    - Time range: Last 7 days
    - Breakdown: None
-   
+
    NEW INSIGHT: Layering Usage
    - Type: Trend
    - Event: layering_started
    - Time range: Last 7 days
-   
+
    NEW INSIGHT: Social Views
    - Type: Trend
    - Event: $pageview
@@ -219,7 +219,7 @@ track('social_content_viewed', { type: 'tiktok' | 'youtube' })
    Alert 1: High Error Rate
    - Condition: events > 10 in 1 hour
    - Actions: Email + Slack
-   
+
    Alert 2: New Issue
    - Condition: Any new error
    - Actions: Email
@@ -233,7 +233,7 @@ track('social_content_viewed', { type: 'tiktok' | 'youtube' })
    - Type: Trends
    - Event: $pageview
    - Breakdown: None
-   
+
    (Note: JS errors caught by Sentry; PostHog shows page navigations)
    ```
 
@@ -242,8 +242,8 @@ track('social_content_viewed', { type: 'tiktok' | 'youtube' })
 ## 4. Custom Alerts (PostHog)
 
 ### Alert 1: Funnel Dropout
-**Trigger:** If `bottle_added` < 10 in 24 hours  
-**Action:** Email + Slack  
+**Trigger:** If `bottle_added` < 10 in 24 hours
+**Action:** Email + Slack
 **Reason:** Indicates onboarding flow broken or low conversion
 
 **Setup:**
@@ -253,8 +253,8 @@ track('social_content_viewed', { type: 'tiktok' | 'youtube' })
 4. Frequency: 1x per day
 
 ### Alert 2: High Error Rate
-**Trigger:** Sentry errors > 5 in 1 hour  
-**Action:** Email + Slack  
+**Trigger:** Sentry errors > 5 in 1 hour
+**Action:** Email + Slack
 **Reason:** Immediate stability risk
 
 **Setup (Sentry):**
@@ -264,8 +264,8 @@ track('social_content_viewed', { type: 'tiktok' | 'youtube' })
 4. Notification: Email + Slack
 
 ### Alert 3: API Latency
-**Trigger:** Avg response time > 2000ms  
-**Action:** Slack warning  
+**Trigger:** Avg response time > 2000ms
+**Action:** Slack warning
 **Reason:** Performance degradation
 
 **Setup (Sentry):**
@@ -277,7 +277,7 @@ track('social_content_viewed', { type: 'tiktok' | 'youtube' })
 
 ## 5. Launch Day Checklist
 
-**Start:** 1 hour before public launch  
+**Start:** 1 hour before public launch
 **Duration:** 24 hours
 
 ### Hour 0 (Pre-launch)
@@ -442,10 +442,10 @@ NEXT_PUBLIC_SENTRY_DSN=https://...@sentry.io/...
 
 - PostHog Docs: https://posthog.com/docs
 - Sentry Docs: https://docs.sentry.io
-- AnotherSense Design Brief: `docs/AnotherSense_Final_UX_Overhaul.md`
-- Sprint Plan: `docs/AnotherSense_Execution_Brief.md`
+- nota. Design Brief: `docs/nota/`
+- Sprint Plan: `docs/HANDOVER.md`
 
 ---
 
-**Last updated:** 2026-06-21  
+**Last updated:** 2026-06-21
 **Next review:** 2026-06-28 (post-launch day 1)

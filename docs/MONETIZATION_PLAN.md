@@ -1,4 +1,4 @@
-# AnotherSense — Monetization Plan
+# nota. — Monetization Plan
 
 > Created 2026-06-23. Current state: **~0% built.** No AdSense, no Shopify, no working payment path, affiliate IDs are placeholders. This is the buildout plan for the three revenue streams Christopher wants: **ads (PWA/app real-estate), affiliate links, and a Shopify storefront** — plus the existing Pro tier.
 > Companion to [`GAP_ANALYSIS.md`](GAP_ANALYSIS.md) and [`FEATURE_ROADMAP.md`](FEATURE_ROADMAP.md).

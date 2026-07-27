@@ -1,6 +1,6 @@
-# Scentral — Claude Code Session Guide
+# nota. — Claude Code Session Guide
 
-Use this file to run your first Claude Code session for Scentral.
+Use this file to run your first Claude Code session for nota.
 All the database work is already done. This session wires up the UI.
 
 ---
@@ -41,7 +41,7 @@ Create `.env.local` in the project root:
 
 ```
 NEXT_PUBLIC_SUPABASE_URL=https://lrkdwobnemczvhpixpky.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxya2R3b2JuZW1jenZocGl4cGt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4Nzg5NjAsImV4cCI6MjA5NDQ1NDk2MH0.1eXO0aYRLnV8RVfz9kTp0AB1QBwGoM0SLqH47HTehoE
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
 ```
 
 ---
@@ -57,7 +57,7 @@ Or paste this exact Claude Code prompt:
 
 ## The Claude Code Prompt (paste this exactly)
 
-> "I'm building Scentral — a personal fragrance intelligence tool. The Supabase project ID is `lrkdwobnemczvhpixpky` and it's already live with 76 fragrances in 3 phases.
+> "I'm building nota. — a personal fragrance intelligence tool. The Supabase project ID is `lrkdwobnemczvhpixpky` and it's already live with 76 fragrances in 3 phases.
 >
 > I have a complete collection page ready at `/Users/christophergoslin/AI Studio/scentral-collection-page.tsx`. Please:
 >

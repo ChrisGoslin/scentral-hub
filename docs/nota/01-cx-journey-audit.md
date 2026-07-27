@@ -8,7 +8,7 @@
 
 **The nota. product exists, but the app doesn't lead you to it.** [V]
 
-The main nav is `DISCOVER / WARDROBE / LAB / BRIEF / IDENTITY` under a "BASENOTE" wordmark. The Read, Noseprint, My Shelf, Traces, and Trails — the entire "understands me → reflects me → evolves me → connects me" loop — are reachable only by URL or from inside other flows. A new user landing today gets a catalogue app with a price-comparison pitch, and would never discover the identity system that is the whole point.
+The main nav is `DISCOVER / WARDROBE / LAB / BRIEF / IDENTITY` under a "nota." wordmark. The Read, Noseprint, My Shelf, Traces, and Trails — the entire "understands me → reflects me → evolves me → connects me" loop — are reachable only by URL or from inside other flows. A new user landing today gets a catalogue app with a price-comparison pitch, and would never discover the identity system that is the whole point.
 
 Everything else in this audit is secondary to fixing that.
 
@@ -84,7 +84,7 @@ Scale 1–5: **R** = recognition-before-interaction, **C** = cognitive load (5 =
 
 ```json
 [
-  {"id":"UX-001","area":"Navigation","severity":"critical","finding":"Core nota loop (Read/Noseprint/Shelf/Traces/Trails) absent from main nav; nav still describes the BaseNote catalogue product","recommendation":"Rebuild nav around the loop: Today / Discover / My Shelf / Traces / You (Read+Noseprint live under You or as first-run flow)","effort":"medium","priority":"pre-launch"},
+  {"id":"UX-001","area":"Navigation","severity":"critical","finding":"Core nota loop (Read/Noseprint/Shelf/Traces/Trails) absent from main nav; nav still describes the nota. catalogue product","recommendation":"Rebuild nav around the loop: Today / Discover / My Shelf / Traces / You (Read+Noseprint live under You or as first-run flow)","effort":"medium","priority":"pre-launch"},
   {"id":"UX-002","area":"Landing","severity":"critical","finding":"Landing pitches price-comparison ('£140 bottle → £18') and 'Stop blind buying' marquee — marketplace/salesy tone contradicts doctrine on the first screen","recommendation":"Lead with identity ('You already have a scent identity' is already perfect); move Inspired-By engine to /clones and Discovery Boxes below the fold or into /boxes","effort":"medium","priority":"pre-launch"},
   {"id":"UX-003","area":"My Shelf","severity":"high","finding":"Flat 10-slot grid; no S/A/B/C tier hierarchy; slot 1 visually identical to slot 10","recommendation":"20 slots in 4 named tier rows with S-tier visually elevated (larger cards, gold rim, more air); C-tier labelled as 'at risk'","effort":"large","priority":"pre-launch"},
   {"id":"UX-004","area":"My Shelf","severity":"high","finding":"No blind-buy indicator anywhere (schema or UI)","recommendation":"BB stamp on card corner once shelf_items.blind_buy lands (DB-002)","effort":"small","priority":"pre-launch"},

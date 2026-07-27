@@ -51,7 +51,7 @@ const sprayingTechnique = {
       content: {
         stat_label: 'Most common recommended zone (of 76 catalogued fragrances with zone data)',
         stat_value: 'Pulse points / wrists — 20 fragrances',
-        source: 'fragrances.application_zone, BaseNote catalogue query, 2026-07-03',
+        source: 'fragrances.application_zone, nota. catalogue query, 2026-07-03',
       },
     },
     {
@@ -68,7 +68,7 @@ const sprayingTechnique = {
       content: {
         stat_label: 'Second most common zone',
         stat_value: 'Neck — 15 fragrances',
-        source: 'fragrances.application_zone, BaseNote catalogue query, 2026-07-03',
+        source: 'fragrances.application_zone, nota. catalogue query, 2026-07-03',
       },
     },
     {
@@ -84,7 +84,7 @@ const sprayingTechnique = {
       step_type: 'experience',
       content: {
         body: 'I spent years rubbing my wrists together after every spray because that\'s what I saw in movies. Stopped doing it, and my Bergamot top notes actually lasted past the first ten minutes for the first time.',
-        author_label: 'a BaseNote wearer, in the app\'s voice — written example (no live Trace entries exist yet)',
+        author_label: 'a nota. wearer, in the app\'s voice — written example (no live Trace entries exist yet)',
       },
     },
     {
@@ -141,7 +141,7 @@ const longevity = {
       content: {
         stat_label: 'A base note, by molecular weight',
         stat_value: 'Ambergris — 332.5 g/mol',
-        source: 'fragrance_notes.molecular_weight, PubChem via BaseNote catalogue, 2026-07-03',
+        source: 'fragrance_notes.molecular_weight, PubChem via nota. catalogue, 2026-07-03',
       },
     },
     {
@@ -158,7 +158,7 @@ const longevity = {
       content: {
         stat_label: 'A top note, by molecular weight',
         stat_value: 'Caramel — 126.2 g/mol',
-        source: 'fragrance_notes.molecular_weight, PubChem via BaseNote catalogue, 2026-07-03',
+        source: 'fragrance_notes.molecular_weight, PubChem via nota. catalogue, 2026-07-03',
       },
     },
     {
@@ -175,7 +175,7 @@ const longevity = {
       content: {
         stat_label: 'Highest XLogP among catalogued base notes',
         stat_value: 'Musk — XLogP 4.8',
-        source: 'fragrance_notes.xlogp, PubChem via BaseNote catalogue, 2026-07-03',
+        source: 'fragrance_notes.xlogp, PubChem via nota. catalogue, 2026-07-03',
       },
     },
     {
@@ -231,7 +231,7 @@ const anosmia = {
       content: {
         stat_label: 'Distribution of anosmia risk across 106 catalogued fragrances',
         stat_value: 'Medium 38 · Low 37 · High 31',
-        source: 'fragrances.anosmia_risk, BaseNote catalogue query, 2026-07-03',
+        source: 'fragrances.anosmia_risk, nota. catalogue query, 2026-07-03',
       },
     },
     {
@@ -255,7 +255,7 @@ const anosmia = {
       step_type: 'experience',
       content: {
         body: 'I used to reapply my signature scent at 2pm every day because I "couldn\'t smell it anymore." My coworker finally told me it was giving people headaches by then. I stopped topping up and just trusted the first application.',
-        author_label: 'a BaseNote wearer, in the app\'s voice — written example (no live Trace entries exist yet)',
+        author_label: 'a nota. wearer, in the app\'s voice — written example (no live Trace entries exist yet)',
       },
     },
     {

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ################################################################################
-# Scentral v1.0 Launch Orchestrator
+# nota. v1.0 Launch Orchestrator
 # Automates prompt sequencing, validation, and deployment
 #
 # Usage:

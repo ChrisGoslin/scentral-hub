@@ -1,7 +1,7 @@
-# Scentral Launch — Complete Asset Checklist + Timeline
+# nota. Launch — Complete Asset Checklist + Timeline
 
-**Launch Date:** T+0 (Date TBD — set in LAUNCH_DATE.md)  
-**Delivery Deadline:** T-7 (all assets locked 7 days before launch)  
+**Launch Date:** T+0 (Date TBD — set in LAUNCH_DATE.md)
+**Delivery Deadline:** T-7 (all assets locked 7 days before launch)
 **Owner:** Christopher
 
 ---
@@ -14,7 +14,7 @@ These must be done before anything else ships.
 - [ ] Vercel deployment tested (prod URL + SSL valid)
 - [ ] Supabase connection tested (fragrances table readable, no 500 errors)
 - [ ] iOS/Android app submissions approved + live in stores (or web-only launch)
-- [ ] `scentral-seven.vercel.app` resolves and loads <3s
+- [ ] `scentral-hub.vercel.app` resolves and loads <3s
 - [ ] localStorage initialization verified (new user gets UUID, all keys set)
 - [ ] Error monitoring live (Sentry or equivalent)
 
@@ -48,14 +48,14 @@ All marketing copy must be locked 7 days before launch to allow scheduling + rev
   - T+0 feature highlight (dupes)
   - T+1 social proof (dupe focus)
   - T+1 personal hook (blind-buying story)
-  - T+3 thread (how Scentral works)
+  - T+3 thread (how nota. works)
   - T+5 proof tweet (1K downloads)
   - T+7 community poll (persona reveal)
   - Response templates for engagement
 
 - [x] **REDDIT_POSTS.md** (2 posts + engagement Q&A)
   - r/fragrance post (T+2): "Built an app to solve my fragrance problem"
-  - r/IndieApps post (T+3): "Scentral—fragrance wardrobe app (built solo, shipped to iOS/Android)"
+  - r/IndieApps post (T+3): "nota.—fragrance wardrobe app (built solo, shipped to iOS/Android)"
   - r/fragrance engagement FAQ
   - r/IndieApps engagement FAQ
   - Timing + etiquette rules
@@ -107,7 +107,7 @@ All marketing copy must be locked 7 days before launch to allow scheduling + rev
 - [ ] **Cover image** (Hero image)
   - Specs: 1200×630px minimum (OG image ratio 1.91:1)
   - File: PNG or JPEG, <200KB
-  - Design: Scentral logo + "Your fragrance DNA in 15 seconds"
+  - Design: nota. logo + "Your fragrance DNA in 15 seconds"
   - Color: Aura palette (amber/gold background)
   - Status: Ready for PH gallery
 
@@ -125,9 +125,9 @@ All marketing copy must be locked 7 days before launch to allow scheduling + rev
   - Annotation: "Save £100+ per bottle"
 
 ### ☐ Social Media Assets
-- [ ] **Twitter header image** (updated to match Scentral branding)
+- [ ] **Twitter header image** (updated to match nota. branding)
   - Specs: 1500×500px
-  - Updated bio to link to scentral-seven.vercel.app
+  - Updated bio to link to scentral-hub.vercel.app
 
 - [ ] **App store preview images** (if iOS/Android)
   - iOS App Store: Up to 5 screenshots, 1242×2208px each
@@ -137,7 +137,7 @@ All marketing copy must be locked 7 days before launch to allow scheduling + rev
 ### ☐ Email Assets
 - [ ] **Email header/logo** (if using templated email)
   - Specs: PNG, 600px wide, <100KB
-  - Logo: Scentral + tagline
+  - Logo: nota. + tagline
 
 ---
 
@@ -199,12 +199,12 @@ All marketing copy must be locked 7 days before launch to allow scheduling + rev
 - [ ] **Maker profile bio updated**
   - Photo: Professional headshot
   - Bio: 2–3 sentences + Twitter handle
-  - Website: scentral-seven.vercel.app
+  - Website: scentral-hub.vercel.app
 
 ### ☐ Maker Outreach (Optional, T-3)
 - [ ] **Early supporters notified** (optional: 24h advance notice)
   - List: Contacts, Twitter followers, beta users
-  - Message: "Launching Scentral tomorrow on Product Hunt. Would mean a lot if you upvoted + left feedback."
+  - Message: "Launching nota. tomorrow on Product Hunt. Would mean a lot if you upvoted + left feedback."
   - Channel: Email, DM, or Twitter
 
 ---
@@ -214,7 +214,7 @@ All marketing copy must be locked 7 days before launch to allow scheduling + rev
 ### ☐ Pre-Launch Checklist (T+0 11:00 PM)
 - [ ] All tweets queued in Buffer (ready to publish)
 - [ ] PH post published (12:01 AM PST exactly)
-- [ ] Vercel deployment live (https://scentral-seven.vercel.app loads <3s)
+- [ ] Vercel deployment live (https://scentral-hub.vercel.app loads <3s)
 - [ ] Analytics tracking enabled (Vercel dashboard + Sentry monitoring)
 - [ ] Monitoring setup ready:
   - [ ] PH tab open in browser (or PH mobile app)

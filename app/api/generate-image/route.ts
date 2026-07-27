@@ -1,5 +1,5 @@
 // app/api/generate-image/route.ts
-// Scentral — Image generation engine (Vertex AI Production Edition)
+// nota. — Image generation engine (Vertex AI Production Edition)
 // POST /api/generate-image
 // Input: { fragranceId: string (UUID) }
 // Output: { success: true, imageUrl, fileName, generatedAt, metadata }

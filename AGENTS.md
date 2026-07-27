@@ -13,6 +13,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 **Owner:** Christopher. **Purpose:** prevent invented facts, paths, keys, and scope.
 This is the SINGLE canonical instructions file. `CLAUDE.md` and `GEMINI.md` point here. Read this FIRST, every session, before acting. Begin your first reply by stating in one line what you grounded yourself in.
+For substantive work, resolve Christopher's portfolio operating files from disk instead of asking for pasted copies: read `~/.claude/CLAUDE.md`, `~/.claude/PROJECTS.md`, and `~/.claude/LESSONS.md` when available, then use this repo's `CLAUDE.md`, `docs/index.md`, and `docs/HANDOVER.md` for project-specific truth.
 **Supplementary reading:** `.claude/skills/grounded-agent-guardrails/SKILL.md` — expands the five safeguards with verification commands, known fabrications list, and a session-start checklist. See also `.claude/skills/safe-commit-shared-repo/SKILL.md` (git hygiene given concurrent sessions) and `.claude/skills/diagnose-prod-slowdown/SKILL.md` (perf-incident runbook).
 **Critical operating rules:** §8 (script execution + network constraint), §9 (lessons learned), §10 (self-check).
 
@@ -78,7 +79,7 @@ fictional features, lore like "Agent Luna / Hegemony / Shadow Branching", and ha
 
 ## 1. Ground truth (the ONLY accepted facts unless re-verified)
 - **Display name:** nota. **Repo:** `scentral-hub` (GitHub: `ChrisGoslin/scentral`). **DB:** `scentral-mvp` (`lrkdwobnemczvhpixpky`). Display-layer rebrand only — do NOT rename repo, DB, or tables.
-- **Brand history:** Scentral Hub → AnotherSense → BaseNote → nota. You may still see `Scentral`, `AnotherSense`, and `BaseNote` in archived docs, old prompts, localStorage keys, repo names, database names, or internal implementation details. Treat `nota.` as the current user-facing brand unless a source-of-truth doc explicitly says otherwise.
+- **Brand history:** the current user-facing brand is `nota.`. Archived docs, prompts, localStorage keys, repo names, database names, or internal implementation details may still contain older legacy naming. Do not reintroduce retired display names; treat `nota.` as current unless a source-of-truth doc explicitly says otherwise. Exception: canonical guardrail lines may intentionally name retired brands so agents know what to block; never rewrite those lists mechanically.
 - **Data:** 127,195 fragrances (bulk-imported from 3 Kaggle datasets — 2026-06-24, IMPORT COMPLETE). Key columns: `plain_description`, `inspired_by`, `family`, `projection`, `optimal_season`, `use_case`, `lean`, `image_url` (populated by backfill scripts — may be null for some rows).
 - **Stack:** Next.js 16.2.9 (App Router, route groups like `(main)`), React 19.2.4, Supabase JS 2.x, Vercel, Tailwind CSS, `@dnd-kit/core` + `@dnd-kit/sortable` + `@dnd-kit/utilities` (Living Wardrobe). Always re-verify version from `package.json` if in doubt — do NOT assert from memory.
 - **Architecture:** Single product. No auth for MVP — identity via `scentral_anon_id` (localStorage UUID, generated on first load).
@@ -152,8 +153,8 @@ fictional features, lore like "Agent Luna / Hegemony / Shadow Branching", and ha
   - `--motion-ceremonial: 480ms cubic-bezier(0.16, 1, 0.3, 1)`
   - `--motion-organic: 800ms cubic-bezier(0.34, 1.56, 0.64, 1)`
 - **Typography:** Instrument Serif italic (emotional/narrative copy, Aura voice) + Unbounded (functional/navigational). Both font variables on the `html` element in `app/layout.tsx`.
-- **Personas:** See `SCENTRAL_PERSONAS.md`. Gavin (newcomer, plain language). Christopher (enthusiast, expert).
-- **Source-of-truth docs:** `AGENTS.md` (this file), `docs/HANDOVER.md` (latest launch handover), `docs/nota/` (current nota. audits and plans), `SCENTRAL_PERSONAS.md`. Older BaseNote/AnotherSense docs are historical unless referenced by the latest handover.
+- **Personas:** See `lib/personas.ts`. Gavin (newcomer, plain language). Christopher (enthusiast, expert).
+- **Source-of-truth docs:** `AGENTS.md` (this file), `docs/HANDOVER.md` (latest launch handover), `docs/nota/` (current nota. audits and plans), `lib/personas.ts`. Older legacy docs are historical unless referenced by the latest handover.
 
 If a "fact" is not in these docs, the repo, or the database, it is NOT a fact yet — verify it or label it unverified.
 
@@ -173,7 +174,7 @@ If a "fact" is not in these docs, the repo, or the database, it is NOT a fact ye
 - **S5 — Flag confidence honestly.** Label every material claim Verified / Assumption / Unknown. No hype framing.
 
 ## 3. Required behaviours
-- **Start of session:** read this file + `SCENTRAL_PERSONAS.md` + run the branch hygiene checklist at `.claude/skills/branch-hygiene/SKILL.md`. If `.husky/pre-push` doesn't exist, install it (see "Local Dev Setup" above). State what you grounded on in your first reply.
+- **Start of session:** read this file + `lib/personas.ts` + run the branch hygiene checklist at `.claude/skills/branch-hygiene/SKILL.md`. If `.husky/pre-push` doesn't exist, install it (see "Local Dev Setup" above). State what you grounded on in your first reply.
 - **Before writing any code:** check if the feature already exists on main (`git log`, `find app -name "page.tsx"`).
 - Before DB/auth changes: inspect first; SHOW the migration/SQL and wait for explicit "approved" before applying.
 - Before claiming a third-party tool does X: web-search and cite, or say it's unverified.

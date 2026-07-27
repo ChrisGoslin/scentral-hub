@@ -104,7 +104,7 @@ No per-fragrance or per-request LLM paths found. One hardening note: `/api/read/
 
 ## 5. Affiliate / Shopify placeholder audit [V]
 
-- **AWIN (`lib/affiliates.ts`):** clean. Publisher ID approved; merchant IDs `'PENDING'` gate `isActive`; links degrade to plain search URLs. Activation = paste merchant IDs + set env var. One fix: header comment says "BaseNote". One structural note: carousel affiliate slots (brief §2) should consume `getRetailersForMarket()` so slots light up automatically on merchant approval — no relaunch needed.
+- **AWIN (`lib/affiliates.ts`):** clean. Publisher ID approved; merchant IDs `'PENDING'` gate `isActive`; links degrade to plain search URLs. Activation = paste merchant IDs + set env var. One fix: header comment says "nota.". One structural note: carousel affiliate slots (brief §2) should consume `getRetailersForMarket()` so slots light up automatically on merchant approval — no relaunch needed.
 - **Shopify (`lib/shopify.ts`):** env-driven, warns + returns null when unconfigured, `/boxes` renders 9 seeded boxes [V — discovery_boxes rows]. Storefront API version pinned at `2024-07` — bump before launch.
 - **Verdict:** both abstractions are future-proof; no rework needed before domain registration.
 

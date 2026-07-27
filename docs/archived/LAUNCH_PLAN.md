@@ -1,9 +1,9 @@
-# Scentral — Pre-Launch Project Plan v2
+# nota. — Pre-Launch Project Plan v2
 ## App Store & Play Store · Best-in-Class Quality Bar
 
-> **Version:** 2.0 | **Date:** 2026-06-16 | **Owner:** Christopher  
-> **Stack:** Next.js 16.2.9 · React 19.2.4 · Supabase · Vercel  
-> **Live:** https://scentral-hub.vercel.app  
+> **Version:** 2.0 | **Date:** 2026-06-16 | **Owner:** Christopher
+> **Stack:** Next.js 16.2.9 · React 19.2.4 · Supabase · Vercel
+> **Live:** https://scentral-hub.vercel.app
 > **Architecture lock:** NO AUTH for MVP · Pro gate = `isPro = false` · do not touch `/intelligence`, `/dna-match`, `/schedule`
 
 ---
@@ -18,7 +18,7 @@ The current codebase is a well-built wardrobe app. Tabs work. Images load. Layer
 
 The single most dangerous gap in v1 of this plan was the missing **Sanctuary Profiler + Persona Reveal**. This is not a nice-to-have. It is the feature that:
 - Creates the "wow" first impression that generates word of mouth
-- Differentiates Scentral from every other fragrance app in the store
+- Differentiates nota. from every other fragrance app in the store
 - Gives the Discover tab a purpose (personalised results, not a generic grid)
 - Gives users a reason to screenshot and share ("I'm a Velvet Intellectual")
 
@@ -38,7 +38,7 @@ v2 of this plan closes all of these.
 
 The persona: TikTok-inspired fragrance beginner-to-obsessive. Owns 5–20 bottles. Mixes Lattafa, Zara dupes, one or two designer pieces. Anxious about blind buys. Motivated by self-expression, compliments, and belonging.
 
-The emotional loop Scentral must deliver:
+The emotional loop nota. must deliver:
 
 ```
 INSTALL       → "This was made for me. I belong here."
@@ -82,7 +82,7 @@ Every prompt in this plan serves one step in that loop.
 **Fan out: 3 parallel sub-agents**
 
 ```
-You are a senior mobile web engineer for Scentral. Read AGENTS.md first.
+You are a senior mobile web engineer for nota. Read AGENTS.md first.
 Do not touch Pro-gated pages (/intelligence, /dna-match, /schedule) or auth flows.
 
 Fan out into 3 parallel sub-agents:
@@ -90,7 +90,7 @@ Fan out into 3 parallel sub-agents:
 SUB-AGENT A — Viewport & Safe Area
 Files: app/layout.tsx, app/globals.css, app/components/BottomNav.tsx
 
-1. Replace ALL `min-h-screen` and `min-h-[100vh]` with `min-h-[100dvh]` across 
+1. Replace ALL `min-h-screen` and `min-h-[100vh]` with `min-h-[100dvh]` across
    the entire codebase. Grep both patterns.
 2. Add to globals.css:
      html, body { overflow-x: hidden; height: 100%; }
@@ -163,9 +163,9 @@ Fix 1 — Populate empty arrays:
   'Light & Subtle': ['Light', 'Soft', 'Whisper']
 
 Fix 2 — Change AND logic to OR with null safety:
-  const matchFam  = families.length === 0 || 
+  const matchFam  = families.length === 0 ||
     (f.family && families.some(fam => (FEEL_FAMILIES[fam] || []).includes(f.family)))
-  const matchProj = projs.length === 0 || 
+  const matchProj = projs.length === 0 ||
     (f.projection && projs.some(proj => (FEEL_PROJECTIONS[proj] || []).includes(f.projection)))
   if (!matchFam || !matchProj) return false
 
@@ -215,7 +215,7 @@ Confirm only main remains. Report branch list.
 ## PHASE 1 — Sanctuary Profiler + Persona Engine
 ### The single most important feature missing from the app
 
-This is what makes Scentral unforgettable. It replaces the current 3-step vibe chip onboarding with a sensory identity quiz that gives Gavan a persona — and that persona shapes everything he sees afterwards.
+This is what makes nota. unforgettable. It replaces the current 3-step vibe chip onboarding with a sensory identity quiz that gives Gavan a persona — and that persona shapes everything he sees afterwards.
 
 The spec defines 6 personas. Start with 3 for v1. Full persona list for Phase 8.
 
@@ -241,7 +241,7 @@ SUB-AGENT A — Persona Definitions + Engine
 File: lib/personas.ts
 
 Define 3 launch personas as TypeScript objects. Each has:
-  id, name, sanctuary, projection, 
+  id, name, sanctuary, projection,
   scent_spectrum: { top: string[], heart: string[], base: string[] }
   narrative: { tagline: string, what_this_says: string, environments: string, social_energy: string }
   recommendations: { preferred_families: string[], avoid_families: string[], layering_tips: string[] }
@@ -338,7 +338,7 @@ STEP 3 — Context (when do you usually reach for fragrance?)
 Headline: "When do you usually reach for it?"
 Sub: "Pick all that apply."
 Multi-select pill grid:
-  Workday, Date Night, Morning Ritual, Weekend Wander, 
+  Workday, Date Night, Morning Ritual, Weekend Wander,
   Cosy Night In, Going Out, Travel, Occasion
 Min 1 selection. CTA button: "Find my scent identity →"
 
@@ -350,8 +350,8 @@ REVEAL SCREEN (step 4)
 - Three narrative bullets (what_this_says, environments, social_energy)
 - Amber separator line
 - "Your notes" — three columns: Top / Heart / Base with note tags
-- Primary CTA: "Explore scents for [persona name] →" 
-  → navigates to /discover?persona=[id] 
+- Primary CTA: "Explore scents for [persona name] →"
+  → navigates to /discover?persona=[id]
   → writes scentral_persona + scentral_onboarded to localStorage
 - Secondary: "Try a different identity →" (goes back to step 1)
 
@@ -403,10 +403,10 @@ pre-filter and personalise the Discover tab.
 3. clearPersonaFilter: remove active filter chips, hide persona banner.
    Do NOT remove localStorage — just clear the active filter state.
 
-4. Page title update: if persona active, show 
+4. Page title update: if persona active, show
    "Discover · For {persona.name}" in the page header instead of just "Discover".
 
-5. URL param handling: /discover?persona=velvet_intellectual should auto-apply 
+5. URL param handling: /discover?persona=velvet_intellectual should auto-apply
    the persona filter on load. This is the deep link from the onboarding reveal CTA.
 
 Commit: "feat(discover): persona-aware pre-filtering + persona banner"
@@ -561,7 +561,7 @@ CSS keyframe:
 Apply .chip-pulse class (add then remove after 400ms) on chip click.
 
 HIGH-LEVERAGE SURFACE 4 — Log Wear button:
-On tap: 
+On tap:
   1. Button text flashes to "✓ Logged" for 1.5 seconds
   2. If streak >= 3: show streak toast (see Phase 4)
   3. Return to original state
@@ -603,12 +603,12 @@ type SimilarityExplanation = {
 
 function getSimilarityExplanation(
   scorePct: number,     // 0–100 from inspired_by confidence or manual
-  targetName: string,   // the designer original  
-  cloneName: string,    // the Scentral catalogue entry
+  targetName: string,   // the designer original
+  cloneName: string,    // the nota. catalogue entry
 ): SimilarityExplanation {
   if (scorePct >= 90) return {
     title: "Practically twins",
-    summary: `${cloneName} and ${targetName} share the same backbone. 
+    summary: `${cloneName} and ${targetName} share the same backbone.
                Most people can't tell them apart after 30 minutes on skin.`,
     guidance: {
       when_to_choose: "If you love the drydown of the original but want a smarter price.",
@@ -617,7 +617,7 @@ function getSimilarityExplanation(
   }
   if (scorePct >= 70) return {
     title: "Very close — different first impression",
-    summary: `${cloneName} is strongly inspired by ${targetName}. 
+    summary: `${cloneName} is strongly inspired by ${targetName}.
                The heart and base are nearly identical; the opening takes a different route.`,
     guidance: {
       when_to_choose: "If you care more about how it wears than how it opens.",
@@ -626,7 +626,7 @@ function getSimilarityExplanation(
   }
   return {
     title: "Same family, different character",
-    summary: `${cloneName} shares the olfactory DNA of ${targetName} 
+    summary: `${cloneName} shares the olfactory DNA of ${targetName}
                but brings its own personality. A great alternative, not a copy.`,
     guidance: {
       when_to_choose: "If you want something in the same mood at a different price point.",
@@ -701,7 +701,7 @@ Per card, show if count > 0:
 
 On detail page:
   Single fragrance fetch via same API.
-  Show: "X people in the Scentral community own this"
+  Show: "X people in the nota. community own this"
   Style: --text-sm, --text-muted, Lucide Users icon (size 14)
 
 Commit: "feat(social): owner count on discover cards + detail page"
@@ -842,7 +842,7 @@ The You tab is where returning users live. Improve it for returning Gavan.
        color:'var(--text)', marginTop: 4 }}>{persona.name}</p>
      <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>
        {persona.narrative.tagline}</p>
-     <button onClick={() => router.push('/onboarding')} 
+     <button onClick={() => router.push('/onboarding')}
        style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 8 }}>
        Retake profiler →
      </button>
@@ -949,13 +949,13 @@ PRIVACY POLICY requirements:
 - Data controller: Christopher Goslin, Ireland
 - Contact: christophergoslin@outlook.com
 - Last updated: 2026-06-16
-- Key claim: "We do not require an account. We do not store your email. 
+- Key claim: "We do not require an account. We do not store your email.
   Your collection is anonymous."
 
 TERMS OF SERVICE requirements:
 - Governing law: Republic of Ireland
 - User-generated content: none in MVP (no UGC rules needed yet)
-- Affiliate disclosure: "Some links earn Scentral a small commission at no cost to you."
+- Affiliate disclosure: "Some links earn nota. a small commission at no cost to you."
 - Age: 13+ (standard for lifestyle apps)
 - Limitation of liability: standard
 
@@ -977,32 +977,32 @@ APPLE APP STORE:
 Short description (30 chars): "Your fragrance wardrobe app."
 
 Full description (British English, 4000 char max):
-Lead: "Scentral is a fragrance app built for people who actually care about what they smell like. 
+Lead: "nota. is a fragrance app built for people who actually care about what they smell like.
 Not collectors with encyclopaedic knowledge — just people with a growing wardrobe and a nose for what works."
 
 Features (prose, not bullets):
-  Discover 280+ fragrances — dupes, Middle Eastern gems, and designer alternatives — 
+  Discover 280+ fragrances — dupes, Middle Eastern gems, and designer alternatives —
   with honest descriptions written for beginners, not enthusiasts.
-  
-  Build your wardrobe in seconds. Search by brand, vibe, or description. 
+
+  Build your wardrobe in seconds. Search by brand, vibe, or description.
   Rate your bottles by how often you actually reach for them.
-  
-  Find your scent identity. The 15-second Sanctuary Profiler asks you two questions 
+
+  Find your scent identity. The 15-second Sanctuary Profiler asks you two questions
   and gives you back a persona — a curated identity that shapes everything you see in the app.
-  
-  Layer like a pro. The Layering Lab suggests what works together and explains why 
+
+  Layer like a pro. The Layering Lab suggests what works together and explains why
   in plain English, not note pyramids.
-  
-  Know your shelf. The Living Wardrobe organises your collection by affinity tier — 
+
+  Know your shelf. The Living Wardrobe organises your collection by affinity tier —
   your signatures at the top, your experiments at the bottom. Drag, drop, sort.
-  
-  Discover cheaper alternatives. See what each fragrance was inspired by and how close 
+
+  Discover cheaper alternatives. See what each fragrance was inspired by and how close
   the copy really is. Stop paying £150 for something you can get for £18.
 
-Closing: "No account required. No reviews you didn't ask for. Just a better way to 
+Closing: "No account required. No reviews you didn't ask for. Just a better way to
 know your collection."
 
-Keywords (100 chars): 
+Keywords (100 chars):
 "fragrance,perfume,wardrobe,cologne,scent,oud,lattafa,dupe,layering,collection,parfum"
 
 Category: Lifestyle
@@ -1216,7 +1216,7 @@ Define PERSONA_TIPS as Record<string, string[]>:
    Below the suggestion cards, add a collapsible "Layering Rules" section.
    Default: collapsed (shows "5 dos & don'ts for layering →" as a tappable line).
    Expanded: 3 DOs (green left-border) + 3 DON'Ts (amber left-border), randomly selected each load.
-   
+
 3. Discover — Persona tips ticker:
    If persona is active, show a subtle tip above the card grid (not above the banner):
    Single tip from PERSONA_TIPS[persona.id], rotates each time the component mounts.
@@ -1300,7 +1300,7 @@ API route: app/api/push/send/route.ts (internal — called by cron/edge function
 
 ------ NOTIFICATION TYPE 1 — Maceration Countdown ------
 Triggered: when user adds a new bottle for the first time (bottle_added event)
-Scheduled: +7 days from add date (stored in localStorage as 
+Scheduled: +7 days from add date (stored in localStorage as
   scentral_maceration_[fragrance_id]: ISO date string)
 Check on app load: if any maceration dates have passed (or are within 24h), prompt.
 
@@ -1416,7 +1416,7 @@ SUBMIT after 7-C returns 0 BLOCKING failures.
 
 Before you submit to the App Store, hand the phone to Gavan (or someone who is Gavan). Watch silently. If the first thing they say is "wait, that's actually me" on the persona reveal — you're ready. If they look confused or bored at any point in the first 30 seconds — there's still work to do.
 
-The Sanctuary Profiler is the make-or-break feature. Everything else is table stakes for a good fragrance app. The profiler is what makes Scentral *Scentral*.
+The Sanctuary Profiler is the make-or-break feature. Everything else is table stakes for a good fragrance app. The profiler is what makes nota. *nota.*.
 
 ---
 
@@ -1432,5 +1432,5 @@ The Sanctuary Profiler is the make-or-break feature. Everything else is table st
 
 ---
 
-*Scentral Pre-Launch Plan v2.0 | Generated: 2026-06-16*  
+*nota. Pre-Launch Plan v2.0 | Generated: 2026-06-16*
 *Next review: after Phase 0 + Phase 1 complete*

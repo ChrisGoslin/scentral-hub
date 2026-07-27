@@ -1,13 +1,13 @@
-# AnotherSense — PRODUCT TRUTH (Canonical Spec)
+# nota. — PRODUCT TRUTH (Canonical Spec)
 
 > **Status:** Proposed single source of truth. Created 2026-06-23.
-> **Purpose:** Replace the contradictory set of specs with ONE reconciled reference. Where this disagrees with older docs (SENSUS playbook, executive-suite, RELEASE_NOTES, architecture.md), **this wins.**
+> **Purpose:** Replace the contradictory set of specs with ONE reconciled reference. Where this disagrees with older docs (nota. playbook, executive-suite, RELEASE_NOTES, architecture.md), **this wins.**
 > **Grounding rule (from AGENTS.md):** if a fact is not in the repo, the code, or the DB, it is not a fact. Items still awaiting Christopher's call are marked **🟡 PENDING DECISION**.
 
 ---
 
 ## 1. Identity
-- **Display name:** AnotherSense. **Repo:** `scentral-hub`. **DB:** `scentral-mvp` (`lrkdwobnemczvhpixpky`). Display-layer rebrand only.
+- **Display name:** nota. **Repo:** `scentral-hub`. **DB:** `scentral-mvp` (`lrkdwobnemczvhpixpky`). Display-layer rebrand only.
 - **Architecture:** Single product, **no auth for MVP** — identity via `scentral_anon_id` (localStorage UUID).
 - **Stack (verified `package.json`):** Next.js 16.2.9 (App Router, route groups), React 19.2, Supabase JS 2.108 + `@supabase/ssr`, Tailwind 4, `@dnd-kit/*`, framer-motion, fuse.js, `@sentry/nextjs`, posthog-js, web-push, `@anthropic-ai/sdk`, `@google/genai`. **No Stripe.** Deployed Vercel → `scentral-hub.vercel.app`.
 - **Data:** 282 fragrances.
@@ -42,7 +42,7 @@
 - **Aura** — currently deterministic rules (`lib/aura.ts`); Claude Haiku copy is *future*, not built. Don't market as AI.
 
 ## 4. Personas — TWO distinct systems (name them separately to end confusion)
-- **Customer personas** (audience/marketing filter, `SCENTRAL_PERSONAS.md`): **Gavan** (newcomer, plain language) + **Christopher** (enthusiast, expert). 2 personas.
+- **Customer personas** (audience/marketing filter, `lib/personas.ts`): **Gavan** (newcomer, plain language) + **Christopher** (enthusiast, expert). 2 personas.
 - **Scent-identity personas** (in-app onboarding result, `lib/personas.ts` — **canonical, code-verified, 6**): `velvet_intellectual`, `solar_minimalist`, `dark_alchemist`, `ritual_keeper`, `rebel_experimentalist`, `comfort_seeker`.
 - These are different axes. Older docs citing "3 personas" (Velvet/Solar/Dark only) are **superseded** — code has 6.
 
@@ -66,4 +66,4 @@ Four palettes exist; **recommendation: lock & activate Dark Ambient Material + A
 **For monetization (not yet present):** `fragrances.similarity_score`, `buy_link`, `affiliate_url` — require a migration.
 
 ## 8. Superseded / do-not-trust docs
-`architecture.md` (76 frags, 3-tab, magic-link — wrong on all 3) · `DIRECTORY_STRUCTURE.md` (lists non-existent components) · `GEMINI.md` + `docs/executive-suite/**` + `.claude/AGENT_LUNA.md` (fabrication lore) · RELEASE_NOTES Epic 7–12 numbering · SENSUS vs AnotherSense vs Phase numbering — collapse to **one** scheme going forward (recommend the AnotherSense feature names, drop numbering entirely in favour of this route table).
+`architecture.md` (76 frags, 3-tab, magic-link — wrong on all 3) · `DIRECTORY_STRUCTURE.md` (lists non-existent components) · `GEMINI.md` + `docs/executive-suite/**` + `.claude/AGENT_LUNA.md` (fabrication lore) · RELEASE_NOTES Epic 7–12 numbering · nota. vs nota. vs Phase numbering — collapse to **one** scheme going forward (recommend the nota. feature names, drop numbering entirely in favour of this route table).

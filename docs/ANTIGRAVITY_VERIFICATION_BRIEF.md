@@ -1,4 +1,4 @@
-# Antigravity Verification & Hardening Brief — Scentral Hub
+# Antigravity Verification & Hardening Brief — nota.
 
 **Purpose:** Verify (or disprove) a set of claims about this codebase, then strengthen/fix the weak areas. This brief was produced by an audit that found several "documented but not actually working" gaps. Your job is to replace assertions with evidence.
 

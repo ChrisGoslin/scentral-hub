@@ -1,7 +1,7 @@
-# Scentral Hub: Engineering Mandate
+# nota. Hub: Engineering Mandate
 
 ## 🏛️ Autonomous Fragrance Sovereignty
-- This is the unified control center for the Scentral ecosystem.
+- This is the unified control center for the nota. ecosystem.
 - **Consolidated Vision:** Marrying Sensory Interaction (Scent Bloom) with Scientific Layering (Lab) and Public Discovery (Catalogue).
 - **Hegemony Standard:** Every UI asset must feel "alive" (Tactile feedback, 50ms latency, micro-transitions).
 

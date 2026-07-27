@@ -1,4 +1,4 @@
-# Quick Setup: Image Generation for Scentral Sprint 1
+# Quick Setup: Image Generation for nota. Sprint 1
 
 This is a step-by-step checklist to get image generation working.
 
@@ -48,7 +48,7 @@ supabase migration up
 
 Verify the column exists:
 ```sql
-SELECT column_name FROM information_schema.columns 
+SELECT column_name FROM information_schema.columns
 WHERE table_name = 'fragrances' AND column_name = 'image_url';
 ```
 
@@ -107,7 +107,7 @@ Check that images were stored and database was updated:
 SELECT COUNT(*) as with_images FROM fragrances WHERE image_url IS NOT NULL;
 
 -- View a few examples
-SELECT id, brand, name, image_url FROM fragrances 
+SELECT id, brand, name, image_url FROM fragrances
 WHERE image_url IS NOT NULL LIMIT 3;
 ```
 
@@ -178,11 +178,11 @@ SETUP_IMAGE_GENERATION.md               ← This file
 
 ## Key Code Quality
 
-✅ **Clear variable names** — no abbreviations, descriptive everywhere  
-✅ **Comprehensive logging** — each step logged with context  
-✅ **Error messages with context** — shows which fragrance, which stage  
-✅ **Type safety** — full TypeScript types for requests/responses  
-✅ **Production-ready** — proper error handling, retries, timeouts  
+✅ **Clear variable names** — no abbreviations, descriptive everywhere
+✅ **Comprehensive logging** — each step logged with context
+✅ **Error messages with context** — shows which fragrance, which stage
+✅ **Type safety** — full TypeScript types for requests/responses
+✅ **Production-ready** — proper error handling, retries, timeouts
 
 ## Architecture Summary
 
@@ -213,6 +213,6 @@ Success response with imageUrl + metadata
 
 ---
 
-**Status:** Ready for testing  
-**Estimated cost:** ~$0.30 (76 images × $0.004 per image)  
+**Status:** Ready for testing
+**Estimated cost:** ~$0.30 (76 images × $0.004 per image)
 **Time to complete:** ~15 minutes

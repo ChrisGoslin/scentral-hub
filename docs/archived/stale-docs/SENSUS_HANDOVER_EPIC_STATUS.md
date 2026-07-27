@@ -1,9 +1,9 @@
 # ARCHIVED / SUPERSEDED
 
-This document is historical and must not be used as current project truth. Sensus was an older name and product phase for what is now nota.; this specific plan is superseded by `AGENTS.md`, `CLAUDE.md`, `docs/index.md`, and the active nota. docs under `docs/nota/`.
+This document is historical and must not be used as current project truth. nota. was an older name and product phase for what is now nota.; this specific plan is superseded by `AGENTS.md`, `CLAUDE.md`, `docs/index.md`, and the active nota. docs under `docs/nota/`.
 
-# SENSUS OVERHAUL — EPIC STATUS & HANDOVER BRIEF
-**Date:** 2026-06-22  
+# nota. OVERHAUL — EPIC STATUS & HANDOVER BRIEF
+**Date:** 2026-06-22
 **Timeline:** Week 1 complete. Production Sprints: Weeks 2–10
 
 ---
@@ -69,9 +69,9 @@ Dark Ambient Material token system + responsive 12-column grid replacing stretch
 **Medium:** Token color definitions may need refinement after focus group review. CSS variable fallbacks should prevent cascade failures.
 
 ### Next Step
-**Day 1:** Copy token definitions to `globals.css` + `tailwind.config.js`  
-**Day 2–3:** Rewrite `BottleCard.tsx` with glass styling + fallback gradients  
-**Day 4:** Update grid in `DiscoverClient.tsx` + `CollectionClient.tsx`  
+**Day 1:** Copy token definitions to `globals.css` + `tailwind.config.js`
+**Day 2–3:** Rewrite `BottleCard.tsx` with glass styling + fallback gradients
+**Day 4:** Update grid in `DiscoverClient.tsx` + `CollectionClient.tsx`
 **Day 5:** QA: smoke tests, responsive checks, WCAG audit
 
 ---
@@ -99,8 +99,8 @@ Replace vertical stacked filters with edge-to-edge horizontal carousels. 4 filte
 **Low:** Chip layout may need flexbox tweaks if fonts render differently on target devices.
 
 ### Next Step
-**Day 1–2:** Rewrite `DiscoverFilters.tsx` with `FilterCarousel` component  
-**Day 3–4:** Integrate into `DiscoverClient.tsx`, wire active filter state  
+**Day 1–2:** Rewrite `DiscoverFilters.tsx` with `FilterCarousel` component
+**Day 3–4:** Integrate into `DiscoverClient.tsx`, wire active filter state
 **Day 5:** QA: scroll smoothness, active state UX, keyboard nav
 
 ---
@@ -134,8 +134,8 @@ When user searches "Sauvage," return:
 **Medium:** Supabase RPC function requires `pg_trgm` extension enabled. Test early.
 
 ### Next Step
-**Week 6:** Deploy RPC function, verify `similarity()` queries work  
-**Week 7:** Build `SearchBar.tsx` component + integrate toggle  
+**Week 6:** Deploy RPC function, verify `similarity()` queries work
+**Week 7:** Build `SearchBar.tsx` component + integrate toggle
 **Week 8:** Render `SmellsLikeResults.tsx`, QA grouping logic
 
 ---
@@ -171,10 +171,10 @@ Gamified daily fragrance routine. Swipeable 3-card deck (Morning/Midday/Evening)
 4. Push notification integration — Supabase Real Time or external service
 
 ### Next Step
-**Week 9, Day 1–2:** Decide on swipe library + animation framework  
-**Week 9, Day 3–4:** Implement card component + gesture detection  
-**Week 9, Day 5:** Build Aura AI logic + `/api/schedule/generate`  
-**Week 10, Day 1–2:** XP + streaks (DB schema + API)  
+**Week 9, Day 1–2:** Decide on swipe library + animation framework
+**Week 9, Day 3–4:** Implement card component + gesture detection
+**Week 9, Day 5:** Build Aura AI logic + `/api/schedule/generate`
+**Week 10, Day 1–2:** XP + streaks (DB schema + API)
 **Week 10, Day 3–4:** Push notifications + QA
 
 ---
@@ -203,8 +203,8 @@ Scent Identity Profiler **above the fold**. Hero headline ("Your Scent Fingerpri
 **Low:** Typography scales need final validation against design mockup.
 
 ### Next Step
-**Week 10, Day 1–2:** Build `HeroSection.tsx` + `PersonaTeasers.tsx`  
-**Week 10, Day 3:** Integrate Scent Identity profiler, test responsive  
+**Week 10, Day 1–2:** Build `HeroSection.tsx` + `PersonaTeasers.tsx`
+**Week 10, Day 3:** Integrate Scent Identity profiler, test responsive
 **Week 10, Day 4:** QA + Lighthouse audit
 
 ---
@@ -335,6 +335,6 @@ Follow execution briefs in `docs/claude-code-briefs/`. Each Epic has:
 
 ---
 
-**Prepared for:** Next chat execution  
-**Date:** 2026-06-22  
+**Prepared for:** Next chat execution
+**Date:** 2026-06-22
 **Timeline:** Weeks 2–10 to App Store submission

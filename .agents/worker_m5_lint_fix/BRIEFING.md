@@ -1,7 +1,7 @@
 # BRIEFING — 2026-07-08T02:48:49+01:00
 
 ## Mission
-Fix ESLint unescaped quote errors in Scentral Hub codebase components.
+Fix ESLint unescaped quote errors in nota. codebase components.
 
 ## 🔒 My Identity
 - Archetype: Lint Fix Worker
@@ -24,7 +24,7 @@ Fix ESLint unescaped quote errors in Scentral Hub codebase components.
 - **What to build**: Fix ESLint unescaped double quotes errors in specified files.
 - **Success criteria**: ESLint passes with zero errors on the specified files; tsc and build compile successfully.
 - **Interface contracts**: N/A
-- **Code layout**: Scentral Hub routing/layouts
+- **Code layout**: nota. routing/layouts
 
 ## Key Decisions Made
 - [initial decision]

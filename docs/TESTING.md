@@ -1,14 +1,14 @@
-# AnotherSense — Testing Guide
+# nota. — Testing Guide
 
-Complete testing strategy for the AnotherSense application, covering smoke tests, E2E tests, and manual QA.
+Complete testing strategy for the nota. application, covering smoke tests, E2E tests, and manual QA.
 
 ---
 
 ## Quick Start
 
 ### Smoke Tests (HTTP Status Checks)
-**What:** Fast HTTP requests to 9 critical routes on a live deployment.  
-**Why:** Verify that the app is up and responsive; catch deploy failures immediately.  
+**What:** Fast HTTP requests to 9 critical routes on a live deployment.
+**Why:** Verify that the app is up and responsive; catch deploy failures immediately.
 **Time:** ~5 seconds
 
 ```bash
@@ -143,7 +143,7 @@ Before shipping:
 - run: npm run test:e2e
 ```
 
-Run smoke tests on every deploy to production.  
+Run smoke tests on every deploy to production.
 Run E2E tests on pull requests and main branch.
 
 ---
@@ -151,8 +151,8 @@ Run E2E tests on pull requests and main branch.
 ## Troubleshooting
 
 ### E2E Test Timeouts
-**Problem:** Test times out waiting for page load.  
-**Cause:** Dev server slow, network latency, or element not rendering.  
+**Problem:** Test times out waiting for page load.
+**Cause:** Dev server slow, network latency, or element not rendering.
 **Fix:**
 ```bash
 # Start dev server separately
@@ -163,18 +163,18 @@ npm run test:e2e
 ```
 
 ### "Page has closed" Error
-**Problem:** Playwright navigates to new page after test finishes.  
-**Cause:** Test doesn't await() redirect or click.  
+**Problem:** Playwright navigates to new page after test finishes.
+**Cause:** Test doesn't await() redirect or click.
 **Fix:** Use `page.waitForURL()` or `page.waitForNavigation()`.
 
 ### Flaky Mobile Tests
-**Problem:** Mobile Safari tests timeout or fail intermittently.  
-**Cause:** Mobile emulation uses shared resources; slower than desktop.  
+**Problem:** Mobile Safari tests timeout or fail intermittently.
+**Cause:** Mobile emulation uses shared resources; slower than desktop.
 **Fix:** Increase timeout or skip mobile in CI (test locally if critical).
 
 ### Selectors Not Found
-**Problem:** `getByText()` or `getByRole()` returns no elements.  
-**Cause:** Text doesn't exist, is hidden, or is in an iframe.  
+**Problem:** `getByText()` or `getByRole()` returns no elements.
+**Cause:** Text doesn't exist, is hidden, or is in an iframe.
 **Fix:** Use `page.locator()` with CSS, or use `--debug` to inspect DOM.
 
 ---

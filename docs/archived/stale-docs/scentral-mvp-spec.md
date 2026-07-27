@@ -1,16 +1,16 @@
-# Scentral MVP Spec
+# nota. MVP Spec
 _Written overnight 16 May 2026. Ready for Claude Code implementation._
 
 ---
 
-## What Scentral is
+## What nota. is
 
 A personal fragrance intelligence tool. Not Reddit-for-fragrance. Not Fragrantica.
 
 **The core loop:**
 1. You know what you own
-2. Scentral tells you how to understand it (olfactory family, phase, chemistry)
-3. Scentral tells you how to combine it (layering lab + spritz schedule)
+2. nota. tells you how to understand it (olfactory family, phase, chemistry)
+3. nota. tells you how to combine it (layering lab + spritz schedule)
 4. You smell incredible. Every day.
 
 **The two things nobody else does:**
@@ -36,7 +36,7 @@ A personal fragrance intelligence tool. Not Reddit-for-fragrance. Not Fragrantic
 You're at the 2-project free tier limit. scentral-mvp couldn't be created.
 **Options when you wake up:**
 - A) Pause the household-finance project (no data lost, just dormant) → create scentral-mvp fresh
-- B) Keep using ScentOI as the Scentral database (perfectly fine, just rename it in Supabase dashboard)
+- B) Keep using ScentOI as the nota. database (perfectly fine, just rename it in Supabase dashboard)
 
 Recommendation: **Option B** — the schema is solid, the data is live. Rename ScentOI → scentral-mvp in the Supabase dashboard and move on.
 
@@ -60,11 +60,11 @@ Recommendation: **Option B** — the schema is solid, the data is live. Rename S
 ---
 
 ### Screen 2 — Layering Lab
-**What it does:** You pick a fragrance. Scentral shows you what it layers with from your collection, and how.
+**What it does:** You pick a fragrance. nota. shows you what it layers with from your collection, and how.
 
 **Layout:**
 - Search/browse your collection → select one fragrance
-- Scentral shows compatible pairings:
+- nota. shows compatible pairings:
   - Phase 1 + Phase 2 combinations
   - Phase 1 + Phase 3 combinations
   - Phase 2 + Phase 3 combinations
@@ -148,7 +148,7 @@ Reuse everything from fragrance-community repo as the starting point. The auth p
 
 ## The Claude Code session prompt (use this exactly)
 
-> "I'm building Scentral — a personal fragrance tool. The Supabase project ID is `lrkdwobnemczvhpixpky`. The database already has a `fragrances` table with 76 rows and a `layering_protocols` table with 4 rows.
+> "I'm building nota. — a personal fragrance tool. The Supabase project ID is `lrkdwobnemczvhpixpky`. The database already has a `fragrances` table with 76 rows and a `layering_protocols` table with 4 rows.
 >
 > Build the Collection screen first: a Next.js page at `/collection` that fetches all fragrances from Supabase and displays them in three phase-grouped sections (Phase 1 = Endothermic Anchors, Phase 2 = Textural Modulators, Phase 3 = Exothermic Tops). Each card should show: name, brand, family, rating, projection, and application_zone. Use Tailwind for styling. Do not touch auth yet."
 
@@ -168,7 +168,7 @@ That's the exact starting point. One page, one query, real data. From there we a
 | Verify it fetches real data | Browser | 5 min |
 | Deploy to Vercel | Claude Code / Vercel | 10 min |
 
-**Total: ~50 minutes to have a live Scentral screen with your real collection data.**
+**Total: ~50 minutes to have a live nota. screen with your real collection data.**
 
 ---
 
@@ -186,10 +186,10 @@ That's the exact starting point. One page, one query, real data. From there we a
 
 ---
 
-## What Scentral is NOT (keep this on the wall)
+## What nota. is NOT (keep this on the wall)
 
 - Not a social network
-- Not a review platform  
+- Not a review platform
 - Not a shop
 - Not an AI chatbot
 
@@ -203,4 +203,4 @@ It is a personal tool that makes you smarter about what you own and how to use i
 - Maceration tracker: shows which bottles are still maturing (based on `maturation` field + purchase date)
 - Wishlist + buy recommendations (your Tier 1/2/3 acquisition data is already in Drive)
 - The Spritz Schedule as a shareable card (social-ready, but not social-first)
-- C. Robin personal fragrance line: when you're ready to create your own, Scentral becomes the portfolio
+- C. Robin personal fragrance line: when you're ready to create your own, nota. becomes the portfolio

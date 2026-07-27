@@ -1,4 +1,4 @@
-# AnotherSense App Store Screenshots
+# nota. App Store Screenshots
 
 Complete set of high-resolution screenshots for iOS App Store and Google Play Store.
 
@@ -12,7 +12,7 @@ Complete set of high-resolution screenshots for iOS App Store and Google Play St
 ### Landing Page
 - **iOS:** ios_landing_1284x2778.png (35 KB)
 - **Android:** android_landing_1440x3200.png (36 KB)
-- Shows: AnotherSense brand identity, hero section, onboarding CTA
+- Shows: nota. brand identity, hero section, onboarding CTA
 
 ### Discovery
 - **iOS:** ios_discover_1284x2778.png (44 KB)

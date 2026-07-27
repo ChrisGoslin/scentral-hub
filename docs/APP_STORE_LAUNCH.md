@@ -1,7 +1,7 @@
-# BaseNote App Store Launch — Assets & Requirements
+# nota. App Store Launch — Assets & Requirements
 
-**Platform:** iOS (App Store Connect) + Android (Google Play Console)  
-**Target Release:** End of Phase 7 (July 2026)  
+**Platform:** iOS (App Store Connect) + Android (Google Play Console)
+**Target Release:** End of Phase 7 (July 2026)
 **Region:** US primary (expand EU/Asia in Phase 8)
 
 ---
@@ -11,18 +11,18 @@
 ### 1. App Information
 
 #### Metadata
-- **App Name:** BaseNote (or "BaseNote: Scent Identity")
+- **App Name:** nota. (or "nota.: Scent Identity")
 - **Subtitle:** "Your Daily Scent Ritual"
 - **Category:** Lifestyle
 - **Content Rating:** 4+ (no objectionable content)
 - **Privacy Policy URL:** https://scentral-hub.vercel.app/disclaimer
-- **Support URL:** support@basenote.co (set up before launch)
+- **Support URL:** current nota. support URL or email (set up before launch)
 - **Marketing URL:** (optional; use landing page or TikTok link)
 
 #### Description (300 chars max for iTunes, but allow ~300 for App Store)
 ```
 Discover your scent identity. Track the fragrances that move you.
-Evolve with intention. BaseNote is your personal scent journal—
+Evolve with intention. nota. is your personal scent journal—
 organize your collection, remember how you smell, and understand
 the fragrances that define you.
 ```
@@ -35,7 +35,7 @@ discovery,personal,style,mood,tracker,notes,lifestyle,wellness
 
 #### Release Notes (for v1.0)
 ```
-Welcome to BaseNote.
+Welcome to nota.
 
 Discover your scent identity:
 • Personal Shelf: Organize and rate your fragrance collection
@@ -67,7 +67,7 @@ No login required. Your collection lives on your device.
 - Icon should be **instantly recognizable** at 180×180 and smaller
 - Suggested: Stylized **bottle silhouette** or **shelving abstraction**
 - Color: Gold accent on cream/white background (brand-aligned)
-- No text inside the icon; BaseNote wordmark is App Name
+- No text inside the icon; nota. wordmark is App Name
 - Must be PNG with full opacity (no transparency on rounded corners—iOS handles that)
 
 ---
@@ -82,7 +82,7 @@ No login required. Your collection lives on your device.
 
 #### Screenshot Sequence (5–8 screens, storytelling order)
 1. **Hero / Onboarding**
-   - Show BaseNote wordmark or a clean shelf image
+   - Show nota. wordmark or a clean shelf image
    - Tagline: "Your Daily Scent Ritual"
    - CTA: "Get Started" or "Explore"
    - Annotation: "Discover your scent identity"
@@ -135,12 +135,12 @@ No login required. Your collection lives on your device.
 - **Codec:** H.264, AAC audio
 
 #### Video Sequence
-1. **Intro (3s):** Fade in BaseNote wordmark with tagline
+1. **Intro (3s):** Fade in nota. wordmark with tagline
 2. **Shelf Interaction (4s):** Show drag-and-drop reordering; highlight smooth motion
 3. **Blind Ranking (3s):** Swipe between two fragrance cards
 4. **Trace Creation (3s):** Add a trace entry (show form + save animation)
 5. **Insights Display (3s):** Show persona card + Wheel chart rotation
-6. **Call-to-Action (2s):** "Available now on App Store" + BaseNote logo
+6. **Call-to-Action (2s):** "Available now on App Store" + nota. logo
 
 **Audio:** Soft, ambient music (no voiceover). 30–60 seconds of royalty-free lo-fi or meditative track.
 
@@ -172,11 +172,11 @@ No login required. Your collection lives on your device.
 ### 1. App Information
 
 #### Metadata
-- **App Name:** BaseNote
+- **App Name:** nota.
 - **Short Description (80 chars):** "Your Daily Scent Ritual — Discover Your Fragrance Identity"
 - **Full Description (4000 chars):**
 ```
-BaseNote is your personal fragrance journal. Discover your scent
+nota. is your personal fragrance journal. Discover your scent
 identity, organize your collection, and understand the fragrances
 that define you.
 
@@ -190,7 +190,7 @@ FEATURES:
 • No Login Required: Your collection lives on your device
 
 Whether you're a casual scent explorer or a dedicated fragrance
-enthusiast, BaseNote helps you understand what you love and why.
+enthusiast, nota. helps you understand what you love and why.
 
 No account. No tracking. Just you and your scent story.
 ```
@@ -200,7 +200,7 @@ No account. No tracking. Just you and your scent story.
 - **Secondary:** (optional) Health & Fitness or Personalization
 
 #### Contact Email
-- support@basenote.co (set up before launch)
+- Current nota. support email (set up before launch)
 
 #### Privacy Policy
 - https://scentral-hub.vercel.app/disclaimer
@@ -223,7 +223,7 @@ No account. No tracking. Just you and your scent story.
 
 #### Feature Graphic (1024×500)
 - Show the **most compelling feature**: Personal Shelf or Insights persona
-- Include BaseNote wordmark + tagline
+- Include nota. wordmark + tagline
 - Use brand colors (cream background, gold accents)
 - Text should be readable at thumbnail size
 
@@ -237,7 +237,7 @@ No account. No tracking. Just you and your scent story.
 ### 3. Release Notes
 
 ```
-v1.0 — Welcome to BaseNote
+v1.0 — Welcome to nota.
 
 Your personal fragrance journey starts here.
 
@@ -258,7 +258,7 @@ No account. No tracking. Just your scent story.
 
 ### 4. In-App Purchases & Ads (If Applicable)
 
-**For BaseNote v1.0 (MVP):**
+**For nota. v1.0 (MVP):**
 - **Monetization:** None (free app, no ads, no IAP)
 - **Status:** Toggle "This app is free and contains no ads"
 - **Future (Phase 8):** Consider Pro tier (gated features) if growth justifies
@@ -315,7 +315,7 @@ For multi-market launch:
 - [ ] Screenshots annotated with clear, readable text
 - [ ] App preview video recorded and edited (optional)
 - [ ] Privacy policy live and accessible
-- [ ] Support email address set up (support@basenote.co)
+- [ ] Support email address set up (current nota. support email)
 - [ ] All in-app text reviewed for typos, tone, brand voice
 - [ ] Feature flags verified (ProGate enabled, free features only for v1.0)
 - [ ] Analytics verified (no PII in events, GDPR compliant)

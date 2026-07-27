@@ -1,9 +1,9 @@
-# Scentral v0.1.0 — App Store Submission Prep
+# nota. v0.1.0 — App Store Submission Prep
 
-**Status:** LAUNCH-READY  
-**Date:** 2026-06-19  
-**Version:** 0.1.0  
-**Build:** Production (Next.js 16.2.9, React 19.2.4)  
+**Status:** LAUNCH-READY
+**Date:** 2026-06-19
+**Version:** 0.1.0
+**Build:** Production (Next.js 16.2.9, React 19.2.4)
 
 ---
 
@@ -15,7 +15,7 @@
 - **Build Number:** 1 (increment for each submission)
 - **Minimum iOS:** 13.0 (or your target minimum)
 - **Device Support:** iPhone, iPad
-- **Privacy Policy:** https://scentral-seven.vercel.app/disclaimer
+- **Privacy Policy:** https://scentral-hub.vercel.app/disclaimer
 
 ### Android (Google Play Console)
 - **Package Name:** `com.scentral.app` (configure via android/build.gradle)
@@ -23,7 +23,7 @@
 - **Version Name:** 0.1.0
 - **Min API Level:** 24 (Android 7.0+)
 - **Target API Level:** 35+ (as per Play Store 2025+ requirements)
-- **Privacy Policy:** https://scentral-seven.vercel.app/disclaimer
+- **Privacy Policy:** https://scentral-hub.vercel.app/disclaimer
 
 ---
 
@@ -31,7 +31,7 @@
 
 ### For App Store
 ```
-Scentral v0.1.0 — Your Scent Wardrobe
+nota. v0.1.0 — Your Scent Wardrobe
 
 Discover, collect, and understand the fragrances that define you — guided by your personal scent identity.
 
@@ -47,7 +47,7 @@ Discover, collect, and understand the fragrances that define you — guided by y
 
 ### For Play Store
 ```
-Scentral — Your Scent Wardrobe
+nota. — Your Scent Wardrobe
 
 Discover, collect, and understand the fragrances that define you — guided by your personal scent identity.
 
@@ -121,10 +121,10 @@ npm run start  # Run locally to verify
 
 ## Contact & Support
 
-**Support Email:** christophergoslin@outlook.com  
-**Privacy Policy URL:** https://scentral-seven.vercel.app/disclaimer  
-**Web Version:** https://scentral-seven.vercel.app  
-**Developer:** Christopher Goslin  
+**Support Email:** christophergoslin@outlook.com
+**Privacy Policy URL:** https://scentral-hub.vercel.app/disclaimer
+**Web Version:** https://scentral-hub.vercel.app
+**Developer:** Christopher Goslin
 
 ---
 
@@ -183,5 +183,5 @@ npm run test:smoke  # or: node scripts/smoke-test.mjs
 
 ---
 
-**Status:** ✅ **READY FOR SUBMISSION**  
+**Status:** ✅ **READY FOR SUBMISSION**
 All checks passing. Proceed with App Store / Play Console uploads.

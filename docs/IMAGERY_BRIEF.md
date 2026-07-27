@@ -1,14 +1,14 @@
-# BaseNote Imagery Brief — Phase 7 Launch Direction
+# nota. Imagery Brief — Phase 7 Launch Direction
 
-**Project:** BaseNote — Personal Scent Identity Platform  
-**Audience:** People aged 22–45 who distrust influencer beauty/fragrance culture  
-**Display Name:** BaseNote (internal names unchanged: scentral-hub repo, scentral-mvp DB)
+**Project:** nota. — Personal Scent Identity Platform
+**Audience:** People aged 22–45 who distrust influencer beauty/fragrance culture
+**Display Name:** nota. (internal names unchanged: scentral-hub repo, scentral-mvp DB)
 
 ---
 
 ## Visual Language: The Trace, Not the Product
 
-BaseNote's visual identity celebrates **scent's invisible impact on human moments**. We photograph *absence*, *residue*, *human presence*, and *the passage of time*—never the glamorous bottle.
+nota.'s visual identity celebrates **scent's invisible impact on human moments**. We photograph *absence*, *residue*, *human presence*, and *the passage of time*—never the glamorous bottle.
 
 ### Core Visual Principles
 
@@ -115,7 +115,7 @@ BaseNote's visual identity celebrates **scent's invisible impact on human moment
 
 ## Hero Imagery for Homepage
 
-**Style:** Quiet, meditative, unposed  
+**Style:** Quiet, meditative, unposed
 **Key Rule:** No bottles. Show *what scent does* (creates moments, marks time, shapes identity)
 
 ### Option A: Shelf in Morning Light
@@ -143,9 +143,9 @@ BaseNote's visual identity celebrates **scent's invisible impact on human moment
 
 ### Homepage OG Image
 - **Size:** 1200×630
-- **Layout:** Textured background (aged linen or wood), centered BaseNote wordmark in Cormorant serif, 1-line tagline below
+- **Layout:** Textured background (aged linen or wood), centered nota. wordmark in Cormorant serif, 1-line tagline below
 - **Color palette:** Cream background, gold text, minimal
-- **Text:** "BaseNote — Your Daily Scent Ritual"
+- **Text:** "nota. — Your Daily Scent Ritual"
 
 ### Fragrance Detail OG Image
 - **Size:** 1200×630
@@ -226,11 +226,11 @@ Use `next/image` with `priority` for hero, `lazy` for scrollable sections:
 
 ## Final Direction
 
-**BaseNote is a mirror, not a mannequin. Our imagery should make users see *themselves* in fragrance, not aspire to someone else's life.**
+**nota. is a mirror, not a mannequin. Our imagery should make users see *themselves* in fragrance, not aspire to someone else's life.**
 
 Every photograph should answer: *What do scents do? They mark time. They shape mood. They become part of who you are—worn on your skin, remembered in your rituals, tracked in your journal, celebrated on your shelf.*
 
-When in doubt, ask: **Is this a photograph of human presence and the trace of a moment, or is this a luxury lifestyle advertisement?** The first belongs in BaseNote. The second does not.
+When in doubt, ask: **Is this a photograph of human presence and the trace of a moment, or is this a luxury lifestyle advertisement?** The first belongs in nota. The second does not.
 
 ---
 

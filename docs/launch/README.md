@@ -1,8 +1,8 @@
-# Scentral Launch — Complete Asset Pack
+# nota. Launch — Complete Asset Pack
 
-**Status:** Ready for execution  
-**Last updated:** 2026-06-21  
-**Owner:** Christopher  
+**Status:** Ready for execution
+**Last updated:** 2026-06-21
+**Owner:** Christopher
 **Commit:** `docs: launch asset pack—tweets, reddit, email, PH, demo script, checklist`
 
 ---
@@ -43,7 +43,7 @@
 #### 🐦 [`TWEET_QUEUE.md`](TWEET_QUEUE.md) — 8 Tweets
 - **T+0:** Main announcement + 15s demo hook + feature highlight
 - **T+1:** Social proof (dupe focus) + personal hook (blind-buying story)
-- **T+3:** Thread (how Scentral works, persona deep-dive)
+- **T+3:** Thread (how nota. works, persona deep-dive)
 - **T+5:** Proof tweet (metrics)
 - **T+7:** Community poll (persona engagement)
 - **Plus:** Response templates for engagement + contingency replies
@@ -55,7 +55,7 @@
 
 #### 🔴 [`REDDIT_POSTS.md`](REDDIT_POSTS.md) — 2 Posts + Playbook
 - **r/fragrance** (T+2): "Built an app to solve my fragrance problem"
-- **r/IndieApps** (T+3): "Scentral—fragrance wardrobe app (built solo, shipped)"
+- **r/IndieApps** (T+3): "nota.—fragrance wardrobe app (built solo, shipped)"
 - FAQ templates for each community
 - Engagement strategy + tone guidelines
 - Timing + do's/don'ts
@@ -67,7 +67,7 @@
 4. Use FAQ templates to respond
 
 #### 📧 [`EMAIL_TEMPLATE.md`](EMAIL_TEMPLATE.md) — 3 Emails
-- **T+1:** Waitlist notification ("Scentral is live")
+- **T+1:** Waitlist notification ("nota. is live")
 - **T+3:** Social proof ("X downloads, Y personas")
 - **T+14:** Re-engagement ("Your wardrobe is waiting")
 - Both HTML + plain-text versions

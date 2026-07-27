@@ -426,7 +426,7 @@ export default function HeroSection() {
             fetchPriority="high"
           />
         </picture>
-        {!shouldReduceMotion && hasMounted && !isSlow && (
+        {!shouldReduceMotion && hasMounted && !isSlow && hasImageLoaded && (
           <video
             ref={videoRef}
             className={styles.film}
@@ -435,7 +435,7 @@ export default function HeroSection() {
             loop
             playsInline
             preload="none"
-            poster={isMobileViewport ? '/media/atelier-matter-mobile-poster.jpg' : '/media/atelier-matter-poster.jpg'}
+            poster={isMobileViewport ? '/media/atelier-matter-mobile-poster-sm.webp' : '/media/atelier-matter-poster.webp'}
             aria-label="Dark ink blooms and disperses through clear water"
           >
             <source media="(max-width: 700px)" src="/media/atelier-matter-mobile.mp4" type="video/mp4" />

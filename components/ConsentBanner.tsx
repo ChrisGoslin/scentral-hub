@@ -70,8 +70,8 @@ export default function ConsentBanner() {
           style={{
             flex: 1,
             padding: '8px 12px',
-            background: 'var(--accent, #B8913A)',
-            color: 'var(--text-inverse, #0f172a)',
+            background: 'var(--olive, #6B7250)',
+            color: 'var(--ivory, #F7F4EE)',
             border: 'none',
             borderRadius: 'var(--r-card, 12px)',
             cursor: 'pointer',

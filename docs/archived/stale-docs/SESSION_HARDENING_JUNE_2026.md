@@ -1,4 +1,4 @@
-# 🏛️ SCENTRAL HUB: SESSION HARDENING SUMMARY (JUNE 2026)
+# 🏛️ nota. HUB: SESSION HARDENING SUMMARY (JUNE 2026)
 
 **Status:** HARDENED & VERIFIED. The project has undergone a complete architectural audit and credential rotation to restore "Golden Source" integrity.
 

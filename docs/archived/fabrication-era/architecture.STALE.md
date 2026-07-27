@@ -1,4 +1,4 @@
-# Scentral Hub — Architecture
+# nota. Hub — Architecture
 
 > **The canonical TAD is at `docs/executive-suite/TECHNICAL_ARCHITECTURE_DOC.md`.**
 > This file is a short summary. For stack details, data model, patterns, and agent rules — read the TAD.

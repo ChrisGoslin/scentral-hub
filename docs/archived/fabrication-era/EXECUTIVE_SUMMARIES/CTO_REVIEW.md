@@ -2,7 +2,7 @@
 
 ## 🛠️ Infrastructure & Scalability Audit
 
-From a technical standpoint, the Scentral Hub is highly performant but carries some "rapid-prototype" debt that needs to be addressed before we scale past 10,000 active concurrent users.
+From a technical standpoint, the nota. Hub is highly performant but carries some "rapid-prototype" debt that needs to be addressed before we scale past 10,000 active concurrent users.
 
 ### Infrastructure Wins:
 - **Serverless Edge:** Leveraging Next.js App Router allows us to deliver high-fidelity visuals with minimal latency globally.

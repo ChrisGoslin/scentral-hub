@@ -1,4 +1,4 @@
-# Scentral — Customer Personas
+# nota. — Customer Personas
 *Last updated: 2026-06-13*
 
 > These personas are the filter for every feature, label, and design decision.
@@ -8,9 +8,9 @@
 
 ## Persona 1 — Gavan (The Awakening Collector)
 
-**Age:** 28  
-**Location:** Dublin, Ireland  
-**Occupation:** Office worker, corporate environment  
+**Age:** 28
+**Location:** Dublin, Ireland
+**Occupation:** Office worker, corporate environment
 
 ### Backstory
 
@@ -32,7 +32,7 @@ Then he ordered five more.
 
 His collection is now building. He's crossed a threshold — from "one or two bottles" to someone who *collects*. He doesn't have the language for it yet. He doesn't know note pyramids or fragrance families. But he knows what he likes, he trusts his nose, and now he knows the inspired-by world exists.
 
-### What Gavan needs from Scentral
+### What Gavan needs from nota.
 
 1. **A bridge between what he knows and what's out there.** He knows his signature scent. Show him what else is in that universe.
 2. **Plain language.** "Warm, long-lasting, works all day without reapplying" — not "amber base with synthetic musks."
@@ -70,8 +70,8 @@ Gavan responds to warmth and confidence, not minimalism and tech. The app should
 
 ## Persona 2 — Christopher (The Enthusiast Evangelist)
 
-**Age:** 34  
-**Location:** Dublin, Ireland (originally from the Middle East)  
+**Age:** 34
+**Location:** Dublin, Ireland (originally from the Middle East)
 **Occupation:** Senior professional, office environment
 
 ### Backstory
@@ -82,12 +82,12 @@ He has a large, curated collection — Lattafa, Afnan, Rasasi, Swiss Arabian, Kh
 
 He's the person who introduced Gavan to the inspired-by world. He does this regularly — showing colleagues, friends, and family that you don't have to pay €150 for a great scent.
 
-### What Christopher needs from Scentral
+### What Christopher needs from nota.
 
 1. **A tool to organise and showcase his collection.** He has 30–50+ bottles. He wants to log them, categorise by role (foundation, enhancer, modifier), and track layering combinations that work.
 2. **Layering intelligence.** He already knows his combinations instinctively. He wants an app that confirms, extends, and helps him articulate *why* they work — so he can share the reasoning with others like Gavan.
 3. **Discovery within the Middle Eastern fragrance world.** Even he doesn't know every brand. He wants to find new Lattafa lines, new Afnan releases, hidden gems.
-4. **A way to be the expert.** Scentral should let Christopher *share* — a collection profile, layering recommendations, "if you like X try Y" lists — so he can be the in-app version of what he already is in real life.
+4. **A way to be the expert.** nota. should let Christopher *share* — a collection profile, layering recommendations, "if you like X try Y" lists — so he can be the in-app version of what he already is in real life.
 5. **Inspired-by mapping.** He knows these intuitively but wants confirmation and discovery. "What does Lattafa Asad compare to?"
 
 ### What Christopher does NOT need
@@ -98,15 +98,15 @@ He's the person who introduced Gavan to the inspired-by world. He does this regu
 
 ### Design signal
 
-Christopher can handle density and information. He appreciates precision. For him, showing the note pyramid is a feature, not jargon. The gap between Gavan and Christopher is the reason Scentral needs two tiers of language — simple by default, depth available on demand.
+Christopher can handle density and information. He appreciates precision. For him, showing the note pyramid is a feature, not jargon. The gap between Gavan and Christopher is the reason nota. needs two tiers of language — simple by default, depth available on demand.
 
 ---
 
 ## How These Two Personas Work Together
 
-Gavan is Scentral's **growth engine** — there are millions of him. The inspired-by moment is the hook that brings him in.
+Gavan is nota.'s **growth engine** — there are millions of him. The inspired-by moment is the hook that brings him in.
 
-Christopher is Scentral's **content engine** — he creates the collections, layering combinations, and "smells like" mappings that make the app valuable for Gavan.
+Christopher is nota.'s **content engine** — he creates the collections, layering combinations, and "smells like" mappings that make the app valuable for Gavan.
 
 The product should be:
 - **Gavan's front door** — simple, warm, "help me find something"

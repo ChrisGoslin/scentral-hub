@@ -56,7 +56,7 @@ export default function WearNoteSheet({ isOpen, onClose, wearLogId, fragranceId,
         body: JSON.stringify({ wearLogId, note: note.trim() }),
       })
 
-      // Push to Scentral Strip Queue
+      // Push to nota. Strip Queue
       const queueItem = {
         wearLogId,
         note: note.trim(),
