@@ -51,7 +51,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # Extract the deployment URL from output
-DEPLOY_URL=$(echo "$DEPLOY_OUTPUT" | grep -oP 'https://[^ ]+(?=\s|$)' | head -1)
+DEPLOY_URL=$(echo "$DEPLOY_OUTPUT" | grep -Eo 'https://[^[:space:]]+' | head -1)
 if [ -z "$DEPLOY_URL" ]; then
   echo "❌ Could not extract deployment URL from Vercel output"
   exit 1
@@ -93,7 +93,7 @@ fi
 # 5. Run smoke tests against the deployment just created
 echo ""
 echo "Running smoke tests..."
-if ! SITE_URL="$DEPLOY_URL" npm run test:smoke:prod; then
+if ! NEXT_PUBLIC_SITE_URL="$DEPLOY_URL" npm run test:smoke:prod; then
   echo ""
   echo "❌ Smoke tests failed. Deployment succeeded but health check failed."
   echo "   Check https://vercel.com/dashboard for recent deployments."
