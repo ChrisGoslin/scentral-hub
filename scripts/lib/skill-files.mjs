@@ -22,7 +22,7 @@ function findSkillFilesIn(skillsDir) {
 export function listSkillFiles(root) {
   const absoluteFiles = SKILL_ROOTS.flatMap((dir) =>
     findSkillFilesIn(join(root, dir, "skills"))
-  ).sort();
+  ).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
   const relativeFiles = absoluteFiles.map((p) => p.slice(root.length + 1));
   return { absoluteFiles, relativeFiles };
 }
