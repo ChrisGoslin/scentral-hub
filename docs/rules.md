@@ -22,6 +22,7 @@ This is the short checklist. `docs/lessons.md` remains the detailed history and 
 2. Before committing, inspect `git status --short`, `git diff --cached --name-only`, `git diff --cached --stat`, and `git diff --cached --check`.
 3. Treat generated artifacts separately from source changes. Move build-state backups aside or clean them only when the cleanup scope is explicit.
 4. Do not push `main` directly when there are multiple local commits and a dirty shared worktree unless Christopher explicitly asks for that exact push.
+5. Root-level `.next.preverify-*` and `.next.preclean-*` directories are generated build backups. Ignore them in Git and ESLint, and move them out of the repo before lint or CI claims.
 
 ## Verification
 
