@@ -123,7 +123,7 @@ test.describe('Hero Screen States', () => {
     await expect(page.getByText('Video unavailable. Viewing static mode.')).toBeVisible({ timeout: 7000 });
   });
 
-  test('image fades in smoothly after loading', async ({ page }) => {
+  test('poster is immediately paintable for LCP', async ({ page }) => {
     await page.goto('/');
 
     // Get the real film image (not the blurhash placeholder)
@@ -131,10 +131,8 @@ test.describe('Hero Screen States', () => {
     // Wait for image to load
     await filmImg.waitFor({ state: 'attached' });
 
-    // Check that image has fade-in transition applied
-    const transitionStyle = await filmImg.evaluate((el) => window.getComputedStyle(el).transition);
-    // Should have a transition property if loaded
-    expect(transitionStyle).toBeTruthy();
+    const opacity = await filmImg.evaluate((el) => window.getComputedStyle(el).opacity);
+    expect(opacity).toBe('1');
   });
 
   test('pause/play button toggles aria-pressed state', async ({ page }) => {

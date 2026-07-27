@@ -424,10 +424,6 @@ export default function HeroSection() {
             alt="Dark ink blooming and dispersing through clear water"
             loading="eager"
             fetchPriority="high"
-            style={{
-              transition: hasImageLoaded ? 'opacity 0.6s ease-out' : 'none',
-              opacity: hasImageLoaded ? 1 : 0.95,
-            }}
           />
         </picture>
         {!shouldReduceMotion && hasMounted && !isSlow && (
