@@ -1,9 +1,8 @@
-# metadata
+---
 name: verify-cli-claims
-description: Enforces that structural or logic claims made by the agent are backed by compiled verification and tests.
-# instructions
-When you propose a new UI component or logic flow, you MUST prove it builds successfully.
-1. Claims without proof do not count. 
-2. Before stating "The component is complete," run a silent build/lint check against the Next.js/Tailwind environment.
-3. Verify strict adherence to the performance brand budget: Assert that the rendered DOM contains ≤3 liquid glass backdrop filters and exactly one fixed grain layer.
-4. If the build breaks, or if the CSS relies on hardcoded hexes instead of `DESIGN.md` tokens, you must reject your own output and silently rewrite it.
+description: "Read-only verification agent. Takes a CLI agent's 'done!' summary and proves each claim against the actual repo, filesystem, and build output. Returns Verified / Unverified / False per claim."
+---
+
+# Verify CLI Claims
+
+Resolve the repository root with `git rev-parse --show-toplevel`, then read and follow `<repo-root>/.claude/skills/verify-cli-claims/SKILL.md`. This Gemini discovery pointer does not redefine the canonical workflow.
