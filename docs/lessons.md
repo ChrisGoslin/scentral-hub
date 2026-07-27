@@ -182,3 +182,19 @@ Context: Merged brand-reconciliation branch (hero video, docs, route alignment),
 **What happened:** L14 detects concurrent sessions + HEAD movement. But detection is not resolution. If two sessions commit to the same branch → conflict on merge, there's no declared strategy: merge first-come-wins, manual conflict resolution, sequential gate (one session locks the branch), or something else. Teams need a playbook.
 **Rule:** For any shared branch, declare the merge strategy upfront: (a) fast-forward preferred when histories don't conflict; (b) resolve merge conflicts with the rule "most recent session's state wins" / "oldest session's data survives" / "manual arbitration" — pick based on the feature (log/audit = oldest wins; feature flags = newest wins; code = manual). For conflicts on code/data, document who arbitrates (Christopher, on-call, automated test result). Record the strategy in CLAUDE.md §11.
 **Enforced by:** conflict resolution rules in CLAUDE.md; for any shared branch work, state "if HEAD moves, merge strategy is X" before proceeding. CI gate: if a merge conflict is detected, require explicit approval before continuing (do not auto-resolve silently).
+
+---
+
+## 2026-07-27 — Cross-repo cleanup audit and skill hygiene
+
+Context: ran a "repo-tidy"-style audit across scentral-hub, abundance, ai-ops, and last30days-skill. The audit itself came back clean, but running it surfaced two problems with the tooling used to run it, not with the code it checked.
+
+### L26 — A skill's "scope" or "rule" content can go stale even when its name still fires correctly
+**What happened:** The global `repo-tidy` skill's Phase 5 hardcoded a "locked MVP scope" (Collection/Lab/You/Scheduler) that matched no current repo — not nota's real route surface, not abundance's, not ai-ops's. It went unnoticed until read closely mid-run; a single-pass audit would have quietly produced a wrong or empty scope-purge result.
+**Rule:** Any skill step that encodes "current scope," "locked features," or similar project-state facts must read that state live from the target repo's own AGENTS.md/CLAUDE.md at run time — never hardcode it in the skill file. If no such source exists, the skill must say so explicitly rather than silently applying a stale or borrowed list.
+**Enforced by:** `repo-tidy` Phase 5 rewritten to read scope from the target repo's docs at run time and to report "SKIPPED, no scope doc found" instead of guessing (`/root/.claude/skills/repo-tidy/SKILL.md`).
+
+### L27 — A project-local skill can silently shadow and contradict a global one of the same name
+**What happened:** `scentral-hub/.claude/skills/repo-tidy/SKILL.md` existed as a second, divergent skill with the same name as the global `repo-tidy` — but it instructed *silently* replacing brand terminology in user-facing copy and prompting to delete branches for vaguely-defined "rejected" features, with an untraceable rule about SVG assets. Per the tool-loading rule ("most specific wins"), this project-local version would have silently taken priority over the safe global one for any session working in this repo — nobody would necessarily notice which version fired.
+**Rule:** (1) Any skill that edits user-facing copy or deletes repo state must never do so "silently" — report/propose, then wait for explicit review, full stop. (2) A project-local skill sharing a name with a global one is a hazard by itself, independent of its content — same-name shadowing means the two are easy to conflate and hard to diff without deliberately comparing them. Prefer a distinct name for any project-local skill that materially diverges from the global one it might be confused with.
+**Enforced by:** rogue `scentral-hub/.claude/skills/repo-tidy/` removed; replaced with distinctly-named `brand-terminology-audit` skill that reports-only (no silent edits, no auto-deletion) and traces every rule back to a current doc instead of carrying forward untraceable claims.
