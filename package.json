@@ -14,6 +14,7 @@
     "test:smoke": "node scripts/smoke-test.mjs",
     "test:smoke:prod": "BASE_URL=${NEXT_PUBLIC_SITE_URL:-https://scentral-hub.vercel.app} node scripts/smoke-test.mjs",
     "test:unit": "node --test tests/**/*.test.mjs",
+    "check:performance-criteria": "node scripts/check-performance-criteria.mjs",
     "pretest:e2e": "npm run build",
     "test:e2e": "playwright test",
     "pretest:e2e:headed": "npm run build",

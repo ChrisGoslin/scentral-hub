@@ -48,7 +48,7 @@
 ### Testing & QA
 - [ ] `npm run test:smoke:prod` passes (smoke tests on live Vercel)
 - [ ] All pages load <3s on 4G (Lighthouse throttle, mobile)
-- [ ] Core Web Vitals: LCP <2.5s, CLS <0.1, FID <100ms (or INP <200ms for 2024 metric)
+- [ ] Core Web Vitals: homepage mobile LCP <=3.0s on slow 4G, CLS <0.1, INP <200ms
 - [ ] iOS Safari compatibility tested (iPhone 12–15)
 - [ ] Android Chrome compatibility tested (Snapdragon 685+, Android 13+)
 - [ ] No hardcoded secrets in source code (grep for API keys, skip .env.local)

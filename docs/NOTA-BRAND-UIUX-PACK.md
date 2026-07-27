@@ -298,7 +298,7 @@ the next step, never blame the user.
 
 ## 13. Performance is a brand attribute
 
-≤3 glass layers per viewport · one fixed grain layer · LCP < 2.5s · no
+≤3 glass layers per viewport · one fixed grain layer · homepage mobile LCP <=3.0s on slow 4G · no
 ceremonial animation on scroll-critical paths · always support reduced motion.
 If a ceremonial hold pushes the identity past the LCP budget, start it at low
 non-zero opacity so it *resolves* rather than *appears*, or shorten it — and

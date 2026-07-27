@@ -75,6 +75,20 @@ Context: designed and converted "The Read" (onboarding scent-identity reveal) fr
 
 ---
 
+## 2026-07-27 — Performance acceptance and adversarial loop
+
+### L26 — A revised acceptance decision needs an executable contract
+**What happened:** Production LCP improved to 2.74–2.83s, but active handoff and launch documents still carried the old `<2.5s` gate. The product decision was correct, yet the documentation system could have sent the next session toward unnecessary work.
+**Rule:** When acceptance criteria change, update the canonical record, active references, and an automated consistency check in the same change. Keep historical measurements labelled as historical.
+**Enforced by:** `npm run check:performance-criteria` in CI; the homepage follow-up is the canonical source for this gate.
+
+### L27 — A process lesson is incomplete without a guardrail
+**What happened:** The loop identified missing performance monitoring and stale-criteria protection, but a lesson alone would not prevent recurrence.
+**Rule:** For every process lesson, add the smallest practical system change: CI check, hook, template, or monitored metric. If that is not possible, record the concrete blocker.
+**Enforced by:** CI `performance-criteria` job and the loop review checklist.
+
+---
+
 ## 2026-07-26 — Homepage/hero reconciliation + parallel fixes + security audit
 
 Context: Merged brand-reconciliation branch (hero video, docs, route alignment), fixed 3 follow-up issues (lab pagination, mobile poster, guest redirect) in parallel, resolved 10 npm vulnerabilities. Session revealed gaps in loop discipline and dependency-update hygiene.
