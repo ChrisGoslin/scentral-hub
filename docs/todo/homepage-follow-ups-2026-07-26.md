@@ -6,13 +6,13 @@
 
 ---
 
-## 1. Verify LCP improvement post-optimization
+## 1. Maintain LCP gate — PASSED
 
-**Priority:** High  
+**Priority:** Medium (maintenance)
 **Effort:** 1–2 hours  
 **Owner:** Christopher
 
-**Implementation status (2026-07-27):** Local fix complete. The poster `<picture>` now owns the media panel's first paint instead of a CSS background, removing the mobile LCP discovery delay. Slow connections receive poster-only mode and video failures expose a static-mode message. The existing ink-in-water film remains the motion enhancement.
+**Implementation status (2026-07-27):** Production gate passed. The poster `<picture>` now owns the media panel's first paint instead of a CSS background, removing the mobile LCP discovery delay. Slow connections receive poster-only mode and video failures expose a static-mode message. The existing ink-in-water film remains the motion enhancement.
 
 **Acceptance criteria:** Mobile LCP must be `<=3.0s` on slow 4G; desktop LCP must remain below 1.5s.
 
@@ -20,13 +20,15 @@
 
 **Optional future improvement:** Split the server-rendered poster/LCP surface from the client-only motion and personalization layer. Do not replace the ink film; the measured bottleneck is hydration/render delay, not video transfer. This is no longer a launch blocker.
 
+**Sensory-film experiment:** If we test an alternative fragrance-led video, hold the poster, copy, and layout constant. Compare completion/play rate, hero interaction, and LCP against the current ink film before changing the default asset.
+
 **What:** We optimized the hero image with Next.js Image component, priority hints, and `fetchPriority="high"`. The revised acceptance target is `<=3.0s` on slow 4G. Production measurement confirmed mobile LCP at 2.74–2.83s.
 
 **Task:**
-- Run Lighthouse on live site (desktop + mobile, slow 4G throttled)
-- Extract LCP value and element (should still be hero image)
-- Compare to baseline: 5.2s (desktop), 5.0s (mobile)
-- If mobile LCP is <=3.0s and desktop LCP remains below 1.5s: declare success and close
+- Re-run Lighthouse on the live site after homepage media or hydration changes
+- Capture 3–5 runs per viewport and record median, p75, and p95 LCP
+- Confirm the LCP element remains the hero poster rather than video
+- If mobile LCP is <=3.0s and desktop LCP remains below 1.5s: retain the current implementation
 - If either threshold regresses: investigate further (image size, priority hints effectiveness, or other bottlenecks)
 
 **Evidence needed:** Lighthouse JSON before/after, or screenshot of the metrics.
@@ -86,6 +88,24 @@
 **What:** `app/globals.css` already ships `--taupe: #766E64`. `DESIGN.md`, `NOTA_MANIFESTO.md`, and `docs/brand/nota-imagery-briefs.md` were updated to `#766E64` (10.35:1 on ivory, clears WCAG AA for any text); `NOTA-BRAND-UIUX-PACK.md`, which still had the old `#B8AC9C`/2.03:1 rule, was brought in line the same day. Code and canonical docs now agree.
 
 Remaining stale reference: `docs/DESIGN.md` (a pre-root-move duplicate, not canonical) still shows the old value — separate repo-tidy cleanup, not a decision.
+
+---
+
+## 5. Add production performance observability
+
+**Priority:** Medium
+**Effort:** 2–4 hours
+**Owner:** Builder
+
+**Why:** CI protects documentation drift, but it cannot detect a real-user LCP regression after deployment.
+
+**Task:**
+- Select the existing product telemetry path for Web Vitals rather than adding a second analytics system
+- Capture homepage LCP, CLS, INP, viewport class, connection type, and hero mode
+- Report p75/p95 weekly or on each release; keep the launch gate at mobile `<=3.0s`
+- Define an alert or review trigger when p75 breaches the threshold for two consecutive samples
+
+**Acceptance:** A documented telemetry source, one production measurement view, and a repeatable review command or dashboard. Until then, this remains an explicit monitoring gap rather than an implied green state.
 
 ---
 
