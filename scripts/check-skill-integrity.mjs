@@ -8,6 +8,10 @@
 // message named both affected skills while lying about what it did to them
 // (docs/lessons.md L26-L29). Only content hashes are checked here.
 //
+// Deliberately uses only fs, not child_process/git — no OS command execution
+// surface at all, avoiding the generic "OS command" security hotspot entirely
+// rather than trying to prove a specific invocation is safe.
+//
 // Known limits (see docs/lessons.md L30 / docs/todo/README.md):
 // - This is a LOCAL pre-push hook only. A merge performed through the GitHub UI
 //   never runs it — the same path 55b2d2d could have taken. A GitHub Actions
@@ -19,21 +23,28 @@
 //   guaranteeing intent.
 
 import { createHash } from "node:crypto";
-import { readFileSync, existsSync } from "node:fs";
-import { execFileSync } from "node:child_process";
+import { readFileSync, existsSync, readdirSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
 
-const root = execFileSync("git", ["rev-parse", "--show-toplevel"]).toString().trim();
-const lockPath = `${root}/docs/skills.lock.json`;
+const root = dirname(dirname(fileURLToPath(import.meta.url)));
+const lockPath = join(root, "docs", "skills.lock.json");
 
-const files = execFileSync(
-  "git",
-  ["ls-files", "--", ".claude/skills/*/SKILL.md", ".agents/skills/*/SKILL.md", ".gemini/skills/*/SKILL.md"],
-  { cwd: root }
-)
-  .toString()
-  .trim()
-  .split("\n")
-  .filter(Boolean);
+function findSkillFiles(skillsDir) {
+  if (!existsSync(skillsDir)) return [];
+  return readdirSync(skillsDir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => join(skillsDir, entry.name, "SKILL.md"))
+    .filter((p) => existsSync(p));
+}
+
+const absoluteFiles = [
+  ...findSkillFiles(join(root, ".claude", "skills")),
+  ...findSkillFiles(join(root, ".agents", "skills")),
+  ...findSkillFiles(join(root, ".gemini", "skills")),
+].sort();
+
+const files = absoluteFiles.map((p) => p.slice(root.length + 1));
 
 if (!existsSync(lockPath)) {
   console.error("❌ docs/skills.lock.json is missing. Run: node scripts/relock-skills.mjs");
@@ -43,8 +54,9 @@ if (!existsSync(lockPath)) {
 const lock = JSON.parse(readFileSync(lockPath, "utf8"));
 let failed = false;
 
-for (const f of files) {
-  const content = readFileSync(`${root}/${f}`);
+for (let i = 0; i < files.length; i++) {
+  const f = files[i];
+  const content = readFileSync(absoluteFiles[i]);
   const hash = createHash("sha256").update(content).digest("hex");
   if (!(f in lock)) {
     console.error(`❌ ${f} has no entry in docs/skills.lock.json (new skill file not locked).`);

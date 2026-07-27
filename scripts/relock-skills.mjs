@@ -9,29 +9,39 @@
 // repo-tidy/verify-cli-claims with dangerous content behind an unrelated-sounding
 // commit message; a keyword check on the message would not have caught it, only
 // a content hash does).
+//
+// Deliberately uses only fs, not child_process/git — no OS command execution
+// surface at all, avoiding the generic "OS command" security hotspot entirely
+// rather than trying to prove a specific invocation is safe.
 
 import { createHash } from "node:crypto";
-import { readFileSync, writeFileSync, existsSync } from "node:fs";
-import { execFileSync } from "node:child_process";
+import { readFileSync, writeFileSync, existsSync, readdirSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
 
-const root = execFileSync("git", ["rev-parse", "--show-toplevel"]).toString().trim();
-const lockPath = `${root}/docs/skills.lock.json`;
+const root = dirname(dirname(fileURLToPath(import.meta.url)));
+const lockPath = join(root, "docs", "skills.lock.json");
 
-const files = execFileSync(
-  "git",
-  ["ls-files", "--", ".claude/skills/*/SKILL.md", ".agents/skills/*/SKILL.md", ".gemini/skills/*/SKILL.md"],
-  { cwd: root }
-)
-  .toString()
-  .trim()
-  .split("\n")
-  .filter(Boolean)
-  .sort();
+function findSkillFiles(skillsDir) {
+  if (!existsSync(skillsDir)) return [];
+  return readdirSync(skillsDir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => join(skillsDir, entry.name, "SKILL.md"))
+    .filter((p) => existsSync(p));
+}
+
+const absoluteFiles = [
+  ...findSkillFiles(join(root, ".claude", "skills")),
+  ...findSkillFiles(join(root, ".agents", "skills")),
+  ...findSkillFiles(join(root, ".gemini", "skills")),
+].sort();
+
+const files = absoluteFiles.map((p) => p.slice(root.length + 1));
 
 const lock = {};
-for (const f of files) {
-  const content = readFileSync(`${root}/${f}`);
-  lock[f] = createHash("sha256").update(content).digest("hex");
+for (let i = 0; i < files.length; i++) {
+  const content = readFileSync(absoluteFiles[i]);
+  lock[files[i]] = createHash("sha256").update(content).digest("hex");
 }
 
 const prev = existsSync(lockPath) ? JSON.parse(readFileSync(lockPath, "utf8")) : {};
