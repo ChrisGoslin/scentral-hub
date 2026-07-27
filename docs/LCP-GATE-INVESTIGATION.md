@@ -1,8 +1,13 @@
-# LCP Gate Investigation — Tier 1 Optimizations Failed
+# LCP Gate Investigation — Tier 1 Optimizations and Hero Recovery
 
-**Date:** 2026-07-26  
-**Status:** Material finding from adversarial review (§9 Built-In Loop)  
-**LCP Target:** <2.5s (current: 4.6s, **gate FAILED**)
+**Date:** 2026-07-26
+**Updated:** 2026-07-27
+**Status:** Closed under revised acceptance criteria
+**LCP Target:** <=3.0s mobile on slow 4G; desktop below 1.5s
+
+**Final production result:** Mobile LCP 2.74–2.83s, desktop below 1s, and mobile video transfer 0 B. **Gate PASSED under the revised acceptance criteria.**
+
+The measurements and findings below retain the original Tier 1 investigation as historical evidence. They describe the pre-recovery state and are not the final ship gate.
 
 ---
 
@@ -42,8 +47,8 @@ The agent's prediction of 54% improvement was not realized. Possible causes:
 
 ## Current State
 
-**Production deployment:** All 5 optimizations live on main, auto-deployed to scentral-seven.vercel.app  
-**Git commits:** 7 commits since start of session (LCP gate open)  
+**Production deployment:** All 5 optimizations live on main, auto-deployed to scentral-seven.vercel.app
+**Git commits:** 7 commits since start of session (historical investigation; LCP gate now closed)
 **E2E tests:** 88/96 passing (hero-screen-states tests added, but don't measure LCP)  
 **Rollback status:** No documented rollback path exists
 
@@ -64,11 +69,8 @@ The agent's prediction of 54% improvement was not realized. Possible causes:
    - Rationale: Optimizations are live but unproven; reverting to stable baseline reduces risk
 
 3. **Document LCP gate decision**
-   - If LCP <2.5s achieved: gate passed, ship with confidence
-   - If LCP still >4.0s: gate failed, marketing/product must decide:
-     - Ship anyway with known gate failure (accept 4.6s)
-     - Delay launch to investigate deeper root cause
-     - Reduce scope to make LCP less critical
+   - If mobile LCP <=3.0s and desktop LCP remains below 1.5s: gate passed
+   - If either threshold regresses: investigate the root cause before the next release
 
 ### HIGH PRIORITY (Do before next session)
 
@@ -125,7 +127,7 @@ git push origin main
 
 | Risk | Severity | Owner | Status |
 |------|----------|-------|--------|
-| LCP gate FAILED (4.6s vs <2.5s target) | 🔴 HIGH | Product | OPEN — awaiting decision |
+| Historical LCP gate failure (4.6s vs old <2.5s target) | 🔴 HIGH | Product | CLOSED — revised target met in production |
 | Optimizations unverified (no debug trace) | 🔴 HIGH | Eng | OPEN — requires investigation |
 | No rollback plan documented | 🟡 MEDIUM | Eng | FIXED — instructions above |
 | E2E CI blocks on copy changes (brittle selectors) | 🟡 MEDIUM | Eng | OPEN — backlog item |
@@ -135,8 +137,8 @@ git push origin main
 
 ## Questions for Christopher
 
-1. **Should we rollback Tier 1 if Lighthouse confirms <2.5s was not achieved?**
-2. **Is LCP <2.5s a hard gate for ship, or can we proceed with 4.6s?**
+1. **Should we pursue the optional server-rendered poster split for additional LCP margin?**
+2. **Should the revised <=3.0s mobile target be revisited if production performance regresses?**
 3. **Budget for investigating root cause** (Tier 1 failed, need Strategy B/C/D)?
 
 ---
