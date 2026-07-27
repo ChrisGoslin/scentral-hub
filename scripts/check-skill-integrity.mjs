@@ -20,13 +20,14 @@
 
 import { createHash } from "node:crypto";
 import { readFileSync, existsSync } from "node:fs";
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 
-const root = execSync("git rev-parse --show-toplevel").toString().trim();
+const root = execFileSync("git", ["rev-parse", "--show-toplevel"]).toString().trim();
 const lockPath = `${root}/docs/skills.lock.json`;
 
-const files = execSync(
-  `git ls-files -- '.claude/skills/*/SKILL.md' '.agents/skills/*/SKILL.md' '.gemini/skills/*/SKILL.md'`,
+const files = execFileSync(
+  "git",
+  ["ls-files", "--", ".claude/skills/*/SKILL.md", ".agents/skills/*/SKILL.md", ".gemini/skills/*/SKILL.md"],
   { cwd: root }
 )
   .toString()
