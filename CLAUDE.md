@@ -101,6 +101,11 @@ Next.js 16.2.9 (App Router, route groups `(main)` `(community)` `(account)`), Re
 10. Verify before trusting any agent, handover, or remediation claim. Current file presence is not proof of prior existence; respect tool-scope limits, and when timing matters confirm provenance with live checks such as `git status --porcelain`, `git log --follow`, direct file reads, and build or filesystem evidence before promoting a claim to fact. See `docs/nota/HANDOVER-2026-07-19-verification-audit.md`.
 11. When a new canonical source is imported or promoted, complete the import in the same turn: update read order, ownership/routing docs, and remove stale "missing" language before calling the work done.
 12. For substantial cross-CLI tasks, invoke `.claude/skills/loop-orchestrator/SKILL.md` and finish at Version 3: initial output plus one accepted bounded stretch, one evidence-led critique and remediation cycle to Version 2, then a second independent critique and remediation cycle to Version 3. Treat versions as checkpoints of one evolving artifact, not three duplicated deliverables. Each pass must record its critique, material delta, verification, and reusable lesson (or `none`). If critique finds no justified patch, record `no patch required`; never manufacture churn. For a trivial task, declare the reduced loop before execution and still verify the result.
+    **"Substantial" is not a judgment call — self-trigger the loop, without waiting to be asked, whenever any of these is true (see `docs/lessons.md` L29, incident where this went unenforced until the user manually invoked `/loop`):**
+    - the task touches any file under `.claude/skills/`, `.agents/skills/`, or `.gemini/skills/` in any repo — no exceptions, regardless of how small the edit looks;
+    - the task spans more than one repo in the same session;
+    - a file's content contradicts its own commit message, or a README/catalog/doc's description of it — this is a stop-and-investigate-provenance event (`git log -p --follow` on that file) before any fix is written, never assumed to be ordinary drift.
+    A session that meets one of these conditions and skips the loop anyway must say so explicitly and why — silent skipping is itself the failure to report.
 
 ## 12. Phase log
 
