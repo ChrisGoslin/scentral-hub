@@ -407,8 +407,7 @@ export default function HeroSection() {
 
           <source
             media="(max-width: 700px)"
-            srcSet="/media/atelier-matter-mobile-poster-sm.webp 390w, /media/atelier-matter-mobile-poster.webp 720w"
-            sizes="100vw"
+            srcSet="/media/atelier-matter-mobile-poster-sm.webp"
             type="image/webp"
           />
           <source
