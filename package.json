@@ -8,6 +8,8 @@
     "start": "next start",
     "start:e2e": "E2E_AUTH_BYPASS=1 next start --hostname 127.0.0.1 --port 3100",
     "lint": "eslint",
+    "skills:relock": "node scripts/relock-skills.mjs",
+    "skills:check": "node scripts/check-skill-integrity.mjs",
     "sanity-check": "node scripts/sanity-check.mjs",
     "audit:image-urls": "node scripts/audit-fragrance-image-urls.mjs",
     "enrich:images:firecrawl": "node scripts/enrich-images-firecrawl.mjs",

@@ -12,6 +12,16 @@
 
 current_branch=$(git symbolic-ref HEAD 2>/dev/null | sed 's|refs/heads/||')
 
+# Skill integrity check runs on every branch, not just main — a skill compromise
+# can land via any branch that later merges (see docs/lessons.md L26-L29).
+echo "🔍 Checking skill file integrity..."
+node "$(git rev-parse --show-toplevel)/scripts/check-skill-integrity.mjs"
+SKILL_INTEGRITY_STATUS=$?
+if [ $SKILL_INTEGRITY_STATUS -ne 0 ]; then
+  echo "❌ Pre-push checks failed — push blocked. Fix errors above before pushing."
+  exit 1
+fi
+
 if [ "$current_branch" != "main" ]; then
   exit 0
 fi
