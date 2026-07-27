@@ -30,6 +30,7 @@ This is the short checklist. `docs/lessons.md` remains the detailed history and 
 2. Mocked E2E proves UI behavior, not protected API behavior. Record the residual gap and add real authenticated integration coverage when test auth exists.
 3. If Next reports missing client manifests or route manifest invariants after interrupted builds, move `.next` aside, rebuild cleanly, then rerun the failing spec before changing product code.
 4. When acceptance criteria change, update the canonical doc and add the smallest executable guardrail available.
+5. CI E2E jobs must have bounded timeouts and upload Playwright diagnostics on failure or cancellation.
 
 ## Cross-Project Boundaries
 
