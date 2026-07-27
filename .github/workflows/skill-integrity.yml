@@ -1,0 +1,20 @@
+name: Skill Integrity
+# CI twin of the local .husky/pre-push skill guard. The pre-push hook only
+# runs on a machine that pushes directly — a merge performed through the
+# GitHub UI never triggers it, which is exactly the path commit 55b2d2d could
+# have taken (see docs/lessons.md L26-L30). This workflow closes that gap by
+# running the same check server-side on every push and PR against main.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: node scripts/check-skill-integrity.mjs

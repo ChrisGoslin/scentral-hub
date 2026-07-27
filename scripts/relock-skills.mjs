@@ -43,8 +43,12 @@ writeFileSync(lockPath, JSON.stringify(lock, null, 2) + "\n");
 
 if (changed.length || removed.length) {
   console.log("skills.lock.json updated:");
-  for (const f of changed) console.log(`  ${prev[f] ? "changed" : "added"}: ${f}`);
-  for (const f of removed) console.log(`  removed: ${f}`);
+  for (const f of changed) {
+    console.log(`  ${prev[f] ? "changed" : "added"}: ${f}`);
+  }
+  for (const f of removed) {
+    console.log(`  removed: ${f}`);
+  }
   console.log("\nReview this diff carefully before committing — it's the record that a skill's content actually changed.");
 } else {
   console.log("skills.lock.json already up to date — no skill file content changed.");

@@ -8,7 +8,9 @@ import { join } from "node:path";
 const SKILL_ROOTS = [".claude", ".agents", ".gemini"];
 
 function findSkillFilesIn(skillsDir) {
-  if (!existsSync(skillsDir)) return [];
+  if (!existsSync(skillsDir)) {
+    return [];
+  }
   return readdirSync(skillsDir, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
     .map((entry) => join(skillsDir, entry.name, "SKILL.md"))
