@@ -77,21 +77,22 @@ cd /path/to/repo && npm run build 2>&1 | tail -30
 Verdict: **Verified** if build exits 0 with no error lines. **False** if build fails.
 
 ### "Tests pass"
+Don't hardcode a script name — read `package.json`'s `scripts` block fresh, since it drifts (as of 2026-07-27 it has `test:e2e`, `test:smoke`, `test:smoke:prod`, `test:unit`, none of which existed the same way on 2026-07-05). Run whichever of these exist via `npm run <script>`, not by invoking the underlying file directly:
 ```bash
-npx tsc --noEmit 2>&1 | tail -20
-# no `npm run test` or `npm run typecheck` script exists in this repo (verified against
-# package.json 2026-07-05) — use tsc directly for typecheck, and one of the commands
-# below for actual test suites:
-npm run test:e2e 2>&1 | tail -20
-node scripts/smoke-test.mjs 2>&1 | tail -20
+cat package.json | grep -A1 '"scripts"' # or: node -e "console.log(Object.keys(require('./package.json').scripts))"
+npx tsc --noEmit 2>&1 | tail -20   # no dedicated typecheck script exists; use tsc directly
+npm run test:e2e 2>&1 | tail -20         # if present
+npm run test:smoke 2>&1 | tail -20       # if present — do not call scripts/smoke-test.mjs directly
+npm run test:unit 2>&1 | tail -20        # if present
 ```
-Verdict: **Verified** if exit 0. **False** if failures.
+Verdict: **Verified** if the commands that exist all exit 0. **Unverifiable** (not False) for any test category whose package script doesn't exist — say so explicitly rather than inventing a direct file invocation.
 
 ### "No hardcoded secrets"
 ```bash
-# Check for common secret patterns
-grep -r "sk_live\|sk_test\|eyJ\|SUPABASE_SERVICE\|password.*=.*['\"]" app/ lib/ --include="*.ts" --include="*.tsx" -l
-grep -rn "process\.env\." app/ lib/ --include="*.ts" --include="*.tsx" | grep -v "process\.env\.[A-Z_]*'" | head -20
+# Check for common secret patterns — scripts/ (.mjs) and config files leak secrets just
+# as easily as app/lib, and a scan that only covers app/lib can't back a repo-wide claim.
+grep -rl "sk_live\|sk_test\|eyJ\|SUPABASE_SERVICE\|password.*=.*['\"]" app/ lib/ scripts/ supabase/functions/ --include="*.ts" --include="*.tsx" --include="*.mjs" --include="*.js"
+grep -rl "process\.env\." app/ lib/ scripts/ --include="*.ts" --include="*.tsx" --include="*.mjs"
 ```
 Verdict: **Verified** if no hardcoded secrets found. **Flag** if any hits.
 

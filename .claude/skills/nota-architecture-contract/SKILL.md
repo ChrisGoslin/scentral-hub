@@ -151,11 +151,14 @@ Derived from (2026-07-05 read-only exploration): `CLAUDE.md` (§1, §3, §5, §6
 Re-verify before trusting, in order of how fast these drift:
 
 ```bash
-# Live table count vs CLAUDE.md §5's stated count — confirmed stale 2026-07-27
-# (doc said 37, live was 41: layering_patterns, layering_protocols, product_signals,
-# trend_signals, fragrance_facts, houses, swap_offers among the undocumented additions).
-# Use Supabase MCP list_tables, or:
-#   SELECT count(*) FROM information_schema.tables WHERE table_schema='public';
+# Live table count vs CLAUDE.md §5's stated count — confirmed stale on 2026-07-27
+# (later than this file's 2026-07-05 blanket verification date above; treat this
+# block specifically as amended 2026-07-27, not covered by the earlier date).
+# Doc said 37, live was 41: layering_patterns, layering_protocols, product_signals,
+# trend_signals, fragrance_facts, houses, swap_offers among the undocumented additions.
+# Use Supabase MCP list_tables, or (note the BASE TABLE filter — information_schema.tables
+# also lists views, and an uncounted view will silently inflate/deflate this number):
+#   SELECT count(*) FROM information_schema.tables WHERE table_schema='public' AND table_type='BASE TABLE';
 # For per-table usage status (ACTIVELY USED / PARTIALLY WIRED / ORPHANED), use the
 # db-table-usage-audit skill rather than re-deriving the method each time.
 

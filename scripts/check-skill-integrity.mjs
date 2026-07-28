@@ -8,15 +8,16 @@
 // message named both affected skills while lying about what it did to them
 // (docs/lessons.md L26-L29). Only content hashes are checked here.
 //
-// Known limits (see docs/lessons.md L30 / docs/todo/README.md):
-// - This is a LOCAL pre-push hook only. A merge performed through the GitHub UI
-//   never runs it — the same path 55b2d2d could have taken. A GitHub Actions
-//   twin of this check on push/PR events is a tracked follow-up, not yet built.
-// - This forces a skill content change to appear as an explicit, reviewable
-//   diff in docs/skills.lock.json. It does not make tampering impossible: an
-//   agent or person who edits a skill file and then honestly runs relock-skills
-//   will produce a matching hash. The guard's value is forcing visibility, not
-//   guaranteeing intent.
+// Enforced two ways (see docs/lessons.md L30): locally via .husky/pre-push on
+// every branch, and server-side via .github/workflows/skill-integrity.yml on
+// push/PR to main — the latter closes the case where a GitHub UI merge would
+// otherwise bypass the local hook entirely (the path 55b2d2d could have taken).
+//
+// Genuine remaining limit: this forces a skill content change to appear as an
+// explicit, reviewable diff in docs/skills.lock.json. It does not make
+// tampering impossible — an agent or person who edits a skill file and then
+// honestly runs relock-skills will produce a matching hash. The guard's value
+// is forcing visibility, not guaranteeing intent.
 
 import { createHash } from "node:crypto";
 import { readFileSync, existsSync } from "node:fs";
@@ -42,6 +43,7 @@ try {
   process.exit(1);
 }
 let failed = false;
+const discovered = new Set(relativeFiles);
 
 for (let i = 0; i < relativeFiles.length; i++) {
   const f = relativeFiles[i];
@@ -52,6 +54,13 @@ for (let i = 0; i < relativeFiles.length; i++) {
     failed = true;
   } else if (lock[f] !== hash) {
     console.error(`❌ ${f} content does not match docs/skills.lock.json — its content changed without being relocked.`);
+    failed = true;
+  }
+}
+
+for (const f of Object.keys(lock)) {
+  if (!discovered.has(f)) {
+    console.error(`❌ ${f} has a lock entry but no corresponding skill file on disk — stale entry, run relock-skills.mjs.`);
     failed = true;
   }
 }

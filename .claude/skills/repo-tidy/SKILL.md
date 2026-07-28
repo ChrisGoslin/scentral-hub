@@ -45,8 +45,9 @@ git branch -r
 ## Phase 2: Secrets Scan
 
 ```bash
-# Common secret patterns — must return 0 results
-grep -rn "sk_live\|sk_test\|service_role\|anon.*key.*=.*['\"]ey" app/ lib/ components/ --include="*.ts" --include="*.tsx"
+# Common secret patterns — must return 0 results. -l (filenames only), never -n:
+# a real hit's matched line would print the secret value itself into your terminal/CI log.
+grep -rl "sk_live\|sk_test\|service_role\|anon.*key.*=.*['\"]ey" app/ lib/ components/ --include="*.ts" --include="*.tsx"
 
 # Check .env files are gitignored
 cat .gitignore | grep env
@@ -62,11 +63,12 @@ git ls-files | grep ".env"
 ## Phase 3: Dead Code Scrub
 
 ```bash
-# Find unused component files (not imported anywhere)
-for f in $(find app/components -name "*.tsx" -o -name "*.ts"); do
+# Find unused component files (not imported anywhere) — both component roots,
+# matching the "app/components and components/ both exist" note in Provenance.
+for f in $(find app/components components -name "*.tsx" -o -name "*.ts"); do
   name=$(basename $f .tsx)
   name=$(basename $name .ts)
-  count=$(grep -r "import.*$name\|from.*$name" app/ --include="*.ts" --include="*.tsx" | wc -l)
+  count=$(grep -r "import.*$name\|from.*$name" app/ components/ --include="*.ts" --include="*.tsx" | wc -l)
   if [ "$count" -eq 0 ]; then
     echo "UNUSED: $f"
   fi
@@ -83,6 +85,8 @@ grep -rn "TODO\|FIXME\|HACK\|XXX\|placeholder\|hardcoded" app/ lib/ --include="*
 ## Phase 4: Regression Check
 
 ```bash
+set -o pipefail  # without this, a failing build/lint piped to `tail` still exits 0
+
 # TypeScript compile check
 npx tsc --noEmit 2>&1
 
@@ -117,8 +121,12 @@ source skill rather than trusting this copy, which can drift.
 
 ```bash
 # Search for the lore-fabrication patterns above (NOT a general scope check —
-# cross-reference AGENTS.md §1 manually for anything else)
-grep -rn "agent.luna\|shadow.*branch\|autopilot-shadow\|hegemony\|olfactory.*nft\|invisible.commerce" app/ --include="*.tsx" --include="*.ts" -l
+# cross-reference AGENTS.md §1 manually for anything else). -i because these are
+# prose names, not identifiers — casing isn't guaranteed. Re-check this pattern
+# against grounded-agent-guardrails' "Known Fabrications" list before trusting
+# it; that list can grow and this copy can drift (as it already had — missing
+# "morocco marketplace" and "alchemist knowledge" until this pass).
+grep -rli "agent.luna\|shadow.*branch\|autopilot-shadow\|hegemony\|olfactory.*nft\|invisible.commerce\|morocco.*marketplace\|alchemist.*knowledge" app/ --include="*.tsx" --include="*.ts"
 ```
 
 ---
@@ -176,7 +184,7 @@ For verifying a specific agent's session claims (not a general repo sweep), use 
 
 - `verify-cli-claims` — Phase 6 (git log sanity) is a direct application of this skill.
 - `safe-commit-shared-repo` — read before Phase 1's branch cleanup, since a concurrent session may own an open branch.
-- `nota-architecture-contract` — the canonical route/component inventory to check Phase 5's scope-purge against, instead of re-reading AGENTS.md §1 from scratch each time.
+- `nota-architecture-contract` — supplementary route/component context for Phase 5's scope-purge; always re-read AGENTS.md §1 first regardless, since scope changes over time and this doc can drift.
 - `nota-failure-archaeology` — background on why the fabricated-lore names in Phase 5 exist at all.
 - `db-table-usage-audit` — Phase 3's DB-layer companion: this skill's dead-code scrub covers files, that skill covers whether a live database table is actually used, half-wired, or dead weight, with a verification method that closes the dynamic-access/RPC blind spot a plain grep would miss.
 

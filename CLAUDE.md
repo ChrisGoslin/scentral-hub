@@ -49,7 +49,7 @@ Next.js 16.2.9 (App Router, route groups `(main)` `(community)` `(account)`), Re
 - `temptations` (reason, status shown/resolved), `evolution_events` (from/to_noseprint, choice, trigger_signals), `interactions` (event_type/entity/metadata — general event log), `insights_cache[...]
 - `houses`, `profiles` (username, house_id, onboarding_completed_at).
 
-**Legacy-era:** `collections` (status 'owned'|'wishlist' only — **no 'tested'/'past_purchase'**; wear_state, shelf_tier int default 2, affinity_score int default 50, scent_memory), `wear_logs` ([...]
+**Legacy-era:** `collections` (status enum includes **'owned'/'wishlist'/'tested'/'past_purchase'** — confirmed live via `supabase/migrations/20260704_db001_collections_status_enum.sql`; the "no tested/past_purchase" claim that used to live on this line was wrong, per this doc's own Phase 0 correction log below — don't reintroduce it; wear_state, shelf_tier int default 2, affinity_score int default 50, scent_memory), `wear_logs` ([...]
 
 **⚠️ Two competing shelf models:** `shelf_items.rank` (nota Shelf) vs `collections.shelf_tier` + `affinity_score` (Living Wardrobe). Both live. Seeding bridges them (`app/(main)/shelf/page.tsx[...]
 

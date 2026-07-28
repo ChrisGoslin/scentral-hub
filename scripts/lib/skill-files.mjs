@@ -7,6 +7,11 @@ import { join } from "node:path";
 
 const SKILL_ROOTS = [".claude", ".agents", ".gemini"];
 
+/**
+ * Returns absolute paths to every `<skillDir>/SKILL.md` directly under `skillsDir`.
+ * @param {string} skillsDir absolute path to a `skills` directory (e.g. `<root>/.claude/skills`)
+ * @returns {string[]}
+ */
 function findSkillFilesIn(skillsDir) {
   if (!existsSync(skillsDir)) {
     return [];
@@ -17,8 +22,13 @@ function findSkillFilesIn(skillsDir) {
     .filter((p) => existsSync(p));
 }
 
-// Returns { absoluteFiles, relativeFiles } for every SKILL.md under
-// .claude/skills, .agents/skills, and .gemini/skills beneath `root`.
+/**
+ * Finds every SKILL.md under `.claude/skills`, `.agents/skills`, and `.gemini/skills`
+ * beneath `root`, sorted for deterministic ordering.
+ * @param {string} root absolute path to the repository root
+ * @returns {{ absoluteFiles: string[], relativeFiles: string[] }} paired absolute
+ *   paths and their root-relative equivalents (same order, same length)
+ */
 export function listSkillFiles(root) {
   const absoluteFiles = SKILL_ROOTS.flatMap((dir) =>
     findSkillFilesIn(join(root, dir, "skills"))
