@@ -101,6 +101,17 @@ cat package.json | grep '"library-name"'
 ```
 Verdict: **Verified** with actual version shown. Never trust agent's stated version without checking.
 
+### "Rule/check X is why CI failed" (a specific third-party rule ID, lint rule, or tool behavior named as root cause)
+An agent naming a specific rule ID (e.g. "SonarJS S2681"), severity level, or tool-behavior claim as the diagnosis for a real failure — not just applying it as general practice — is asserting something checkable. A plausible-sounding rule ID is not a verified one (see `docs/lessons.md` L31: a real session named the wrong rule ID, at the wrong severity, and the "fix" had zero effect on the actual failure).
+```bash
+# The rule ID/behavior must be checked against the tool's own docs or a search,
+# not recalled from memory, before it's committed as the stated justification for a fix.
+# WebSearch/WebFetch the rule ID directly, e.g.:
+#   site:rules.sonarsource.com <rule-id>
+#   site:docs.github.com <specific behavior claim>
+```
+Verdict: **Verified** if the rule ID, its type (Bug/Code Smell/Vulnerability/Security Hotspot), and severity are confirmed against the tool's own documentation. **Unverified** if the agent named a rule from memory and the claim wasn't checked. **Red flag**: if a "fix" for a specific named rule was pushed and the same CI check failed again on the next run with the same message — that is direct evidence the diagnosis was wrong, and the next step must be verification, not a second guess.
+
 ---
 
 ## Output Format

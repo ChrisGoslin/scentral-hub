@@ -178,6 +178,7 @@ For verifying a specific agent's session claims (not a general repo sweep), use 
 - `safe-commit-shared-repo` — read before Phase 1's branch cleanup, since a concurrent session may own an open branch.
 - `nota-architecture-contract` — the canonical route/component inventory to check Phase 5's scope-purge against, instead of re-reading AGENTS.md §1 from scratch each time.
 - `nota-failure-archaeology` — background on why the fabricated-lore names in Phase 5 exist at all.
+- `db-table-usage-audit` — Phase 3's DB-layer companion: this skill's dead-code scrub covers files, that skill covers whether a live database table is actually used, half-wired, or dead weight, with a verification method that closes the dynamic-access/RPC blind spot a plain grep would miss.
 
 ## Provenance and maintenance
 

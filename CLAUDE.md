@@ -35,9 +35,9 @@ Next.js 16.2.9 (App Router, route groups `(main)` `(community)` `(account)`), Re
 **System:** `/`, `/onboarding`, `/login`, `/learning`, `/ritual/[id]`, `/waitlist`, `/privacy`, `/terms`, `/disclaimer`, `/admin/enrichment`, `/admin/feedback`.
 **~58 API routes** under `app/api/` incl. `read/generate`, `shelf`, `blind-ranking/{session,place,reveal}`, `traces`, `trails/progress`, `temptations`, `evolution/detect`, `insights`, `aura`, `og/[...]
 
-## 5. Database (live schema verified via Supabase MCP, 2026-07-04)
+## 5. Database (live schema verified via Supabase MCP, 2026-07-04; table count re-verified 2026-07-27)
 
-37 public tables, all RLS-enabled. `fragrances` = **127,595 rows** (`plain_description`, `inspired_by`, `family`, `projection`, `optimal_season`, `use_case`, `lean`, `image_url`, `popularity_rank`[...]
+**41 public tables** (was 37 as of 2026-07-04; drifted undetected for weeks — see `docs/lessons.md` L32 and the `db-table-usage-audit` skill for the per-table usage audit this correction came from), all RLS-enabled. `fragrances` = **127,595 rows** (`plain_description`, `inspired_by`, `family`, `projection`, `optimal_season`, `use_case`, `lean`, `image_url`, `popularity_rank`[...]
 
 **nota-era tables (all `user_id uuid`):**
 - `noseprints` — name, descriptor, read_text, signals jsonb, matches uuid[], stretch_note, status ('current').
@@ -55,9 +55,9 @@ Next.js 16.2.9 (App Router, route groups `(main)` `(community)` `(account)`), Re
 
 ## 6. My Shelf — current implementation vs. spec
 
-- **Current:** 10 slots (SHELF_SIZE=10 in `app/(main)/shelf/page.tsx` AND `app/api/shelf/route.ts`). Seeded once: top-3 noseprint matches + owned collections by tier/affinity. Actions: add/remove/[...]
+- **Current (corrected 2026-07-27 — was stale, said 10):** **20 slots** — `SHELF_SIZE=20` confirmed live in both `app/(main)/shelf/page.tsx:15` and `app/api/shelf/route.ts:13`. Seeded once: top-3 noseprint matches + owned collections by tier/affinity. Actions: add/remove/[...]
 - **Spec (founder brief):** **20 slots in 4 tiers** — S (1–5), A (6–10), B (11–15), C (16–20, at-risk). Eligibility: only Tested/Own/Past-Purchase fragrances, **enforced in data model**.[...]
-- **Gap (updated post-migrations 2026-07-04):** DB layer is DONE (tiers, BB, eligibility trigger, ±20 ranks). Remaining is ALL app-layer: SHELF_SIZE 10→20 in both files, tier-row UI, BB stamp r[...]
+- **Gap (corrected 2026-07-27):** DB layer is DONE (tiers, BB, eligibility trigger, ±20 ranks) **and app-layer SHELF_SIZE is now 20, matching spec** — the "SHELF_SIZE 10→20" migration this line used to describe as outstanding is done. Remaining gap, verified this session: `shelf_items.tier` and `shelf_items.blind_buy` columns exist live but are **never selected/read anywhere in app code** (`app/api/shelf/route.ts`, `app/(main)/shelf/page.tsx` only ever select `id, rank, source, locked, fragrance_id`) — no tier-row UI, no BB stamp rendering. See `db-table-usage-audit` skill for the audit this came from.
 
 ## 7. LLM / cost posture (verified)
 
