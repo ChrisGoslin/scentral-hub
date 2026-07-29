@@ -73,7 +73,7 @@ export default function WardrobeIntelligence() {
 
       {loading && (
         <div className="py-8 text-center space-y-3">
-          <Sparkles size={24} className="mx-auto text-[var(--accent)] animate-pulse" />
+          <Sparkles size={24} className="mx-auto text-[var(--accent)] opacity-80" />
           <p className="text-xs font-light text-[var(--text-muted)] italic">
             The Sommelier is auditing your collection...
           </p>
