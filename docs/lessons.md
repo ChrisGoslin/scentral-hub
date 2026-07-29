@@ -192,3 +192,139 @@ Context: Merged brand-reconciliation branch (hero video, docs, route alignment),
 **What happened:** L14 detects concurrent sessions + HEAD movement. But detection is not resolution. If two sessions commit to the same branch → conflict on merge, there's no declared strategy: merge first-come-wins, manual conflict resolution, sequential gate (one session locks the branch), or something else. Teams need a playbook.
 **Rule:** For any shared branch, declare the merge strategy upfront: (a) fast-forward preferred when histories don't conflict; (b) resolve merge conflicts with the rule "most recent session's state wins" / "oldest session's data survives" / "manual arbitration" — pick based on the feature (log/audit = oldest wins; feature flags = newest wins; code = manual). For conflicts on code/data, document who arbitrates (Christopher, on-call, automated test result). Record the strategy in CLAUDE.md §11.
 **Enforced by:** conflict resolution rules in CLAUDE.md; for any shared branch work, state "if HEAD moves, merge strategy is X" before proceeding. CI gate: if a merge conflict is detected, require explicit approval before continuing (do not auto-resolve silently).
+
+### L26 — Test-Coverage Isolation from Live API States (E2E Fixture Mode)
+**What happened:** Introducing dynamic transaction trends and sheet updates initially failed E2E Playwright tests because the tests hit the live ranges (which changed in this session) or expected exactly 5 confirmed items. Hardening the quality gate required isolated mock environments.
+**Rule:** E2E and UI verification tests must be fully isolated from live external API feeds or dynamic historical worksheets. Enforce a local fixture/mock mode during the `build` and `test:e2e` execution.
+**Remedy built in:** Configured `ABUNDANCE_FIXTURE_MODE=true` in script pipelines and implemented mock data mapping inside `fixture-store.ts`.
+**Enforced by:** Pre-commit build pipeline parameter verification.
+
+### L27 — Enforce Local Database Reset before Migration Push
+**What happened:** Local database workspaces naturally accumulate manual columns, test entries, and ad-hoc overrides during active development. Pushing migrations directly without a database reset risks schema inconsistencies between development and production.
+**Rule:** Before pushing any database schema migrations to production, reset the local test database workspace to verify that all migration SQL statements are fully reproducible from scratch.
+**Remedy built in:** Integrated database reset steps into the Supabase migration guidelines.
+**Enforced by:** Pre-push checklist standard.
+
+### L28 — Programmatic Rate Limit Protection for Batch Operations
+**What happened:** Multi-document OCR processing and image generation loops triggered API rate limit spikes (HTTP 429/503), requiring manual human restarts.
+**Rule:** All batch-processing or bulk-ingestion scripts interacting with external APIs must implement exponential backoff with randomized jitter and support checkpoints to resume failures.
+**Remedy built in:** Implemented standard `callWithBackoff` helpers and a `--resume-from` CLI argument.
+**Enforced by:** Ingestion review checklist.
+
+---
+
+## 2026-07-29 — Cowork front-end consultant build (design-system skills)
+
+Context: built a "front-end design consultant" skill + Claude Code prompt pack in Cowork for nota. and Abundance, then read both repos and found most of it wrong. Every lesson below was already latent in L1/L6/L9/L10 — they were written down but not embedded.
+
+### L29 — Authoring for a repo you have not opened is invention, not consulting
+**What happened:** Wrote a complete design-token system for nota. — palette, type pairing, radius scale, motion durations — from doctrine prose alone, without opening `scentral-hub`. Nearly every specific was wrong: proposed Signifier + Founders Grotesk against canon's Instrument Serif + Geist; proposed a 2/4/8/16 radius scale against shipped `--r-card:16px/--r-btn:12px`; proposed shadcn setup steps for a repo with no `components.json`; banned spring overshoot while `--motion-organic` uses it deliberately. Directionally plausible, factually wrong — the most dangerous combination, because it reads authoritative.
+**Rule:** Do not author tokens, rules, or "systems" for an existing codebase before reading it. If repo access is unavailable, the deliverable is a *questions list*, explicitly labelled as ungrounded — never a spec. Plausibility is not grounding.
+**Enforced by:** `implementation-preflight` gate 1, extended to skill/doc authoring, not just code. Any artifact asserting project-specific values must name the file:line it was read from.
+
+### L30 — Canon lives in the repo; a second copy is drift by construction
+**What happened:** Copied token values into a Cowork skill so it could "know" the brand — creating a fifth source of truth alongside `DESIGN.md`, `NOTA-BRAND-UIUX-PACK.md`, `NOTA_MANIFESTO.md`, and shipped CSS. `AGENTS.md` §5b already says, verbatim: *"Read DESIGN.md before any UI work — it is the canonical token and material system; do not duplicate its rules here."* The instruction was in the repo before the mistake was made.
+**Rule:** External tooling (Cowork skills, prompt packs, agent configs) must *point at* repo canon and read it at run time, never mirror its contents. A tool that restates a value is a tool that will eventually contradict it.
+**Enforced by:** `canonical-source-reconciler` skill; plus a self-check when authoring any skill — "does this file state a project fact? if yes, does it cite where it's read from, rather than asserting it?"
+
+### L31 — Check the repo's own `.claude/skills/` before building a capability
+**What happened:** Designed a doc-vs-code drift protocol from scratch, and a visual verification workflow, without checking `.claude/skills/` — which already contains 27 skills including `canonical-source-reconciler`, `implementation-preflight`, `verify-cli-claims`, `screen-state-completeness`, and `loop-orchestrator`. Rebuilt existing capability under new names, in a different location, with different wording.
+**Rule:** Before authoring any new skill or agent capability, list `.claude/skills/` in the target repo and the global skill set. If a skill covers the need, extend or invoke it; do not parallel-build. This is L6 (reduce sources of truth) applied to tooling rather than docs.
+**Enforced by:** `implementation-preflight` gate: "does this capability already exist? `ls .claude/skills/` output pasted before authoring."
+
+### L32 — The user's description of their own repo is a hypothesis, not evidence
+**What happened:** Asked whether Abundance was greenfield; was told yes, "my doctrine stands." It is not greenfield — it is a working Next 16 app with `/subscriptions`, `/scenarios`, `/calendar`, `/documents`, its own shipped palette, `AGENTS.md`, vitest + Playwright, and a Drive ingest pipeline. Had this gone unverified, a fabricated doctrine would have been declared canonical over a live product. Compounding L9: the question should not have been asked at all — the repo was one `ls` away.
+**Rule:** Never let a user's recollection of repo state substitute for reading it, especially when their answer would license you to skip verification. Treat "it's greenfield / nothing's there / that's not built yet" as the highest-priority claim to check, because it is the one that unlocks unverified work.
+**Enforced by:** `grounded-agent-guardrails` — verify before asserting, extended to verifying *before accepting* a state claim that reduces scope.
+
+### L33 — An anti-slop rule asserted from taste will flag intentional craft
+**What happened:** Wrote a hard rule banning spring overshoot in motion. nota. ships `--motion-organic: 800ms cubic-bezier(0.34, 1.56, 0.64, 1)` deliberately. Also hard-banned Geist as an "AI tell" while canon names it the 90% body face. The rules were confident, unsourced, and would have generated false violations against considered decisions.
+**Rule:** Every anti-slop rule must carry either (a) a citation to project canon, or (b) external evidence, plus an explicit exception clause for deliberate use. A rule with neither is personal taste wearing a uniform. The tell is *unexamined defaults*, never a specific typeface or easing curve.
+**Enforced by:** anti-slop rules live in `NOTA-BRAND-UIUX-PACK.md` §14 only; external tools cite §14 rather than inventing parallel lists.
+
+### L34 — Audit the doctrine for slop, not only the code
+**What happened:** Spent the session enforcing canon against code, and never asked whether canon itself encoded a generic choice. It does: `NOTA-BRAND-UIUX-PACK.md` §4 and `DESIGN.md` name **Geist** as the 90% body face. 2026 external evidence places Geist in the "AI-startup typeface" cluster alongside Inter Display and General Sans — precisely the convergence §14 exists to prevent. Canon can drift toward generic while remaining internally consistent.
+**Rule:** Canon gets the same adversarial review as code, on a schedule. Ask periodically: has any canonical choice become generic since it was made? A doctrine written in year N encodes year N's defaults, and defaults commoditise.
+**Enforced by:** annual (or per-major-release) canon review, with external evidence required to change a canonical choice — logged per §5a with the why in the commit message.
+
+### L35 — Shipped code loading retired assets is a finding, not a detail
+**What happened:** `NOTA-BRAND-UIUX-PACK.md` §4 lists Satoshi, Unbounded, Space Grotesk, Caveat, and Cormorant Garamond as retired — "if found in the codebase, migrate." `app/layout.tsx` currently imports **Unbounded, Space Grotesk, and Caveat** via `next/font/google`, and `globals.css` declares a Cormorant Garamond `@font-face`. Four retired faces are live in production, costing bytes and brand coherence simultaneously.
+**Rule:** When canon retires an asset, the retirement is not complete until the code no longer loads it. Track retirement as migration work with an owner, not as a doc edit.
+**Enforced by:** a grep gate — for each name on the retired list, `grep -r` across `app/` and `globals.css` must return nothing; wire into the pre-deploy checklist alongside `repo-tidy`.
+
+### L36 — Deliverables written outside the repo do not survive the session
+**What happened:** Produced skills and a prompt pack into Cowork storage and an ephemeral outputs folder, while the repo's own `.claude/skills/` is the location Claude Code actually auto-loads. Exactly L10, repeated verbatim, in a session where L10 was already on file.
+**Rule:** Before writing any agent-facing artifact, name the consuming tool and the path it auto-loads from, and write there. If that path isn't reachable from the current session, state that as the blocker instead of writing elsewhere and calling it delivered.
+**Enforced by:** `implementation-preflight` gate 4, extended: "which tool loads this, from which path, without being told?"
+
+### L37 — Same-named skills at different layers are scoping, not duplication
+**What happened:** Found 4 of 6 shared skills diverging between global Cowork (`~/.claude/skills/`) and repo (`.claude/skills/`) — `verify-cli-claims` 149 lines vs 18, `repo-tidy` 167 vs 24, plus `grounded-agent-guardrails` and `loop-orchestrator`. Nearly "reconciled" them into single versions. Reading them first showed the repo copies are deliberately nota-specialised: repo `verify-cli-claims` asserts the ≤3 liquid-glass backdrop-filter budget, the single fixed grain layer, and `DESIGN.md` token usage over hardcoded hexes — none of which a generic global skill can know. Repo skills take precedence inside the repo, so the layering already works correctly. Merging would have destroyed the specialisation and silently removed a brand-performance gate.
+**Rule:** Before treating same-named artifacts at different layers as duplication, read both and classify: **intentional specialisation** (generic base + domain-specific override — correct, leave it), **accidental drift** (same intent, wording diverged — merge), or **stale copy** (abandoned version — delete). Line-count difference is not evidence of any of the three. "Reduce sources of truth" (L6) applies to competing claims about the *same* scope, not to deliberate layering across scopes.
+**Remedy built in:** `alignment-sweep` Pass 4 requires this classification before any divergence is reported as a finding, and names the `verify-cli-claims` case as the worked example.
+**Enforced by:** `alignment-sweep` skill (repo + global copies), run monthly via the `monthly-alignment-sweep` scheduled task (Cowork Scheduled, not a repo skill).
+
+### L38 — A defect flagged as "not fixed, needs someone who knows" should be fixed once you know
+**What happened:** `repo-tidy` carried a defect note from 2026-07-27: a global rebrand find/replace had overwritten its retired-product-names list with three identical `"nota."` entries, and step 2 instructed replacing them *with* `nota.`. The note correctly refused to guess and left it for someone with the knowledge. Two days later the canonical retired names were sitting in `NOTA-BRAND-UIUX-PACK.md` §4 and the brand doctrine — the information existed; nobody closed the loop.
+**Rule:** A deferred-defect note is a debt with an owner, not a permanent disclaimer. When you gain the knowledge a note was waiting on, fix it in that session and date the fix. Sweep for `not fixed`, `known defect`, `needs verification`, and `TODO` in skills and canon docs periodically — a flagged defect that survives three sweeps is either fixed or deliberately accepted, never left ambiguous.
+**Remedy built in:** `repo-tidy` step 1 restored from canonical sources 2026-07-29, retired-font sweep added per L35, and the guardrail-list exception from `AGENTS.md` §82 made explicit so the list isn't re-clobbered by the next global find/replace.
+**Enforced by:** `alignment-sweep` Pass 6 (freshness) treats unresolved defect notes older than 90 days as findings.
+
+### L39 — This repo has three CLI skill mirrors; a fix in one is a fix in none
+**What happened:** Fixed the `repo-tidy` retired-terms defect in `.claude/skills/` and nearly stopped there. The repo actually maintains **three** CLI skill trees — `.claude/skills/` (29 skills), `.agents/skills/` (6), `.gemini/skills/` (5) — for Claude Code, Codex, and Gemini respectively. `repo-tidy`, `verify-cli-claims`, `canonical-source-reconciler`, and `loop-orchestrator` exist in all three. They are **not** automatic mirrors: they hold different subsets, and the `.agents` and `.gemini` copies of `repo-tidy` differed from each other *and* from `.claude` before the fix. Codex and Gemini would have kept running the defective version indefinitely.
+**Rule:** Before editing any skill in this repo, check whether it exists in `.agents/skills/` or `.gemini/skills/` too, and propagate. A defect fixed in one CLI's tree while the others keep the broken copy is worse than the original defect — it creates the illusion of a fix while producing divergent behaviour per tool.
+```bash
+for s in <skill>; do for d in .claude .agents .gemini; do
+  [ -f "$d/skills/$s/SKILL.md" ] && echo "$d has $s"; done; done
+```
+**Remedy built in:** `repo-tidy` fix propagated to all three trees 2026-07-29; all three verified byte-identical.
+**Enforced by:** `alignment-sweep` Pass 4 extended to diff across `.claude` / `.agents` / `.gemini`, not just repo-vs-global.
+
+---
+
+## 2026-07-29 — Adversarial pass over this session's own output
+
+### L40 — Run every new rule against the artifact that introduced it
+**What happened:** Wrote L39 ("this repo has three CLI skill trees; a fix in one is a fix in none"), then within the same session shipped `alignment-sweep` and `canon-slop-audit` into `.claude/skills/` **only**. Codex and Gemini would never have seen either. The violation was invisible until an adversarial pass explicitly diffed the trees — the same pass the new skill itself prescribes. Also shipped an `Enforced by: monthly-alignment-sweep` reference that resolves to a Cowork scheduled task, not a repo skill, violating L23's rule that every "Enforced by" must point at something that actually runs where claimed.
+**Rule:** The moment a lesson is written, run it against the current session's own deliverables before closing. A rule authored and violated in the same session is worse than no rule — it teaches the next agent that lessons are documentation rather than constraints. Applies with double force to any lesson about propagation, duplication, or placement, because those are precisely the ones the author is mid-violating.
+**Remedy built in:** Both skills propagated to `.agents/` and `.gemini/`, verified byte-identical; the false enforcement reference corrected in place.
+**Enforced by:** `loop-orchestrator` critical-review pass extended — the final gate now asks "does this session's output satisfy the rules this session wrote?" and `alignment-sweep` Pass 4 diffs all three CLI trees for every skill, not just pre-existing ones.
+
+### L41 — Untested infrastructure claims are the highest-confidence, lowest-evidence claims an agent makes
+**What happened:** Authored `visual-verification` — a skill whose entire premise is *never claim a UI works without running it* — and then reviewed an entire design system, wrote 11 lessons, rebuilt six skills, and produced a prompt pack **without once starting the dev server**. When finally instructed to run E2E, the sandbox surfaced four blockers in sequence: the mount blocks `unlink` (Next cannot clear `.next/BUILD_ID`), Playwright browsers were absent, `--with-deps` needs root, and `lightningcss` had no arm64 binding. None was visible from reading code. All four were trivially discoverable by running one command.
+**Rule:** Any skill that prescribes execution must itself be executed at least once against the real target before it is called delivered. "The instructions are correct" is not the same claim as "the instructions work here," and only the second is worth anything. Where the environment cannot support execution, that limitation is the headline finding, not a footnote.
+**Remedy built in:** Full E2E executed 2026-07-29 — build ✓, 35 passed / 7 skipped / 0 failed on chromium and Mobile Chrome, unit 17/17, lint 0 errors. Sandbox workaround documented below.
+**Enforced by:** `verify-cli-claims` (repo copy) already forbids "complete" without a build; extended in spirit to skills — a skill prescribing a command is unverified until that command has run.
+
+### L42 — Sandbox execution recipe for this repo (saves the next agent ~40 minutes)
+**What happened:** Getting a green E2E run inside a Cowork sandbox required four non-obvious workarounds, discovered serially.
+**Rule:** Record environment-specific execution recipes; rediscovering them is pure waste.
+**Remedy built in:**
+1. **Mount blocks `unlink`** → `next build` fails `EPERM` on `.next/BUILD_ID`. Copy the repo out: `tar -cf - --exclude=node_modules --exclude=.next --exclude=.git . | (cd /tmp/nota && tar -xf -)`.
+2. **Do not symlink `node_modules`** — Turbopack rejects it ("points out of the filesystem root"). Copy it (~1.1 GB; needs ≥3 GB free).
+3. **Playwright** — `--with-deps` fails (no root). Use `PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1 npx playwright install chromium`, then supply the one missing lib manually: `apt-get download libxdamage1 && dpkg-deb -x *.deb /tmp/libs`, then `LD_LIBRARY_PATH=/tmp/libs/usr/lib/aarch64-linux-gnu`.
+4. **arm64** — install `lightningcss-linux-arm64-gnu --no-save` or the CSS pipeline dies at build.
+**Enforced by:** referenced from `alignment-sweep` Pass 1 so a sweep that needs to run tests doesn't re-derive this.
+
+### L43 — Two live test gaps found by actually running the suite
+**What happened:** The green run surfaced what static review could not. **(a)** All 7 skipped specs are auth/data-gated — including the entire `lens-filter-empty-state` suite, which is the only automated coverage of contextual empty states across shelf view modes. The screens `screen-state-completeness` cares most about are the ones never exercised in CI. **(b)** The E2E web server logged repeated `429`s from `upload.wikimedia.org` — tests are fetching live upstream images, so the suite depends on a third party's rate limiter and will flake in CI.
+**Rule:** A green suite is evidence about what ran, never about what was skipped. Report skip counts with the same prominence as failures, and name what coverage each skip removes. Any external network call inside a test is a latent flake — fixture it (cf. L26, `ABUNDANCE_FIXTURE_MODE`).
+**Enforced by:** `alignment-sweep` Pass 6 extended to report skipped-spec counts and any external hosts contacted during a test run. Open for Christopher: seed auth/data fixtures so the 7 skips execute, and stub `upload.wikimedia.org` image responses.
+
+### L44 — Looking at the rendered screen found three defects that six passes of reading did not
+**What happened:** After an entire session of canon review, drift analysis, and a green E2E suite, the first actual screenshot of the homepage surfaced three defects no amount of reading had caught:
+
+1. **`ConsentBanner.tsx` ships three off-palette navy blues** — `#1a2439`, `#2d3d5c`, `#7a8fa3`. None appears anywhere in `DESIGN.md`, `NOTA-BRAND-UIUX-PACK.md`, or `NOTA_MANIFESTO.md`; the nota. palette contains no blue at all. This component renders on **every route** via `app/layout.tsx`, making it the single most brand-visible element in the product.
+2. **`var(--bg-secondary, #1a2439)` references a token that does not exist** — `--bg-secondary` is defined nowhere in `globals.css` or `lib/design/tokens.css`, so every render silently falls through to the hardcoded navy. A missing token with a plausible fallback fails invisibly forever.
+3. **`--r-card: 16px` contradicts brand pack §6**, which specifies structural radius `0px` for cards, sheets and panels — "cut-paper / glass-edge geometry. Reject bubble aesthetics." The banner also renders as a rounded bubble, the exact aesthetic §6 rejects.
+
+E2E passed 35/35 throughout. Tests assert behaviour, not brand.
+
+**Rule:** A green suite and a canon review are not evidence about appearance. Any engagement that reviews, audits, or changes visual doctrine must screenshot at least one real rendered route before reporting, and must sample computed values (`getComputedStyle`) rather than reading declared ones — the declared value is not necessarily the rendered value. Specifically: grep every `var(--token, fallback)` for tokens that do not exist, because the fallback makes the failure silent.
+**Remedy built in:** Screens captured to `outputs/nota-screens/` and inspected 2026-07-29. `visual-verification` skill executed for the first time. Findings logged as open items below.
+**Enforced by:** `visual-verification` skill; `alignment-sweep` Pass 2 extended to grep for `var(--*, #hex)` fallbacks whose token is undefined, and to compare computed body/surface values against `DESIGN.md` rather than only reading declarations.
+
+**Open for Christopher (not fixed — brand decisions):**
+- `ConsentBanner.tsx` needs re-tokening to the real palette (charcoal surface, ivory text, olive action). Three hardcoded navies + one phantom token.
+- Define `--bg-secondary` or remove the reference.
+- Reconcile `--r-card: 16px` / `--r-btn: 12px` against §6's `0px` structural radius — one of the two is wrong.
+- Banner overlaps the `03 IDENTITY` section content at desktop 1440×900 and has a clipped glyph at the left viewport edge.
