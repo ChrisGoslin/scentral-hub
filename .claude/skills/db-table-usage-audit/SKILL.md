@@ -18,9 +18,17 @@ Nota's database has repeatedly drifted ahead of (or been misdescribed by) its ow
 
 ## Workflow
 
-1. **Pull the live schema, not the doc's claim.** Use `list_tables` (Supabase MCP) with `verbose: true` for column-level detail, or, if MCP access isn't available, `SELECT table_name, (SELECT count(*) FROM information_schema.columns WHERE table_name = t.table_name) FROM information_schema.tables t WHERE table_schema='public' AND table_type='BASE TABLE'` — the `table_type='BASE TABLE'` filter matters: `information_schema.tables` also lists views, and a view misclassified as a table produces a false ORPHANED/dead-table recommendation. This fallback still won't give row counts; run a per-table `SELECT count(*) FROM <table>` (or an explicit UNION of them) as a second step when MCP isn't available.
+1. **Pull the live schema, not the doc's claim.** Use `list_tables` (Supabase MCP) with `verbose: true` for column-level detail, or, if MCP access isn't available:
+   ```sql
+   SELECT table_name,
+     (SELECT count(*) FROM information_schema.columns c
+      WHERE c.table_schema = 'public' AND c.table_name = t.table_name) AS column_count
+   FROM information_schema.tables t
+   WHERE table_schema = 'public' AND table_type = 'BASE TABLE'
+   ```
+   Both the outer query and the correlated subquery need `table_schema = 'public'` — filtering only the outer query lets a same-named table in another schema (e.g. `auth.users` vs a hypothetical `public.users`) inflate the column count for the wrong table. The `table_type='BASE TABLE'` filter also matters: `information_schema.tables` also lists views, and a view misclassified as a table produces a false ORPHANED/dead-table recommendation. This fallback still won't give row counts; run a per-table `SELECT count(*) FROM <table>` (or an explicit UNION of them) as a second step when MCP isn't available.
 2. **Grep every candidate surface for the literal table name**: `app/`, `lib/`, `components/`, `scripts/`, `supabase/functions/`. This is necessary but **not sufficient** — see step 3.
-3. **Before asserting ORPHANED, close the dynamic-access blind spot across ALL of the surfaces in step 2, not just `app/`** (see `docs/lessons.md` L32):
+3. **Before asserting ORPHANED, close the dynamic-access blind spot across ALL of the surfaces in step 2, not just `app/`** (see `docs/lessons.md` L42):
    - Check the table's defining migration file(s) for `CREATE FUNCTION` / `CREATE TRIGGER` — a table can be live entirely through an RPC function or trigger with no literal table-name reference anywhere.
    - Grep every surface from step 2 — `app/`, `lib/`, `components/`, `scripts/`, `supabase/functions/` — for **any** `.rpc(` call at all (not just ones naming the table); an RPC function's name rarely matches its target table's name, and a table used only from a script or Edge Function is just as live as one used from `app/`.
    - Check for any generic/dynamic query-builder pattern in the codebase (a helper taking a table name as a variable) that would evade literal-string grep.
@@ -37,7 +45,7 @@ A table: `table name | status | evidence`. Flag any anomaly (live data with no c
 
 ## Guardrails
 
-- Don't assert a table is safe to drop based on grep alone — that's exactly the mistake L32 exists to prevent.
+- Don't assert a table is safe to drop based on grep alone — that's exactly the mistake L42 exists to prevent.
 - Don't fill a gap in evidence with an assumption from the doc describing the schema — the doc is what's suspected to be wrong in the first place.
 - If a table has row data with no discoverable consumer anywhere in the checked repo, say so as an open question (possible external pipeline, possible orphaned import) — don't guess which.
 
@@ -49,4 +57,4 @@ A table: `table name | status | evidence`. Flag any anomaly (live data with no c
 
 ## Provenance and maintenance
 
-Derived from a live audit of scentral-hub's `scentral-mvp` Supabase project (2026-07-27) that found CLAUDE.md's table count (37) was stale against the live count (41), found `shelf_items.tier`/`blind_buy` columns live in schema but never read by app code, and found `trend_signals` receiving live external data with zero in-repo consumer. See `docs/lessons.md` L32.
+Derived from a live audit of scentral-hub's `scentral-mvp` Supabase project (2026-07-27) that found CLAUDE.md's table count (37) was stale against the live count (41), found `shelf_items.tier`/`blind_buy` columns live in schema but never read by app code, and found `trend_signals` receiving live external data with zero in-repo consumer. See `docs/lessons.md` L42.

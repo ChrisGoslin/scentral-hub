@@ -79,10 +79,12 @@ Verdict: **Verified** if build exits 0 with no error lines. **False** if build f
 ### "Tests pass"
 Don't hardcode a script name — read `package.json`'s `scripts` block fresh, since it drifts (as of 2026-07-27 it has `test:e2e`, `test:smoke`, `test:smoke:prod`, `test:unit`, none of which existed the same way on 2026-07-05). Run whichever of these exist via `npm run <script>`, not by invoking the underlying file directly:
 ```bash
+set -o pipefail  # without this, a failing command piped to `tail` still exits 0
 cat package.json | grep -A1 '"scripts"' # or: node -e "console.log(Object.keys(require('./package.json').scripts))"
 npx tsc --noEmit 2>&1 | tail -20   # no dedicated typecheck script exists; use tsc directly
 npm run test:e2e 2>&1 | tail -20         # if present
 npm run test:smoke 2>&1 | tail -20       # if present — do not call scripts/smoke-test.mjs directly
+npm run test:smoke:prod 2>&1 | tail -20  # if present — hits the deployed BASE_URL, only run when a live deploy claim is being checked
 npm run test:unit 2>&1 | tail -20        # if present
 ```
 Verdict: **Verified** if the commands that exist all exit 0. **Unverifiable** (not False) for any test category whose package script doesn't exist — say so explicitly rather than inventing a direct file invocation.
@@ -103,7 +105,7 @@ cat package.json | grep '"library-name"'
 Verdict: **Verified** with actual version shown. Never trust agent's stated version without checking.
 
 ### "Rule/check X is why CI failed" (a specific third-party rule ID, lint rule, or tool behavior named as root cause)
-An agent naming a specific rule ID (e.g. "SonarJS S2681"), severity level, or tool-behavior claim as the diagnosis for a real failure — not just applying it as general practice — is asserting something checkable. A plausible-sounding rule ID is not a verified one (see `docs/lessons.md` L31: a real session named the wrong rule ID, at the wrong severity, and the "fix" had zero effect on the actual failure).
+An agent naming a specific rule ID (e.g. "SonarJS S2681"), severity level, or tool-behavior claim as the diagnosis for a real failure — not just applying it as general practice — is asserting something checkable. A plausible-sounding rule ID is not a verified one (see `docs/lessons.md` L41: a real session named the wrong rule ID, at the wrong severity, and the "fix" had zero effect on the actual failure).
 ```bash
 # The rule ID/behavior must be checked against the tool's own docs or a search,
 # not recalled from memory, before it's committed as the stated justification for a fix.
@@ -163,8 +165,21 @@ This skill is **read-only**. It does not:
 
 It only inspects and reports. All fixes are the human's (or next agent session's) responsibility.
 
-### Corrections (2026-07-05)
-`npm run test` and `npm run typecheck` do not exist in `package.json` (verified: `cat package.json | grep -A1 '"scripts"'`) — the "Tests pass" section above has been fixed to use `npx tsc --noEmit` for typecheck and `npm run test:e2e` / `node scripts/smoke-test.mjs` for actual test runs. There is no unit-test runner (Vitest/Jest) configured in this repo as of this date, despite `qe-automation` describing a Vitest unit layer as the target state — treat "unit tests pass" claims as unverifiable until a unit runner actually exists; check with `grep -n '"vitest"\|"jest"' package.json`.
+### Corrections (2026-07-05, superseded 2026-07-29 — see below)
+`npm run test` and `npm run typecheck` do not exist in `package.json`. There is no unit-test runner (Vitest/Jest) configured in this repo as of this date, despite `qe-automation` describing a Vitest unit layer as the target state — treat "unit tests pass" claims as unverifiable until a unit runner actually exists; check with `grep -n '"vitest"\|"jest"' package.json`.
+
+### Correction (2026-07-29)
+The line above once told readers to run `node scripts/smoke-test.mjs` directly. That contradicts the "Tests pass" section above, which explicitly requires `npm run <script>` invocation (never the raw file) so drift in the underlying command is caught by `package.json`, not hardcoded here. If this file and the "Tests pass" section ever disagree again, the "Tests pass" section wins — it is re-verified against live `package.json` per session; this historical note is not.
+
+### Correction (2026-07-29) — pre-push/pre-commit hook claims need hook-firing proof, not script-output proof
+A hook file existing in `.husky/` (or any git-hooks directory) and passing when invoked manually (`node scripts/x.mjs`) is not evidence the hook fires on a real `git push`/`git commit`. Verify hook wiring itself before trusting any "guard blocks bad pushes" claim:
+```bash
+git rev-parse --git-path hooks    # find the real hooks dir
+git config --get core.hooksPath   # confirm it points at .husky (or wherever the hook file lives)
+ls -la "$(git rev-parse --git-path hooks)/pre-push" 2>/dev/null   # confirm the actual hook is installed there
+ls node_modules/.bin/husky 2>/dev/null   # confirm husky itself was installed, not just referenced in package.json
+```
+**Verdict: Verified** only if `core.hooksPath` resolves to the directory containing the hook AND the hook file is present at that resolved path AND (for husky) the binary is installed. **False** if any of those three is missing — in that case, every prior "guard fired correctly" claim in the session was actually a manual script invocation, not a real hook execution, and must be re-labeled as such.
 
 ## When NOT to use this skill
 
