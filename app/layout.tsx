@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Caveat, Instrument_Serif, Space_Grotesk, Unbounded } from "next/font/google";
+import { Geist, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import "../lib/design/tokens.css";
 import PWARegistration from "./components/PWARegistration";
@@ -13,24 +13,9 @@ import TemptationProvider from "@/components/temptations/TemptationProvider";
 import ConsentBanner from "@/components/ConsentBanner";
 import AmbientModeController from "./components/AmbientModeController";
 
-const spaceGrotesk = Space_Grotesk({
+const geist = Geist({
   subsets: ["latin"],
-  weight: ["400", "500", "700"],
-  variable: "--font-space",
-  display: "swap",
-});
-
-const unbounded = Unbounded({
-  subsets: ["latin"],
-  weight: ["400", "500", "700"],
-  variable: "--font-unbounded",
-  display: "swap",
-});
-
-const caveat = Caveat({
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  variable: "--font-caveat",
+  variable: "--font-geist",
   display: "swap",
 });
 
@@ -99,7 +84,7 @@ export default function RootLayout({
       lang="en"
       data-theme="dark"
       data-scroll-behavior="smooth"
-      className={`h-[100dvh] antialiased ${spaceGrotesk.variable} ${unbounded.variable} ${caveat.variable} ${instrumentSerif.variable}`}
+      className={`h-[100dvh] antialiased ${geist.variable} ${instrumentSerif.variable}`}
     >
       <head>
         <link rel="preconnect" href="https://cdn.vercel.com" />

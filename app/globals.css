@@ -1,14 +1,5 @@
 @import "tailwindcss";
 
-@font-face {
-  font-family: "Cormorant Garamond";
-  src: url("/fonts/cormorant-garamond-v21-latin-italic.woff2") format("woff2");
-  font-style: italic;
-  font-weight: 400;
-  font-display: optional;
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-
 :root {
   --ivory: #F7F4EE;
   --stone: #E5E0D6;
@@ -40,9 +31,9 @@
   --shadow-card: 0 2px 8px oklch(0.2 0.02 60 / 0.08), 0 8px 24px oklch(0.2 0.02 60 / 0.06);
   
   /* Typography */
-  --font-display: var(--font-instrument-serif, "Instrument Serif", "Cormorant Garamond", Georgia, serif);
-  --font-body: var(--font-unbounded), var(--font-space), "Satoshi", sans-serif;
-  --font-hand: var(--font-caveat), 'Caveat', cursive;
+  --font-display: var(--font-instrument-serif, "Instrument Serif", Georgia, serif);
+  --font-body: var(--font-geist), "Geist", sans-serif;
+  --font-hand: var(--font-instrument-serif, "Instrument Serif", Georgia, serif);
 
   /* M3 type scale — fluid clamp() roles (Sprint 1-A) */
   --text-display: clamp(2rem, 1.5rem + 2.5vw, 3.5rem);
