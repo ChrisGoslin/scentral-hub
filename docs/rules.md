@@ -22,6 +22,7 @@ This is the short checklist. `docs/lessons.md` remains the detailed history and 
 2. Before committing, inspect `git status --short`, `git diff --cached --name-only`, `git diff --cached --stat`, and `git diff --cached --check`.
 3. Treat generated artifacts separately from source changes. Move build-state backups aside or clean them only when the cleanup scope is explicit.
 4. Do not push `main` directly when there are multiple local commits and a dirty shared worktree unless Christopher explicitly asks for that exact push.
+5. Root-level `.next.preverify-*` and `.next.preclean-*` directories are generated build backups. Ignore them in Git and ESLint, and move them out of the repo before lint or CI claims.
 
 ## Verification
 
@@ -29,6 +30,7 @@ This is the short checklist. `docs/lessons.md` remains the detailed history and 
 2. Mocked E2E proves UI behavior, not protected API behavior. Record the residual gap and add real authenticated integration coverage when test auth exists.
 3. If Next reports missing client manifests or route manifest invariants after interrupted builds, move `.next` aside, rebuild cleanly, then rerun the failing spec before changing product code.
 4. When acceptance criteria change, update the canonical doc and add the smallest executable guardrail available.
+5. CI E2E jobs must have bounded timeouts and upload Playwright diagnostics on failure or cancellation.
 
 ## Cross-Project Boundaries
 

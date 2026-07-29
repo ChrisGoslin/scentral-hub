@@ -92,7 +92,7 @@
 
 - ✅ **iOS** — PWA, home screen installable (Safari 18+)
 - ✅ **Android** — PWA, home screen installable (Chrome 120+)
-- ✅ **Web** — Full desktop experience at scentral-seven.vercel.app
+- ✅ **Web** — Full desktop experience at scentral-hub.vercel.app
 
 ### 🎯 **Roadmap (Post-Launch)**
 

@@ -191,6 +191,6 @@ export async function POST(req: Request) {
 
   } catch (error) {
     console.error('Sommelier API Error:', error)
-    return NextResponse.json({ error: error instanceof Error ? error.message : 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: 'Sommelier is not available right now. Please try again later.' }, { status: 500 })
   }
 }

@@ -3,7 +3,7 @@ APP STORE SCREENSHOTS - CAPTURE COMPLETE
 
 Project: nota. (scentral-hub)
 Date Captured: 2026-06-21
-App URL: https://scentral-seven.vercel.app
+App URL: https://scentral-hub.vercel.app
 
 SCREENSHOTS CAPTURED
 ====================
@@ -128,4 +128,3 @@ Discover: "Explore 280+ fragrances"
 Collection: "Your personal scent collection"
 You: "Track your fragrance journey"
 Spritz: "Daily ritual planning"
-
