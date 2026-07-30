@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Instrument_Serif } from "next/font/google";
+import { IBM_Plex_Sans, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import "../lib/design/tokens.css";
 import PWARegistration from "./components/PWARegistration";
@@ -13,9 +13,10 @@ import TemptationProvider from "@/components/temptations/TemptationProvider";
 import ConsentBanner from "@/components/ConsentBanner";
 import AmbientModeController from "./components/AmbientModeController";
 
-const geist = Geist({
+const ibmPlexSans = IBM_Plex_Sans({
   subsets: ["latin"],
-  variable: "--font-geist",
+  weight: ["400", "500", "600"],
+  variable: "--font-ibm-plex",
   display: "swap",
 });
 
@@ -84,7 +85,7 @@ export default function RootLayout({
       lang="en"
       data-theme="dark"
       data-scroll-behavior="smooth"
-      className={`h-[100dvh] antialiased ${geist.variable} ${instrumentSerif.variable}`}
+      className={`h-[100dvh] antialiased ${ibmPlexSans.variable} ${instrumentSerif.variable}`}
     >
       <head>
         <link rel="preconnect" href="https://cdn.vercel.com" />
