@@ -5,4 +5,4 @@ description: "Use when new canonical docs, brand doctrine files, or operating-sy
 
 # Skill: canonical-source-reconciler
 
-Resolve the repository root with `git rev-parse --show-toplevel`, then read and follow `<repo-root>/.claude/skills/canonical-source-reconciler/SKILL.md`. Use its `scripts/check_canonical_sources.sh` sweep from the same directory. This wrapper exists only for cross-CLI discovery; do not duplicate or redefine the workflow here.
+Resolve the repository root with `git rev-parse --show-toplevel`, then read and follow `<repo-root>/.claude/skills/canonical-source-reconciler/SKILL.md`. This Gemini discovery pointer does not redefine the canonical workflow.
