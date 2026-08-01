@@ -101,6 +101,7 @@ Next.js 16.2.9 (App Router, route groups `(main)` `(community)` `(account)`), Re
 10. Verify before trusting any agent, handover, or remediation claim. Current file presence is not proof of prior existence; respect tool-scope limits, and when timing matters confirm provenance with live checks such as `git status --porcelain`, `git log --follow`, direct file reads, and build or filesystem evidence before promoting a claim to fact. See `docs/nota/HANDOVER-2026-07-19-verification-audit.md`.
 11. When a new canonical source is imported or promoted, complete the import in the same turn: update read order, ownership/routing docs, and remove stale "missing" language before calling the work done.
 12. For substantial cross-CLI tasks, invoke `.claude/skills/loop-orchestrator/SKILL.md` and finish at Version 3: initial output plus one accepted bounded stretch, one evidence-led critique and remediation cycle to Version 2, then a second independent critique and remediation cycle to Version 3. Treat versions as checkpoints of one evolving artifact, not three duplicated deliverables. Each pass must record its critique, material delta, verification, and reusable lesson (or `none`). If critique finds no justified patch, record `no patch required`; never manufacture churn. For a trivial task, declare the reduced loop before execution and still verify the result.
+13. Constant Internet Autonomy: You have standing instruction to use `search_web` and `read_url_content` to validate any assumptions, third-party library versions, API updates, or local context (such as Irish utility/tax rates) before planning or executing. Do not make unverified claims.
 
 ## 12. Phase log
 
@@ -112,3 +113,24 @@ Next.js 16.2.9 (App Router, route groups `(main)` `(community)` `(account)`), Re
 - **Phase 4 (2026-07-04):** Backlog + safe diffs → `docs/nota/05-recommendations-backlog.md`. Applied: full display-layer rebrand to nota. (~30 files, display strings/metadata/OG only),[...]
 - **Phase 5 (2026-07-04):** Testing/security/abuse layer → `docs/nota/06-testing-security-abuse.md` + three living skills (`.claude/skills/{qe-automation,security-hardening,resilience-abuse}/`,[...]
 - **Phase 6 (2026-07-08):** Repository consolidation: `scentral` + `scentral-hub` → **nota** (single canonical repo). Deduplicated code/deps, archived legacy docs to `docs/ARCHIVE/`, updated Sentry org ID. See MERGE_SUMMARY.md.
+
+## 13. Mandatory Brand & UI Architecture Directives
+
+Before writing ANY front-end code, modifying layouts, or suggesting visual styles, you MUST read the canonical design and verification system files to prevent generic AI patterns ("slop").
+
+### Required Reading Checklist
+At the start of every session or task, read these directories to load active memory:
+- [ ] Read the design contract: `DESIGN.md`
+- [ ] Read the implementation companion: `NOTA-BRAND-UIUX-PACK.md`
+- [ ] Read the sensory memory layer: `NOTA_LORE.md`
+- [ ] Read the verification skill: `.claude/skills/verify-cli-claims/SKILL.md`
+
+### Hard Coding Rules
+*   Never use raw Tailwind surface classes (e.g., `bg-neutral-100`, `text-neutral-500`). Use brand variables.
+*   Never ship alternate body fonts. Use Geist for system UI and Instrument Serif Italic for identity, memory, and emotional moments.
+*   Financial figures must use tabular numerals (`font-variant-numeric: tabular-nums`).
+*   Money deltas must use typography size/weight and glyphs (+/-) rather than reflexively coloring negative numbers red.
+*   Skeletons must mimic the real layout structure; no default `animate-pulse`.
+
+### UI Verification Gate
+*   You are not allowed to declare a component or page complete without running a visual audit of its states (loading, empty, success, error, focus, hover, mobile) against the `visual-verification` checks.

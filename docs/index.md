@@ -27,10 +27,9 @@ Older legacy docs may be useful history, but treat them as stale unless one of t
 
 These live outside the repo and are useful for planning, priorities, and Christopher's working preferences:
 
-- `/Users/christophergoslin/Projects/Claude/AI Studio/PROJECTS.md`
-- `/Users/christophergoslin/Projects/Claude/AI Studio/profile.md`
-- `/Users/christophergoslin/.claude/CLAUDE.md`
 - `/Users/christophergoslin/.claude/PROJECTS.md`
+- `/Users/christophergoslin/.claude/profile.md`
+- `/Users/christophergoslin/.claude/CLAUDE.md`
 - `/Users/christophergoslin/.claude/LESSONS.md`
 
 Do not copy long content from those files into this repo. Link or cite the path, then update the canonical source when direction changes.
