@@ -102,6 +102,7 @@ Next.js 16.2.9 (App Router, route groups `(main)` `(community)` `(account)`), Re
 11. When a new canonical source is imported or promoted, complete the import in the same turn: update read order, ownership/routing docs, and remove stale "missing" language before calling the work done.
 12. For substantial cross-CLI tasks, invoke `.claude/skills/loop-orchestrator/SKILL.md` and finish at Version 3: initial output plus one accepted bounded stretch, one evidence-led critique and remediation cycle to Version 2, then a second independent critique and remediation cycle to Version 3. Treat versions as checkpoints of one evolving artifact, not three duplicated deliverables. Each pass must record its critique, material delta, verification, and reusable lesson (or `none`). If critique finds no justified patch, record `no patch required`; never manufacture churn. For a trivial task, declare the reduced loop before execution and still verify the result.
 13. Constant Internet Autonomy: You have standing instruction to use `search_web` and `read_url_content` to validate any assumptions, third-party library versions, API updates, or local context (such as Irish utility/tax rates) before planning or executing. Do not make unverified claims.
+14. Canonical routing docs must point at the real operating files. If `docs/index.md` or `CLAUDE.md` ever drifts to dead paths, fix the pointers immediately so stale context does not spread to later sessions.
 
 ## 12. Phase log
 
