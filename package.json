@@ -10,6 +10,7 @@
     "lint": "eslint",
     "skills:relock": "node scripts/relock-skills.mjs",
     "skills:check": "node scripts/check-skill-integrity.mjs",
+    "lessons:check": "node scripts/check-lesson-ids.mjs",
     "sanity-check": "node scripts/sanity-check.mjs",
     "audit:image-urls": "node scripts/audit-fragrance-image-urls.mjs",
     "enrich:images:firecrawl": "node scripts/enrich-images-firecrawl.mjs",

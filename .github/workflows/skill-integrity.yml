@@ -1,9 +1,12 @@
 name: Skill Integrity
-# CI twin of the local .husky/pre-push skill guard. The pre-push hook only
-# runs on a machine that pushes directly — a merge performed through the
-# GitHub UI never triggers it, which is exactly the path commit 55b2d2d could
-# have taken (see docs/lessons.md L26-L30). This workflow closes that gap by
-# running the same check server-side on every push and PR against main.
+# CI twin of the local .husky/pre-push guard (skill hash lock + lesson-ID
+# uniqueness). The pre-push hook only runs on a machine that pushes
+# directly — a merge performed through the GitHub UI never triggers it,
+# which is exactly the path commit 55b2d2d could have taken (see
+# docs/lessons.md L36-L40). This workflow closes that gap by running the
+# same checks server-side on every push and PR against main. It is also
+# the one guard in this repo confirmed to actually fire in a sandboxed
+# dev environment without a working local git-hooks install (see L43).
 on:
   push:
     branches: [main]
@@ -22,3 +25,4 @@ jobs:
         with:
           node-version: '20'
       - run: node scripts/check-skill-integrity.mjs
+      - run: node scripts/check-lesson-ids.mjs
