@@ -81,7 +81,17 @@ Don't hardcode a script name — read `package.json`'s `scripts` block fresh, si
 ```bash
 set -o pipefail  # without this, a failing command piped to `tail` still exits 0
 cat package.json | grep -A1 '"scripts"' # or: node -e "console.log(Object.keys(require('./package.json').scripts))"
-npx tsc --noEmit 2>&1 | tail -20   # no dedicated typecheck script exists; use tsc directly
+# No dedicated typecheck script exists. Use the locally installed compiler (node_modules/.bin/tsc),
+# never bare `npx tsc` — with no version pin, npx can resolve a compiler from the registry instead
+# of the declared package.json devDependency, which is both a correctness risk (different TS
+# version, different diagnostics) and a supply-chain risk (MCP/registry "rug pull" — see the tool
+# note this section carries). If node_modules/.bin/tsc isn't present, the check is Unverifiable,
+# not "run npx and hope."
+if [ -x node_modules/.bin/tsc ]; then
+  node_modules/.bin/tsc --noEmit 2>&1 | tail -20
+else
+  echo "UNVERIFIABLE: node_modules/.bin/tsc not present — do not fall back to unpinned npx tsc."
+fi
 npm run test:e2e 2>&1 | tail -20         # if present
 npm run test:smoke 2>&1 | tail -20       # if present — do not call scripts/smoke-test.mjs directly
 npm run test:smoke:prod 2>&1 | tail -20  # if present — hits the deployed BASE_URL, only run when a live deploy claim is being checked
@@ -176,10 +186,14 @@ A hook file existing in `.husky/` (or any git-hooks directory) and passing when 
 ```bash
 git rev-parse --git-path hooks    # find the real hooks dir
 git config --get core.hooksPath   # confirm it points at .husky (or wherever the hook file lives)
-ls -la "$(git rev-parse --git-path hooks)/pre-push" 2>/dev/null   # confirm the actual hook is installed there
+# Check every hook the claim actually names, not just pre-push — a claim that says
+# "the pre-commit hook blocks X" is unverified if only pre-push is checked, and vice versa.
+for hook in pre-push pre-commit; do
+  ls -la "$(git rev-parse --git-path hooks)/$hook" 2>/dev/null || echo "MISSING: $hook not installed at resolved hooks path"
+done
 ls node_modules/.bin/husky 2>/dev/null   # confirm husky itself was installed, not just referenced in package.json
 ```
-**Verdict: Verified** only if `core.hooksPath` resolves to the directory containing the hook AND the hook file is present at that resolved path AND (for husky) the binary is installed. **False** if any of those three is missing — in that case, every prior "guard fired correctly" claim in the session was actually a manual script invocation, not a real hook execution, and must be re-labeled as such.
+**Verdict: Verified** only for each specific hook where `core.hooksPath` resolves to the directory containing that hook's file AND the hook file is present at that resolved path AND (for husky) the binary is installed — check every hook named by the claim independently, since one can be wired while another isn't. **False** for any named hook missing one of those three. In that case, every prior "guard fired correctly" claim about that hook in the session was actually a manual script invocation, not a real hook execution, and must be re-labeled as such.
 
 ## When NOT to use this skill
 

@@ -26,7 +26,17 @@ Nota's database has repeatedly drifted ahead of (or been misdescribed by) its ow
    FROM information_schema.tables t
    WHERE table_schema = 'public' AND table_type = 'BASE TABLE'
    ```
-   Both the outer query and the correlated subquery need `table_schema = 'public'` — filtering only the outer query lets a same-named table in another schema (e.g. `auth.users` vs a hypothetical `public.users`) inflate the column count for the wrong table. The `table_type='BASE TABLE'` filter also matters: `information_schema.tables` also lists views, and a view misclassified as a table produces a false ORPHANED/dead-table recommendation. This fallback still won't give row counts; run a per-table `SELECT count(*) FROM <table>` (or an explicit UNION of them) as a second step when MCP isn't available.
+   Both the outer query and the correlated subquery need `table_schema = 'public'` — filtering only the outer query lets a same-named table in another schema (e.g. `auth.users` vs a hypothetical `public.users`) inflate the column count for the wrong table. The `table_type='BASE TABLE'` filter also matters: `information_schema.tables` also lists views, and a view misclassified as a table produces a false ORPHANED/dead-table recommendation.
+
+   **`information_schema.tables` is privilege-scoped, not a full catalog.** Postgres only returns rows the current role has SELECT (or schema-level) privilege on — a role without full `public` schema access silently sees fewer tables than actually exist, not zero, so an incomplete result looks identical to a complete one. Before trusting the row count as exhaustive: confirm the querying role has broad `public` schema privileges (e.g. `SELECT has_schema_privilege(current_user, 'public', 'USAGE')` plus spot-checking a couple of known tables appear in the result), or prefer the privileged Supabase MCP `list_tables` path, which does not have this gap. If neither can be confirmed, report the audit as **incomplete** for schema coverage rather than treating the returned set as the full table list — and never classify a table missing from this fallback's output as ORPHANED on that basis alone; it may simply be invisible to the current role.
+
+   This fallback still won't give row counts; run a per-table row count as a second step when MCP isn't available:
+   ```sql
+   SELECT 'shelf_items' AS table_name, count(*) FROM public.shelf_items
+   UNION ALL
+   SELECT 'trend_signals', count(*) FROM public.trend_signals
+   ```
+   Always schema-qualify (`public.<table>`) and label each branch with the table name as shown — an unlabeled `UNION` of bare counts makes it impossible to tell which number belongs to which table once results come back.
 2. **Grep every candidate surface for the literal table name**: `app/`, `lib/`, `components/`, `scripts/`, `supabase/functions/`. This is necessary but **not sufficient** — see step 3.
 3. **Before asserting ORPHANED, close the dynamic-access blind spot across ALL of the surfaces in step 2, not just `app/`** (see `docs/lessons.md` L42):
    - Check the table's defining migration file(s) for `CREATE FUNCTION` / `CREATE TRIGGER` — a table can be live entirely through an RPC function or trigger with no literal table-name reference anywhere.
