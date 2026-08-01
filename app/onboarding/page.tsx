@@ -8,11 +8,11 @@ import { buildPersonalNote } from '@/lib/personalization'
 import { track } from '@/lib/posthog'
 import PersonaRevealOverlay from './PersonaRevealOverlay'
 
-interface NosePrintCardProps {
+interface ReadCardProps {
   persona: Persona
 }
 
-function NosePrintCard({ persona }: NosePrintCardProps) {
+function ReadCard({ persona }: ReadCardProps) {
   const cardRef = useRef<HTMLDivElement>(null)
   const [copied, setCopied] = useState(false)
 
@@ -26,7 +26,7 @@ function NosePrintCard({ persona }: NosePrintCardProps) {
       })
       const link = document.createElement('a')
       link.href = canvas.toDataURL('image/png')
-      link.download = 'my-noseprint.png'
+      link.download = 'my-read.png'
       link.click()
       track('noseprint_card_downloaded', { persona_id: persona.id })
     } catch (err) {
@@ -130,7 +130,7 @@ function NosePrintCard({ persona }: NosePrintCardProps) {
           fontWeight: 500,
           letterSpacing: '0.04em',
         }}>
-          Find your Noseprint at nota.app
+        Find your Read at nota.app
         </div>
       </div>
 
@@ -513,9 +513,9 @@ export default function OnboardingPage() {
               transition: prefersReducedMotion.current ? 'opacity 200ms ease' : 'opacity 400ms ease 640ms',
             }}>
               <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: persona.ui_theme.accentColor, marginBottom: 16 }}>
-                Share Your NosePrint
+                Share Your Read
               </p>
-              <NosePrintCard persona={persona} />
+              <ReadCard persona={persona} />
             </div>
           </div>
 

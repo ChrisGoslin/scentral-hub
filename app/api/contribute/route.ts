@@ -11,8 +11,8 @@ function levelForXp(xp: number): number {
   return level
 }
 
-// XP award values per contribution type
-const XP_VALUES = {
+// Progress award values per contribution type.
+const PROGRESS_VALUES = {
   new_fragrance: 50,
   add_notes: 20,
   rate_projection: 10,
@@ -92,9 +92,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: contribError.message }, { status: 500 })
     }
 
-    const xpToAward = XP_VALUES[type as keyof typeof XP_VALUES]
+    const xpToAward = PROGRESS_VALUES[type as keyof typeof PROGRESS_VALUES]
 
-    // Update user XP
+    // Update persisted progress.
     const { data: xpRow } = await supabaseAdmin
       .from('user_xp')
       .select('total_xp, level')
@@ -114,7 +114,7 @@ export async function POST(req: NextRequest) {
       })
 
     if (xpError) {
-      console.error('XP upsert error:', xpError)
+      console.error('Progress upsert error:', xpError)
       return NextResponse.json({ error: xpError.message }, { status: 500 })
     }
 

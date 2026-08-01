@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-// XP levels per AGENTS.md §1 — The Curious(0), Enthusiast(100), Collector(300),
-// Connoisseur(600), Curator(1000), Auteur(1500).
+// Progress thresholds per AGENTS.md §1.
 const LEVEL_THRESHOLDS = [0, 100, 300, 600, 1000, 1500]
-const SWIPE_RIGHT_XP = 10
+const SWIPE_RIGHT_RESONANCE = 10
 
 function levelForXp(xp: number): number {
   let level = 1
@@ -68,14 +67,14 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // --- XP ---
+    // --- Progress ---
     const { data: xpRow } = await supabaseAdmin
       .from('user_xp')
       .select('total_xp, level')
       .eq('anon_id', anonId)
       .maybeSingle()
 
-    const newTotalXp = (xpRow?.total_xp ?? 0) + SWIPE_RIGHT_XP
+    const newTotalXp = (xpRow?.total_xp ?? 0) + SWIPE_RIGHT_RESONANCE
     const newLevel = levelForXp(newTotalXp)
 
     const { error: xpError } = await supabaseAdmin
@@ -125,7 +124,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      xp: { totalXp: newTotalXp, level: newLevel, gained: SWIPE_RIGHT_XP },
+      xp: { totalXp: newTotalXp, level: newLevel, gained: SWIPE_RIGHT_RESONANCE },
       streak: { current: currentStreak, longest: longestStreak },
       wearLogId,
     })

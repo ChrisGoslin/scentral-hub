@@ -445,7 +445,7 @@ export default function SpritzClient() {
                 pointerEvents: 'none',
               }}
             >
-              +{xpToast} XP
+              +{xpToast} resonance
             </motion.div>
           )}
         </AnimatePresence>

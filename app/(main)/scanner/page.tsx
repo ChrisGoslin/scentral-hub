@@ -509,7 +509,7 @@ function ScannerPageInner() {
         )}
       </div>
 
-      {/* XP Toast */}
+      {/* Progress toast */}
       {xpToast && (
         <div style={{
           position: 'fixed',
@@ -525,7 +525,7 @@ function ScannerPageInner() {
           fontWeight: 600,
           zIndex: 50,
         }}>
-          +{xpToast} XP
+          +{xpToast} resonance
         </div>
       )}
 
@@ -650,7 +650,7 @@ function ScannerPageInner() {
             color: 'var(--text-muted)',
             marginBottom: '20px',
           }}>
-            Help us grow! Add this fragrance and earn 50 XP.
+            Help the archive deepen. Add this fragrance and add 50 resonance.
           </p>
 
           <AddFragranceForm

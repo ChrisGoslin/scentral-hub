@@ -1,7 +1,7 @@
 "use client"
 import React, { useRef, useEffect } from 'react'
 
-export default function ScentBloom({ children }: { children: React.ReactNode }) {
+export default function PointerAura({ children }: { children: React.ReactNode }) {
   const el = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
@@ -47,9 +47,9 @@ export default function ScentBloom({ children }: { children: React.ReactNode }) 
   }, [])
 
   return (
-    <div ref={el} className="scent-bloom relative overflow-hidden rounded-3xl">
+    <div ref={el} className="pointer-aura relative overflow-hidden rounded-3xl">
       {children}
-      <div aria-hidden className="pointer-events-none scent-bloom-overlay" />
+      <div aria-hidden className="pointer-events-none pointer-aura-overlay" />
     </div>
   )
 }

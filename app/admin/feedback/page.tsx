@@ -179,7 +179,7 @@ export default function AdminFeedbackPage() {
                 <Badge color="var(--text-muted)">{TYPE_LABELS[row.type]}</Badge>
                 <Badge color={STATUS_COLOR[row.status]}>{STATUS_LABELS[row.status]}</Badge>
                 {row.xp_awarded > 0 && (
-                  <span style={{ fontSize: 11, color: 'var(--xp-color)' }}>+{row.xp_awarded} XP</span>
+                  <span style={{ fontSize: 11, color: 'var(--xp-color)' }}>+{row.xp_awarded} resonance</span>
                 )}
                 <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>
                   {new Date(row.created_at).toLocaleDateString()}

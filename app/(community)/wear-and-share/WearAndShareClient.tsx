@@ -151,7 +151,7 @@ export default function WearAndShareClient({
               )}
             </div>
 
-            {/* Fragrance name (Cormorant Garamond italic, 16px) */}
+            {/* Fragrance name, display italic */}
             {post.fragrances?.[0] && (
               <Link href={`/cabinet/${post.fragrance_id}?from=wear-and-share`}>
                 <h3

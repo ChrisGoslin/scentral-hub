@@ -158,7 +158,7 @@ export default function AddFragranceForm({ onSubmit, loading = false }: AddFragr
         disabled={loading}
         style={{ width: '100%' }}
       >
-        {loading ? 'Adding...' : 'Add Fragrance & Earn 50 XP'}
+        {loading ? 'Adding...' : 'Add fragrance & add 50 resonance'}
       </Button>
     </form>
   )

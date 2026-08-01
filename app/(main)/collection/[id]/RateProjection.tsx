@@ -58,7 +58,7 @@ export default function RateProjection({ fragranceId, currentProjection }: RateP
 
   return (
     <div style={{ width: '100%' }}>
-      {/* XP Toast */}
+      {/* Progress toast */}
       {xpToast && (
         <div style={{
           position: 'fixed',
@@ -74,7 +74,7 @@ export default function RateProjection({ fragranceId, currentProjection }: RateP
           fontWeight: 600,
           zIndex: 50,
         }}>
-          +{xpToast} XP
+          +{xpToast} resonance
         </div>
       )}
 

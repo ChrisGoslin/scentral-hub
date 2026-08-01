@@ -51,8 +51,8 @@ Do this:
 ### B1. Stack versions
 Run and paste: the `next`, `react`, `react-dom` versions from `package.json` AND from the installed lockfile. Confirm they match (no drift).
 
-### B2. ScentBloom ↔ AudioChord event contract
-**Claim:** `ScentBloom.tsx` emits `window` CustomEvent `scent:move`; `AudioChord.tsx` listens for it (decoupled via event bus).
+### B2. PointerAura ↔ AudioChord event contract
+**Claim:** `PointerAura.tsx` emits `window` CustomEvent `scent:move`; `AudioChord.tsx` listens for it (decoupled via event bus).
 - Confirm both sides reference the exact same event name `scent:move`. Paste the emit line and the listener line.
 - Confirm the 300ms throttle and `localStorage` opt-in key (`scent-audio-enabled`) in AudioChord.
 - Flag any mismatch (e.g., if a third component emits a differently-named event nobody listens to).
