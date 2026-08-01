@@ -44,7 +44,7 @@
     "posthog-js": "^1.399.2",
     "qrcode.react": "^4.2.0",
     "react": "^19.2.7",
-    "react-dom": "^19.2.7",
+    "react-dom": "^19.2.8",
     "sharp": "^0.35.3",
     "web-push": "^3.6.7"
   },
