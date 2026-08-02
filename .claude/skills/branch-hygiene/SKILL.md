@@ -15,11 +15,18 @@ Cowork mounts this repo with `unlink` denied. Every git index operation, every
 `~/Projects/claude-global/LESSONS.md`). Steps 3–4 below are then impossible.
 
 ```bash
-# Probe an existing throwaway path — never create one, or you leave litter
-# you cannot remove. Reuse .git/.hygiene_probe if present.
-touch .git/.hygiene_probe 2>/dev/null && rm .git/.hygiene_probe 2>/dev/null \
+# Probe OS scratch space (mktemp), never a path inside this repo — if unlink
+# is denied there too, the repo mount is at least as restrictive, and this
+# probe never strands a file the repo mount can't remove (system temp is a
+# separate, always-wipeable mount even under Cowork — see GL-5/L45).
+probe=$(mktemp 2>/dev/null) && rm -f "$probe" 2>/dev/null && [ ! -e "$probe" ] \
   && echo "git-capable" || echo "READ/WRITE ONLY — hand commits off"
 ```
+
+Fixed 2026-08-03 (Claude Code): the prior version of this probe touched and removed
+`.git/.hygiene_probe` inside the repo itself — if `rm` failed silently, that file
+was exactly the kind of undeletable litter L45 exists to prevent. See L45's own
+lesson for the incident this reproduced.
 
 If the result is `READ/WRITE ONLY`: do the work, write the files, then produce a
 commit script at `docs/todo/commit-<date>.sh` with explicit pathspecs and stop.
