@@ -60,7 +60,57 @@ if [ -n "$DECLARED_HOSTS" ]; then
   done
 fi
 
-if [ $TSC_STATUS -ne 0 ] || [ -n "$BAD_FILES" ] || [ $IMAGE_HOST_FAILED -ne 0 ]; then
+# Lesson-ID integrity (L47) — a duplicate ID silently retargets every citation to it.
+echo "🔍 Checking lesson-ID integrity..."
+LESSON_ID_FAILED=0
+if [ -f docs/lessons.md ]; then
+  UNIQUE_IDS=$(grep -oE "^### L[0-9]+" docs/lessons.md | sort -u | wc -l | tr -d ' ')
+  TOTAL_IDS=$(grep -cE "^### L[0-9]+" docs/lessons.md | tr -d ' ')
+  if [ "$UNIQUE_IDS" -ne "$TOTAL_IDS" ]; then
+    echo "❌ $((TOTAL_IDS - UNIQUE_IDS)) duplicate lesson IDs in docs/lessons.md."
+    LESSON_ID_FAILED=1
+  fi
+fi
+
+# Dead canon pointers (GL-3, GL-7) — ~/.claude/*.md is unreachable from Cowork and has
+# silently broken grounding twice; canon must route through claude-global/ instead.
+# Scoped to the actual canon-routing surface (docs/index.md, CLAUDE.md, AGENTS.md),
+# not all of docs/ — a full-tree scan false-positives on historical handover docs that
+# narrate the incident itself (they must quote the bad path to describe it) and on
+# already-archived stubs under docs/archived/. Narrowed 2026-08-03 after the literal
+# docs/-wide check specified in the original prompt hit exactly those false positives
+# on first run.
+echo "🔍 Checking for dead canon pointers..."
+ROUTING_DOCS="docs/index.md CLAUDE.md AGENTS.md"
+DEAD_POINTERS=""
+for f in $ROUTING_DOCS; do
+  if [ -f "$f" ] && grep -qE '~/\.claude/[A-Za-z0-9_./-]*\.md|/Users/[^/]+/\.claude/[A-Za-z0-9_./-]*\.md' "$f" 2>/dev/null; then
+    DEAD_POINTERS="$DEAD_POINTERS $f"
+  fi
+done
+if [ -n "$DEAD_POINTERS" ]; then
+  echo "❌ Dead canon pointer(s) to ~/.claude/*.md found in routing docs (unreachable from Cowork):"
+  for f in $DEAD_POINTERS; do echo "   - $f"; done
+fi
+
+# Skill tree parity (L46) — warn only, do not block. Exclusions recorded in
+# .claude/skills/README.md are expected gaps, not drift.
+echo "🔍 Checking skill tree parity (warn only)..."
+if [ -d .claude/skills ]; then
+  ls .claude/skills 2>/dev/null | sort > /tmp/pre-push-claude-skills.$$
+  ls .agents/skills 2>/dev/null | sort > /tmp/pre-push-agents-skills.$$
+  ls .gemini/skills 2>/dev/null | sort > /tmp/pre-push-gemini-skills.$$
+  MISSING_AGENTS=$(comm -23 /tmp/pre-push-claude-skills.$$ /tmp/pre-push-agents-skills.$$ | grep -v '^README.md$')
+  MISSING_GEMINI=$(comm -23 /tmp/pre-push-claude-skills.$$ /tmp/pre-push-gemini-skills.$$ | grep -v '^README.md$')
+  rm -f /tmp/pre-push-claude-skills.$$ /tmp/pre-push-agents-skills.$$ /tmp/pre-push-gemini-skills.$$
+  if [ -n "$MISSING_AGENTS" ] || [ -n "$MISSING_GEMINI" ]; then
+    echo "⚠️  Skill tree drift detected (not blocking) — check .claude/skills/README.md for known exclusions:"
+    [ -n "$MISSING_AGENTS" ] && echo "$MISSING_AGENTS" | sed 's/^/   .agents missing: /'
+    [ -n "$MISSING_GEMINI" ] && echo "$MISSING_GEMINI" | sed 's/^/   .gemini missing: /'
+  fi
+fi
+
+if [ $TSC_STATUS -ne 0 ] || [ -n "$BAD_FILES" ] || [ $IMAGE_HOST_FAILED -ne 0 ] || [ $LESSON_ID_FAILED -ne 0 ] || [ -n "$DEAD_POINTERS" ]; then
   echo "❌ Pre-push checks failed — push blocked. Fix errors above before pushing."
   exit 1
 fi

@@ -13,7 +13,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 **Owner:** Christopher. **Purpose:** prevent invented facts, paths, keys, and scope.
 This is the SINGLE canonical instructions file. `CLAUDE.md` and `GEMINI.md` point here. Read this FIRST, every session, before acting. Begin your first reply by stating in one line what you grounded yourself in.
-For substantive work, resolve Christopher's portfolio operating files from disk instead of asking for pasted copies: read `~/.claude/CLAUDE.md`, `~/.claude/PROJECTS.md`, and `~/.claude/LESSONS.md` when available, then use this repo's `CLAUDE.md`, `docs/index.md`, and `docs/HANDOVER.md` for project-specific truth.
+For substantive work, resolve Christopher's portfolio operating files from disk instead of asking for pasted copies: read `~/Projects/claude-global/CLAUDE.md`, `~/Projects/claude-global/PROJECTS.md`, and `~/Projects/claude-global/LESSONS.md` when available — **not** `~/.claude/*.md`, which holds only `projects/` and `skills/` and is unreachable from Cowork (see GL-3/GL-7 in `claude-global/LESSONS.md`) — then use this repo's `CLAUDE.md`, `docs/index.md`, and `docs/HANDOVER.md` for project-specific truth.
 **Supplementary reading:** `.claude/skills/grounded-agent-guardrails/SKILL.md` — expands the five safeguards with verification commands, known fabrications list, and a session-start checklist. See also `.claude/skills/safe-commit-shared-repo/SKILL.md` (git hygiene given concurrent sessions) and `.claude/skills/diagnose-prod-slowdown/SKILL.md` (perf-incident runbook).
 **Critical operating rules:** §8 (script execution + network constraint), §9 (lessons learned), §10 (self-check).
 
