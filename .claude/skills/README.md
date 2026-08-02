@@ -95,3 +95,10 @@ It diagnoses the Claude-in-Chrome MCP native-host bridge, a Claude Code-specific
 integration with no Codex or Gemini equivalent — porting it would describe a connection
 that doesn't exist in those environments. `alignment-sweep`'s divergence check should
 treat this as a standing exclusion, not re-flag it every run.
+
+<!-- pre-push-skill-parity-exclusions:start -->
+<!-- One skill directory name per line. .husky/pre-push reads this block verbatim as
+     its skill-tree-parity exclusion list — do not reformat, and add new deliberate
+     exclusions here (not just in the prose above) or the hook will start nagging. -->
+claude-in-chrome-bridge-diagnostics
+<!-- pre-push-skill-parity-exclusions:end -->
