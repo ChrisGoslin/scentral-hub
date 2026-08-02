@@ -67,7 +67,7 @@ Also sweep retired product names in user-facing surfaces: `Scentral` · `BaseNot
 
 ## Pass 4 — Skill-layer divergence
 
-Skills of the same name exist at **five** places: global Cowork (`~/.claude/skills/`), and four repo trees — `.claude/skills/` (Claude Code, 29 skills), `.agents/skills/` (Codex, 6), `.gemini/skills/` (Gemini, 5), plus plugin sets.
+Skills of the same name exist at **five** places: global Cowork (`~/.claude/skills/`), and four repo trees — `.claude/skills/` (Claude Code, 29 skills), `.agents/skills/` (Codex, 29), `.gemini/skills/` (Gemini, 28), plus plugin sets.
 
 **First check the three CLI trees agree** (L39) — they are not auto-mirrored and have silently diverged before:
 

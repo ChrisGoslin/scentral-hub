@@ -81,10 +81,19 @@ fi
 # docs/-wide check specified in the original prompt hit exactly those false positives
 # on first run.
 echo "🔍 Checking for dead canon pointers..."
-ROUTING_DOCS="docs/index.md CLAUDE.md AGENTS.md"
+# Fixed routing surface plus docs/launch/ (an active operational doc tree, not
+# historical) — loop-orchestrator critique 2026-08-03 found docs/launch/
+# LAUNCH_MAESTRO_INTEGRATION.md out of the original 3-file scope. Regex narrowed
+# to the four actual canon filenames (CLAUDE/PROJECTS/LESSONS/profile.md) rather
+# than any ~/.claude/*.md — a broader pattern would wrongly flag
+# ~/.claude/plugins/launch-maestro/... in that same doc, which is a correct,
+# real plugin path, not a stale canon pointer (GL-3/GL-7 is about the four
+# canon files moving to claude-global/, not about ~/.claude/ categorically).
+ROUTING_DOCS="docs/index.md CLAUDE.md AGENTS.md docs/HANDOVER.md"
+[ -d docs/launch ] && ROUTING_DOCS="$ROUTING_DOCS $(find docs/launch -name '*.md' 2>/dev/null)"
 DEAD_POINTERS=""
 for f in $ROUTING_DOCS; do
-  if [ -f "$f" ] && grep -qE '~/\.claude/[A-Za-z0-9_./-]*\.md|/Users/[^/]+/\.claude/[A-Za-z0-9_./-]*\.md' "$f" 2>/dev/null; then
+  if [ -f "$f" ] && grep -qE '~/\.claude/(CLAUDE|PROJECTS|LESSONS|profile)\.md|/Users/[^/]+/\.claude/(CLAUDE|PROJECTS|LESSONS|profile)\.md' "$f" 2>/dev/null; then
     DEAD_POINTERS="$DEAD_POINTERS $f"
   fi
 done
