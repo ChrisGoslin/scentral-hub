@@ -224,3 +224,28 @@ can read the first but not the second. Report the preferences surface as
 **unverifiable from this tool** and list the canon paths it must name, so the
 divergence is visible rather than silent.
 
+
+## Scope correction — added 2026-08-02
+
+This sweep previously declared its scope as nota., Abundance, and the global
+operating docs. That omitted **Household Finance** (`~/Projects/household-finance`),
+which `claude-global/PROJECTS.md` lists as an **active** project with real,
+violable constraints:
+
+- No Auth **by design** — member tracking uses the `owner` field on transactions.
+  An agent "adding auth for safety" is breaking the architecture, not improving it.
+- PDF parsing **must** use `unpdf`. Never `pdf-parse`.
+- Live at `household-finance-ruby.vercel.app` — it is a public surface.
+
+Include it in every pass. It has `AGENTS.md`, `CLAUDE.md` and a `.claude/skills/`
+tree, but **no `docs/lessons.md`** — so Pass 6 (doc freshness) and the lesson-ID
+integrity assertion have nothing to read there. Report that absence as a finding
+each run until a lessons file exists or the project is explicitly declared exempt.
+
+**Copy parity warning.** `alignment-sweep` now exists in at least five places:
+`.claude/`, `.agents/`, `.gemini/`, the Cowork account-level skill, and
+`~/Claude/Scheduled/monthly-alignment-sweep/SKILL.md`. **The scheduled copy is the
+only one that runs unattended** — it is outside `~/Projects` and therefore invisible
+to Cowork sessions. When editing this skill, update all five, and treat the scheduled
+copy as the authoritative one for anything that must happen without a human present.
+

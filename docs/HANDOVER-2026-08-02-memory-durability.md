@@ -1,6 +1,26 @@
 # Handover — 2026-08-02 · Session-memory durability
 
-**Environment blocker first (per GL-6):** none. `.git/index.lock` is clear.
+## ⛔ ENVIRONMENT BLOCKER — FIX THIS FIRST (GL-6)
+
+A **stale `.git/index.lock` is present** (0 bytes, created 2026-08-03 00:41). It blocks
+every `git add`, `commit`, `rebase` and `status` for **every tool and every human** —
+Claude Code, Codex, Gemini, and you — not just the session that made it.
+
+```bash
+rm -f ~/Projects/scentral-hub/.git/index.lock
+```
+
+Cause: this Cowork session ran `git status` against the mounted repo. `git status`
+refreshes the index, which takes the lock — it is **not** a read-only command. The mount
+denies `unlink`, so git could not clean up after itself (`warning: unable to unlink
+'.git/index.lock': Operation not permitted`). Recorded as L59.
+
+Do this before running any prompt in `docs/todo/claude-code-prompts-2026-08-02.md`.
+
+---
+
+**Environment blocker at authoring time:** none — the lock above was created later, by
+this session's own verification pass.
 **Cowork constraint (GL-5):** this session ran in Cowork; the mount denies `unlink`,
 so **nothing here was committed**. Run `docs/todo/commit-2026-08-02.sh` from Claude
 Code or terminal to land it.
@@ -140,8 +160,13 @@ Canon lives in ~/Projects/claude-global/ — CLAUDE.md, PROJECTS.md,
 LESSONS.md, profile.md. NOT ~/.claude/, which is unreachable from Cowork
 and holds only projects/ and skills/.
 
-Cowork cannot delete files or commit (GL-5). Never promise a commit from
-Cowork; write the artifact and hand off a commit script.
+Cowork authors; Claude Code verifies. Cowork cannot delete files, so it
+cannot commit and cannot clean up after git (GL-5). From Cowork the ONLY
+permitted git commands are the non-index reads: log, show, rev-list,
+ls-files, cat-file, branch --list. NEVER git status, git diff against the
+worktree, add, commit, stash or rebase — they take .git/index.lock and
+strand it, blocking every tool in the repo for everyone (L59, GL-6).
+Repo-state verification is delegated to Claude Code, not attempted here.
 
 Session handovers are repo artifacts: <repo>/docs/HANDOVER-<date>-<topic>.md,
 committed. Never /tmp or /home/claude — both are wiped. If it isn't
@@ -172,6 +197,21 @@ the script prints the exact sequence when it finishes.
 | 6 | Delete stale local branch `integration/homepage-brand-and-fixes` (upstream gone) | Claude Code | — |
 | 7 | Renumber the **orphan** L26–L35 series → L48–L57 | Claude Code | F6/L47 — spec below |
 | 8 | Mirror the `alignment-sweep` integrity block into the **account-level** skill | Christopher (Cowork `save_skill`) | Repo trees done; account cache is read-only |
+| 9 | Add canon-integrity checks to `.husky/pre-push` | Claude Code | GL-9 — prompt 5 |
+| 11 | **Sync `alignment-sweep` into the 2 out-of-tree copies** | Claude Code | Prompt 6. **Highest-value item.** The scheduled copy is the only unattended check you have, and it is stale |
+| 12 | Widen sweep scope to `household-finance`; it has no `docs/lessons.md` | done in 3 repo trees; propagate via item 11 | Active project, public surface, was outside all drift checking |
+| 13 | Consolidate GL-3/GL-7/GL-8/GL-10 + the five-copy finding into one rule | Christopher (§5 change control) | They are one rule: *verify the copy that actually executes*. `LESSONS.md` is 82 lines against CLAUDE.md's 30-line cap — appending a sixth entry is the wrong fix |
+| 10 | Consolidate `claude-global/LESSONS.md` (78 lines vs CLAUDE.md's stated 30-line cap) | Christopher + Claude Code | CLAUDE.md §4 requires consolidating recurring lessons into rules via §5 change control |
+
+**All prompts for items 1–9 are written and ready to paste:**
+`docs/todo/claude-code-prompts-2026-08-02.md`. Run **Prompt 0 (verification) first** —
+nothing in this handover was built against a compiler, because Cowork cannot run one.
+
+`cowork-session-preflight` (open item from the loop) is **done** — saved to the account
+2026-08-02 with the GL-8 two-surface check, a non-destructive capability probe fixing
+GL-5's litter defect, a Resolved-lesson re-check for GL-7, all-tree duplication checking
+for L46, and a new anti-pattern forbidding `Enforced by:` claims for mechanisms that were
+never built.
 
 ### Open item 7 — renumbering spec (do not improvise)
 

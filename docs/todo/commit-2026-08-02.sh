@@ -30,6 +30,8 @@ rm -f .loop_probe
 PATHS=(
   docs/HANDOVER-2026-08-02-memory-durability.md
   docs/todo/commit-2026-08-02.sh
+  docs/todo/claude-code-prompts-2026-08-02.md
+  docs/todo/alignment-sweep-addenda-2026-08-02.md
   docs/index.md
   docs/lessons.md
   .claude/skills/branch-hygiene/SKILL.md
