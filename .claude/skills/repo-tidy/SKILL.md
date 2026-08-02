@@ -39,3 +39,19 @@ Before finalizing any merge or completing a major feature, execute a repository 
 > `nota-brand-manager` doctrine and `NOTA-BRAND-UIUX-PACK.md` §4, plus the `AGENTS.md` §82
 > rule that guardrail lists may legitimately name retired brands. Retired-font sweep added
 > per L35.
+
+7. **Lesson-ID integrity** (added 2026-08-02, `docs/lessons.md` L47). A lesson ID is a
+   citation target; a duplicate ID silently retargets every reference to it. Before any
+   merge to main:
+   ```bash
+   u=$(grep -oE "^### L[0-9]+" docs/lessons.md | sort -u | wc -l)
+   t=$(grep -cE "^### L[0-9]+" docs/lessons.md)
+   [ "$u" -eq "$t" ] || echo "HIGH: $((t-u)) duplicate lesson IDs — do not merge"
+   ```
+   On collision, renumber the **uncited** series only. Establish which that is first:
+   `grep -rnoE "\bL[0-9]+\b" docs .claude .agents .gemini | grep -v docs/lessons.md`.
+
+**Note on skill-name collision:** an account-level skill also named `repo-tidy` exists
+with a different 7-phase structure. This repo-level file is the one that governs
+`scentral-hub`. Cite steps here by number, never as "Phase N" — that refers to the other file.
+

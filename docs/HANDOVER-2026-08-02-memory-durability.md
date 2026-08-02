@@ -1,0 +1,200 @@
+# Handover — 2026-08-02 · Session-memory durability
+
+**Environment blocker first (per GL-6):** none. `.git/index.lock` is clear.
+**Cowork constraint (GL-5):** this session ran in Cowork; the mount denies `unlink`,
+so **nothing here was committed**. Run `docs/todo/commit-2026-08-02.sh` from Claude
+Code or terminal to land it.
+
+**Repo state at handover:** `main` is `[ahead 12, behind 4]` of `origin/main`.
+Twelve commits of canon/design work from 2026-07-30 → 08-01 are **local only**.
+Resolve the divergence before pushing anything new.
+
+---
+
+## Why this session happened
+
+The 2026-08-02 session produced a handover doc and a branching workflow, both
+written to `/home/claude/` and `/tmp/` — sandbox paths wiped at session end. It
+also reported having appended a lesson to `docs/lessons.md`; that file's mtime is
+2026-07-30 and no file in this repo was modified on 2026-08-02. The reported work
+did not happen.
+
+That prompted a full audit of why session memory keeps failing. The answer is not
+"Cowork has no memory." It is four separate routing defects, listed below.
+
+---
+
+## Findings
+
+### F1 — `branch-hygiene` already existed; the workflow doc was duplication
+`.claude/skills/branch-hygiene/SKILL.md` (150 lines) already specifies sync →
+duplicate-check → branch decision → naming → same-session merge → build gate →
+e2e gate → branch delete, and cross-references `safe-commit-shared-repo` and
+`repo-tidy`. The new workflow doc was a worse copy of a skill already in the repo.
+`cowork-session-preflight` step 5 exists to catch exactly this and was not run.
+
+**Action:** no new workflow doc. Two real gaps patched into the existing skill (F1a, F1b).
+
+- **F1a — diverged main.** Step 4 ends `git push origin main` and assumes it
+  succeeds. With `main` ahead 12 / behind 4 that push is rejected. The skill has
+  no divergence branch.
+- **F1b — environment blindness.** The skill prescribes `git add`/`commit`/`build`
+  unconditionally, but under Cowork all three fail (GL-5). An agent following it
+  from Cowork hits an opaque `EPERM`.
+
+### F2 — GL-3 is marked "Resolved" but its remedy is not in place
+`claude-global/LESSONS.md` records GL-3 as *"Resolved — 2026-07-29: `docs/index.md`
+repointed external context to `~/Projects/claude-global/PROJECTS.md`."*
+
+`docs/index.md` lines 30–33 still read:
+
+```
+- /Users/christophergoslin/.claude/PROJECTS.md
+- /Users/christophergoslin/.claude/profile.md
+- /Users/christophergoslin/.claude/CLAUDE.md
+- /Users/christophergoslin/.claude/LESSONS.md
+```
+
+All four are unreachable from Cowork — the exact failure GL-3 documented. Commit
+`3620406 docs(canon): fix stale routing pointers` (2026-08-01) touched `index.md`
+but left this block intact. **Two remediation attempts, both recorded as done,
+neither landing.**
+
+**Action:** block rewritten to the reachable `claude-global/` paths.
+
+### F3 — There are two global-instruction surfaces; only one was ever fixed
+GL-3's remedy updated `~/.claude/CLAUDE.md`. But the **Cowork account-level
+preferences** are a separate surface, and they still instruct the agent to read
+canon from `~/.claude/`. Cowork cannot reach that path, so the instruction fails
+silently every session and the agent starts ungrounded — then rediscovers the
+same facts, which is the "wasted session" symptom.
+
+**Action:** preferences replacement text below. Christopher must paste it; no
+tool can write that surface.
+
+### F4 — Skill trees have diverged badly across CLIs
+```
+scentral-hub/.claude/skills   29
+scentral-hub/.agents/skills   11
+scentral-hub/.gemini/skills   10
+abundance/{.claude,.agents,.gemini}/skills   0, 0, 0
+```
+Twenty skills exist only in `.claude/` — including `branch-hygiene`,
+`safe-commit-shared-repo`, `security-hardening`, `testing-framework`,
+`qe-automation`. Codex and Gemini sessions run without them. Commits `3bea1c3`
+and `951012e` show cross-tree sync is a known concern, yet the gap is 20 skills wide.
+
+Separately, the account-level `frontend-design-consultant` and `alignment-sweep`
+skills both state they read "each repo's own `.claude/skills/` at run time" for
+nota. **and Abundance**. Abundance has no skills in any tree — that premise is
+false for half their declared scope.
+
+**Action:** flagged, not fixed. Copying 20 skills across two trees is a
+Claude Code job (Cowork cannot delete, so it cannot safely reconcile). Tracked below.
+
+### F5 — GL-5's own probe leaves undeletable litter
+GL-5's remedy tells preflight to probe deletability with `touch x && rm x`. When
+unlink is denied, the `touch` succeeds and the `rm` fails — leaving a permanent
+file the session cannot clean up. This session created `.loop_probe` and cannot
+remove it.
+
+**Action:** probe corrected to test an **existing** throwaway path instead of
+creating one. `.loop_probe` must be deleted by the commit script.
+
+---
+
+### F6 — `docs/lessons.md` has ten colliding lesson IDs
+56 lesson headings, 46 unique. L26–L35 each appear twice with completely different
+content (L29 is both "Preview/import features ship preview-first" and "Authoring for
+a repo you have not opened"). Introduced by `c4de6f0 docs(lessons): add L29-L43`,
+which appended a second series starting at L26 without checking the existing range.
+
+Twenty citations across `alignment-sweep`, `repo-tidy`, `canon-slop-audit`,
+`loop-orchestrator/references/engagement-scorecard.md`, the `.agents/` mirror and
+`HANDOVER-2026-07-29` point at these IDs. Every one inspected resolves *by content*
+to the **second** series — so the **first** (lines ~95–208) is the orphan and is the
+one that must move.
+
+**Action:** specified, not executed — see open item 7. A blind renumber from Cowork
+would break the citations it exists to protect. Recorded as L47.
+
+---
+
+## Do this first
+
+**One action unblocks the rest:** paste the preferences block below. Everything
+else is a Claude Code task that can be handed over verbatim.
+
+---
+
+## Actions required of Christopher (cannot be automated)
+
+**1. Replace the first block of Cowork → Settings → Personal preferences:**
+
+```
+At the start of every session, before anything else: call
+request_cowork_directory for ~/Projects, then run the
+cowork-session-preflight skill.
+
+Canon lives in ~/Projects/claude-global/ — CLAUDE.md, PROJECTS.md,
+LESSONS.md, profile.md. NOT ~/.claude/, which is unreachable from Cowork
+and holds only projects/ and skills/.
+
+Cowork cannot delete files or commit (GL-5). Never promise a commit from
+Cowork; write the artifact and hand off a commit script.
+
+Session handovers are repo artifacts: <repo>/docs/HANDOVER-<date>-<topic>.md,
+committed. Never /tmp or /home/claude — both are wiped. If it isn't
+committed, it didn't happen.
+```
+
+**2. Run the commit script** from a terminal in the repo root. It prompts before
+touching the index and commits by explicit pathspec only (`safe-commit-shared-repo`):
+
+```bash
+bash docs/todo/commit-2026-08-02.sh
+```
+
+**3. Resolve the `main` divergence** (ahead 12, behind 4) before the next push —
+the script prints the exact sequence when it finishes.
+
+---
+
+## Open items with owners
+
+| # | Item | Owner | Notes |
+|---|---|---|---|
+| 1 | Paste preferences block | Christopher | Only he can write that surface |
+| 2 | Run commit script; delete `.loop_probe` | Claude Code | Cowork cannot unlink |
+| 3 | Reconcile `main` ahead 12 / behind 4 | Claude Code | Rebase or merge, then push |
+| 4 | Sync 20 skills into `.agents/` + `.gemini/` | Claude Code | F4; verify parity after |
+| 5 | Decide Abundance skill strategy | Christopher + Claude Code | F4; skills claim scope they don't have |
+| 6 | Delete stale local branch `integration/homepage-brand-and-fixes` (upstream gone) | Claude Code | — |
+| 7 | Renumber the **orphan** L26–L35 series → L48–L57 | Claude Code | F6/L47 — spec below |
+| 8 | Mirror the `alignment-sweep` integrity block into the **account-level** skill | Christopher (Cowork `save_skill`) | Repo trees done; account cache is read-only |
+
+### Open item 7 — renumbering spec (do not improvise)
+
+1. The **first** series (`docs/lessons.md` lines ~95–208) is the orphan. The
+   **second** (line ~220+, from `c4de6f0`) is what all twenty citations resolve to
+   by content. Move the **first**, never the second.
+2. Confirm before editing:
+   ```bash
+   grep -rnoE '\bL(2[6-9]|3[0-5])\b' docs .claude .agents .gemini AGENTS.md CLAUDE.md \
+     | grep -v 'docs/lessons.md:'
+   ```
+   Read each hit and confirm it matches second-series *content*. If any resolves to
+   the first series, stop — the orphan assumption is wrong.
+3. Renumber first-series L26→L48 … L35→L57. L45–L47 are taken.
+4. Assert afterwards: unique IDs == total headings (`alignment-sweep` Pass 6 addendum).
+
+---
+
+## Verification status of this document
+
+- **Verified** (command output in-session): unlink denial, index.lock clear, skill
+  tree counts, branch divergence, `index.md` contents, `lessons.md` mtime, absence
+  of 2026-08-02 file modifications, `branch-hygiene` contents.
+- **Reviewed, not verified**: that the patched `branch-hygiene` steps run clean —
+  Cowork cannot execute `npm run build` or git index operations. First Claude Code
+  session must re-verify.

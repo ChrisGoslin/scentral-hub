@@ -8,6 +8,23 @@ description: "Session-start checklist to prevent duplicate features and stale br
 Run this checklist at the START of every session before writing any code.
 Prevents duplicate features, stale branches, and wasted work.
 
+## Step 0 — Confirm this environment can do git at all
+
+Cowork mounts this repo with `unlink` denied. Every git index operation, every
+`next build`, and every temp-file cleanup fails there with `EPERM` (see GL-5 in
+`~/Projects/claude-global/LESSONS.md`). Steps 3–4 below are then impossible.
+
+```bash
+# Probe an existing throwaway path — never create one, or you leave litter
+# you cannot remove. Reuse .git/.hygiene_probe if present.
+touch .git/.hygiene_probe 2>/dev/null && rm .git/.hygiene_probe 2>/dev/null \
+  && echo "git-capable" || echo "READ/WRITE ONLY — hand commits off"
+```
+
+If the result is `READ/WRITE ONLY`: do the work, write the files, then produce a
+commit script at `docs/todo/commit-<date>.sh` with explicit pathspecs and stop.
+**Do not promise a commit.** Continue to Step 1 for orientation only.
+
 ## Step 1 — Sync and orient
 
 ```bash
@@ -96,6 +113,30 @@ npm run test:e2e -- --project=chromium
 
 git push origin main
 ```
+
+### If the push is rejected — main has diverged
+
+`git push` assumes `main` is only ahead of `origin/main`. Check before you try:
+
+```bash
+git rev-list --left-right --count origin/main...main   # behind<TAB>ahead
+```
+
+`0	N` — ahead only. Push normally.
+
+`M	N` — **diverged.** Someone else (or another CLI session) pushed while you had
+local commits. Never `push --force`; another session's work is on the far side.
+
+```bash
+git pull --rebase origin main   # replay your N commits on top of theirs
+npm run build                   # MANDATORY — rebase can produce a broken tree
+                                # that neither side had on its own
+git push origin main
+```
+
+If the rebase conflicts, stop and hand off rather than resolving blind — a
+mis-resolved rebase silently discards a concurrent session's work, which is the
+same class of failure `safe-commit-shared-repo` exists to prevent.
 
 If `npm run build` fails, fix it before pushing — do not push broken commits and let Vercel
 be the test suite. This applies even to changes that "shouldn't" affect the build (e.g. a

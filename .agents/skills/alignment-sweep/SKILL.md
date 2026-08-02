@@ -183,3 +183,44 @@ Compare against the previous sweep. **A finding that appears three sweeps runnin
 4. **Intentional specialisation is not drift** — classify before flagging.
 5. **If the sweep can't run fully** (unmounted, unreachable), report partial scope explicitly. A silent partial sweep reads as an all-clear.
 6. Log genuinely new lessons to `docs/lessons.md`; cross-project ones to `claude-global/LESSONS.md`.
+
+## Integrity assertions — added 2026-08-02
+
+Machine-checkable additions to the passes above. Each exists because a lesson
+claimed enforcement that was not actually in place.
+
+### Pass 2 addendum — a Resolved lesson is a claim, not a state (GL-7)
+For every lesson in `claude-global/LESSONS.md` or `docs/lessons.md` marked
+**Resolved**, re-open the file its remedy names and confirm the corrected text is
+present. A Resolved lesson whose remedy is absent is a **HIGH** finding, ranked
+above a merely unresolved one — it has suppressed further checking. Report as
+`lesson <id> claims <file>:<what> — absent`.
+
+### Pass 4 addendum — declared scope vs actual trees (L46)
+```bash
+for d in .claude .agents .gemini; do echo "$d: $(ls $d/skills 2>/dev/null | wc -l)"; done
+comm -23 <(ls .claude/skills|sort) <(ls .agents/skills|sort)
+comm -23 <(ls .claude/skills|sort) <(ls .gemini/skills|sort)
+```
+Any skill present in one tree and absent from another is a finding. Additionally,
+when a skill's own description names a repo in its scope, assert that repo has a
+skills tree containing it — a skill declaring scope it cannot reach is a HIGH
+finding regardless of tree parity.
+
+### Pass 6 addendum — lesson-ID integrity (L47)
+```bash
+u=$(grep -oE "^### L[0-9]+" docs/lessons.md | sort -u | wc -l)
+t=$(grep -cE "^### L[0-9]+" docs/lessons.md)
+[ "$u" -eq "$t" ] || echo "HIGH: $((t-u)) duplicate lesson IDs"
+```
+Unique lesson IDs must equal total lesson headings. On collision, renumber the
+**uncited** series only — check citations first with
+`grep -rnoE "\bL[0-9]+\b" docs .claude .agents .gemini | grep -v docs/lessons.md`.
+
+### Pass 5 addendum — the second global-instruction surface (GL-8)
+Global instructions live on two independently-drifting surfaces: files under
+`~/Projects/claude-global/`, and the Cowork account-level preferences. The sweep
+can read the first but not the second. Report the preferences surface as
+**unverifiable from this tool** and list the canon paths it must name, so the
+divergence is visible rather than silent.
+

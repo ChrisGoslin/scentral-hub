@@ -27,10 +27,16 @@ Older legacy docs may be useful history, but treat them as stale unless one of t
 
 These live outside the repo and are useful for planning, priorities, and Christopher's working preferences:
 
-- `/Users/christophergoslin/.claude/PROJECTS.md`
-- `/Users/christophergoslin/.claude/profile.md`
-- `/Users/christophergoslin/.claude/CLAUDE.md`
-- `/Users/christophergoslin/.claude/LESSONS.md`
+- `~/Projects/claude-global/CLAUDE.md` — operating system and partnership protocol
+- `~/Projects/claude-global/PROJECTS.md` — portfolio status, per-project constraints
+- `~/Projects/claude-global/LESSONS.md` — cross-project lessons (GL-n)
+- `~/Projects/claude-global/profile.md` — working preferences
+
+**Do not cite `~/.claude/*.md`.** That directory holds only `projects/` and
+`skills/`; the canon files are not there and the path is unreachable from Cowork.
+This block was wrong from 2026-07-27 (`bc2d60f`, which introduced it) to 2026-08-02,
+despite a remediation recorded as complete on 2026-07-29 and a second attempt in
+`3620406` — see GL-3 and GL-7 in `claude-global/LESSONS.md`.
 
 Do not copy long content from those files into this repo. Link or cite the path, then update the canonical source when direction changes.
 
