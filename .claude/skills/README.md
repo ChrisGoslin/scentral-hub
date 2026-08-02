@@ -75,3 +75,23 @@ the `SKILL.md` directly; `AGENTS.md` points to the ones that matter at session s
 - `.agents/skills/supabase/` and `.agents/skills/supabase-postgres-best-practices/` — vendor-
   maintained by Supabase (versioned, `metadata.author: supabase`), not project-authored. Don't
   edit these; they update via the Supabase plugin, not manually.
+
+## Cross-CLI parity (L46, checked 2026-08-03)
+
+`.claude/skills`, `.agents/skills`, and `.gemini/skills` had diverged to 29/11/10 — 18
+safety- and repo-rule-bearing skills existed only under `.claude/`, leaving Codex and
+Gemini sessions without branch discipline, shared-repo commit safety, security posture,
+or nota. domain/architecture knowledge. All 18 were ported byte-identical into `.agents/`
+and `.gemini/` on 2026-08-03: `branch-hygiene`, `diagnose-prod-slowdown`,
+`dns-propagation-under-cache-interference`, `fragrance-domain-reference`,
+`nota-architecture-contract`, `nota-config-and-flags`, `nota-failure-archaeology`,
+`nota-identity-consolidation-campaign`, `nota-portability-concierge`,
+`nota-research-frontier`, `nota-run-and-operate`, `qe-automation`, `resilience-abuse`,
+`safe-commit-shared-repo`, `security-hardening`, `shopify-image-enrichment`,
+`testing-framework`, `vercel-domain-tls-workflow`.
+
+**One deliberate exclusion:** `claude-in-chrome-bridge-diagnostics` stays `.claude`-only.
+It diagnoses the Claude-in-Chrome MCP native-host bridge, a Claude Code-specific tool
+integration with no Codex or Gemini equivalent — porting it would describe a connection
+that doesn't exist in those environments. `alignment-sweep`'s divergence check should
+treat this as a standing exclusion, not re-flag it every run.
