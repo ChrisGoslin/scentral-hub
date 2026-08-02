@@ -93,7 +93,7 @@ ROUTING_DOCS="docs/index.md CLAUDE.md AGENTS.md docs/HANDOVER.md"
 [ -d docs/launch ] && ROUTING_DOCS="$ROUTING_DOCS $(find docs/launch -name '*.md' 2>/dev/null)"
 DEAD_POINTERS=""
 for f in $ROUTING_DOCS; do
-  if [ -f "$f" ] && grep -qE '~/\.claude/(CLAUDE|PROJECTS|LESSONS|profile)\.md|/Users/[^/]+/\.claude/(CLAUDE|PROJECTS|LESSONS|profile)\.md' "$f" 2>/dev/null; then
+  if [ -f "$f" ] && grep -qiE '~/\.claude/(CLAUDE|PROJECTS|LESSONS|profile)\.md|/Users/[^/]+/\.claude/(CLAUDE|PROJECTS|LESSONS|profile)\.md' "$f" 2>/dev/null; then
     DEAD_POINTERS="$DEAD_POINTERS $f"
   fi
 done
@@ -103,14 +103,20 @@ if [ -n "$DEAD_POINTERS" ]; then
 fi
 
 # Skill tree parity (L46) — warn only, do not block. Exclusions recorded in
-# .claude/skills/README.md are expected gaps, not drift.
+# .claude/skills/README.md are expected gaps, not drift. Critique 2 (2026-08-03)
+# found the exclusion filter only dropped README.md itself and never actually
+# read the documented exclusion (claude-in-chrome-bridge-diagnostics), so it
+# nagged on every push despite the README's "not re-flag it every run" claim —
+# fixed by listing exclusions explicitly here; keep this list in sync with
+# .claude/skills/README.md's "Cross-CLI parity" section by hand.
 echo "🔍 Checking skill tree parity (warn only)..."
 if [ -d .claude/skills ]; then
+  EXCLUDED_SKILLS="README.md|claude-in-chrome-bridge-diagnostics"
   ls .claude/skills 2>/dev/null | sort > /tmp/pre-push-claude-skills.$$
   ls .agents/skills 2>/dev/null | sort > /tmp/pre-push-agents-skills.$$
   ls .gemini/skills 2>/dev/null | sort > /tmp/pre-push-gemini-skills.$$
-  MISSING_AGENTS=$(comm -23 /tmp/pre-push-claude-skills.$$ /tmp/pre-push-agents-skills.$$ | grep -v '^README.md$')
-  MISSING_GEMINI=$(comm -23 /tmp/pre-push-claude-skills.$$ /tmp/pre-push-gemini-skills.$$ | grep -v '^README.md$')
+  MISSING_AGENTS=$(comm -23 /tmp/pre-push-claude-skills.$$ /tmp/pre-push-agents-skills.$$ | grep -vE "^($EXCLUDED_SKILLS)\$")
+  MISSING_GEMINI=$(comm -23 /tmp/pre-push-claude-skills.$$ /tmp/pre-push-gemini-skills.$$ | grep -vE "^($EXCLUDED_SKILLS)\$")
   rm -f /tmp/pre-push-claude-skills.$$ /tmp/pre-push-agents-skills.$$ /tmp/pre-push-gemini-skills.$$
   if [ -n "$MISSING_AGENTS" ] || [ -n "$MISSING_GEMINI" ]; then
     echo "⚠️  Skill tree drift detected (not blocking) — check .claude/skills/README.md for known exclusions:"
