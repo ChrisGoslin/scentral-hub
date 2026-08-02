@@ -150,7 +150,7 @@ be the test suite. This applies even to changes that "shouldn't" affect the buil
 script in `scripts/`, a debug-only route, a doc change) — that assumption is exactly what
 failed here three times in a row.
 
-See `.claude/skills/safe-commit-shared-repo/SKILL.md` for the full checklist.
+See `.gemini/skills/safe-commit-shared-repo/SKILL.md` for the full checklist.
 
 If you created a branch:
 ```bash
