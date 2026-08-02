@@ -28,7 +28,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@google/genai": "^2.10.0",
     "@google/generative-ai": "^0.24.1",
-    "@sentry/nextjs": "^10.66.0",
+    "@sentry/nextjs": "^10.69.0",
     "@supabase/ssr": "^0.12.3",
     "@supabase/supabase-js": "^2.110.7",
     "@upstash/ratelimit": "^2.0.8",
