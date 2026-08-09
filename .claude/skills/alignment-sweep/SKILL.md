@@ -69,19 +69,23 @@ Also sweep retired product names in user-facing surfaces: `Scentral` · `BaseNot
 
 Skills of the same name exist at **five** places: global Cowork (`~/.claude/skills/`), and four repo trees — `.claude/skills/` (Claude Code, 29 skills), `.agents/skills/` (Codex, 29), `.gemini/skills/` (Gemini, 28), plus plugin sets.
 
-**First check the three CLI trees agree** (L39) — they are not auto-mirrored and have silently diverged before:
+**First check the three CLI trees route to one canonical body** (L39). `.claude`
+owns the full skill; `.agents` and `.gemini` must be thin discovery adapters:
 
 ```bash
 cd ~/Projects/scentral-hub
-for s in repo-tidy verify-cli-claims canonical-source-reconciler loop-orchestrator; do
-  printf "%-30s " "$s"
-  a=$(diff -q .claude/skills/$s/SKILL.md .agents/skills/$s/SKILL.md >/dev/null 2>&1 && echo ok || echo DIFF)
-  g=$(diff -q .claude/skills/$s/SKILL.md .gemini/skills/$s/SKILL.md >/dev/null 2>&1 && echo ok || echo DIFF)
-  echo "agents:$a gemini:$g"
+for d in .agents .gemini; do
+  f="$d/skills/alignment-sweep/SKILL.md"
+  test -f "$f" || { echo "MISSING: $f"; continue; }
+  grep -q '<repo-root>/.claude/skills/alignment-sweep/SKILL.md' "$f" \
+    && echo "$d: adapter routes to canonical body" \
+    || echo "$d: BROKEN ADAPTER"
+  test "$(wc -l < "$f")" -le 20 || echo "$d: DUPLICATED BODY"
 done
 ```
 
-Any `DIFF` here is a **HIGH** finding — Codex or Gemini is running different rules from Claude Code on the same named skill.
+Any missing, broken, or body-duplicating adapter here is a **HIGH** finding —
+Codex or Gemini may be running missing, stale, or independently editable rules.
 
 Then compare repo vs global Cowork:
 
@@ -246,6 +250,13 @@ each run until a lessons file exists or the project is explicitly declared exemp
 `.claude/`, `.agents/`, `.gemini/`, the Cowork account-level skill, and
 `~/Claude/Scheduled/monthly-alignment-sweep/SKILL.md`. **The scheduled copy is the
 only one that runs unattended** — it is outside `~/Projects` and therefore invisible
-to Cowork sessions. When editing this skill, update all five, and treat the scheduled
-copy as the authoritative one for anything that must happen without a human present.
+to Cowork sessions.
 
+~~Treat the scheduled copy as the authoritative body and update all five copies.~~
+**STALE as of 2026-08-10:** this repository's `.claude` file is the canonical skill
+body. `.agents` and `.gemini` are thin discovery adapters.
+`monthly-alignment-sweep` is an unattended trigger that invokes this body.
+
+
+## Canon Integrity Pass
+Execute: `~/Projects/claude-global/scripts/verify-canon.sh --mode=audit` during monthly sweep.
