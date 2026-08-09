@@ -16,6 +16,30 @@ function isShelfRequest(body: unknown): body is ShelfRequest {
   return typeof body === 'object' && body !== null && 'action' in body
 }
 
+// Eligible fragrance ids for the current user — status must be owned/tested/past_purchase
+// (mirrors the enforce_shelf_eligibility() trigger in db003). Used by the shelf search sheet
+// to show eligibility before selection rather than surfacing the DB's 409 after the fact.
+export async function GET() {
+  const cookieStore = await cookies()
+  const supabase = await createClient(cookieStore)
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const { data, error } = await supabase
+    .from('collections')
+    .select('fragrance_id')
+    .eq('user_id', user.id)
+    .in('status', ['owned', 'tested', 'past_purchase'])
+
+  if (error) {
+    console.error('[/api/shelf GET] error:', error.message)
+    return NextResponse.json({ error: 'Failed to load eligibility' }, { status: 500 })
+  }
+
+  return NextResponse.json({ eligibleFragranceIds: (data ?? []).map(r => r.fragrance_id) })
+}
+
 export async function POST(req: Request) {
   const cookieStore = await cookies()
   const supabase = await createClient(cookieStore)
