@@ -167,6 +167,11 @@ If a "fact" is not in these docs, the repo, or the database, it is NOT a fact ye
 ## 2. The five safeguards (hard rules)
 - **S1 — Verify before asserting.** Never state a version, API capability, path, table/column, or third-party
   feature as fact without checking (read the file, run `list_tables`, or web-search with a source).
+  Schema and code drift silently: a migration being applied does not mean app code uses what it added, and a
+  table existing does not mean it's wired to any route. Before describing a feature as "built" or "ready,"
+  verify the specific code path reads/writes the specific table/column in question — don't infer from the
+  migration list or from another doc. This applies doubly when multiple agents/sessions have touched the
+  repo since you last checked.
 - **S2 — No secrets in code or docs, ever.** Keys go in `.env.local` (gitignored), referenced via
   `process.env`. If you SEE a hardcoded secret, stop and flag it for rotation — never copy or echo it.
 - **S3 — Real paths only.** Confirm a path exists before referencing it. Never invent a plausible directory.
