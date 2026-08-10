@@ -11,7 +11,8 @@ colors:
   accent-experimental: "#B4674E"  # Terracotta — rare experimental warmth
 typography:
   headline-display: "Instrument Serif Italic"
-  body-sans: "Geist"
+  body-sans: "IBM Plex Sans"   # corrected 2026-08-09: shipped app/layout.tsx:2 imports
+                                # IBM_Plex_Sans, not Geist; canon was stale, code wins
 spacing:
   xs: "4px"
   sm: "8px"
@@ -84,19 +85,16 @@ Amber's 4.47:1 is sufficient for the wordmark period and the Dot (both non-text 
 
 Identity names, major reveals, memories, emotional copy, selected editorial headlines. Recommended tracking: `-0.01em`.
 
-### The Instrument — Geist (~90%)
+### The Instrument — IBM Plex Sans (~90%)
 
 Navigation, body copy, labels, chemistry, timestamps, system feedback, forms and controls.
 
 Do not introduce additional geometric display fonts without explicit brand review. Satoshi and Unbounded are **not** part of the core system.
 
-> **Target vs shipped (verified 2026-07-24 against `app/layout.tsx`):** Geist is the
-> *intended* body font. The code currently ships **Unbounded** (`app/layout.tsx`
-> imports it via `next/font/google`; no Geist import exists yet). Unbounded is a
-> **retired** font per `NOTA-BRAND-UIUX-PACK.md` §4 — the migration to Geist is
-> pending, not done. This doc describes the target; treat the Unbounded→Geist swap
-> as outstanding implementation work, not doc drift. See
-> `docs/nota/14-brand-token-drift-verification.md`.
+> **Reconciled 2026-08-10 against shipped code and git history:** IBM Plex Sans is
+> the intended and shipped body font (`app/layout.tsx`, `app/globals.css`). The
+> earlier Geist target and Unbounded migration note were stale. Unbounded and Geist
+> are retired; do not reintroduce them.
 
 ## 4. Layout and spacing
 
@@ -239,7 +237,7 @@ Until measured, the hold ships behind the three escape hatches documented in §8
 
 **Cabinet vs. Shelf — flagged for a product decision, not resolved here:** two live, separately-tabled surfaces (`collections` vs `shelf_items`) both claim ownership of "what the user actually wears/owns." This is a genuine data-model duplication (`CLAUDE.md` §5–6 lessons.md L6 — multiple sources of truth), not a naming inconsistency a doc edit can fix. Needs a human call on whether these merge, or on how they're positioned as distinct surfaces (e.g. Cabinet = full archive, Shelf = curated top-20) — the current copy on both pages doesn't make that distinction to the user.
 
-Naming register unchanged: short, concrete, slightly literary nouns. Never tech-y compounds (`nota.lab`, `ScentMatch`, `FragranceAI`) and never gamified labels (Streaks, XP, Badges).
+Naming register unchanged: short, concrete, slightly literary nouns. Never tech-y compounds (`nota.lab`, `ScentMatch`, `FragranceAI`) and never user-facing gamified labels (Streaks, XP, Badges). The existing admin/contributor feedback award may retain its internal `XP` field name; that narrow operational exception does not authorize XP language or mechanics on user-facing nota. surfaces.
 
 Retired product names — BaseNote, Scentral, AnotherSense, Fragrance Community, Sensus, ScentOI, NosePrint™, ScentBloom™, Scent Tarot™ — never appear in new user-facing work. This guardrail intentionally names retired brands; do not mechanically rewrite this line.
 
@@ -249,7 +247,7 @@ A nota. UI change is complete only when:
 
 - the user goal is clear and the primary action is obvious
 - existing tokens and components are reused
-- typography follows the 90/10 Geist–Instrument Serif model
+- typography follows the 90/10 IBM Plex Sans–Instrument Serif model
 - tactile effects support, rather than obscure, content
 - spacing and alignment are coherent before irregularity is introduced
 - mobile, large text, keyboard, contrast, loading, empty, error, and reduced-motion states are checked

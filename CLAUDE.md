@@ -69,7 +69,7 @@ Next.js 16.2.9 (App Router, route groups `(main)` `(community)` `(account)`), Re
 
 ## 8. Design primitives (verified in code)
 
-- **Fonts:** Unbounded + Space Grotesk (nav/functional, next/font) + **Instrument Serif** (emotional/display, next/font/google, `--font-display`), falling back to self-hosted Cormorant Garamond woff2 then Georgia if Instrument Serif fails to load. Verified 2026-07-24 against `app/layout.tsx`: the display font (Instrument Serif Italic) matches DESIGN.md. On body-sans the docs and code intentionally differ — DESIGN.md §3 and `NOTA-BRAND-UIUX-PACK.md` §4 name **Geist** as the *target* and mark **Unbounded** as a *retired* font to migrate away from; the code still ships Unbounded. So Geist is a deliberate migration target, NOT "fictional" (the prior 2026-07-23 note here claiming DESIGN.md was "corrected to Unbounded" was wrong and is retracted). Outstanding work = the Unbounded→Geist code migration. See `docs/nota/14-brand-token-drift-verification.md`.
+- **Fonts:** IBM Plex Sans (system UI, `next/font/google`) + **Instrument Serif Italic** (identity, memory, and emotional display). Reconciled 2026-08-10 against `app/layout.tsx`, `app/globals.css`, and implementation commit `f888e02`: IBM Plex Sans is intentionally shipped and canonical. Earlier Geist-target and Unbounded-migration language was stale; Geist, Unbounded, Space Grotesk, and Cormorant Garamond are retired for active UI work.
 - **Colour:** light parchment palette in `:root` (`--color-bg #F7F3EE`, primary gold `#B8913A`) but `app/layout.tsx` hardcodes `data-theme="dark"` → effective default is dark slate `#0F172A` + g[...]
 - **Motion tokens:** `--motion-instant` 80ms / `--motion-responsive` 200ms / `--motion-ceremonial` 480ms / `--motion-organic` 800ms (+ legacy `--motion-fast/base`). Brief's motion verbs: reveal, d[...]
 - **Other:** glassmorphism (`--glass-*`), 8-layer `--shadow-object`, radius `--r-card 12px`/pill buttons, spacing `--sp-1..5`, fluid type scale (`--text-display` etc.), family gradient tokens.
@@ -81,10 +81,10 @@ Next.js 16.2.9 (App Router, route groups `(main)` `(community)` `(account)`), Re
 - **Shopify Storefront** (`lib/shopify.ts`): env-driven (`NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN`, `SHOPIFY_STOREFRONT_API_KEY`), graceful null when unconfigured. Consumed by `/boxes`.
 - **Pro gating:** `getIsPro()` is a global `NEXT_PUBLIC_BETA_MODE` flag, not per-user (known footgun; no Stripe).
 
-## 10. Personas & XP
+## 10. Personas & legacy point mechanics
 
 - 6 scent-identity personas in `lib/personas.ts` (canonical, never inline).
-- XP 6 levels (0/100/300/600/1000/1500); writes `user_xp` + `as_xp` localStorage.
+- Existing contributor, scanner, and Spritz flows still write XP-derived values and expose some as "resonance" points. This is verified shipped legacy behavior, not authority for new user-facing gamification. Do not expand it; product remediation must remove or explicitly reframe the point mechanic before doctrine can call it compliant.
 - Customer personas: Gavin (newcomer), Christopher (enthusiast) — `lib/personas.ts`.
 
 ## 11. Operational rules (binding, from AGENTS.md — do not relearn these the hard way)
@@ -128,7 +128,7 @@ At the start of every session or task, read these directories to load active mem
 
 ### Hard Coding Rules
 *   Never use raw Tailwind surface classes (e.g., `bg-neutral-100`, `text-neutral-500`). Use brand variables.
-*   Never ship alternate body fonts. Use Geist for system UI and Instrument Serif Italic for identity, memory, and emotional moments.
+*   Never ship alternate body fonts. Use IBM Plex Sans for system UI and Instrument Serif Italic for identity, memory, and emotional moments.
 *   Financial figures must use tabular numerals (`font-variant-numeric: tabular-nums`).
 *   Money deltas must use typography size/weight and glyphs (+/-) rather than reflexively coloring negative numbers red.
 *   Skeletons must mimic the real layout structure; no default `animate-pulse`.
