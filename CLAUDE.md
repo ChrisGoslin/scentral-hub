@@ -1,5 +1,7 @@
 # CLAUDE.md — nota. System Memory
 
+@AGENTS.md
+
 > **Living factual memory for the nota. product.** Created 2026-07-04 (Phase 0 of pre-launch audit).
 > **Updated 2026-07-08:** scentral + scentral-hub consolidated into nota (Phase 6).
 > Where this disagrees with older docs (AGENTS.md branding, PRODUCT_TRUTH.md, executive-suite), **this wins** — except AGENTS.md §8–§9 operational lessons (L1–L17), git hygiene, and deploy [...]
