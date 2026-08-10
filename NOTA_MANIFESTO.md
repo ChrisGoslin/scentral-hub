@@ -35,7 +35,7 @@ We do not just track bottles; we manipulate physical reality.
 The narrative is the living molecule.
 
 *   **The Vessel:** *Instrument Serif Italic* with `-0.01em` tracking delivers the wet-ink emotional soul of identity revelation.
-*   **The System:** *Geist* with wider uppercase tracking delivers the analytical chemistry.
+*   **The System:** *IBM Plex Sans* with wider uppercase tracking delivers the analytical chemistry.
 *   **The Lexicon:** We speak in raw materials, evaporation curves, haptic weight, and observed shifts.
 *   **The Stance:** We observe; we do not announce. "You tend to..." "Something's shifted." "Trace left." "Noted."
 
@@ -59,7 +59,7 @@ Every surface must resolve into heavy paper, liquid glass, or physical objects.
     *   `--primary` (Amber #A0622A): Biological heat. Pulse points, dot glows.
 *   **The Typography:** 
     *   **The Vessel (10%):** *Instrument Serif Italic* (`-0.01em` tracking). For identity reveals and emotional copy.
-    *   **The System (90%):** *Geist*. For labels, timestamps, and chemistry.
+    *   **The System (90%):** *IBM Plex Sans*. For labels, timestamps, and chemistry.
 *   **Tactile Physics:** 
     *   Apply 2% SVG fractal noise grain globally.
     *   *Bendy UI:* Cards physically react and bend at the exact point of the thumb.
@@ -76,7 +76,9 @@ The period in `nota.` is a biological signal of presence.
     *   *Class E Failure:* A sharp double pulse owning the failure quietly.
 
 ## 8. ASYNCHRONOUS RESONANCE (Community)
-No standard gamification. No XP.
+No new user-facing XP, levels, or point-driven engagement. Existing XP-derived
+"resonance" awards are verified legacy drift, not approved doctrine; do not
+expand them, and remove or explicitly reframe them in a dedicated product change.
 
 *   **The Patina Effect:** When a curator leaves a "Resonance" on a Trace, the original author quietly sees their Trace card accumulate a glowing amber patina over time. It creates reciprocation without dopamine-hacking anxiety.
 *   **Lexicon:** The Read, Noseprint, Shelf, Traces (expression), Trails (learning), Today's Arc.
