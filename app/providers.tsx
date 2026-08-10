@@ -2,6 +2,7 @@
 
 import React, { useEffect } from 'react'
 import { initDeferred } from '@/lib/posthog'
+import { initDeferred as initSentryDeferred } from '@/instrumentation-client'
 import { initTheme } from '@/lib/theme'
 
 // Note: PostHog's React context provider (posthog-js/react) is intentionally
@@ -17,6 +18,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
     // Defer PostHog's SDK load until the browser is idle so it never
     // competes with LCP-critical work on first paint.
     initDeferred()
+    // Same idle-deferred, consent-gated pattern for Sentry.
+    initSentryDeferred()
   }, [])
 
   return <>{children}</>
