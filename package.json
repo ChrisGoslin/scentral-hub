@@ -48,10 +48,14 @@
     "web-push": "^3.6.7"
   },
   "overrides": {
-    "brace-expansion": "5.0.8",
+    "brace-expansion": "5.0.9",
     "minimatch": "10.2.5",
     "postcss": ">=8.5.18",
-    "sharp": "^0.35.3"
+    "sharp": "^0.35.3",
+    "nanoid": "3.3.17",
+    "js-yaml": "4.3.1",
+    "dompurify": "3.4.13",
+    "fast-uri": "3.1.5"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.0",
