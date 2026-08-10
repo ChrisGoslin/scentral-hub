@@ -2,7 +2,7 @@
 > **AGENT DIRECTIVE:** This is the `BRAIN.md` of nota. It contains our compressed atomic knowledge, pattern library, and hard-won interaction truths. You must consult this to understand HOW our interface breathes and behaves over time.
 
 ## 1. The Typographic & Temporal Laws
-- **The 90/10 Split:** 90% of the UI is the analytical scaffolding (`Geist`). 10% is the wet-ink emotional soul (`Instrument Serif Italic` with `-0.01em` tracking). If everything is poetry, nothing is.
+- **The 90/10 Split:** 90% of the UI is the analytical scaffolding (`IBM Plex Sans`). 10% is the wet-ink emotional soul (`Instrument Serif Italic` with `-0.01em` tracking). If everything is poetry, nothing is.
 - **The Class B Ceremony:** Deep identity reveals (like "The Read") MUST freeze the UI for exactly 1200ms in absolute silence. This builds anticipation before the massive Serif text materializes. Do not bypass this silence.
 
 ## 2. The Biological Dot
