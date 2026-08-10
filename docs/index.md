@@ -19,6 +19,8 @@ Read in this order:
 
 For verification-discipline history and the three-round audit that motivated the current trust rule, see [docs/nota/HANDOVER-2026-07-19-verification-audit.md](./nota/HANDOVER-2026-07-19-verification-audit.md).
 For future handoffs, use [docs/nota/HANDOVER-TEMPLATE-verification-first.md](./nota/HANDOVER-TEMPLATE-verification-first.md) as the default scaffold.
+For hero-media brand rulings (stock-footage subject/face checks), see [docs/BRAND-RULING-hero-video.md](./BRAND-RULING-hero-video.md) — RESOLVED 2026-07-24, clip replaced with a faceless ink-in-water shot; confirmed still current in `components/landing/HeroSection.tsx` as of 2026-08-10.
+For accumulated session lessons (verification traps, drift patterns, reusable fixes), see [docs/lessons.md](./lessons.md).
 For substantial multi-pass work, use [the loop orchestrator](../.claude/skills/loop-orchestrator/SKILL.md) to select the appropriate depth and enforce independent critique and completion evidence.
 
 Older legacy docs may be useful history, but treat them as stale unless one of the files above points to them.

@@ -207,21 +207,21 @@ Until measured, the hold ships behind the three escape hatches documented in §8
 
 ## 12. Surface glossary (canonical names)
 
-**Superseded 2026-07-22.** This table previously invented names (Shelf, Trails, Traces) with no route to back them. A homepage/hero build on `brand/sensory-sanctuary` exposed the real, shipped route map via failing E2E specs (`/collection` vs `/cabinet`, `/discover` vs `/study`, `/layering` vs `/lab`). **The shipped routes are the ground truth now** — this doc's job is to catch up to them, not the other way round.
+**Superseded 2026-07-22, reconciled 2026-08-10.** This table previously invented names (Shelf, Trails, Traces) with no route to back them. A homepage/hero build on `brand/sensory-sanctuary` exposed the real, shipped route map via failing E2E specs (`/collection` vs `/cabinet`, `/discover` vs `/study`, `/layering` vs `/lab`). **The shipped routes are the ground truth now** — this doc's job is to catch up to them, not the other way round. All rows below were re-verified against live `app/` routes and passing E2E coverage on 2026-08-10; the "Unconfirmed" statuses from the earlier pass are resolved.
 
 | Canonical name | Route | Layer | Status |
 |---|---|---|---|
 | **The Read** | `/read` | identity reveal | Confirmed — route ships, matches doctrine |
 | **Cabinet** | `/cabinet` | truth layer — what the user actually wears | Confirmed route. Retires "Shelf" / "The Shelf" as the UI name — use **Cabinet** in copy and code going forward |
-| **Study** | `/study` | discovery / learning surface | Confirmed route. Mapping to doctrine's Profiler/Trails is **unconfirmed** — needs a repo read of `app/study` to see what it actually contains before this row is trusted |
-| **Lab** | `/lab` | fragrance formulation / blending ("Layering Lab") | Confirmed route. **This is likely NOT the same surface as doctrine's "Traces"** (Traces = memories/expression; Lab = chemistry/formulation per earlier project specs). Treat as a distinct, additional surface until verified — do not silently merge it into Traces |
-| Noseprint | — | behavioural scent identity | Unconfirmed against routes — verify still shipped |
-| Blind Ranking | — | bias removal | Unconfirmed against routes |
-| Traces | — | expression layer — memories, not descriptions | **Do not assume this is `/lab`.** Verify whether Traces exists as its own route or was never built |
-| Insights | — | reflection layer | Unconfirmed against routes |
-| Scentiment | — | resonance metric inside Insights | Unconfirmed |
-| Temptations | — | personalised commerce | Unconfirmed |
-| Aura | — | fragrance intelligence layer | Unconfirmed |
+| **Study** | `/study` | discovery / learning surface | Confirmed 2026-08-10 (`app/(main)/study/page.tsx`, `getByRole` E2E coverage in `e2e/`). Renders `DiscoverClient` (catalogue search) — this is the discovery/search surface, not a Profiler/Trails mapping |
+| **Lab** | `/lab` | fragrance formulation / blending ("nota.Lab") | Confirmed 2026-08-10 (`app/(main)/lab/page.tsx`). Renders `LayeringClient` — layering combinations, dry-down logic. Confirmed **distinct from Traces** (below); do not merge |
+| Noseprint | `/noseprint` | behavioural scent identity | Confirmed 2026-08-10 — top-level route (`app/noseprint/page.tsx`), plus OG share image at `app/api/og/noseprint` |
+| Blind Ranking | `/shelf/blind` | bias removal | Confirmed 2026-08-10 (`app/(main)/shelf/blind/page.tsx`, `BlindRankingClient.tsx`) |
+| Traces | `/traces` | expression layer — memories, not descriptions | Confirmed 2026-08-10 as its own route (`app/(main)/traces/page.tsx`), separate from `/lab` |
+| Insights | `/insights` | reflection layer | Confirmed 2026-08-10 (`app/(main)/insights/page.tsx`, `InsightsClient.tsx`) |
+| Scentiment | — (inside `/insights`) | resonance metric inside Insights | Confirmed present in code (`app/api/insights/route.ts`, `InsightsClient.tsx`) — not a standalone route, ships as data inside Insights |
+| Temptations | — (API only, no dedicated route) | personalised commerce | Confirmed as API surface only (`app/api/temptations/`) — no standalone `/temptations` page found; surfaces inline elsewhere (e.g. `components/temptations/`) |
+| Aura | — (API + component, no dedicated route) | fragrance intelligence layer | Confirmed as API + component only (`app/api/aura/`, `components/aura/`, `AuraShareCard.tsx`) — no standalone `/aura` page found |
 | Houses | — | belonging layer | Unconfirmed |
 
 **Retired UI names — replace on sight:** "Shelf" / "The Shelf" → **Cabinet**. "Discover" → **Study**. "Layering" (as a UI label, not the chemistry concept) → **Lab**. `nota.lab`, `Trace Composer` remain retired regardless of route naming.
