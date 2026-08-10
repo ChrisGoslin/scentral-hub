@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { defineConfig, devices } from '@playwright/test';
 
 /**
@@ -145,7 +144,7 @@ export default defineConfig({
  *   });
  *
  * Mock API responses:
- *   await page.route('**/api/search', (route: any) => {
+ *   await page.route(/\/api\/search$/, (route: any) => {
  *     route.fulfill({ status: 200, body: JSON.stringify([]) });
  *   });
  */

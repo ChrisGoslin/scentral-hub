@@ -1,4 +1,7 @@
 #!/usr/bin/env node
+import * as http from 'node:http'
+import * as https from 'node:https'
+
 /**
  * smoke-test.example.mjs
  * Fast HTTP smoke test for deployment verification
@@ -31,7 +34,7 @@ const RST  = '\x1b[0m'
 
 async function testRoute(route) {
   return new Promise((resolve) => {
-    const client = BASE_URL.startsWith('https') ? require('https') : require('http')
+    const client = BASE_URL.startsWith('https') ? https : http
     const startTime = Date.now()
 
     client.get(`${BASE_URL}${route[0]}`, (res) => {
