@@ -1,33 +1,38 @@
 # Handover — 2026-08-02 · Session-memory durability
 
-## ⛔ ENVIRONMENT BLOCKER — FIX THIS FIRST (GL-6)
+> **ARCHIVED 2026-08-10 — provenance only; no standing authority.** State, counts,
+> blockers, owners, and commands below describe the 2026-08-02 session. They are not a
+> current task queue and do not authorize lock deletion, commits, rebases, pushes, branch
+> deletion, shared configuration changes, or work in another product repository.
+
+## Historical environment blocker (GL-6)
 
 A **stale `.git/index.lock` is present** (0 bytes, created 2026-08-03 00:41). It blocks
 every `git add`, `commit`, `rebase` and `status` for **every tool and every human** —
 Claude Code, Codex, Gemini, and you — not just the session that made it.
 
-```bash
-rm -f ~/Projects/scentral-hub/.git/index.lock
-```
+Do not remove `.git/index.lock` based on this handover. Inspect the live lock and active
+Git processes first; a current process may own it. A confirmed stale lock still requires
+an explicitly scoped cleanup action.
 
 Cause: this Cowork session ran `git status` against the mounted repo. `git status`
 refreshes the index, which takes the lock — it is **not** a read-only command. The mount
 denies `unlink`, so git could not clean up after itself (`warning: unable to unlink
 '.git/index.lock': Operation not permitted`). Recorded as L59.
 
-Do this before running any prompt in `docs/todo/claude-code-prompts-2026-08-02.md`.
+The related prompt pack is also archived and grants no execution authority.
 
 ---
 
 **Environment blocker at authoring time:** none — the lock above was created later, by
 this session's own verification pass.
 **Cowork constraint (GL-5):** this session ran in Cowork; the mount denies `unlink`,
-so **nothing here was committed**. Run `docs/todo/commit-2026-08-02.sh` from Claude
-Code or terminal to land it.
+so **nothing here was committed at authoring time**. That historical fact does not
+authorize running the old commit script now.
 
 **Repo state at handover:** `main` is `[ahead 12, behind 4]` of `origin/main`.
 Twelve commits of canon/design work from 2026-07-30 → 08-01 are **local only**.
-Resolve the divergence before pushing anything new.
+This divergence claim is historical and must not drive a current Git action.
 
 ---
 
@@ -140,14 +145,14 @@ would break the citations it exists to protect. Recorded as L47.
 
 ---
 
-## Do this first
+## Historical proposed first action
 
-**One action unblocks the rest:** paste the preferences block below. Everything
-else is a Claude Code task that can be handed over verbatim.
+The authoring session proposed pasting the preferences block below. It is retained for
+audit context only and is not an instruction to modify shared settings.
 
 ---
 
-## Actions required of Christopher (cannot be automated)
+## Historical actions proposed to Christopher (do not execute from this document)
 
 **1. Replace the first block of Cowork → Settings → Personal preferences:**
 
@@ -173,39 +178,34 @@ committed. Never /tmp or /home/claude — both are wiped. If it isn't
 committed, it didn't happen.
 ```
 
-**2. Run the commit script** from a terminal in the repo root. It prompts before
-touching the index and commits by explicit pathspec only (`safe-commit-shared-repo`):
+**2. Historical commit proposal:** do not run `docs/todo/commit-2026-08-02.sh` from
+this handover. Inspect live state and define a new explicit-path commit scope instead.
 
-```bash
-bash docs/todo/commit-2026-08-02.sh
-```
-
-**3. Resolve the `main` divergence** (ahead 12, behind 4) before the next push —
-the script prints the exact sequence when it finishes.
+**3. Historical divergence proposal:** re-measure the branch before any separately
+authorized Git operation; the old ahead/behind figures are not current evidence.
 
 ---
 
-## Open items with owners
+## Historical open-item ledger (closed as an authority surface)
 
 | # | Item | Owner | Notes |
 |---|---|---|---|
-| 1 | Paste preferences block | Christopher | Only he can write that surface |
-| 2 | Run commit script; delete `.loop_probe` | Claude Code | Cowork cannot unlink |
-| 3 | Reconcile `main` ahead 12 / behind 4 | Claude Code | Rebase or merge, then push |
-| 4 | Sync 20 skills into `.agents/` + `.gemini/` | Claude Code | F4; verify parity after |
-| 5 | Decide Abundance skill strategy | Christopher + Claude Code | F4; skills claim scope they don't have |
-| 6 | Delete stale local branch `integration/homepage-brand-and-fixes` (upstream gone) | Claude Code | — |
+| 1 | Paste preferences block | Historical proposal | Requires a fresh shared-settings task |
+| 2 | Commit files; remove `.loop_probe` | Historical proposal | No commit or deletion authority remains |
+| 3 | Reconcile historical branch divergence | Historical proposal | Re-measure and obtain fresh authority |
+| 4 | Classify and sync skills across repositories | Historical cross-silo proposal | Do not execute from nota. |
+| 5 | ABunDance skill strategy | Historical cross-silo proposal | ABunDance is a separate product silo |
+| 6 | Delete stale local branch | Historical proposal | No branch-deletion authority remains |
 | 7 | Renumber the **orphan** L26–L35 series → L48–L57 | Claude Code | F6/L47 — spec below |
-| 8 | Mirror the `alignment-sweep` integrity block into the **account-level** skill | Christopher (Cowork `save_skill`) | Repo trees done; account cache is read-only |
-| 9 | Add canon-integrity checks to `.husky/pre-push` | Claude Code | GL-9 — prompt 5 |
-| 11 | **Sync `alignment-sweep` into the 2 out-of-tree copies** | Claude Code | Prompt 6. **Highest-value item.** The scheduled copy is the only unattended check you have, and it is stale |
-| 12 | Widen sweep scope to `household-finance`; it has no `docs/lessons.md` | done in 3 repo trees; propagate via item 11 | Active project, public surface, was outside all drift checking |
+| 8 | Mirror `alignment-sweep` into account-level configuration | Historical AI Ops proposal | Requires a fresh AI Ops task |
+| 9 | Add canon-integrity checks to `.husky/pre-push` | Historical proposal | Re-verify current hook before any change |
+| 11 | Sync out-of-tree `alignment-sweep` copies | Historical AI Ops proposal | No out-of-tree authority remains |
+| 12 | Widen sweep scope to Household Finance | Historical cross-silo proposal | Do not execute from nota. |
 | 13 | Consolidate GL-3/GL-7/GL-8/GL-10 + the five-copy finding into one rule | Christopher (§5 change control) | They are one rule: *verify the copy that actually executes*. `LESSONS.md` is 82 lines against CLAUDE.md's 30-line cap — appending a sixth entry is the wrong fix |
 | 10 | Consolidate `claude-global/LESSONS.md` (78 lines vs CLAUDE.md's stated 30-line cap) | Christopher + Claude Code | CLAUDE.md §4 requires consolidating recurring lessons into rules via §5 change control |
 
-**All prompts for items 1–9 are written and ready to paste:**
-`docs/todo/claude-code-prompts-2026-08-02.md`. Run **Prompt 0 (verification) first** —
-nothing in this handover was built against a compiler, because Cowork cannot run one.
+The associated prompt pack is archived. Its prompts may explain prior intent, but they
+must not be pasted or executed as current instructions.
 
 `cowork-session-preflight` (open item from the loop) is **done** — saved to the account
 2026-08-02 with the GL-8 two-surface check, a non-destructive capability probe fixing
