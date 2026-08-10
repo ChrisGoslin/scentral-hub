@@ -127,16 +127,18 @@ theme layer maps role→pigment, differently per mode. **Never reference a raw
 
 ## 4. Typography — 90 / 10
 
-- **The Instrument — Geist (~90%):** navigation, body, labels, chemistry,
+- **The Instrument — IBM Plex Sans (~90%):** navigation, body, labels, chemistry,
   timestamps, forms, system feedback. Uppercase labels track `+0.15em`.
+  (Corrected 2026-08-09: canon named Geist; `app/layout.tsx:2` has shipped
+  IBM Plex Sans since before this correction. Code wins — see `DESIGN.md`.)
 - **The Vessel — Instrument Serif Italic (~10%):** identity names, major
   reveals, memories, emotional copy. Tracking `-0.01em`. This is wet ink; use it
   sparingly, as emphasis on the moment that carries the emotion.
 
 **Retired fonts — do not use:** Satoshi, Unbounded, Space Grotesk, Caveat,
-Cormorant Garamond. If found in the codebase, migrate to Geist / Instrument
-Serif. Do not add geometric display fonts (they read tech-startup and fail the
-2036 test).
+Cormorant Garamond, Geist. If found in the codebase, migrate to IBM Plex Sans /
+Instrument Serif. Do not add geometric display fonts (they read tech-startup
+and fail the 2036 test).
 
 ---
 
@@ -267,7 +269,9 @@ ScentBloom™, Scent Tarot™, nota.lab, Trace Composer, and the UI label
 "Discover" (route renamed to Study). This guardrail intentionally names retired brands; do not mechanically rewrite this line. **"Shelf" is not retired** — corrects the
 prior version of this doc. Feature names are short, concrete, slightly
 literary nouns — never tech compounds (ScentMatch, FragranceAI) or gamified
-labels (Streaks, XP, Badges).
+labels (Streaks, XP, Badges). The existing admin/contributor feedback award may
+retain its internal `XP_VALUES` / `xpAwarded` field names; this is a narrow
+operational exception, not permission for user-facing XP language or mechanics.
 
 ---
 
