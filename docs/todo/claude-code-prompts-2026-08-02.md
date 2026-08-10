@@ -1,5 +1,11 @@
 # Claude Code prompt pack — 2026-08-02 durability handoff
 
+> **Historical planning artifact — no standing execution authority.** Re-verify every
+> claim against the live repository before reuse. This file authorizes work only inside
+> `scentral-hub`; any push, rebase, branch deletion, global configuration edit, or read/
+> write in another product repository requires a fresh, explicit instruction. Commands
+> below are evidence of the old plan, not a queue for a future agent to execute.
+
 Paste these into Claude Code **in order**. Prompt 0 is the verification gate: if it
 fails, stop and fix before running 1–5. Each prompt is self-contained.
 
@@ -7,11 +13,9 @@ Context for all prompts: `docs/HANDOVER-2026-08-02-memory-durability.md`.
 
 ## ⛔ Before any prompt below
 
-```bash
-rm -f ~/Projects/scentral-hub/.git/index.lock
-```
-A stale 0-byte lock was stranded by a Cowork `git status` (see L59). Every git command
-is blocked for every tool until it is removed.
+First inspect `.git/index.lock` and active Git processes. Do not remove a lock merely
+because this historical prompt says one existed; a live process may own it. If the lock
+is confirmed stale, request explicit approval before deleting it.
 
 ## Corrections since authoring — read these
 
@@ -88,7 +92,7 @@ is blocked for every tool until it is removed.
 
 ---
 
-## Prompt 1b — Reconcile main (RISKY — separate gate on purpose)
+## Prompt 1b — Reconcile main (ARCHIVED — requires fresh explicit approval)
 
 > Prerequisite: Prompt 1 complete, `backup/pre-durability-2026-08-02` exists.
 >
@@ -121,7 +125,9 @@ is blocked for every tool until it is removed.
 > report — do not resolve blind. A mis-resolved rebase silently discards a concurrent
 > session's work, the exact failure `safe-commit-shared-repo` exists to prevent.
 >
-> Recovery at any point: `git reset --hard backup/pre-durability-2026-08-02`.
+> On conflict, use `git rebase --abort`. Do not use `git reset --hard` in a shared
+> worktree; it can erase unrelated uncommitted work. A backup ref is evidence, not
+> permission to overwrite the working tree.
 >
 > Finally, the stale branch. It **is** merged into main (verified), so `-d` is safe
 > and will refuse if that ever stops being true — never use `-D`:
@@ -131,23 +137,83 @@ is blocked for every tool until it is removed.
 
 ---
 
-## Prompt 2 — Skill tree parity (handover item 4)
+## Prompt 2 — Classify skills by tier, then sync a baseline (ARCHIVED cross-silo proposal)
 
-> `scentral-hub` skill trees have diverged: `.claude/skills` 29, `.agents/skills` 11,
-> `.gemini/skills` 10. Twenty skills exist only under `.claude/` — including
+> **Do not execute from this repo.** This proposal reads and writes other product repos
+> and user-level agent configuration. It requires a separately approved AI Ops or
+> portfolio-scoped task with each target named explicitly.
+
+> **Christopher's rule: every skill should be available everywhere it is relevant.**
+> That does NOT mean copying 29 skills into 3 trees across 3 repos (~87 files) —
+> that guarantees the divergence this session spent its time reconciling. It means
+> each skill lives at the **highest tier that can reach every place it applies**,
+> and only there.
+>
+> **Answer this first, before copying anything:** does Claude Code read skills from
+> any tier above the repo — `~/.claude/skills/`, a user tier, or the Cowork account
+> tier? Test it directly. The answer determines whether the baseline below needs to
+> be copied per-repo at all, or whether one user-tier copy covers every repo. **Do
+> not assume; report what you observed.** Same question for Codex (`.agents/`) and
+> Gemini (`.gemini/`).
+>
+> ### Current state (verified 2026-08-02)
+> ```
+> scentral-hub/.claude/skills   29      .agents/skills 11      .gemini/skills 10
+> abundance/*                    0                     0                      0
+> household-finance/.claude/skills  exists (uncounted)
+> Cowork account tier            25
+> ```
+>
+> **Seven skills already exist in BOTH the account tier and `scentral-hub/.claude/`:**
+> `alignment-sweep`, `grounded-agent-guardrails`, `implementation-preflight`,
+> `loop-orchestrator`, `repo-tidy`, `screen-state-completeness`, `verify-cli-claims`.
+> That is live duplication — `alignment-sweep`'s repo copy is 251 lines, the account
+> copy 127. They have already diverged. Reconcile each: keep ONE authoritative copy,
+> delete or stub the other.
+>
+> ### The three tiers
+>
+> **Tier 1 — Account level (one copy, loads everywhere).** Anything universal:
+> grounding, verification, delivery discipline, document formats. Includes the seven
+> duplicated above. These should exist at the account tier **only** — remove the repo
+> copies once the account copy carries the richer content.
+>
+> **Tier 2 — Repo baseline (small synced set, all three CLI trees).** Skills that
+> encode *engineering* safety and must bind Codex and Gemini, which cannot read the
+> account tier. Candidates — confirm each by reading it:
 > `branch-hygiene`, `safe-commit-shared-repo`, `security-hardening`,
-> `testing-framework`, `qe-automation`. Codex and Gemini sessions currently run this
-> repo with no branch discipline and no shared-repo commit safety loaded. See
-> `docs/lessons.md` L46.
+> `testing-framework`, `qe-automation`, `resilience-abuse`.
+> Several are written with nota.-specific examples. **Generalise them** so the same
+> file can drop into `abundance` and `household-finance` unchanged, keeping repo
+> specifics in each repo's `AGENTS.md`. Target 5–8 skills — small enough to keep
+> honest, which 29 is not.
 >
-> For each of the 20: decide **port** or **deliberately Claude-only**, and say why.
-> Port the ones that encode safety or repo rules. Do not bulk-copy — some may
-> legitimately be Claude-specific (e.g. `claude-in-chrome-bridge-diagnostics`).
-> Record the deliberate exclusions in `.claude/skills/README.md` so the next
-> divergence check doesn't re-flag them.
+> **Tier 3 — Repo-specific (one repo only, `.claude/` only).** Domain knowledge that
+> would be noise elsewhere: `nota-architecture-contract`, `nota-config-and-flags`,
+> `nota-failure-archaeology`, `nota-identity-consolidation-campaign`,
+> `nota-portability-concierge`, `nota-research-frontier`, `nota-run-and-operate`,
+> `fragrance-domain-reference`, `shopify-image-enrichment`, `canon-slop-audit`,
+> `canonical-source-reconciler`, `diagnose-prod-slowdown`, `vercel-domain-tls-workflow`,
+> `dns-propagation-under-cache-interference`, `claude-in-chrome-bridge-diagnostics`.
 >
-> Then verify parity:
-> `for d in .claude .agents .gemini; do echo "$d: $(ls $d/skills | wc -l)"; done`
+> ### Deliverables
+> 1. A table: every skill → tier → action (promote / generalise+sync / leave / delete
+>    duplicate). Read each before classifying; the list above is a starting hypothesis,
+>    not an answer.
+> 2. Execute tier 2: generalise the baseline, sync to all three trees in all three
+>    repos. **This resolves handover item 5 (Abundance) — it gets the baseline, which
+>    makes the `frontend-design-consultant` and `alignment-sweep` scope claims true.**
+> 3. Write `.claude/skills/README.md` in each repo recording the tier map and any
+>    deliberate exclusion, so the next divergence check doesn't re-flag them.
+> 4. Verify:
+>    ```bash
+>    for r in scentral-hub abundance household-finance; do
+>      for d in .claude .agents .gemini; do
+>        echo "$r/$d: $(ls ~/Projects/$r/$d/skills 2>/dev/null | wc -l)"
+>      done
+>    done
+>    ```
+>    Baseline count must match across all nine. Divergence here is the finding.
 
 ---
 
@@ -169,7 +235,10 @@ is blocked for every tool until it is removed.
 
 ---
 
-## Prompt 4 — Abundance skills decision (handover item 5)
+## Prompt 4 — Abundance skills decision (ARCHIVED cross-silo proposal)
+
+> **Do not execute from this repo.** ABunDance is a separate product silo. Re-open this
+> decision only in an explicitly scoped ABunDance or portfolio task.
 
 > `~/Projects/abundance` has **zero** skills in `.claude/`, `.agents/` and `.gemini/`.
 > But two account-level skills — `frontend-design-consultant` and `alignment-sweep` —
@@ -188,7 +257,10 @@ is blocked for every tool until it is removed.
 
 ---
 
-## Prompt 6 — Sync the two out-of-tree `alignment-sweep` copies (DO THIS EARLY)
+## Prompt 6 — Sync out-of-tree `alignment-sweep` copies (ARCHIVED AI Ops proposal)
+
+> **Do not execute from this repo.** Scheduled and account-level skills are shared AI
+> Ops infrastructure and require a fresh, explicit approval and live-state review.
 
 > `alignment-sweep` exists in **five** places. Three (`.claude`, `.agents`, `.gemini`)
 > were updated on 2026-08-02 with an integrity-assertions block and a scope correction.
