@@ -85,10 +85,18 @@ grep -rn "TODO\|FIXME\|HACK\|XXX\|placeholder\|hardcoded" app/ lib/ --include="*
 ## Phase 4: Regression Check
 
 ```bash
-set -o pipefail  # without this, a failing build/lint piped to `tail` still exits 0
+set -euo pipefail  # without pipefail, a failing build/lint piped to `tail` can exit 0
 
-# TypeScript compile check
-npx tsc --noEmit 2>&1
+# TypeScript compile check. Prefer a package script if one exists; otherwise use
+# the locally installed compiler. Do not use bare `npx tsc`.
+if npm run | grep -qE '^  typecheck$'; then
+  npm run typecheck
+elif [ -x node_modules/.bin/tsc ]; then
+  node_modules/.bin/tsc --noEmit
+else
+  echo "UNVERIFIABLE: no package.json typecheck script and node_modules/.bin/tsc is missing."
+  exit 1
+fi
 
 # Full build
 npm run build 2>&1 | tail -40
@@ -149,7 +157,7 @@ Compare against the agent's summary using the `verify-cli-claims` skill. Any com
 
 ```
 □ npm run build passes locally
-□ No TypeScript errors (npx tsc --noEmit)
+□ No TypeScript errors (`npm run typecheck` if configured, otherwise `node_modules/.bin/tsc --noEmit`; no bare `npx tsc`)
 □ .env.local variables are set in Vercel dashboard (not hardcoded)
 □ NEXT_PUBLIC_ variables are correct for production URL
 □ No console.log with sensitive data

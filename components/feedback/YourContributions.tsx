@@ -67,7 +67,7 @@ export default function YourContributions() {
         </div>
         <div>
           <p style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--xp-color)' }}>{totalXp}</p>
-          <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>XP earned</p>
+          <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>resonance earned</p>
         </div>
       </Card>
 

@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { createClient } from '@/utils/supabase/server'
 import Button from '@/components/ui/Button'
 import ShelfClient from './ShelfClient'
-import type { ShelfSlot, ShelfFragrance, ShelfSource } from './types'
+import type { ShelfSlot, ShelfFragrance, ShelfSource, ShelfTier } from './types'
 
 export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {
@@ -21,6 +21,8 @@ type ShelfItemRow = {
   rank: number
   source: ShelfSource
   locked: boolean
+  tier: ShelfTier | null
+  blind_buy: boolean
   fragrance: ShelfFragrance | ShelfFragrance[] | null
 }
 
@@ -29,15 +31,15 @@ function normalizeFragrance(f: ShelfItemRow['fragrance']): ShelfFragrance | null
   return Array.isArray(f) ? (f[0] ?? null) : f
 }
 
-function buildSlots(rows: { id: string; rank: number; source: ShelfSource; locked: boolean; fragrance: ShelfFragrance | null }[]): ShelfSlot[] {
+function buildSlots(rows: { id: string; rank: number; source: ShelfSource; locked: boolean; tier: ShelfTier | null; blindBuy: boolean; fragrance: ShelfFragrance | null }[]): ShelfSlot[] {
   const byRank = new Map(rows.map(r => [r.rank, r]))
   const slots: ShelfSlot[] = []
   for (let rank = 1; rank <= SHELF_SIZE; rank++) {
     const row = byRank.get(rank)
     slots.push(
       row
-        ? { itemId: row.id, rank, source: row.source, locked: row.locked, fragrance: row.fragrance }
-        : { itemId: null, rank, source: null, locked: false, fragrance: null }
+        ? { itemId: row.id, rank, source: row.source, locked: row.locked, tier: row.tier, blindBuy: row.blindBuy, fragrance: row.fragrance }
+        : { itemId: null, rank, source: null, locked: false, tier: null, blindBuy: false, fragrance: null }
     )
   }
   return slots
@@ -189,7 +191,7 @@ export default async function ShelfPage() {
 
   const { data: rows } = await supabase
     .from('shelf_items')
-    .select(`id, rank, source, locked, fragrance:fragrances(${FRAGRANCE_COLUMNS})`)
+    .select(`id, rank, source, locked, tier, blind_buy, fragrance:fragrances(${FRAGRANCE_COLUMNS})`)
     .eq('user_id', user.id)
     .order('rank', { ascending: true })
 
@@ -198,6 +200,8 @@ export default async function ShelfPage() {
     rank: r.rank,
     source: r.source as ShelfSource,
     locked: r.locked,
+    tier: r.tier,
+    blindBuy: r.blind_buy,
     fragrance: normalizeFragrance(r.fragrance),
   }))
 

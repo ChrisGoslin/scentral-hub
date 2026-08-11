@@ -78,13 +78,13 @@ function CollectionRadar({ fragrances }: { fragrances: Fragrance[] }) {
     return getRadarPoint(v, angle, radius, centerX, centerY)
   }).join(' ')
 
-  const gridLevels = [0.2, 0.4, 0.6, 0.8, 1.0]
+  const radarRings = [0.2, 0.4, 0.6, 0.8, 1.0]
 
   return (
     <div className="flex flex-col items-center gap-6">
       <svg width={size} height={size} className="overflow-visible">
         {/* Grid */}
-        {gridLevels.map(level => (
+        {radarRings.map(level => (
           <polygon
             key={level}
             points={labels.map((_, i) => {

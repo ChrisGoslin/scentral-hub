@@ -15,7 +15,21 @@ import { CSS } from '@dnd-kit/utilities'
 import Button from '@/components/ui/Button'
 import AuraShelfAdvisory from '@/components/aura/AuraShelfAdvisory'
 import { SafeFragranceImage } from '@/components/fragrance/SafeFragranceImage'
-import type { ShelfSlot, ShelfFragrance } from './types'
+import type { ShelfSlot, ShelfFragrance, ShelfTier } from './types'
+
+const TIER_LABELS: Record<ShelfTier, string> = {
+  S: 'Top Signatures',
+  A: 'Occasion Modifiers',
+  B: 'Base Anchors',
+  C: 'At Risk',
+}
+
+function tierForRank(rank: number): ShelfTier {
+  if (rank <= 5) return 'S'
+  if (rank <= 10) return 'A'
+  if (rank <= 15) return 'B'
+  return 'C'
+}
 
 // Spec calls for a 300ms "drift/settle" drag animation. There is no 300ms token in
 // lib/design/tokens.css (nearest neighbors are --motion-responsive at 200ms and
@@ -208,6 +222,28 @@ function FilledSlot({
           Noseprint
         </div>
       )}
+      {slot.blindBuy && (
+        <div
+          title="Added before it was tested"
+          style={{
+            position: 'absolute',
+            bottom: 6,
+            right: 6,
+            zIndex: 2,
+            fontSize: 8,
+            fontFamily: 'var(--font-ui)',
+            color: 'var(--text-muted)',
+            background: 'transparent',
+            border: '1px solid var(--line)',
+            borderRadius: 999,
+            padding: '2px 6px',
+            textTransform: 'uppercase',
+            letterSpacing: '0.04em',
+          }}
+        >
+          Blind buy
+        </div>
+      )}
 
       <BottleThumb fragrance={f} />
 
@@ -284,9 +320,27 @@ function SearchSheet({
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<ShelfFragrance[]>([])
   const [loading, setLoading] = useState(false)
+  const [eligibleIds, setEligibleIds] = useState<Set<string> | null>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const trimmedQuery = query.trim()
+
+  // Fetch once per sheet open — used to badge/sort results by eligibility (owned/tested/
+  // past_purchase) so the DB trigger's 409 is a rare fallback, not the primary UX (04-architecture-plan.md).
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/shelf')
+      .then(res => (res.ok ? res.json() : { eligibleFragranceIds: [] }))
+      .then(data => {
+        if (!cancelled) setEligibleIds(new Set(data.eligibleFragranceIds ?? []))
+      })
+      .catch(() => {
+        if (!cancelled) setEligibleIds(new Set())
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
@@ -318,6 +372,15 @@ function SearchSheet({
   }, [query, trimmedQuery])
 
   const displayResults = trimmedQuery.length < 2 ? [] : results
+  // Eligible first, both groups alphabetical by brand within themselves — stable, no surprises.
+  const sortedResults = eligibleIds
+    ? [...displayResults].sort((a, b) => {
+        const aEligible = eligibleIds.has(a.id)
+        const bEligible = eligibleIds.has(b.id)
+        if (aEligible !== bEligible) return aEligible ? -1 : 1
+        return a.brand.localeCompare(b.brand)
+      })
+    : displayResults
 
   return (
     <div
@@ -389,42 +452,62 @@ function SearchSheet({
         />
         <div style={{ overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4 }}>
           {loading && <p style={{ fontSize: 12, color: 'var(--text-muted)', padding: 8 }}>Searching…</p>}
-          {!loading && trimmedQuery.length >= 2 && displayResults.length === 0 && (
+          {!loading && trimmedQuery.length >= 2 && sortedResults.length === 0 && (
             <p style={{ fontSize: 12, color: 'var(--text-muted)', padding: 8 }}>No matches.</p>
           )}
-          {displayResults.map(f => (
-            <button
-              key={f.id}
-              onClick={() => onSelect(f)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-                padding: 8,
-                borderRadius: 8,
-                border: 'none',
-                background: 'transparent',
-                cursor: 'pointer',
-                textAlign: 'left',
-              }}
-            >
-              <div style={{ width: 36, height: 48, position: 'relative', flexShrink: 0, borderRadius: 4, overflow: 'hidden', background: 'var(--surface-2)' }}>
-                <SafeFragranceImage
-                  imageUrl={f.image_url}
-                  brand={f.brand}
-                  name={f.name}
-                  family={f.family}
-                  sizes="36px"
-                  wrapperStyle={{ position: 'absolute', inset: 0, background: 'var(--surface-2)' }}
-                  imageStyle={{ objectFit: 'contain' }}
-                />
-              </div>
-              <div>
-                <p style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'var(--font-ui)' }}>{f.brand}</p>
-                <p style={{ fontSize: 13, color: 'var(--text)', fontFamily: 'var(--font-display)' }}>{f.name}</p>
-              </div>
-            </button>
-          ))}
+          {sortedResults.map(f => {
+            const isEligible = eligibleIds ? eligibleIds.has(f.id) : true
+            return (
+              <button
+                key={f.id}
+                onClick={() => onSelect(f)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: 8,
+                  borderRadius: 8,
+                  border: 'none',
+                  background: 'transparent',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                }}
+              >
+                <div style={{ width: 36, height: 48, position: 'relative', flexShrink: 0, borderRadius: 4, overflow: 'hidden', background: 'var(--surface-2)' }}>
+                  <SafeFragranceImage
+                    imageUrl={f.image_url}
+                    brand={f.brand}
+                    name={f.name}
+                    family={f.family}
+                    sizes="36px"
+                    wrapperStyle={{ position: 'absolute', inset: 0, background: 'var(--surface-2)' }}
+                    imageStyle={{ objectFit: 'contain' }}
+                  />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'var(--font-ui)' }}>{f.brand}</p>
+                  <p style={{ fontSize: 13, color: 'var(--text)', fontFamily: 'var(--font-display)' }}>{f.name}</p>
+                </div>
+                {!isEligible && (
+                  <span
+                    style={{
+                      flexShrink: 0,
+                      fontSize: 9,
+                      fontFamily: 'var(--font-ui)',
+                      color: 'var(--text-muted)',
+                      border: '1px solid var(--line)',
+                      borderRadius: 999,
+                      padding: '3px 8px',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.03em',
+                    }}
+                  >
+                    Not tested
+                  </span>
+                )}
+              </button>
+            )
+          })}
         </div>
         <Button variant="secondary" onClick={onClose}>Cancel</Button>
       </div>
@@ -470,10 +553,10 @@ export default function ShelfClient({ slots: initialSlots, topThree }: ShelfClie
     // Ranks are reassigned by position 1..N among filled slots; empty slots keep their ranks appended after.
     const emptyRanks = current.filter(s => s.itemId === null).map(s => s.rank).sort((a, b) => a - b)
     const usedRanks = [...reordered.map((_, i) => i + 1)]
-    const newSlotsFilled = reordered.map((s, i) => ({ ...s, rank: i + 1 }))
+    const newSlotsFilled = reordered.map((s, i) => ({ ...s, rank: i + 1, tier: tierForRank(i + 1) }))
     const newEmpty = emptyRanks
       .filter(r => !usedRanks.includes(r))
-      .map(r => ({ itemId: null, rank: r, source: null, locked: false, fragrance: null } as ShelfSlot))
+      .map(r => ({ itemId: null, rank: r, source: null, locked: false, tier: null, blindBuy: false, fragrance: null } as ShelfSlot))
 
     // Merge back into rank order 1..10
     const merged = [...newSlotsFilled, ...newEmpty].sort((a, b) => a.rank - b.rank)
@@ -494,7 +577,7 @@ export default function ShelfClient({ slots: initialSlots, topThree }: ShelfClie
 
   const handleRemove = useCallback(async (itemId: string) => {
     const current = slotsRef.current
-    const next = current.map(s => (s.itemId === itemId ? { itemId: null, rank: s.rank, source: null, locked: false, fragrance: null } as ShelfSlot : s))
+    const next = current.map(s => (s.itemId === itemId ? { itemId: null, rank: s.rank, source: null, locked: false, tier: null, blindBuy: false, fragrance: null } as ShelfSlot : s))
     setSlots(next)
     slotsRef.current = next
 
@@ -525,6 +608,8 @@ export default function ShelfClient({ slots: initialSlots, topThree }: ShelfClie
       rank,
       source: 'manual',
       locked: false,
+      tier: tierForRank(rank),
+      blindBuy: false,
       fragrance,
     }
     const next = current.map(s => (s.rank === rank ? optimisticSlot : s))
@@ -579,6 +664,8 @@ export default function ShelfClient({ slots: initialSlots, topThree }: ShelfClie
             rank,
             source: 'manual' as const,
             locked: false,
+            tier: tierForRank(rank),
+            blindBuy: false,
             fragrance,
           }
         : s
@@ -621,26 +708,41 @@ export default function ShelfClient({ slots: initialSlots, topThree }: ShelfClie
 
       <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={onDragEnd}>
         <SortableContext items={sortableIds} strategy={rectSortingStrategy}>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
-              gap: 12,
-            }}
-          >
-            {slots.map(slot =>
-              slot.itemId && slot.fragrance ? (
-                <FilledSlot
-                  key={slot.itemId}
-                  slot={slot}
-                  onRemove={() => handleRemove(slot.itemId!)}
-                  onReplace={() => openReplace(slot.rank)}
-                />
-              ) : (
-                <EmptySlot key={`empty-${slot.rank}`} rank={slot.rank} onFill={() => openReplace(slot.rank)} />
-              )
-            )}
-          </div>
+          {(['S', 'A', 'B', 'C'] as const).map(tier => {
+            const tierSlots = slots.filter(s => tierForRank(s.rank) === tier)
+            return (
+              <div key={tier} style={{ marginBottom: 20 }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 10 }}>
+                  <span style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 15, color: 'var(--accent)' }}>
+                    {tier}
+                  </span>
+                  <span style={{ fontSize: 11, fontFamily: 'var(--font-ui)', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                    {TIER_LABELS[tier]}
+                  </span>
+                </div>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
+                    gap: 12,
+                  }}
+                >
+                  {tierSlots.map(slot =>
+                    slot.itemId && slot.fragrance ? (
+                      <FilledSlot
+                        key={slot.itemId}
+                        slot={slot}
+                        onRemove={() => handleRemove(slot.itemId!)}
+                        onReplace={() => openReplace(slot.rank)}
+                      />
+                    ) : (
+                      <EmptySlot key={`empty-${slot.rank}`} rank={slot.rank} onFill={() => openReplace(slot.rank)} />
+                    )
+                  )}
+                </div>
+              </div>
+            )
+          })}
         </SortableContext>
       </DndContext>
 

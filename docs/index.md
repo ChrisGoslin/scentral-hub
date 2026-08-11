@@ -19,6 +19,8 @@ Read in this order:
 
 For verification-discipline history and the three-round audit that motivated the current trust rule, see [docs/nota/HANDOVER-2026-07-19-verification-audit.md](./nota/HANDOVER-2026-07-19-verification-audit.md).
 For future handoffs, use [docs/nota/HANDOVER-TEMPLATE-verification-first.md](./nota/HANDOVER-TEMPLATE-verification-first.md) as the default scaffold.
+For hero-media brand rulings (stock-footage subject/face checks), see [docs/BRAND-RULING-hero-video.md](./BRAND-RULING-hero-video.md) — RESOLVED 2026-07-24, clip replaced with a faceless ink-in-water shot; confirmed still current in `components/landing/HeroSection.tsx` as of 2026-08-10.
+For accumulated session lessons (verification traps, drift patterns, reusable fixes), see [docs/lessons.md](./lessons.md).
 For substantial multi-pass work, use [the loop orchestrator](../.claude/skills/loop-orchestrator/SKILL.md) to select the appropriate depth and enforce independent critique and completion evidence.
 
 Older legacy docs may be useful history, but treat them as stale unless one of the files above points to them.
@@ -27,11 +29,16 @@ Older legacy docs may be useful history, but treat them as stale unless one of t
 
 These live outside the repo and are useful for planning, priorities, and Christopher's working preferences:
 
-- `/Users/christophergoslin/Projects/Claude/AI Studio/PROJECTS.md`
-- `/Users/christophergoslin/Projects/Claude/AI Studio/profile.md`
-- `/Users/christophergoslin/.claude/CLAUDE.md`
-- `/Users/christophergoslin/.claude/PROJECTS.md`
-- `/Users/christophergoslin/.claude/LESSONS.md`
+- `~/Projects/claude-global/CLAUDE.md` — operating system and partnership protocol
+- `~/Projects/claude-global/PROJECTS.md` — portfolio status, per-project constraints
+- `~/Projects/claude-global/LESSONS.md` — cross-project lessons (GL-n)
+- `~/Projects/claude-global/profile.md` — working preferences
+
+**Do not cite `~/.claude/*.md`.** That directory holds only `projects/` and
+`skills/`; the canon files are not there and the path is unreachable from Cowork.
+This block was wrong from 2026-07-27 (`bc2d60f`, which introduced it) to 2026-08-02,
+despite a remediation recorded as complete on 2026-07-29 and a second attempt in
+`3620406` — see GL-3 and GL-7 in `claude-global/LESSONS.md`.
 
 Do not copy long content from those files into this repo. Link or cite the path, then update the canonical source when direction changes.
 

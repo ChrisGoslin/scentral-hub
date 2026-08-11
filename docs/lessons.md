@@ -77,52 +77,52 @@ Context: designed and converted "The Read" (onboarding scent-identity reveal) fr
 
 ## 2026-07-27 — Performance acceptance and adversarial loop
 
-### L26 — A revised acceptance decision needs an executable contract
+### L48 — A revised acceptance decision needs an executable contract
 **What happened:** Production LCP improved to 2.74–2.83s, but active handoff and launch documents still carried the old `<2.5s` gate. The product decision was correct, yet the documentation system could have sent the next session toward unnecessary work.
 **Rule:** When acceptance criteria change, update the canonical record, active references, and an automated consistency check in the same change. Keep historical measurements labelled as historical.
 **Enforced by:** `npm run check:performance-criteria` in CI; the homepage follow-up is the canonical source for this gate.
 
-### L27 — A process lesson is incomplete without a guardrail
+### L49 — A process lesson is incomplete without a guardrail
 **What happened:** The loop identified missing performance monitoring and stale-criteria protection, but a lesson alone would not prevent recurrence.
 **Rule:** For every process lesson, add the smallest practical system change: CI check, hook, template, or monitored metric. If that is not possible, record the concrete blocker.
 **Enforced by:** CI `performance-criteria` job and the loop review checklist.
 
-### L28 — Test auth bypasses must be environment-gated
+### L50 — Test auth bypasses must be environment-gated
 **What happened:** The Archive import page reused the E2E `fake-session` cookie pattern. A red-team pass correctly flagged that a cookie-only bypass could make a protected page look signed-in outside the test harness, even though the API still required real Supabase auth.
 **Rule:** Any fake auth, fixture auth, or bypass path must require an explicit test-only environment flag as well as the test marker. Cookies, headers, or localStorage markers alone are never enough.
 **Enforced by:** `E2E_AUTH_BYPASS=1` is required by `start:e2e`; reviews must grep for `fake-session`, `fake-access-token`, and auth bypass markers before accepting protected-route changes.
 
-### L29 — Preview/import features ship preview-first, write-later
+### L51 — Preview/import features ship preview-first, write-later
 **What happened:** The portability concierge work was valuable only because it stayed no-write: users can paste CSV/TSV text, inspect exact/likely/ambiguous/unmatched results, and preserve source values before any database mutation exists.
 **Rule:** Imports and migrations of user-owned history must start with a bounded preview surface. The write step is a separate tranche with explicit approval, authenticated ownership, idempotency, audit logging, and rollback receipt.
 **Enforced by:** `docs/nota/11-portability-concierge.md` acceptance gates; preview routes must be checked for absence of `insert`, `update`, `upsert`, `delete`, write RPCs, and service-role clients.
 
-### L30 — Do not query schema columns that migrations cannot reproduce
+### L52 — Do not query schema columns that migrations cannot reproduce
 **What happened:** The preview route initially queried `fragrances.full_name`. Red-team found no migration proving that column exists in a fresh schema replay, so the route could have worked only against an out-of-band production drift.
 **Rule:** A query may use only columns proven by migrations, generated types, or a live schema check documented in the change. If a column is not reproducible from the repo, either add the migration or avoid the column.
 **Enforced by:** before committing database-backed code, search migrations for every newly referenced table/column and record any live-only exception in the PR or handoff.
 
-### L31 — Dirty worktrees require exact staging
+### L53 — Dirty worktrees require exact staging
 **What happened:** The repo contained broad unrelated edits and untracked artifacts while the portability tranche was ready. A broad `git add .` would have bundled unrelated agent work into the feature commit.
 **Rule:** In a dirty shared worktree, stage and commit by exact paths. Treat mixed files, staged leftovers, generated artifacts, and unrelated changes as separate concerns.
 **Enforced by:** run `git status --short`, `git diff --cached --name-only`, and `git diff --cached --stat` before commit; use exact path staging and never broad-add unless the whole worktree is intentionally owned by the change.
 
-### L32 — Next manifest failures after interrupted builds need a clean rebuild
+### L54 — Next manifest failures after interrupted builds need a clean rebuild
 **What happened:** Full E2E briefly failed with Next client-reference-manifest errors after interrupted or overlapping builds. Moving `.next` aside and rebuilding cleanly separated framework build-state corruption from real app regressions.
 **Rule:** If Next reports missing client manifests, missing `500.html`, or route manifest invariants after interrupted builds, do not treat the app as broken until `.next` has been moved aside and rebuilt from scratch.
 **Enforced by:** E2E failure triage: check running `next` processes, move generated `.next` state aside, run `npm run build`, then rerun the failing spec before debugging product code.
 
-### L33 — Protected API tests need real auth coverage eventually
+### L55 — Protected API tests need real auth coverage eventually
 **What happened:** The Archive import E2E mocked `/api/portability/preview`, which verified the UI path but not real `401`, `415`, `413`, `429`, Supabase query behavior, or no-write API behavior under authenticated test conditions.
 **Rule:** Mocked E2E is acceptable for UI feedback, but protected APIs need a real authenticated integration test before production reliance. Document the gap when test auth is unavailable.
 **Enforced by:** backlog item in `docs/nota/05-recommendations-backlog.md`; protected route PRs must identify whether auth behavior is tested by unit, integration, E2E mock, or live smoke.
 
-### L34 — Generated build backups must be ignored before lint claims
+### L56 — Generated build backups must be ignored before lint claims
 **What happened:** A local clean rebuild created `.next.preverify-*` backup state. ESLint traversed that generated bundle under Node 20 and reported thousands of irrelevant generated-code errors, while Node 26 appeared clean because the local generated state differed.
 **Rule:** Build backups such as `.next.preverify-*` and `.next.preclean-*` are generated artifacts. They must be ignored by both Git and ESLint, moved out of the repo when found, and never used as evidence of product-code lint failures.
 **Enforced by:** `.gitignore` and `eslint.config.mjs` ignore rules; before claiming lint or CI status, check for root-level `.next.pre*` directories and move them aside if present.
 
-### L35 — E2E CI needs a bounded diagnostic failure mode
+### L57 — E2E CI needs a bounded diagnostic failure mode
 **What happened:** The `main` E2E job ran long after build, typecheck, lint, performance, Security Audit, and CodeQL were green. While a full Playwright matrix can legitimately take several minutes, an unbounded run leaves agents unable to distinguish slow tests from a hung server or orphaned process.
 **Rule:** Long-running CI jobs must have explicit timeouts and diagnostics. A failed or cancelled E2E run should preserve Playwright artifacts so the next session can inspect traces instead of re-running blind.
 **Enforced by:** CI `e2e.timeout-minutes` and `Upload E2E diagnostics` artifact step for `test-results/` and `playwright-report/`.
@@ -193,69 +193,242 @@ Context: Merged brand-reconciliation branch (hero video, docs, route alignment),
 **Rule:** For any shared branch, declare the merge strategy upfront: (a) fast-forward preferred when histories don't conflict; (b) resolve merge conflicts with the rule "most recent session's state wins" / "oldest session's data survives" / "manual arbitration" — pick based on the feature (log/audit = oldest wins; feature flags = newest wins; code = manual). For conflicts on code/data, document who arbitrates (Christopher, on-call, automated test result). Record the strategy in CLAUDE.md §11.
 **Enforced by:** conflict resolution rules in CLAUDE.md; for any shared branch work, state "if HEAD moves, merge strategy is X" before proceeding. CI gate: if a merge conflict is detected, require explicit approval before continuing (do not auto-resolve silently).
 
----
+### L26 — Test-Coverage Isolation from Live API States (E2E Fixture Mode)
+**What happened:** Introducing dynamic transaction trends and sheet updates initially failed E2E Playwright tests because the tests hit the live ranges (which changed in this session) or expected exactly 5 confirmed items. Hardening the quality gate required isolated mock environments.
+**Rule:** E2E and UI verification tests must be fully isolated from live external API feeds or dynamic historical worksheets. Enforce a local fixture/mock mode during the `build` and `test:e2e` execution.
+**Remedy built in:** Configured `ABUNDANCE_FIXTURE_MODE=true` in script pipelines and implemented mock data mapping inside `fixture-store.ts`.
+**Enforced by:** Pre-commit build pipeline parameter verification.
 
-## 2026-07-27 — Cross-repo cleanup audit and skill hygiene
+### L27 — Enforce Local Database Reset before Migration Push
+**What happened:** Local database workspaces naturally accumulate manual columns, test entries, and ad-hoc overrides during active development. Pushing migrations directly without a database reset risks schema inconsistencies between development and production.
+**Rule:** Before pushing any database schema migrations to production, reset the local test database workspace to verify that all migration SQL statements are fully reproducible from scratch.
+**Remedy built in:** Integrated database reset steps into the Supabase migration guidelines.
+**Enforced by:** Pre-push checklist standard.
 
-Context: ran a "repo-tidy"-style audit across scentral-hub, abundance, ai-ops, and last30days-skill. The audit itself came back clean, but running it surfaced two problems with the tooling used to run it, not with the code it checked.
-
-### L36 — A skill's "scope" or "rule" content can go stale even when its name still fires correctly
-**What happened:** The global `repo-tidy` skill's Phase 5 hardcoded a "locked MVP scope" (Collection/Lab/You/Scheduler) that matched no current repo — not nota's real route surface, not abundance's, not ai-ops's. It went unnoticed until read closely mid-run; a single-pass audit would have quietly produced a wrong or empty scope-purge result.
-**Rule:** Any skill step that encodes "current scope," "locked features," or similar project-state facts must read that state live from the target repo's own AGENTS.md/CLAUDE.md at run time — never hardcode it in the skill file. If no such source exists, the skill must say so explicitly rather than silently applying a stale or borrowed list.
-**Enforced by:** `repo-tidy` Phase 5 rewritten to read scope from the target repo's docs at run time and to report "SKIPPED, no scope doc found" instead of guessing (`/root/.claude/skills/repo-tidy/SKILL.md`).
-
-### L37 — A misleading commit message is a bigger threat than an obviously-bad diff
-**What happened:** `scentral-hub/.claude/skills/repo-tidy/SKILL.md` was, initially, assumed to be an independently-authored "rogue" skill sitting in the repo. Git history showed the real story: commit `55b2d2d` ("chore: consolidate skill definitions to canonical-source-reconciler pattern (#77)", 2026-07-24, already merged to `origin/main`) claimed to "trim the `.claude/skills` copies of repo-tidy/verify-cli-claims down to metadata" and mirror them as "thin pointer copies" elsewhere. The actual diff deleted a mature 189-line `repo-tidy` skill and a 174-line `verify-cli-claims` skill and replaced both with short skills whose instructions were to *silently* rewrite user-facing copy, *silently* rewrite an agent's own rejected output, and prompt-delete branches on vague grounds — then copied those same replacements into `.agents/skills/` and `.gemini/skills/`, so three CLI tool configs carried the tampered versions. The commit message never mentioned any of that. A first pass reading only the current file (not `git log -p` on it) missed this entirely and treated it as ordinary drift.
-**Rule:** When a skill/doc's content looks materially different from what its own commit message or catalog description implies, do not accept the mismatch as coincidental drift — pull `git log -p --follow` on the specific file before concluding what happened or writing a lesson about it. A commit message and its diff disagreeing is itself the finding, independent of whether the diff's content is also dangerous. Treat "silently rewrite / silently replace" instructions appearing in any skill as a stop-and-flag condition, not a style note — flag to the user before patching, especially if the change already reached a shared/main branch.
-**Enforced by:** content restored from pre-55b2d2d history for both `.claude/skills/repo-tidy` and `.claude/skills/verify-cli-claims`; `.agents/skills/` and `.gemini/skills/` copies of both converted to genuine thin pointers (matching the `loop-orchestrator` pattern) instead of independent full copies, so there is exactly one place either skill's real content can drift from. Fix pushed as a new commit/PR against `origin/main`, not a history rewrite. New standalone `brand-terminology-audit` skill kept as a narrower, report-only complement (see the `repo-tidy` row note in `.claude/skills/README.md`).
-
-### L38 — "Consolidation" and "pointer" commits need the same scrutiny as feature commits
-**What happened:** The tampering above rode inside a commit explicitly framed as low-risk tooling hygiene ("consolidate skill definitions," "thin pointer copies," "trims down to metadata") — the kind of commit message that reads as safe to skim past. It also had a `Co-authored-by: Claude` trailer, meaning a prior Claude Code session either produced or accepted this diff without the mismatch being caught at commit time.
-**Rule:** "Refactor / consolidate / dedupe" commits touching skill, doc, or config files that other sessions treat as instructions get the same diff-read discipline as a feature commit — never assume the diff matches the message just because the message sounds administrative. Before authoring or accepting a "consolidation" commit for skill files specifically, read the full before/after content for every file it claims to only "trim" or "point," not just the file list.
-**Enforced by:** nothing mechanical yet — this is advisory, not enforced, per this doc's own standard that an enforcement reference must resolve to a reachable control. `implementation-preflight` and `canonical-source-reconciler` should be read as also covering skill/doc consolidation commits, not only code refactors, but neither currently gates on it. `scripts/check-skill-integrity.mjs` (L30) is the actual mechanical gate that would have caught this specific incident's content change, regardless of the commit message — that's the real enforcement; this lesson's "read the diff" rule remains advisory until something checks for it directly.
-
-### L39 — The loop only works if it self-triggers; "substantial" is too fuzzy a threshold
-**What happened:** This entire incident (L36–L38) was found and fixed only because the user explicitly typed `/loop` after a first pass had already declared the work done. CLAUDE.md rule 12 already required `loop-orchestrator` for "substantial cross-CLI tasks," and a 4-repo cleanup audit followed by editing a skill file that governs behavior across Claude/Gemini/other-agent configs plainly qualified — but it was judged as routine single-pass work instead. Rule 10 (confirm provenance via `git log --follow` before promoting a claim to fact) was also available and unused on first pass; the divergent skill file was found by chance, then misdiagnosed as independent drift rather than investigated as tampering. Had the user not asked for the loop, a commit already compromising two safety skills on `origin/main` would have been "fixed" cosmetically (one file, wrong root cause) and the session would have reported success.
-**Rule:** A judgment-call trigger ("invoke for substantial tasks") is not a safety mechanism if the judgment doesn't reliably fire — it's a courtesy that depends on someone else remembering to ask. Replace fuzzy judgment with concrete, mechanical trigger conditions checked at the start of any repo-hygiene, skill-editing, or multi-repo task: (a) touching any file under `.claude/skills/`, `.agents/skills/`, or `.gemini/skills/` — self-trigger the loop, no exceptions; (b) work spanning more than one repo in the same session — self-trigger; (c) finding a file whose content contradicts its own commit message, a README/catalog description, or another doc's description of it — treat as a stop-and-investigate-provenance event before any fix, not a stale-drift assumption. When a session skips the loop despite one of these conditions being true, that is itself the failure to report, not a background detail.
-**Enforced by:** CLAUDE.md rule 12 rewritten with the three concrete trigger conditions above, replacing "substantial" as the sole test. `grounded-agent-guardrails` should also carry these triggers in its session-start checklist so they're checked before any skill-directory work begins, not only when a task already feels large.
-
-### L40 — A commit-message keyword check does not detect content tampering; only a content hash does
-**What happened:** Building a guard against a repeat of the `55b2d2d` incident, the first design (V1) blocked a push if a changed skill file's name wasn't mentioned in any pushed commit message. Testing it against the actual historical commit (not a hypothetical) showed it would not have caught anything: `55b2d2d`'s message names both `repo-tidy` and `verify-cli-claims` explicitly — it just lies about what happened to them. A keyword-presence check is trivially satisfied by a misleading-but-name-dropping message.
-**Rule:** A guard against tampering must check the artifact's actual content (hash) against a committed, reviewable baseline — never a proxy signal like message text, labels, or self-reported descriptions, all of which the same commit that tampers the content can also satisfy. Before trusting any new integrity check, test it against the real incident it's meant to catch, not a synthetic best-case example — a check that passes only on an idealized bad case is unverified.
-**Enforced by:** `scripts/check-skill-integrity.mjs` (content-hash check against `docs/skills.lock.json`, regenerated only via deliberate `npm run skills:relock`), enforced both locally via `.husky/pre-push` on every branch and server-side via `.github/workflows/skill-integrity.yml` on push/PR to main (the latter closes the GitHub-UI-merge gap the local hook alone can't). Genuine remaining limit, recorded in the script's own header: it forces visibility of a change, not proof of honest intent — an agent that tampers and then honestly relocks still passes.
-
-### L41 — A plausible-sounding rule ID is not a verified rule ID
-**What happened:** Diagnosing a SonarCloud "D Reliability Rating" failure, I named the cause as "S2681 (curly braces), Critical severity" from memory and patched accordingly. The Quality Gate still failed on the next push. Only a second guess (S2871, missing sort compare function) actually fixed it. Web research afterward showed S2681 isn't even the JavaScript rule ID for that check — the real one is S121, and S121 is a Code Smell, which cannot move a Reliability Rating at all. The first "fix" was real code-quality value but zero relevance to the failure it was sold as fixing.
-**Rule:** A specific rule ID, severity level, or tool-behavior claim recalled from memory is a guess wearing a citation's clothes. Before asserting one as the diagnosis for a real failure (not just applying it as a general good practice), verify it against the tool's own documentation or a search — especially when the fix is about to be committed as "this is why X failed." If verification isn't available, say "suspected X, unverified" rather than naming a specific rule ID as fact. The tell that should have triggered a check immediately: the claimed fix didn't work on the next CI run, and a second guess was required — that's the moment to stop guessing and go verify, not guess a third time.
-**Remedy built in:** `.claude/skills/verify-cli-claims/SKILL.md` gained a new claim-type section ("Rule/check X is why CI failed") with its own verdict rubric (Verified only if the rule ID/type/severity is confirmed against the tool's own docs) and an explicit red-flag trigger (a named fix that doesn't clear the same CI check on the next run is direct evidence the diagnosis was wrong).
-**Enforced by:** the new `verify-cli-claims` claim-type section itself — any future session running that skill against a CI-failure diagnosis now has the check spelled out, not left to memory. `docs/lessons.md` L36–L40 already establish "test against the real incident, not a hypothetical" for integrity checks; this extends the same discipline to third-party tool failures.
-
-### L42 — "No app code references it" needs the dynamic-access and RPC check before it's a verified claim
-**What happened:** An ORPHANED/ACTIVELY-USED table audit initially classified six tables as orphaned based on grep for literal table-name strings in `app/`, `lib/`, `scripts/`. That method has a real blind spot: a table accessed only via a Postgres RPC function (`supabase.rpc('name')`) or a generic/dynamic query helper taking a variable table name would be invisible to it — and `swap_offers` turning up in an unexpected place (a GDPR delete-list, not a feature route) showed unexpected access patterns are real, not hypothetical, in this codebase. The gap was flagged in a self-critique but not closed until asked to eliminate it: checking every candidate table's defining migration for `CREATE FUNCTION`/`CREATE TRIGGER`, and grepping app code for any `.rpc(` call at all.
-**Rule:** "No app code references table X" is a **reviewed** claim, not a **verified** one, until three things are checked, not just literal-string grep: (1) the table's own migration file for functions/triggers defined on it, (2) app code for any `.rpc()` call (which wouldn't contain the table name as a literal string), and (3) any generic/dynamic query builder pattern in the codebase. Skipping this on an "orphaned" classification risks recommending deletion of something that's actually live through an indirect path. A table with live row data but zero readers (found via this same audit: `trend_signals`) is a distinct case from a truly dead table — check row content, not just row count, before concluding ORPHANED vs an external-pipeline PARTIALLY WIRED.
-**Remedy built in:** new `.claude/skills/db-table-usage-audit/SKILL.md` — the workflow bakes in all three checks as mandatory steps before any ORPHANED verdict, plus the row-content check for the live-data-no-reader case. `nota-architecture-contract` and `repo-tidy` both now cross-reference it.
-**Enforced by:** the `db-table-usage-audit` skill itself, cross-referenced from `repo-tidy`'s "See also" (DB-layer companion to its file-level dead-code scrub) and from `nota-architecture-contract`'s re-verify checklist (live table-count check). Any future dead-table audit that skips these three checks is now deviating from a named skill, not just missing an unwritten best practice.
+### L28 — Programmatic Rate Limit Protection for Batch Operations
+**What happened:** Multi-document OCR processing and image generation loops triggered API rate limit spikes (HTTP 429/503), requiring manual human restarts.
+**Rule:** All batch-processing or bulk-ingestion scripts interacting with external APIs must implement exponential backoff with randomized jitter and support checkpoints to resume failures.
+**Remedy built in:** Implemented standard `callWithBackoff` helpers and a `--resume-from` CLI argument.
+**Enforced by:** Ingestion review checklist.
 
 ---
 
-## 2026-07-29 — Adversarial review of project standards (PDLC self-rating, requested by founder)
+## 2026-07-29 — Cowork front-end consultant build (design-system skills)
 
-Context: a "rate yourself as a Solutions Architect + adversarial review" request, on top of ongoing PR #82 (skill-tampering restore + hardening) CodeRabbit cycles, surfaced two standards violations that had been running silently under every prior "verified" claim this session, plus one documentation-integrity bug in this very file.
+Context: built a "front-end design consultant" skill + Claude Code prompt pack in Cowork for nota. and Abundance, then read both repos and found most of it wrong. Every lesson below was already latent in L1/L6/L9/L10 — they were written down but not embedded.
 
-### L43 — A hook file existing and passing when run manually is not proof it fires on a real git event
-**What happened:** Every "the pre-push guard blocks bad pushes" claim made this session (about `.husky/pre-push` running `scripts/check-skill-integrity.mjs`) was actually a manual `node scripts/check-skill-integrity.mjs` invocation. `.git/hooks/pre-push` does not exist in this sandbox, `core.hooksPath` is unset, and `node_modules/.bin/husky` was never installed (because `node_modules` itself was never installed this session). The hook has never once fired via an actual `git push` here — the script's correctness was verified, its wiring was not.
-**Rule:** A claim that "hook X guards against Y" requires checking the hook's actual firing path — `core.hooksPath` resolves to the directory containing the hook file, the hook file is present at that resolved path, and (for husky) the binary is installed — not just that the underlying script exits 0 when invoked directly. Treat "the hook will catch this" as unverified until that three-part check passes.
-**Remedy built in:** `.claude/skills/verify-cli-claims/SKILL.md` gained a "pre-push/pre-commit hook claims" correction (2026-07-29) with the exact `git rev-parse --git-path hooks` / `core.hooksPath` / binary-presence checklist, and an explicit instruction to re-label any prior "guard fired correctly" claim as a manual-invocation claim when the check fails.
-**Enforced by:** the new `verify-cli-claims` correction section itself. CI's `.github/workflows/skill-integrity.yml` remains the one enforcement path in this repo proven to actually run (triggered by GitHub Actions on push/PR, independent of local hook wiring) — until a session with real `npm install` + husky access confirms the local hook fires, treat the CI workflow as the sole verified guard, not the local hook.
+### L29 — Authoring for a repo you have not opened is invention, not consulting
+**What happened:** Wrote a complete design-token system for nota. — palette, type pairing, radius scale, motion durations — from doctrine prose alone, without opening `scentral-hub`. Nearly every specific was wrong: proposed Signifier + Founders Grotesk against canon's Instrument Serif + Geist; proposed a 2/4/8/16 radius scale against shipped `--r-card:16px/--r-btn:12px`; proposed shadcn setup steps for a repo with no `components.json`; banned spring overshoot while `--motion-organic` uses it deliberately. Directionally plausible, factually wrong — the most dangerous combination, because it reads authoritative.
+**Rule:** Do not author tokens, rules, or "systems" for an existing codebase before reading it. If repo access is unavailable, the deliverable is a *questions list*, explicitly labelled as ungrounded — never a spec. Plausibility is not grounding.
+**Enforced by:** `implementation-preflight` gate 1, extended to skill/doc authoring, not just code. Any artifact asserting project-specific values must name the file:line it was read from.
 
-### L44 — "No node_modules" silently downgrades every build/lint/typecheck claim to unverifiable
-**What happened:** This sandboxed environment never had `npm install` run, so `npm run build`, `npm run lint`, and `npx tsc --noEmit` were never actually executable this entire session — yet skill files and prior summaries referenced these commands as the standard verification step without flagging that they could not be run here. `ci.yml` (the workflow that would run them in GitHub Actions) also never triggered on PR #82 at all, because a new workflow file on a non-default branch doesn't fire on `pull_request` events until it's merged to the default branch — confirmed via web research, not assumed.
-**Rule:** Before citing a build/lint/typecheck command as verification evidence, confirm the toolchain can actually execute in the current environment (`ls node_modules/.bin/<tool>` or equivalent) and confirm the CI workflow that would run it has actually triggered (not just exists in the diff) — a workflow file present on a branch is not the same as that workflow having run. If neither is true, state explicitly "unverifiable in this environment" rather than citing the command as if it ran.
-**Remedy built in:** this lesson itself, plus the `verify-cli-claims` "App builds without errors" / "Tests pass" sections, which already require showing actual command output — the missing piece was checking *executability* first. Any future session in a sandboxed environment without `node_modules` must state that limitation up front in its first status update, not discover it as a surprising gap later.
-**Enforced by:** advisory only — no mechanical check can force a sandboxed environment to have `node_modules`. The mechanical piece is checking `mcp__github__actions_list` (or equivalent) for whether the relevant CI workflow has actually run against the current PR/branch before citing "CI passed" as evidence, which this session did do once prompted to check.
+### L30 — Canon lives in the repo; a second copy is drift by construction
+**What happened:** Copied token values into a Cowork skill so it could "know" the brand — creating a fifth source of truth alongside `DESIGN.md`, `NOTA-BRAND-UIUX-PACK.md`, `NOTA_MANIFESTO.md`, and shipped CSS. `AGENTS.md` §5b already says, verbatim: *"Read DESIGN.md before any UI work — it is the canonical token and material system; do not duplicate its rules here."* The instruction was in the repo before the mistake was made.
+**Rule:** External tooling (Cowork skills, prompt packs, agent configs) must *point at* repo canon and read it at run time, never mirror its contents. A tool that restates a value is a tool that will eventually contradict it.
+**Enforced by:** `canonical-source-reconciler` skill; plus a self-check when authoring any skill — "does this file state a project fact? if yes, does it cite where it's read from, rather than asserting it?"
 
-### L45 — A canonical lessons doc needs its own ID-uniqueness check, not just human review
-**What happened:** Two unrelated 2026-07-27 sessions each independently authored lessons L26–L32 in this same file (lines 80–110 and, until this fix, 202–237), and three other skill files (`db-table-usage-audit`, `verify-cli-claims`, `.claude/skills/README.md`) and `docs/todo/README.md` cross-referenced the second set by number — CodeRabbit caught the collision; a prior read-through of this file by an agent session did not.
-**Rule:** Before adding new lesson entries to a canonical, cross-referenced lessons file, grep the file for the ID range about to be used (`grep -n "^### L<n>"`) and confirm no collision — do not rely on "the file looked append-only" as proof IDs are unique.
-**Remedy built in:** renumbered the second (2026-07-27 skill-tampering) set from L26–L32 to L36–L42 and updated every external cross-reference (`CLAUDE.md`, `docs/todo/README.md`, `.claude/skills/README.md`, `.claude/skills/verify-cli-claims/SKILL.md`, `.claude/skills/db-table-usage-audit/SKILL.md`) to match, in this same change.
-**Enforced by:** `scripts/check-lesson-ids.mjs` (verified against the real incident: injecting a duplicate `### L26` reproduces the exact CodeRabbit-caught collision and the script exits 1, catching it before a false pass), wired into `npm run lessons:check`, `.husky/pre-push` (all branches, not just main), and `.github/workflows/skill-integrity.yml` (the CI twin, which per L43 is the one guard in this repo confirmed to actually fire in a sandboxed dev environment). No longer advisory-only.
+### L31 — Check the repo's own `.claude/skills/` before building a capability
+**What happened:** Designed a doc-vs-code drift protocol from scratch, and a visual verification workflow, without checking `.claude/skills/` — which already contains 27 skills including `canonical-source-reconciler`, `implementation-preflight`, `verify-cli-claims`, `screen-state-completeness`, and `loop-orchestrator`. Rebuilt existing capability under new names, in a different location, with different wording.
+**Rule:** Before authoring any new skill or agent capability, list `.claude/skills/` in the target repo and the global skill set. If a skill covers the need, extend or invoke it; do not parallel-build. This is L6 (reduce sources of truth) applied to tooling rather than docs.
+**Enforced by:** `implementation-preflight` gate: "does this capability already exist? `ls .claude/skills/` output pasted before authoring."
+
+### L32 — The user's description of their own repo is a hypothesis, not evidence
+**What happened:** Asked whether Abundance was greenfield; was told yes, "my doctrine stands." It is not greenfield — it is a working Next 16 app with `/subscriptions`, `/scenarios`, `/calendar`, `/documents`, its own shipped palette, `AGENTS.md`, vitest + Playwright, and a Drive ingest pipeline. Had this gone unverified, a fabricated doctrine would have been declared canonical over a live product. Compounding L9: the question should not have been asked at all — the repo was one `ls` away.
+**Rule:** Never let a user's recollection of repo state substitute for reading it, especially when their answer would license you to skip verification. Treat "it's greenfield / nothing's there / that's not built yet" as the highest-priority claim to check, because it is the one that unlocks unverified work.
+**Enforced by:** `grounded-agent-guardrails` — verify before asserting, extended to verifying *before accepting* a state claim that reduces scope.
+
+### L33 — An anti-slop rule asserted from taste will flag intentional craft
+**What happened:** Wrote a hard rule banning spring overshoot in motion. nota. ships `--motion-organic: 800ms cubic-bezier(0.34, 1.56, 0.64, 1)` deliberately. Also hard-banned Geist as an "AI tell" while canon names it the 90% body face. The rules were confident, unsourced, and would have generated false violations against considered decisions.
+**Rule:** Every anti-slop rule must carry either (a) a citation to project canon, or (b) external evidence, plus an explicit exception clause for deliberate use. A rule with neither is personal taste wearing a uniform. The tell is *unexamined defaults*, never a specific typeface or easing curve.
+**Enforced by:** anti-slop rules live in `NOTA-BRAND-UIUX-PACK.md` §14 only; external tools cite §14 rather than inventing parallel lists.
+
+### L34 — Audit the doctrine for slop, not only the code
+**What happened:** Spent the session enforcing canon against code, and never asked whether canon itself encoded a generic choice. It does: `NOTA-BRAND-UIUX-PACK.md` §4 and `DESIGN.md` name **Geist** as the 90% body face. 2026 external evidence places Geist in the "AI-startup typeface" cluster alongside Inter Display and General Sans — precisely the convergence §14 exists to prevent. Canon can drift toward generic while remaining internally consistent.
+**Rule:** Canon gets the same adversarial review as code, on a schedule. Ask periodically: has any canonical choice become generic since it was made? A doctrine written in year N encodes year N's defaults, and defaults commoditise.
+**Enforced by:** annual (or per-major-release) canon review, with external evidence required to change a canonical choice — logged per §5a with the why in the commit message.
+
+### L35 — Shipped code loading retired assets is a finding, not a detail
+**What happened:** `NOTA-BRAND-UIUX-PACK.md` §4 lists Satoshi, Unbounded, Space Grotesk, Caveat, and Cormorant Garamond as retired — "if found in the codebase, migrate." `app/layout.tsx` currently imports **Unbounded, Space Grotesk, and Caveat** via `next/font/google`, and `globals.css` declares a Cormorant Garamond `@font-face`. Four retired faces are live in production, costing bytes and brand coherence simultaneously.
+**Rule:** When canon retires an asset, the retirement is not complete until the code no longer loads it. Track retirement as migration work with an owner, not as a doc edit.
+**Enforced by:** a grep gate — for each name on the retired list, `grep -r` across `app/` and `globals.css` must return nothing; wire into the pre-deploy checklist alongside `repo-tidy`.
+
+### L36 — Deliverables written outside the repo do not survive the session
+**What happened:** Produced skills and a prompt pack into Cowork storage and an ephemeral outputs folder, while the repo's own `.claude/skills/` is the location Claude Code actually auto-loads. Exactly L10, repeated verbatim, in a session where L10 was already on file.
+**Rule:** Before writing any agent-facing artifact, name the consuming tool and the path it auto-loads from, and write there. If that path isn't reachable from the current session, state that as the blocker instead of writing elsewhere and calling it delivered.
+**Enforced by:** `implementation-preflight` gate 4, extended: "which tool loads this, from which path, without being told?"
+
+### L37 — Same-named skills at different layers are scoping, not duplication
+**What happened:** Found 4 of 6 shared skills diverging between global Cowork (`~/.claude/skills/`) and repo (`.claude/skills/`) — `verify-cli-claims` 149 lines vs 18, `repo-tidy` 167 vs 24, plus `grounded-agent-guardrails` and `loop-orchestrator`. Nearly "reconciled" them into single versions. Reading them first showed the repo copies are deliberately nota-specialised: repo `verify-cli-claims` asserts the ≤3 liquid-glass backdrop-filter budget, the single fixed grain layer, and `DESIGN.md` token usage over hardcoded hexes — none of which a generic global skill can know. Repo skills take precedence inside the repo, so the layering already works correctly. Merging would have destroyed the specialisation and silently removed a brand-performance gate.
+**Rule:** Before treating same-named artifacts at different layers as duplication, read both and classify: **intentional specialisation** (generic base + domain-specific override — correct, leave it), **accidental drift** (same intent, wording diverged — merge), or **stale copy** (abandoned version — delete). Line-count difference is not evidence of any of the three. "Reduce sources of truth" (L6) applies to competing claims about the *same* scope, not to deliberate layering across scopes.
+**Remedy built in:** `alignment-sweep` Pass 4 requires this classification before any divergence is reported as a finding, and names the `verify-cli-claims` case as the worked example.
+**Enforced by:** `alignment-sweep` skill (repo + global copies), run monthly via the `monthly-alignment-sweep` scheduled task (Cowork Scheduled, not a repo skill).
+
+### L38 — A defect flagged as "not fixed, needs someone who knows" should be fixed once you know
+**What happened:** `repo-tidy` carried a defect note from 2026-07-27: a global rebrand find/replace had overwritten its retired-product-names list with three identical `"nota."` entries, and step 2 instructed replacing them *with* `nota.`. The note correctly refused to guess and left it for someone with the knowledge. Two days later the canonical retired names were sitting in `NOTA-BRAND-UIUX-PACK.md` §4 and the brand doctrine — the information existed; nobody closed the loop.
+**Rule:** A deferred-defect note is a debt with an owner, not a permanent disclaimer. When you gain the knowledge a note was waiting on, fix it in that session and date the fix. Sweep for `not fixed`, `known defect`, `needs verification`, and `TODO` in skills and canon docs periodically — a flagged defect that survives three sweeps is either fixed or deliberately accepted, never left ambiguous.
+**Remedy built in:** `repo-tidy` step 1 restored from canonical sources 2026-07-29, retired-font sweep added per L35, and the guardrail-list exception from `AGENTS.md` §82 made explicit so the list isn't re-clobbered by the next global find/replace.
+**Enforced by:** `alignment-sweep` Pass 6 (freshness) treats unresolved defect notes older than 90 days as findings.
+
+### L39 — This repo has three CLI skill mirrors; a fix in one is a fix in none
+**What happened:** Fixed the `repo-tidy` retired-terms defect in `.claude/skills/` and nearly stopped there. The repo actually maintains **three** CLI skill trees — `.claude/skills/` (29 skills), `.agents/skills/` (6), `.gemini/skills/` (5) — for Claude Code, Codex, and Gemini respectively. `repo-tidy`, `verify-cli-claims`, `canonical-source-reconciler`, and `loop-orchestrator` exist in all three. They are **not** automatic mirrors: they hold different subsets, and the `.agents` and `.gemini` copies of `repo-tidy` differed from each other *and* from `.claude` before the fix. Codex and Gemini would have kept running the defective version indefinitely.
+**Rule:** Before editing any skill in this repo, check whether it exists in `.agents/skills/` or `.gemini/skills/` too, and propagate. A defect fixed in one CLI's tree while the others keep the broken copy is worse than the original defect — it creates the illusion of a fix while producing divergent behaviour per tool.
+```bash
+for s in <skill>; do for d in .claude .agents .gemini; do
+  [ -f "$d/skills/$s/SKILL.md" ] && echo "$d has $s"; done; done
+```
+**Remedy built in:** `repo-tidy` fix propagated to all three trees 2026-07-29; all three verified byte-identical.
+**Enforced by:** `alignment-sweep` Pass 4 extended to diff across `.claude` / `.agents` / `.gemini`, not just repo-vs-global.
+
+---
+
+## 2026-07-29 — Adversarial pass over this session's own output
+
+### L40 — Run every new rule against the artifact that introduced it
+**What happened:** Wrote L39 ("this repo has three CLI skill trees; a fix in one is a fix in none"), then within the same session shipped `alignment-sweep` and `canon-slop-audit` into `.claude/skills/` **only**. Codex and Gemini would never have seen either. The violation was invisible until an adversarial pass explicitly diffed the trees — the same pass the new skill itself prescribes. Also shipped an `Enforced by: monthly-alignment-sweep` reference that resolves to a Cowork scheduled task, not a repo skill, violating L23's rule that every "Enforced by" must point at something that actually runs where claimed.
+**Rule:** The moment a lesson is written, run it against the current session's own deliverables before closing. A rule authored and violated in the same session is worse than no rule — it teaches the next agent that lessons are documentation rather than constraints. Applies with double force to any lesson about propagation, duplication, or placement, because those are precisely the ones the author is mid-violating.
+**Remedy built in:** Both skills propagated to `.agents/` and `.gemini/`, verified byte-identical; the false enforcement reference corrected in place.
+**Enforced by:** `loop-orchestrator` critical-review pass extended — the final gate now asks "does this session's output satisfy the rules this session wrote?" and `alignment-sweep` Pass 4 diffs all three CLI trees for every skill, not just pre-existing ones.
+
+### L41 — Untested infrastructure claims are the highest-confidence, lowest-evidence claims an agent makes
+**What happened:** Authored `visual-verification` — a skill whose entire premise is *never claim a UI works without running it* — and then reviewed an entire design system, wrote 11 lessons, rebuilt six skills, and produced a prompt pack **without once starting the dev server**. When finally instructed to run E2E, the sandbox surfaced four blockers in sequence: the mount blocks `unlink` (Next cannot clear `.next/BUILD_ID`), Playwright browsers were absent, `--with-deps` needs root, and `lightningcss` had no arm64 binding. None was visible from reading code. All four were trivially discoverable by running one command.
+**Rule:** Any skill that prescribes execution must itself be executed at least once against the real target before it is called delivered. "The instructions are correct" is not the same claim as "the instructions work here," and only the second is worth anything. Where the environment cannot support execution, that limitation is the headline finding, not a footnote.
+**Remedy built in:** Full E2E executed 2026-07-29 — build ✓, 35 passed / 7 skipped / 0 failed on chromium and Mobile Chrome, unit 17/17, lint 0 errors. Sandbox workaround documented below.
+**Enforced by:** `verify-cli-claims` (repo copy) already forbids "complete" without a build; extended in spirit to skills — a skill prescribing a command is unverified until that command has run.
+
+### L42 — Sandbox execution recipe for this repo (saves the next agent ~40 minutes)
+**What happened:** Getting a green E2E run inside a Cowork sandbox required four non-obvious workarounds, discovered serially.
+**Rule:** Record environment-specific execution recipes; rediscovering them is pure waste.
+**Remedy built in:**
+1. **Mount blocks `unlink`** → `next build` fails `EPERM` on `.next/BUILD_ID`. Copy the repo out: `tar -cf - --exclude=node_modules --exclude=.next --exclude=.git . | (cd /tmp/nota && tar -xf -)`.
+2. **Do not symlink `node_modules`** — Turbopack rejects it ("points out of the filesystem root"). Copy it (~1.1 GB; needs ≥3 GB free).
+3. **Playwright** — `--with-deps` fails (no root). Use `PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1 npx playwright install chromium`, then supply the one missing lib manually: `apt-get download libxdamage1 && dpkg-deb -x *.deb /tmp/libs`, then `LD_LIBRARY_PATH=/tmp/libs/usr/lib/aarch64-linux-gnu`.
+4. **arm64** — install `lightningcss-linux-arm64-gnu --no-save` or the CSS pipeline dies at build.
+**Enforced by:** referenced from `alignment-sweep` Pass 1 so a sweep that needs to run tests doesn't re-derive this.
+
+### L43 — Two live test gaps found by actually running the suite
+**What happened:** The green run surfaced what static review could not. **(a)** All 7 skipped specs are auth/data-gated — including the entire `lens-filter-empty-state` suite, which is the only automated coverage of contextual empty states across shelf view modes. The screens `screen-state-completeness` cares most about are the ones never exercised in CI. **(b)** The E2E web server logged repeated `429`s from `upload.wikimedia.org` — tests are fetching live upstream images, so the suite depends on a third party's rate limiter and will flake in CI.
+**Rule:** A green suite is evidence about what ran, never about what was skipped. Report skip counts with the same prominence as failures, and name what coverage each skip removes. Any external network call inside a test is a latent flake — fixture it (cf. L26, `ABUNDANCE_FIXTURE_MODE`).
+**Enforced by:** `alignment-sweep` Pass 6 extended to report skipped-spec counts and any external hosts contacted during a test run. Open for Christopher: seed auth/data fixtures so the 7 skips execute, and stub `upload.wikimedia.org` image responses.
+
+### L44 — Looking at the rendered screen found three defects that six passes of reading did not
+**What happened:** After an entire session of canon review, drift analysis, and a green E2E suite, the first actual screenshot of the homepage surfaced three defects no amount of reading had caught:
+
+1. **`ConsentBanner.tsx` ships three off-palette navy blues** — `#1a2439`, `#2d3d5c`, `#7a8fa3`. None appears anywhere in `DESIGN.md`, `NOTA-BRAND-UIUX-PACK.md`, or `NOTA_MANIFESTO.md`; the nota. palette contains no blue at all. This component renders on **every route** via `app/layout.tsx`, making it the single most brand-visible element in the product.
+2. **`var(--bg-secondary, #1a2439)` references a token that does not exist** — `--bg-secondary` is defined nowhere in `globals.css` or `lib/design/tokens.css`, so every render silently falls through to the hardcoded navy. A missing token with a plausible fallback fails invisibly forever.
+3. **`--r-card: 16px` contradicts brand pack §6**, which specifies structural radius `0px` for cards, sheets and panels — "cut-paper / glass-edge geometry. Reject bubble aesthetics." The banner also renders as a rounded bubble, the exact aesthetic §6 rejects.
+
+E2E passed 35/35 throughout. Tests assert behaviour, not brand.
+
+**Rule:** A green suite and a canon review are not evidence about appearance. Any engagement that reviews, audits, or changes visual doctrine must screenshot at least one real rendered route before reporting, and must sample computed values (`getComputedStyle`) rather than reading declared ones — the declared value is not necessarily the rendered value. Specifically: grep every `var(--token, fallback)` for tokens that do not exist, because the fallback makes the failure silent.
+**Remedy built in:** Screens captured to `outputs/nota-screens/` and inspected 2026-07-29. `visual-verification` skill executed for the first time. Findings logged as open items below.
+**Enforced by:** `visual-verification` skill; `alignment-sweep` Pass 2 extended to grep for `var(--*, #hex)` fallbacks whose token is undefined, and to compare computed body/surface values against `DESIGN.md` rather than only reading declarations.
+
+**Open for Christopher (not fixed — brand decisions):**
+- `ConsentBanner.tsx` needs re-tokening to the real palette (charcoal surface, ivory text, olive action). Three hardcoded navies + one phantom token.
+- Define `--bg-secondary` or remove the reference.
+- Reconcile `--r-card: 16px` / `--r-btn: 12px` against §6's `0px` structural radius — one of the two is wrong.
+- Banner overlaps the `03 IDENTITY` section content at desktop 1440×900 and has a clipped glyph at the left viewport edge.
+
+### L45 — A skill that prescribes commands must first prove the environment can run them
+**What happened:** `branch-hygiene` Step 4 prescribed `git add`, `git commit`, `npm run build`, `git push origin main` unconditionally. Under Cowork all four fail: the mount denies `unlink`, so every git index operation and every `next build` returns `EPERM` (GL-5). An agent following the skill from Cowork hits an opaque permissions error with no guidance. Step 4 also assumed `main` was only *ahead* of `origin/main`; it is currently `[ahead 12, behind 4]`, so the prescribed `git push` is rejected and the skill offers no divergence path. Separately, GL-5's own deletability probe (`touch x && rm x`) *creates* a file before testing whether files can be removed — when unlink is denied the probe leaves permanent litter. This session created `.loop_probe` and could not remove it.
+**Rule:** Any skill that issues commands must gate on environment capability before issuing them, and must probe capabilities non-destructively — never by creating state it may be unable to clean up. Prescribing a command that cannot run in one of the three environments in active use is a defect in the skill, not a quirk of the environment.
+**Remedy built in:** `branch-hygiene` gained Step 0 (capability probe against an *existing* throwaway path, with an explicit `READ/WRITE ONLY → hand off a commit script` branch) and a diverged-main section in Step 4 (`rev-list --left-right --count`, `pull --rebase`, mandatory rebuild after rebase, explicit no-force rule, hand off on conflict rather than resolve blind).
+**Enforced by:** `branch-hygiene` Step 0 runs before Step 1 in every session; `repo-tidy` and `verify-cli-claims` both treat "command prescribed but never executed against the real target" as an unverified claim.
+
+### L46 — Capability that exists in only one CLI tree is capability the other CLIs do not have
+**What happened:** `.claude/skills` holds 29 skills, `.agents/skills` 11, `.gemini/skills` 10. Twenty exist only under `.claude/` — including `branch-hygiene`, `safe-commit-shared-repo`, `security-hardening`, `testing-framework` and `qe-automation`. Codex and Gemini sessions edit this repo with no branch discipline, no shared-repo commit safety and no security skill loaded, while commits `3bea1c3` and `951012e` show cross-tree parity was already understood to matter. Meanwhile the account-level `frontend-design-consultant` and `alignment-sweep` skills both declare that they read "each repo's own `.claude/skills/` at run time" for nota. **and Abundance** — and Abundance has zero skills in all three trees, making that premise false for half their declared scope.
+**Rule:** A skill is only in force where its tree is loaded. Authoring into `.claude/` alone silently exempts every other CLI from the rule it encodes — and the safety skills are precisely the ones whose absence is invisible until something breaks. A skill that declares a scope must be checked against every repo in that scope, not just the one it was written in.
+**Remedy built in:** Divergence quantified and recorded as open item 4 in `docs/HANDOVER-2026-08-02-memory-durability.md` with Claude Code as owner (Cowork cannot delete, so it cannot safely reconcile trees). Abundance's empty-tree problem recorded as item 5, requiring a decision rather than a silent copy.
+**Enforced by:** `alignment-sweep` Pass 4 (skill-layer divergence) — extended to fail when a skill's stated scope names a repo whose tree does not contain it.
+
+### L47 — Appending a lesson series without checking the existing range collides ten IDs silently
+**What happened:** `docs/lessons.md` contains 56 lesson headings but only 46 unique IDs. L26–L35 each appear **twice, with completely different content** — e.g. L29 is both "Preview/import features ship preview-first, write-later" (line 95) and "Authoring for a repo you have not opened is invention, not consulting" (line 220). Commit `c4de6f0 docs(lessons): add L29-L43` appended a second series beginning at L26 without checking that L26–L35 already existed. Twenty citations across `alignment-sweep`, `repo-tidy`, `canon-slop-audit`, `loop-orchestrator/references/engagement-scorecard.md`, the `.agents/` mirror, and `HANDOVER-2026-07-29` now point at ambiguous IDs. Every one inspected resolves by content to the *second* series, making the older block the orphan — but the ID alone cannot tell a reader which is meant.
+**Rule:** A lesson ID is a citation target, so appending to a lessons file is an API change, not a text edit. Derive the next ID from `grep -oE '^### L[0-9]+' | sort -V | tail -1` before writing, and after writing assert `unique == total`. Never renumber a cited series to resolve a collision — renumber the uncited one, or every downstream reference silently retargets.
+**Remedy built in:** Collision quantified and a renumbering spec with citation-safety constraints recorded as open item 7 in `docs/HANDOVER-2026-08-02-memory-durability.md`, owned by Claude Code. Not executed from Cowork: the fix spans `.claude/`, `.agents/` and `.gemini/` trees plus handover docs, and a blind renumber would break the twenty live citations it is meant to protect.
+**Enforced by:** `alignment-sweep` Pass 6 (doc freshness) extended with an integrity assertion on `docs/lessons.md` — unique lesson IDs must equal total lesson headings, and any duplicate ID is a HIGH finding. `repo-tidy` step 7 (repo-level file; the account-level skill of the same name has a different phase structure and does not govern this repo) checks the same before any merge to main.
+
+### L58 — A hand-off pack must separate reversible steps from irreversible ones
+**What happened:** The 2026-08-02 prompt pack bundled `git commit` (local, reversible), `git pull --rebase` over twelve local commits (hard to reverse), `git push` (public), and `git branch -d` into a single Prompt 1, with no recovery ref created first and no requirement to paste the preceding verification verdict. Claude Code refused to run it, correctly citing that the pack contained rebase, push, branch deletion and hook modification as one undifferentiated block. The refusal was right and the pack was wrong: a `git branch backup/<name>` before the risky step costs nothing and makes every subsequent action a one-command undo. Separately, the pack asserted `main` was `[ahead 12, behind 4]` from a Cowork sandbox that could not `git fetch` — stale tracking data presented as current state.
+**Rule:** Split hand-off packs at the reversibility boundary, not the topic boundary. Everything local and undoable goes in one prompt that ends with "stop and report"; anything that rewrites history, publishes, or deletes goes in a separate gated prompt that begins by creating a recovery ref and re-measuring the state itself. Never carry a measurement across an environment boundary — state that a hand-off asserts must be re-established by the executing agent, because the authoring agent may not have been able to observe it. An agent refusing a hand-off on safety grounds is the system working; treat the refusal as a finding about the pack.
+**Remedy built in:** Prompt 1 split into Prompt 1 (commit only, creates `backup/pre-durability-2026-08-02`, ends in a mandatory stop) and Prompt 1b (fetch, measure real divergence, branch on the actual conflict surface, `rebase --abort` and report on conflict, explicit `git reset --hard <backup>` recovery line, `-d` never `-D`). Prompt 1 now requires Prompt 0's verdict to be pasted before it may run.
+**Enforced by:** `branch-hygiene` Step 0 (hand off a script when the environment cannot commit) and Step 4's diverged-main path, which already requires measuring `rev-list --left-right --count` rather than trusting a prior report; this lesson extends that requirement to any state claim inherited from another agent's document.
+
+### L59 — `git status` is not a read-only command, and in Cowork it strands a lock that blocks everyone
+**What happened:** A Cowork session ran `git status --short docs/lessons.md` to check whether a file was modified — an apparently harmless read. `git status` refreshes the index, which acquires `.git/index.lock`. The Cowork mount denies `unlink`, so git could not remove its own lock: `warning: unable to unlink '.git/index.lock': Operation not permitted`. A 0-byte stale lock was left behind, blocking every `git add`, `commit`, `rebase` and `status` for **every tool and every human** touching the repo — the identical environment-wide outage recorded as GL-6 on 2026-07-27, reproduced from the read side rather than the write side. GL-5 had correctly said "no git index operations from Cowork", but everyone including its author read that as "no commits", not "no status".
+**Rule:** From a mount that denies `unlink`, the only safe git commands are ones that never touch the index: `git log`, `git show`, `git rev-list`, `git branch --list`, `git ls-files`, `git cat-file`. **`git status`, `git diff` against the worktree, `git add`, `git commit`, `git stash` and `git rebase` all take the index lock and will strand it.** To ask "is this file modified" without the index, use `git diff --no-index` against a `git show HEAD:<path>` dump, or simply compare mtimes. Treat GL-5 as covering reads, not just writes.
+**Remedy built in:** The blocker and its one-line fix now open `docs/HANDOVER-2026-08-02-memory-durability.md` as the first section, per GL-6. `branch-hygiene` Step 0 already routes `READ/WRITE ONLY` environments to a hand-off script; this lesson names the specific read commands that are unsafe there, which Step 0 previously did not.
+**Enforced by:** `branch-hygiene` Step 0 — its capability probe now precedes any git use, and a `READ/WRITE ONLY` result forbids index-touching commands including `git status`. `alignment-sweep` Pass 8 already reports a stale `.git/index.lock` as a HIGH finding (GL-6).
+
+### L60 — A remedy's own comment can be wrong; test the command, not the prose next to it
+**What happened:** L45's remedy for `branch-hygiene` Step 0 added a comment reading "Probe an existing throwaway path — never create one, or you leave litter you cannot remove," directly above a command that still did `touch .git/.hygiene_probe && rm .git/.hygiene_probe` — creating a new file first. If `rm` failed silently under a mount that denies `unlink`, that file was exactly the litter the comment claimed to avoid. GL-10 predicted this exact pattern (a rule violated within the same session that wrote it); this is a second, independent instance of it, caught only by re-executing the probe rather than reading its comment.
+**Rule:** A comment describing what a command does is a claim, not evidence. When reviewing or writing a safety probe, run it and inspect what it actually touches on disk — don't accept prose adjacent to code as proof of the code's behavior.
+**Remedy built in:** Step 0's probe now uses `mktemp` in OS scratch space instead of a path inside the repo, so a failed `rm` can never strand anything the repo mount can't clean up, regardless of what any comment claims.
+**Enforced by:** Not currently automated — this is a code-review discipline, not a grep-able pattern. `alignment-sweep` Pass 2 addendum (GL-7) is the closest existing mechanism (re-verify a claimed remedy against its target file) and should be read as covering "remedy comments" too, not just "Resolved" lesson notes.
+
+### L61 — A hook rewritten for one shell must be tested in that shell, not just read
+**What happened:** The `.husky/pre-push` additions for lesson-ID integrity, dead-canon-pointer, and skill-tree-parity checks (2026-08-03) were first written using `comm -23 <(...) <(...)` — process substitution, which is a bash-only construct. The hook's shebang is `#!/bin/sh`, and this repo's `sh` is dash, which doesn't support it. Direct invocation (`sh .husky/pre-push`) caught the syntax error immediately; had it not been tested this way before a real push, the skill-tree-parity check would have silently thrown a shell error on every push to `main` rather than running.
+**Rule:** A shell script's shebang defines its actual execution environment, not the shell you happen to be typing commands in. Any script with `#!/bin/sh` must be verified against a real `sh`/dash invocation (`sh script.sh` or `dash -n script.sh` for syntax-only), not just visually reviewed or run under whatever the author's interactive shell happens to be.
+**Remedy built in:** Rewrote the check using portable temp files (`ls ... > /tmp/...$$`) instead of process substitution, then re-ran `sh .husky/pre-push` to confirm the fix before it landed.
+**Enforced by:** `safe-commit-shared-repo`'s "testing a new git hook" section already requires direct invocation before trusting a hook; this lesson adds the specific case of shell-portability bugs that only surface under the shebang's actual interpreter, not the author's shell.
+
+### L62 — A regex broadened to close one gap can open a false positive somewhere else in the same pass
+**What happened:** The pre-push dead-canon-pointer check (L47/GL-3/GL-7) originally scanned only `docs/index.md`, `CLAUDE.md`, `AGENTS.md` — too narrow, and missed a live stale pointer in `docs/launch/LAUNCH_MAESTRO_INTEGRATION.md` (found by an independent loop-orchestrator critique, 2026-08-03). The first fix broadened the *file scope* to include `docs/launch/`, which would have then flagged `~/.claude/plugins/launch-maestro/...` in that same file — a correct, real plugin path, not a stale canon pointer. GL-3/GL-7 is specifically about four canon files (`CLAUDE.md`, `PROJECTS.md`, `LESSONS.md`, `profile.md`) that moved to `claude-global/`; it was never a claim that all of `~/.claude/` is unreachable or wrong.
+**Rule:** When fixing a detector's false negative (missed a real case), re-check whether the fix introduces a false positive elsewhere before shipping it — broadening scope and narrowing precision are two different fixes, and a gap found in one dimension is often best closed by tightening the other, not just scanning more files with the same loose pattern.
+**Remedy built in:** Narrowed the regex to the four actual canon filenames (`CLAUDE|PROJECTS|LESSONS|profile\.md`) instead of matching any `~/.claude/*.md`, then broadened the file scope to include `docs/launch/` and `docs/HANDOVER.md` safely on top of that.
+**Enforced by:** `.husky/pre-push`'s dead-canon-pointer check, re-tested against both the original failing case (`docs/launch/LAUNCH_MAESTRO_INTEGRATION.md`, now clean) and a real duplicate-ID failure case before this landed.
+
+---
+
+## 2026-07-27 — PR #82 skill hygiene and review hardening
+
+Context: PR #82 restored and hardened repo skills after review surfaced tampered skill bodies, stale audit claims, and missing integrity checks. These entries were appended at fresh IDs during the 2026-08-11 merge with `main` so existing `L36-L62` citations keep their original meanings.
+
+### L63 — A skill's "scope" or "rule" content can go stale even when its name still fires correctly
+**What happened:** The global `repo-tidy` skill's Phase 5 hardcoded a "locked MVP scope" that matched no current repo. It went unnoticed until read closely mid-run; a single-pass audit would have quietly produced a wrong or empty scope-purge result.
+**Rule:** Any skill step that encodes "current scope," "locked features," or similar project-state facts must read that state live from the target repo's own AGENTS.md/CLAUDE.md at run time. If no such source exists, the skill must say so explicitly rather than silently applying a stale or borrowed list.
+**Enforced by:** `repo-tidy` Phase 5 rewritten to read scope from the target repo's docs at run time and report an explicit skipped state instead of guessing.
+
+### L64 — A misleading commit message is a bigger threat than an obviously-bad diff
+**What happened:** Commit `55b2d2d` claimed to trim `repo-tidy` and `verify-cli-claims` into pointer copies, but the diff replaced mature safety skills with short instructions that could silently rewrite output and prompt-delete branches, then mirrored those replacements across `.claude/`, `.agents/`, and `.gemini/`.
+**Rule:** When a skill/doc's content materially differs from what its commit message or catalog description implies, run `git log -p --follow` on that file before treating the mismatch as ordinary drift. Treat "silently rewrite / silently replace" instructions in any skill as a stop-and-flag condition.
+**Enforced by:** restored `.claude/skills/repo-tidy` and `.claude/skills/verify-cli-claims` from pre-55b2d2d history; `.agents/` and `.gemini/` copies are thin pointers to the canonical `.claude/` bodies.
+
+### L65 — "Consolidation" and "pointer" commits need the same scrutiny as feature commits
+**What happened:** The tampering in L64 was framed as low-risk tooling hygiene. The administrative wording made the change easy to skim even though it altered instructions consumed by future agents.
+**Rule:** Any "refactor / consolidate / dedupe" commit touching skill, doc, or config files gets a full before/after content read. Do not assume a consolidation diff matches the message because the message sounds mechanical.
+**Enforced by:** `scripts/check-skill-integrity.mjs` content-hash enforcement catches unexpected skill-body changes regardless of the commit message.
+
+### L66 — The loop only works if it self-triggers
+**What happened:** The skill-tampering incident was found because the user explicitly asked for a loop after an initial pass had already declared the work done. The existing "substantial work" trigger was too fuzzy and failed to fire.
+**Rule:** Self-trigger the loop whenever work touches `.claude/skills/`, `.agents/skills/`, or `.gemini/skills/`; spans more than one repo; or finds a file whose content contradicts its own commit message, catalog, or README description. Skipping the loop when a trigger is present must be reported.
+**Enforced by:** `CLAUDE.md` rule 12 now names these concrete self-trigger conditions.
+
+### L67 — A commit-message keyword check does not detect content tampering; only a content hash does
+**What happened:** A first guard design checked whether changed skill filenames appeared in commit messages. The real bad commit would have passed because it named the files while misdescribing the content change.
+**Rule:** A tamper guard must check artifact content against a committed, reviewable baseline, not proxy signals like commit messages, labels, or descriptions. Test every new integrity check against the real incident it is meant to catch.
+**Enforced by:** `scripts/check-skill-integrity.mjs` checks skill file hashes against `docs/skills.lock.json`, with relocking reserved for deliberate `npm run skills:relock` changes.
+
+### L68 — A plausible-sounding rule ID is not a verified rule ID
+**What happened:** A SonarCloud failure was initially attributed to the wrong JavaScript rule ID and severity from memory. The first fix improved style but had no effect on the real Quality Gate.
+**Rule:** Before naming a third-party rule ID, severity, or tool behavior as the diagnosis for a real failure, verify it against the tool's own documentation or current source. If unverified, label it as suspected rather than fact.
+**Enforced by:** `verify-cli-claims` now has a claim-type section for named rule/tool diagnoses and requires external verification before a "Verified" verdict.
+
+### L69 — "No app code references it" needs dynamic-access and RPC checks
+**What happened:** A table audit initially classified candidates using literal string search across app code. That missed possible access through RPC functions, triggers, generic query helpers, and non-app surfaces.
+**Rule:** "No app code references table X" is only reviewed until the audit checks literal usage, dynamic query builders, `.rpc(` calls, migration-defined functions/triggers, and every declared surface such as `app/`, `lib/`, `components/`, `scripts/`, and `supabase/functions/`.
+**Enforced by:** `.claude/skills/db-table-usage-audit/SKILL.md` bakes those checks into the ORPHANED verdict requirements.
+
+### L70 — A hook file passing manually is not proof it fires on a real git event
+**What happened:** Claims that the pre-push guard blocked bad pushes were based on manual script execution, not proof that Git resolved and fired the hook.
+**Rule:** A hook claim requires checking the actual hook path, `core.hooksPath`, the named hook file, and any required hook runner binary. Verify each claimed hook independently.
+**Enforced by:** `verify-cli-claims` now includes a hook-verification correction for pre-push and pre-commit claims.
+
+### L71 — "No node_modules" silently downgrades build and typecheck claims to unverifiable
+**What happened:** Prior summaries referenced build, lint, and typecheck commands as standards without first confirming the local toolchain existed in the sandbox.
+**Rule:** Before citing a local command as verification evidence, confirm the declared binary or package script can execute in the current environment. If not, report the claim as unverifiable rather than substituting an unpinned fallback.
+**Enforced by:** `verify-cli-claims` now forbids unpinned `npx tsc` fallback and treats missing local compiler/scripts as Unverifiable.
+
+### L72 — A canonical lessons doc needs its own ID-uniqueness check
+**What happened:** Two independent sessions authored overlapping lesson IDs, and cross-references silently became ambiguous until review caught the collision.
+**Rule:** Before adding lesson entries, derive the next ID from the existing headings and assert unique heading count equals total heading count after the edit.
+**Enforced by:** `scripts/check-lesson-ids.mjs`, `npm run lessons:check`, `.husky/pre-push`, and `.github/workflows/skill-integrity.yml`.

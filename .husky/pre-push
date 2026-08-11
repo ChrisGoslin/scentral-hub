@@ -81,7 +81,75 @@ if [ -n "$DECLARED_HOSTS" ]; then
   done
 fi
 
-if [ $TSC_STATUS -ne 0 ] || [ -n "$BAD_FILES" ] || [ $IMAGE_HOST_FAILED -ne 0 ]; then
+# Lesson-ID integrity (L47) — a duplicate ID silently retargets every citation to it.
+echo "🔍 Checking lesson-ID integrity..."
+LESSON_ID_FAILED=0
+if [ -f docs/lessons.md ]; then
+  UNIQUE_IDS=$(grep -oE "^### L[0-9]+" docs/lessons.md | sort -u | wc -l | tr -d ' ')
+  TOTAL_IDS=$(grep -cE "^### L[0-9]+" docs/lessons.md | tr -d ' ')
+  if [ "$UNIQUE_IDS" -ne "$TOTAL_IDS" ]; then
+    echo "❌ $((TOTAL_IDS - UNIQUE_IDS)) duplicate lesson IDs in docs/lessons.md."
+    LESSON_ID_FAILED=1
+  fi
+fi
+
+# Dead canon pointers (GL-3, GL-7) — ~/.claude/*.md is unreachable from Cowork and has
+# silently broken grounding twice; canon must route through claude-global/ instead.
+#
+# Auto-discovers routing docs instead of a fixed list (2026-08-03, after a fixed
+# 3-file list missed a real stale pointer in docs/launch/). Scans all of docs/ plus
+# CLAUDE.md/AGENTS.md, excluding docs/archived/ (explicitly superseded) and dated
+# historical incident narratives (HANDOVER-YYYY-MM-DD-*.md, *verification-audit*.md)
+# that must quote a bad path to document it. Safe against false positives because the
+# regex below is narrow — it matches only the four actual canon filenames
+# (CLAUDE/PROJECTS/LESSONS/profile.md), not any ~/.claude/* path, so it does not flag
+# legitimate paths like ~/.claude/plugins/... or ~/.claude/skills/... (GL-3/GL-7 is
+# about those four files moving to claude-global/, not about ~/.claude/ categorically).
+echo "🔍 Checking for dead canon pointers..."
+ROUTING_DOCS="CLAUDE.md AGENTS.md"
+ROUTING_DOCS="$ROUTING_DOCS $(find docs -name '*.md' \
+  -not -path '*/archived/*' \
+  -not -name 'HANDOVER-????-??-??-*.md' \
+  -not -name '*verification-audit*.md' 2>/dev/null)"
+DEAD_POINTERS=""
+for f in $ROUTING_DOCS; do
+  if [ -f "$f" ] && grep -qiE '~/\.claude/(CLAUDE|PROJECTS|LESSONS|profile)\.md|/Users/[^/]+/\.claude/(CLAUDE|PROJECTS|LESSONS|profile)\.md' "$f" 2>/dev/null; then
+    DEAD_POINTERS="$DEAD_POINTERS $f"
+  fi
+done
+if [ -n "$DEAD_POINTERS" ]; then
+  echo "❌ Dead canon pointer(s) to ~/.claude/*.md found in routing docs (unreachable from Cowork):"
+  for f in $DEAD_POINTERS; do echo "   - $f"; done
+fi
+
+# Skill tree parity (L46) — warn only, do not block. Exclusions are read directly
+# from .claude/skills/README.md's machine-readable block (between the
+# pre-push-skill-parity-exclusions markers) instead of a second hardcoded list —
+# Critique 2 (2026-08-03) found a hardcoded copy here drifted from the README's
+# prose immediately (the filter never read the documented exclusion at all).
+# Single source of truth now: edit the README block, this hook picks it up.
+echo "🔍 Checking skill tree parity (warn only)..."
+if [ -d .claude/skills ]; then
+  EXCLUDED_SKILLS="README.md"
+  if [ -f .claude/skills/README.md ]; then
+    README_EXCLUSIONS=$(sed -n '/<!-- pre-push-skill-parity-exclusions:start -->/,/<!-- pre-push-skill-parity-exclusions:end -->/p' .claude/skills/README.md \
+      | grep -v '^<!--' | grep -v '^$' | tr '\n' '|' | sed 's/|$//')
+    [ -n "$README_EXCLUSIONS" ] && EXCLUDED_SKILLS="$EXCLUDED_SKILLS|$README_EXCLUSIONS"
+  fi
+  ls .claude/skills 2>/dev/null | sort > /tmp/pre-push-claude-skills.$$
+  ls .agents/skills 2>/dev/null | sort > /tmp/pre-push-agents-skills.$$
+  ls .gemini/skills 2>/dev/null | sort > /tmp/pre-push-gemini-skills.$$
+  MISSING_AGENTS=$(comm -23 /tmp/pre-push-claude-skills.$$ /tmp/pre-push-agents-skills.$$ | grep -vE "^($EXCLUDED_SKILLS)\$")
+  MISSING_GEMINI=$(comm -23 /tmp/pre-push-claude-skills.$$ /tmp/pre-push-gemini-skills.$$ | grep -vE "^($EXCLUDED_SKILLS)\$")
+  rm -f /tmp/pre-push-claude-skills.$$ /tmp/pre-push-agents-skills.$$ /tmp/pre-push-gemini-skills.$$
+  if [ -n "$MISSING_AGENTS" ] || [ -n "$MISSING_GEMINI" ]; then
+    echo "⚠️  Skill tree drift detected (not blocking) — check .claude/skills/README.md for known exclusions:"
+    [ -n "$MISSING_AGENTS" ] && echo "$MISSING_AGENTS" | sed 's/^/   .agents missing: /'
+    [ -n "$MISSING_GEMINI" ] && echo "$MISSING_GEMINI" | sed 's/^/   .gemini missing: /'
+  fi
+fi
+
+if [ $TSC_STATUS -ne 0 ] || [ -n "$BAD_FILES" ] || [ $IMAGE_HOST_FAILED -ne 0 ] || [ $LESSON_ID_FAILED -ne 0 ] || [ -n "$DEAD_POINTERS" ]; then
   echo "❌ Pre-push checks failed — push blocked. Fix errors above before pushing."
   exit 1
 fi

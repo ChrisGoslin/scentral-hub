@@ -6,9 +6,9 @@
 //
 // Deliberately does NOT trust commit messages: the 55b2d2d incident's commit
 // message named both affected skills while lying about what it did to them
-// (docs/lessons.md L26-L29). Only content hashes are checked here.
+// (docs/lessons.md L64). Only content hashes are checked here.
 //
-// Enforced two ways (see docs/lessons.md L30): locally via .husky/pre-push on
+// Enforced two ways (see docs/lessons.md L67): locally via .husky/pre-push on
 // every branch, and server-side via .github/workflows/skill-integrity.yml on
 // push/PR to main — the latter closes the case where a GitHub UI merge would
 // otherwise bypass the local hook entirely (the path 55b2d2d could have taken).

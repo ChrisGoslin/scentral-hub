@@ -1,6 +1,6 @@
 ---
 name: loop-orchestrator
-description: Orchestrate evidence-gated delivery loops for substantial, cross-CLI, canonical, risky, or release-affecting work. Use when a task needs coordinated building, independent critique, remediation through Version 2 or Version 3, verified completion claims, or reusable lesson routing; also use when deciding whether a request needs quick, standard, or assured loop depth.
+description: Orchestrate evidence-gated delivery loops for substantial, cross-CLI, canonical, risky, or release-affecting work. Use when a task needs coordinated building, independent critique, remediation through Version 2 or Version 3, verified completion claims, or reusable lesson routing; also use when deciding whether a request needs quick, standard, or assured loop depth. Also triggers on "Rate", "Critique", "score this", "how did we do", "retro", or "rate your performance" — see §7 for the dual-perspective engagement scorecard that scores the provider and the client's experience separately, leads with the unprompted-defect-discovery ratio, and runs an adversarial pass over the session's own output before publishing.
 ---
 
 # Loop Orchestrator
@@ -95,6 +95,25 @@ bash "$repo_root/.claude/skills/loop-orchestrator/scripts/validate-completion-re
 ```
 
 The script validates record structure, not the truth of its contents. Direct inspection and real checks remain mandatory.
+
+## 7. Rate / Critique — engagement scorecard
+
+**Trigger words:** `Rate` · `Critique` · `rate this` · `critique this` · `score this` · `how did we do` · `retro` · `retrospective` · `rate your performance`.
+
+Also run **unprompted** at the close of any `assured` loop, and at the end of any engagement that produced three or more rebuilds of the same artifact — the client should not have to ask for the bad news.
+
+Follow [references/engagement-scorecard.md](references/engagement-scorecard.md) in full.
+
+**Governing premise:** Christopher is a **non-technical client who depends on provider expertise to find defects he cannot see.** The measure is therefore not whether the work ended up correct, but **how much of that correctness the client had to enforce.** Good work delivered only after five rounds of client QE is a failed engagement with a good artifact in it.
+
+Two voices, both mandatory:
+
+1. **Solutions Architect** — scores Discovery · Analysis · Implementation · Review · Output · Customer Satisfaction, 0–10, each tied to checkable evidence. Rebuilds cap Implementation: one → max 8, two → max 6, three or more → max 5. Recovery quality never restores points lost to avoidable rework.
+2. **The Client** — first person, blunt, quantified. Leads with the **QE ledger**: every correction in the engagement attributed to `CLIENT` or `PROVIDER`, and the **unprompted discovery ratio** (provider-found ÷ total) stated explicitly. ≥0.8 is doing the job; <0.3 means the client is doing the provider's QA and paying for the privilege. Then rework %, risk introduced (near-misses caught by the client count as failures, not saves), any rule broken that the client had already documented, genuine credit, and a rehire verdict split between discovery and execution.
+
+Then run the **adversarial pass** before publishing: check this session's output against the rules this session wrote, every `Enforced by:` reference for an actually-running mechanism, every new artifact for presence in all consuming trees (`.claude/`, `.agents/`, `.gemini/`, Cowork), and every command-prescribing skill for having been executed once against the real target. **Fix what it finds, then report both violation and fix.**
+
+Route resulting lessons to their single canonical owner. Never inflate to close on a positive — a scorecard is only worth the trust placed in it.
 
 ## Guardrails
 

@@ -13,9 +13,8 @@ const TYPE_OPTIONS: Array<{ value: FeedbackType; label: string }> = [
   { value: 'suggestion', label: 'Suggestion' },
 ]
 
-// Reuses the app-wide anon identity key so admin-awarded XP lands on the same
-// user_xp row as every other XP source (wear logging, contributions) — not a
-// disconnected second identity.
+// Reuses the app-wide anon identity key so admin-awarded progress lands on the
+// same user_xp row as other contribution sources, not a disconnected identity.
 function getOrCreateSessionId(): string {
   try {
     const existing = localStorage.getItem('scentral_anon_id')

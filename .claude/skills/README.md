@@ -20,19 +20,19 @@ mechanism is broken again.
 | `safe-commit-shared-repo` | Commit safely when a concurrent session may be editing this repo at the same time. Explicit-pathspec discipline. Now also covers testing a new git hook safely and the `git reset --hard` blast-radius trap. | Yes — add new "what NOT to do" examples as you hit them. Grew 2026-06-25: a `git reset --hard` used to undo a self-inflicted test commit also wiped unrelated uncommitted work, and a hook "verified" by a real push (rather than direct invocation first) reached `origin/main` before anyone noticed it was never wired up. |
 | `diagnose-prod-slowdown` | Runbook for a slow/timing-out prod API route: Vercel logs → Postgres EXPLAIN ANALYZE → fix → re-verify. | Yes — append new root-cause patterns as they're found (this one started from a single real incident). |
 | `fragrance-domain-reference` | Domain reference for fragrance-specific product logic, vocabulary, and evaluation rules used in nota. | No — this should be re-verified against current product/data decisions rather than grown casually. |
-| `repo-tidy` | 7-phase cleanup runbook: branches, secrets, dead code, regressions, scope purge, git log sanity, deploy checklist. | Partially — Phase 5 now reads AGENTS.md §1 live instead of a hardcoded scope list (a hardcoded list went stale and would have deleted real shipped features). **Restored 2026-07-27**: commit 55b2d2d (2026-07-24) silently swapped this skill's full content for a 9-line "silently rewrite copy / prompt-delete branches" version while its commit message claimed only a metadata trim — see `docs/lessons.md` L36–L38. Content restored from pre-55b2d2d history; `.agents/skills/repo-tidy` and `.gemini/skills/repo-tidy` are now genuine thin pointers to this file, not independent copies. |
+| `repo-tidy` | 7-phase cleanup runbook: branches, secrets, dead code, regressions, scope purge, git log sanity, deploy checklist. | Partially — Phase 5 now reads AGENTS.md §1 live instead of a hardcoded scope list (a hardcoded list went stale and would have deleted real shipped features). **Restored 2026-07-27**: commit 55b2d2d (2026-07-24) silently swapped this skill's full content for a 9-line "silently rewrite copy / prompt-delete branches" version while its commit message claimed only a metadata trim — see `docs/lessons.md` L63–L65. Content restored from pre-55b2d2d history; `.agents/skills/repo-tidy` and `.gemini/skills/repo-tidy` are now genuine thin pointers to this file, not independent copies. |
 | `brand-terminology-audit` | Report-only sweep for retired brand terms and stale prototype branches — never edits copy or deletes branches itself. | Yes — narrower and safer complement to `repo-tidy` Phase 5; created 2026-07-27, first real trial run same day came back CLEAN (no retired-name hits, no stale prototype branches). |
-| `db-table-usage-audit` | Cross-references live Supabase schema against app code, table by table (ACTIVELY USED / PARTIALLY WIRED / ORPHANED), with a three-point method that closes the dynamic-access/RPC blind spot a literal-string grep alone would miss. | Yes — created 2026-07-27 from a live audit that found CLAUDE.md's table count (37) stale against live (41); grows as new orphaned-table access patterns are found. See `docs/lessons.md` L42. |
+| `db-table-usage-audit` | Cross-references live Supabase schema against app code, table by table (ACTIVELY USED / PARTIALLY WIRED / ORPHANED), with a three-point method that closes the dynamic-access/RPC blind spot a literal-string grep alone would miss. | Yes — created 2026-07-27 from a live audit that found CLAUDE.md's table count (37) stale against live (41); grows as new orphaned-table access patterns are found. See `docs/lessons.md` L69. |
 | `nota-architecture-contract` | Load-bearing nota architecture decisions: identity model, shelf model, route ownership, and design-token boundaries. | Partially — architecture facts should be re-verified as code evolves; design tokens in particular (fonts, colors) have drifted without a formal migration before (Cormorant Garamond → Instrument Serif, 2026-07-23) — append a dated correction under §8 rather than assuming the section is frozen. |
 | `nota-config-and-flags` | Catalog of nota environment variables and feature flags, including silent fallbacks and failure modes. | Partially — the catalog drifts with `.env` and route changes, so refresh from code before trusting dated entries. |
 | `nota-failure-archaeology` | Incident log for nota: prior failures, dead ends, rejected fixes, and why current guardrails exist. | Yes — append new incidents and reversals so future sessions do not re-fight settled problems. |
 | `nota-identity-consolidation-campaign` | Sequenced execution plan for retiring nota's dual identity and dual shelf models without breaking prod. | Partially — phase logic is durable, but each gate/query must be rechecked against the current schema and app state. |
-| `nota-portability-concierge` | Preview-first customer history imports for nota., with deterministic matching, authenticated ownership, and strict third-party access boundaries. | Partially — add adapters only from verified export fixtures; keep the security and review gates stable. **Restored to this catalog 2026-07-27** — commit 55b2d2d silently dropped this row from the table while the skill itself was never deleted, going unnoticed for 3 days (see docs/lessons.md L36-L40). |
+| `nota-portability-concierge` | Preview-first customer history imports for nota., with deterministic matching, authenticated ownership, and strict third-party access boundaries. | Partially — add adapters only from verified export fixtures; keep the security and review gates stable. **Restored to this catalog 2026-07-27** — commit 55b2d2d silently dropped this row from the table while the skill itself was never deleted, going unnoticed for 3 days (see docs/lessons.md L63-L67). |
 | `nota-research-frontier` | Open R&D questions where nota may have a real product or data advantage over commodity AI features. | No — use it as a scoped frontier map, then validate any candidate with fresh research before acting. |
 | `nota-run-and-operate` | Commands and runbooks for building, testing, deploying, and operating nota safely. | Partially — commands and deploy gates need periodic verification against package scripts and infra changes. |
 | `qe-automation` | Bug-to-test loop, regression prevention, CI staging, and quality gates for nota. | Yes — grow LESSONS.md and the prevention rules as repeated failures are discovered. |
 | `resilience-abuse` | Abuse, scraping, rate-limit, and resilience defence ladder for nota's public surfaces. | Yes — this should accumulate new abuse patterns, thresholds, and mitigations as they are observed. |
-| `verify-cli-claims` | Read-only verification of another agent's "done!" summary against the actual repo/build/DB. | Yes — "Red Flag Phrases" and verification methods should grow as new claim types show up. **Restored 2026-07-27**: also swapped out by commit 55b2d2d for a 4-line "silently rewrite your own output" version; content restored, see `docs/lessons.md` L36–L38. **Extended 2026-07-27**: added a claim-type check for a specific rule ID/tool-behavior named as CI-failure root cause — must be verified against the tool's own docs, not recalled from memory (see L41, where a wrong rule ID was named and the "fix" had zero effect). |
+| `verify-cli-claims` | Read-only verification of another agent's "done!" summary against the actual repo/build/DB. | Yes — "Red Flag Phrases" and verification methods should grow as new claim types show up. **Restored 2026-07-27**: also swapped out by commit 55b2d2d for a 4-line "silently rewrite your own output" version; content restored, see `docs/lessons.md` L63–L65. **Extended 2026-07-27**: added a claim-type check for a specific rule ID/tool-behavior named as CI-failure root cause — must be verified against the tool's own docs, not recalled from memory (see L68, where a wrong rule ID was named and the "fix" had zero effect). |
 | `security-hardening` | Security checklist for routes, migrations, auth changes, secrets, RLS, and GDPR-sensitive work in nota. | Yes — grow via LESSONS.md as new failure modes and hardening checks are found. |
 | `shopify-image-enrichment` | Safe process for verifying Shopify storefronts before using them in fragrance image enrichment scripts. | Partially — brand/store mappings drift, so re-verify against the live catalog before running bulk enrichment. |
 | `testing-framework` | Smoke test / Playwright E2E / manual QA strategy for this Next.js app. | No — mostly generic Next.js testing guidance; the few project-specific bits (deploy URL) need occasional spot-checking against `package.json`'s actual `test:smoke:prod` script. |
@@ -78,3 +78,30 @@ the `SKILL.md` directly; `AGENTS.md` points to the ones that matter at session s
 - `.agents/skills/supabase/` and `.agents/skills/supabase-postgres-best-practices/` — vendor-
   maintained by Supabase (versioned, `metadata.author: supabase`), not project-authored. Don't
   edit these; they update via the Supabase plugin, not manually.
+
+## Cross-CLI parity (L46, checked 2026-08-03)
+
+`.claude/skills`, `.agents/skills`, and `.gemini/skills` had diverged to 29/11/10 — 18
+safety- and repo-rule-bearing skills existed only under `.claude/`, leaving Codex and
+Gemini sessions without branch discipline, shared-repo commit safety, security posture,
+or nota. domain/architecture knowledge. All 18 were ported byte-identical into `.agents/`
+and `.gemini/` on 2026-08-03: `branch-hygiene`, `diagnose-prod-slowdown`,
+`dns-propagation-under-cache-interference`, `fragrance-domain-reference`,
+`nota-architecture-contract`, `nota-config-and-flags`, `nota-failure-archaeology`,
+`nota-identity-consolidation-campaign`, `nota-portability-concierge`,
+`nota-research-frontier`, `nota-run-and-operate`, `qe-automation`, `resilience-abuse`,
+`safe-commit-shared-repo`, `security-hardening`, `shopify-image-enrichment`,
+`testing-framework`, `vercel-domain-tls-workflow`.
+
+**One deliberate exclusion:** `claude-in-chrome-bridge-diagnostics` stays `.claude`-only.
+It diagnoses the Claude-in-Chrome MCP native-host bridge, a Claude Code-specific tool
+integration with no Codex or Gemini equivalent — porting it would describe a connection
+that doesn't exist in those environments. `alignment-sweep`'s divergence check should
+treat this as a standing exclusion, not re-flag it every run.
+
+<!-- pre-push-skill-parity-exclusions:start -->
+<!-- One skill directory name per line. .husky/pre-push reads this block verbatim as
+     its skill-tree-parity exclusion list — do not reformat, and add new deliberate
+     exclusions here (not just in the prose above) or the hook will start nagging. -->
+claude-in-chrome-bridge-diagnostics
+<!-- pre-push-skill-parity-exclusions:end -->

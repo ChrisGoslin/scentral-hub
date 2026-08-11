@@ -137,7 +137,7 @@ export default function ScheduleClient({ fragrances, savedSchedules: initialSave
               : 'bg-white border-[var(--line)] text-[var(--text-muted)] hover:border-[var(--hf-gold)]'
           }`}
         >
-          <Sparkles size={14} className={explorationMode ? 'animate-pulse' : ''} />
+          <Sparkles size={14} className={explorationMode ? 'text-[var(--accent)] transition-transform duration-300' : ''} />
           <span className="text-[10px] font-bold uppercase tracking-wider">
             {explorationMode ? 'Exploration' : 'Standard'}
           </span>

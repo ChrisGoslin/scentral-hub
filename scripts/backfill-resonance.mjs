@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
 
 dotenv.config({ path: '.env.local' });
@@ -14,8 +14,10 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY || !GEMINI_API_KEY) {
 }
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
-const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: 'gemini-embedding-001' });
+const genAI = new GoogleGenAI({
+  apiKey: GEMINI_API_KEY,
+  httpOptions: { apiVersion: 'v1' }
+});
 
 async function backfill() {
   console.log('🚀 Starting Resonance Backfill...');
@@ -48,8 +50,15 @@ async function backfill() {
       const text = `${f.brand} ${f.name}. Family: ${f.family || 'Unknown'}. Notes: ${notesText || 'N/A'}`;
       console.log(`✨ Embedding [${f.brand}] ${f.name}...`);
 
-      const result = await model.embedContent(text);
-      const embedding = result.embedding.values;
+      const result = await genAI.models.embedContent({
+        model: 'gemini-embedding-001',
+        contents: text
+      });
+      const embedding = result.embeddings?.[0]?.values;
+
+      if (!embedding) {
+        throw new Error('Google GenAI returned no embedding values');
+      }
 
       if (embedding.length !== 3072) {
         throw new Error(`Unexpected embedding length: ${embedding.length}`);

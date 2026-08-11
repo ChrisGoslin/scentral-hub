@@ -13,7 +13,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 **Owner:** Christopher. **Purpose:** prevent invented facts, paths, keys, and scope.
 This is the SINGLE canonical instructions file. `CLAUDE.md` and `GEMINI.md` point here. Read this FIRST, every session, before acting. Begin your first reply by stating in one line what you grounded yourself in.
-For substantive work, resolve Christopher's portfolio operating files from disk instead of asking for pasted copies: read `~/.claude/CLAUDE.md`, `~/.claude/PROJECTS.md`, and `~/.claude/LESSONS.md` when available, then use this repo's `CLAUDE.md`, `docs/index.md`, and `docs/HANDOVER.md` for project-specific truth.
+For substantive work, resolve Christopher's portfolio operating files from disk instead of asking for pasted copies: read `~/Projects/claude-global/CLAUDE.md`, `~/Projects/claude-global/PROJECTS.md`, and `~/Projects/claude-global/LESSONS.md` when available — **not** `~/.claude/*.md`, which holds only `projects/` and `skills/` and is unreachable from Cowork (see GL-3/GL-7 in `claude-global/LESSONS.md`) — then use this repo's `CLAUDE.md`, `docs/index.md`, and `docs/HANDOVER.md` for project-specific truth.
 **Supplementary reading:** `.claude/skills/grounded-agent-guardrails/SKILL.md` — expands the five safeguards with verification commands, known fabrications list, and a session-start checklist. See also `.claude/skills/safe-commit-shared-repo/SKILL.md` (git hygiene given concurrent sessions) and `.claude/skills/diagnose-prod-slowdown/SKILL.md` (perf-incident runbook).
 **Critical operating rules:** §8 (script execution + network constraint), §9 (lessons learned), §10 (self-check).
 
@@ -94,7 +94,7 @@ fictional features, lore like "Agent Luna / Hegemony / Shadow Branching", and ha
   - `/dna-match` (Resonance — find similar scents)
   - `/intelligence` (Wardrobe Intelligence — gated)
   - `/schedule` (Legacy daily ritual planner)
-  - `/spritz` ← NEW — Spritz Schedule (Aura swipe card, XP engine, AnatomyIndicator)
+  - `/spritz` ← NEW — Spritz Schedule (Aura swipe card, legacy XP engine, AnatomyIndicator)
   - `/wheel` ← NEW — Fragrance Wheel (9-axis polar SVG, gap analysis, share as PNG)
   - `/boxes` ← NEW — Discovery Box Storefront (curated sample sets → Shopify checkout)
   - `/boxes/[slug]` ← NEW — Box detail view (contents, "Add to Cart" CTA)
@@ -142,7 +142,7 @@ fictional features, lore like "Agent Luna / Hegemony / Shadow Branching", and ha
   - Sidebar view modes: All, By House, By Season, Wishlist.
   - Visual style: walnut-cabinet shelf chrome per tier; bottle items are full-bleed `OptimizedBottleCard` tiles in a responsive grid.
 - **Aura:** AI curation character. Rules-based schedule logic + Claude Haiku for italic copy text. Cost: ~£9/month at 1K DAU. Never prescriptive. Writes in Instrument Serif italic.
-- **XP system (6 levels):** The Curious (0), The Enthusiast (100), The Collector (300), The Connoisseur (600), The Curator (1000), The Auteur (1500). Values: swipe-right worn +10 XP, scent memory +5 XP, wishlist add +5 XP, onboarding complete +20 XP.
+- **Legacy XP system (verified shipped, not approved doctrine):** Six levels and point awards remain in contributor, scanner, and Spritz paths. Some user-facing surfaces rename points "resonance." Do not expand this mechanic; the product remains anti-gamification until a dedicated change removes or explicitly reframes it.
 - **Design tokens (add to `app/globals.css` or `lib/design/tokens.css`):**
   - `--aura: oklch(0.72 0.08 60)` — amber-gold glow
   - `--aura-surface: oklch(0.18 0.04 60 / 0.6)` — dark amber glass
@@ -167,6 +167,11 @@ If a "fact" is not in these docs, the repo, or the database, it is NOT a fact ye
 ## 2. The five safeguards (hard rules)
 - **S1 — Verify before asserting.** Never state a version, API capability, path, table/column, or third-party
   feature as fact without checking (read the file, run `list_tables`, or web-search with a source).
+  Schema and code drift silently: a migration being applied does not mean app code uses what it added, and a
+  table existing does not mean it's wired to any route. Before describing a feature as "built" or "ready,"
+  verify the specific code path reads/writes the specific table/column in question — don't infer from the
+  migration list or from another doc. This applies doubly when multiple agents/sessions have touched the
+  repo since you last checked.
 - **S2 — No secrets in code or docs, ever.** Keys go in `.env.local` (gitignored), referenced via
   `process.env`. If you SEE a hardcoded secret, stop and flag it for rotation — never copy or echo it.
 - **S3 — Real paths only.** Confirm a path exists before referencing it. Never invent a plausible directory.
@@ -240,7 +245,7 @@ Merged 2026-07-24 from a parallel brand-doc reconciliation pass. Read `DESIGN.md
 **Cognitive-load gate** — for the area being changed, report: primary user decision, primary action, secondary actions, information that can be inferred rather than requested, possible dead ends or ambiguous states. Prefer one clear primary action; do not enforce arbitrary universal counts.
 
 **Implementation rules:**
-- Use Geist for system UI and Instrument Serif Italic only for identity, memory, and major emotional moments.
+- Use IBM Plex Sans for system UI and Instrument Serif Italic only for identity, memory, and major emotional moments.
 - Use semantic colour and motion tokens; do not hard-code new visual values without justification.
 - Preserve existing layout unless the task explicitly requires structural change. Make focused patches — do not redraw an entire screen to add one component.
 - Apply tactile materials through subtle texture, composition, and consequence — not decorative clutter. Analog dissonance is optional and must never damage alignment, responsiveness, or accessibility.
@@ -511,7 +516,7 @@ DO NOT use: Light, Soft, Whisper, Heavy, Massive — not in DB.
 - NEVER remove cabinetSnapshot CustomEvent from WardrobeShelf.tsx — feeds future vision pipeline
 - rating in DB is 0-10; display as 5-star: Math.round(rating / 2)
 - isPro = false — ProGate is active. Do NOT touch gated routes.
-- XP writes to Supabase user_xp AND as_xp localStorage (optimistic)
+- Legacy XP writes to Supabase `user_xp` and `as_xp` localStorage. Preserve existing data compatibility, but do not add new user-facing point mechanics.
 - Spritz Schedule: rules-based Aura logic (lib/aura.ts). Haiku copy via Supabase Edge Function.
 
 ## No secrets in code
@@ -581,4 +586,4 @@ Mentality: Everything is a system of patterns that relates to something else. Th
 Phase 1: [CRITIQUE] - Identify the naive, generic "AI SaaS" approach to my request. Explicitly state how you will reject that sterile approach and apply our heavy, tactile constraints. [4, 5]
 Phase 2: [ENHANCEMENT (+20%)] - Add an unprompted sensory or UX enhancement (e.g., analog dissonance, haptic rhythm, or a `mix-blend-multiply` ink bleed). [4, 5]
 Phase 3: [COGNITIVE LOAD GATE] - Audit the screen: Max 1 decision, max 3 actions. If it fails, reject your own design and restart. [4, 5]
-Phase 4: [EXECUTION] - Output the code using our semantic design tokens and the Geist/Instrument Serif split.
+Phase 4: [EXECUTION] - Output the code using our semantic design tokens and the IBM Plex Sans/Instrument Serif split.

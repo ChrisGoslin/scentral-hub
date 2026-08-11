@@ -83,7 +83,7 @@ function EngagementPrompt({ isWornToday, isAtRisk, streak }: { isWornToday: bool
   if (isAtRisk) {
     return (
       <div
-        className="p-4 rounded-xl border mb-6 animate-pulse"
+        className="p-4 rounded-xl border mb-6"
         style={{ background: '#fffbeb', borderColor: '#fef3c7', borderLeft: '4px solid #d97706' }}
       >
         <p style={{ fontSize: 11, fontWeight: 700, color: '#92400e', textTransform: 'uppercase', letterSpacing: '0.05em' }}>

@@ -37,7 +37,7 @@ export default function PrivacyPage() {
         <ul style={{ marginLeft: 20, marginTop: 8 }}>
           <li style={{ marginBottom: 6 }}>
             <strong>Local/guest mode:</strong> a random ID stored in your browser groups locally-saved
-            activity. It is not linked to your name or email. Anonymous engagement metrics (like XP and streaks)
+            activity. It is not linked to your name or email. Anonymous engagement metrics (like contribution progress and wear continuity)
             sync between your device and our servers to allow backup and stats tracking, but do not contain personal identifiers.
           </li>
           <li>
@@ -56,9 +56,9 @@ export default function PrivacyPage() {
           <li style={{ marginBottom: 6 }}>Your <strong>account email</strong> (used only for authentication, via Supabase Auth)</li>
           <li style={{ marginBottom: 6 }}>Your <strong>wear logs</strong> (fragrances you logged as worn)</li>
           <li style={{ marginBottom: 6 }}>Your <strong>collection</strong> (fragrances you&apos;ve added, with affinity scores)</li>
-          <li style={{ marginBottom: 6 }}>Your <strong>Noseprint, Shelf, and Traces activity</strong> (identity, ranking, and community features)</li>
-          <li style={{ marginBottom: 6 }}>Your <strong>streak data</strong> (consecutive days worn)</li>
-          <li>Your <strong>XP progress</strong> (engagement level)</li>
+          <li style={{ marginBottom: 6 }}>Your <strong>The Read, Shelf, and Traces activity</strong> (identity, ranking, and community features)</li>
+          <li style={{ marginBottom: 6 }}>Your <strong>wear continuity data</strong> (consecutive days worn)</li>
+          <li>Your <strong>contribution progress</strong> (engagement level)</li>
         </ul>
         <p style={{ marginTop: 12 }}>
           We store this data to enable the features you use — collection sync across devices, wear
@@ -94,7 +94,7 @@ export default function PrivacyPage() {
           <li style={{ marginBottom: 6 }}><code style={{ background: 'var(--surface-2)', padding: '2px 4px', borderRadius: 2 }}>scentral_anon_id</code> — local/guest-mode ID (see section 2)</li>
           <li style={{ marginBottom: 6 }}><code style={{ background: 'var(--surface-2)', padding: '2px 4px', borderRadius: 2 }}>scentral_persona</code> — your chosen scent persona</li>
           <li style={{ marginBottom: 6 }}><code style={{ background: 'var(--surface-2)', padding: '2px 4px', borderRadius: 2 }}>scentral_onboarded</code> — whether you completed onboarding</li>
-          <li style={{ marginBottom: 6 }}><code style={{ background: 'var(--surface-2)', padding: '2px 4px', borderRadius: 2 }}>as_xp</code> — your XP progress (cached locally)</li>
+          <li style={{ marginBottom: 6 }}><code style={{ background: 'var(--surface-2)', padding: '2px 4px', borderRadius: 2 }}>as_xp</code> — your contribution progress (cached locally)</li>
           <li>Supabase session cookies — required to keep you signed in</li>
         </ul>
         <p style={{ marginTop: 12 }}>

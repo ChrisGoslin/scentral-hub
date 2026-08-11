@@ -150,8 +150,8 @@ export default function CompareScentsClient({ fragrances }: { fragrances: Fragra
         </div>
 
         {loading && (
-          <div className="space-y-4 animate-pulse">
-            <div className="h-40 rounded-3xl" style={{ background: 'var(--surface)' }} />
+          <div className="space-y-4">
+            <div className="h-40 rounded-3xl" style={{ background: 'var(--surface)', border: '1px solid var(--line)' }} />
             <div className="h-6 w-1/3 mx-auto rounded" style={{ background: 'var(--surface)' }} />
           </div>
         )}

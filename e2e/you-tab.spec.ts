@@ -28,10 +28,15 @@ test('shows wishlist if not empty', async ({ page }) => {
     })
   });
 
-  await page.route('**/rest/v1/fragrances**', route => {
+  // Match the PostgREST request explicitly (including its query string). The
+  // broad glob was not reliable on the Linux CI browsers, so the test could
+  // render a signed-in page while the wishlist query received an empty real
+  // response.
+  await page.route(/\/rest\/v1\/fragrances(?:\?|$)/, route => {
     route.fulfill({
       status: 200,
       contentType: 'application/json',
+      headers: { 'content-range': '0-0/1' },
       body: JSON.stringify([
         {
           id: '0b84f3c0-379e-4b77-834c-20e3636f018e',
@@ -93,9 +98,13 @@ test('shows wishlist if not empty', async ({ page }) => {
     localStorage.setItem('scentral_wishlist', JSON.stringify([id]));
   }, testId);
 
+  const wishlistRequest = page.waitForResponse(response =>
+    response.url().includes('/rest/v1/fragrances') && response.ok()
+  );
   await page.goto('/you');
+  await wishlistRequest;
   await expect(page.getByText('MY WISHLIST')).toBeVisible({ timeout: 20000 });
-  await expect(page.getByRole('link', { name: /Lattafa Asad/i })).toBeVisible();
+  await expect(page.getByRole('link', { name: /Lattafa Asad/i })).toBeVisible({ timeout: 20000 });
   await expect(page.getByRole('link', { name: /Preview an import/i })).toBeVisible();
 });
 });
