@@ -19,6 +19,12 @@ Use this folder as the shared place for review items and known untouched issues.
 - Add new review items here as we find them.
 - Keep this folder small and current so it stays useful.
 
+## PR #82 closure loop — 2026-08-11
+
+- **Critique 1:** Merge from `main` could retarget lesson IDs and silently satisfy stale citations. **Remediation:** kept `main`'s `L36-L62`, appended PR-specific lessons as `L63-L72`, retargeted PR references, and verified `npm run lessons:check`.
+- **Critique 2:** Review fixes across `.claude/skills`, `.agents/skills`, and `.gemini/skills` could drift between provider copies. **Remediation:** mirrored testing-framework fixes across `.agents` and `.gemini`, updated all three canon-slop-audit copies, relocked skills, and verified `npm run skills:check`.
+- **Critique 3:** Local E2E in the isolated worktree lacked Supabase env vars. **Remediation:** did not copy secret-bearing `.env.local`; relied on GitHub E2E after push, which passed on PR head `8a80484`.
+
 ## Added 2026-07-27 — from cross-repo cleanup audit + skill-tampering incident (see docs/lessons.md L63–L65)
 
 Audit covered scentral-hub, abundance, ai-ops, last30days-skill: branches clean, no leaked secrets across all four, low TODO/HACK counts. Mid-audit, discovered commit `55b2d2d` (2026-07-24, already on `origin/main`) had replaced `.claude/skills/repo-tidy` and `.claude/skills/verify-cli-claims` with short "silently rewrite" versions behind a commit message claiming only a metadata trim, and propagated the same into `.agents/skills/` and `.gemini/skills/`. Content restored from pre-tampering history; `.agents`/`.gemini` copies converted to genuine thin pointers, PR [#82](https://github.com/ChrisGoslin/scentral-hub/pull/82).

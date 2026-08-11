@@ -66,7 +66,7 @@ const ROUTES = [
 
 **Setup:**
 ```bash
-npm install -D @playwright/test
+npm install -D @playwright/test@1.62.0 lighthouse@<reviewed-exact-version> --save-exact
 
 npm run test:e2e              # All tests, all platforms
 npm run test:e2e:headed      # Watch in browser
@@ -123,7 +123,7 @@ Add these to `package.json`:
 {
   "scripts": {
     "test:smoke": "node scripts/smoke-test.mjs",
-    "test:smoke:prod": "BASE_URL=https://scentral-hub.vercel.app node scripts/smoke-test.mjs",
+    "test:smoke:prod": "BASE_URL=${NEXT_PUBLIC_SITE_URL:-https://nota.vercel.app} node scripts/smoke-test.mjs",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed"
   }
@@ -146,7 +146,7 @@ Routes to test (minimum):
 ### Step 2: Set Up Playwright
 ```bash
 npm install -D @playwright/test
-npx playwright install chromium
+npx playwright@1.62.0 install chromium webkit
 touch playwright.config.ts
 # See: examples/playwright.config.example.ts
 ```
@@ -203,11 +203,11 @@ test.beforeEach(async ({ page }) => {
 
 ### Pattern: Wait for Network (Loading States)
 ```typescript
-// Wait for page to fully load
-await page.waitForLoadState('networkidle');
-
-// Or wait for specific element
+// Wait for the state this test actually needs
 await expect(page.locator('text=Results')).toBeVisible({ timeout: 3000 });
+
+// Or wait for a specific response when testing network behavior
+await page.waitForResponse(response => response.url().includes('/api/search') && response.ok());
 ```
 
 ### Pattern: Selector Priority
@@ -243,7 +243,7 @@ Target these metrics (Lighthouse throttled):
 
 Run locally:
 ```bash
-npx lighthouse http://localhost:3000 --view
+npx --no-install lighthouse http://localhost:3000 --view
 ```
 
 ## Debugging & Troubleshooting
@@ -254,13 +254,13 @@ For detailed troubleshooting steps, anti-patterns, and solutions:
 **Quick fixes:**
 - **Test timeout:** Start `npm run dev` separately before running tests
 - **Selector not found:** Use `--debug` mode to inspect DOM
-- **Flaky mobile tests:** Increase timeout or skip in CI
+- **Flaky mobile tests:** Keep mobile coverage in CI via a bounded project or tracked quarantine with owner/date and lost coverage
 - **Network errors:** Check `page.waitForLoadState()` or mock API responses
 
 ## Files to Reference
 
 - **`references/e2e-patterns.md`** — Detailed Playwright patterns and anti-patterns
-- **`references/performance-baselines.md`** — Core Web Vitals and optimization
+- **`references/performance-baselines.md`** — Future Core Web Vitals and optimization reference; until added, use the table in this file
 - **`references/troubleshooting.md`** — Common issues and solutions
 - **`examples/smoke-test.example.mjs`** — Working smoke test script
 - **`examples/e2e-test.example.ts`** — Playwright test template
@@ -289,7 +289,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: npm ci
-      - run: npx playwright install
+      - run: npx playwright@1.62.0 install chromium webkit
       - run: npm run test:e2e
 ```
 
@@ -298,7 +298,8 @@ jobs:
 2. ✅ Build succeeds (`npm run build`)
 3. ✅ Smoke tests pass against staging
 4. ✅ Deploy to production
-5. ✅ Run `npm run test:smoke:prod` to verify
+5. ✅ Verify deployment output includes the expected `▲ Aliased` production target
+6. ✅ Run `npm run test:smoke:prod` to verify
 
 ## Best Practices
 

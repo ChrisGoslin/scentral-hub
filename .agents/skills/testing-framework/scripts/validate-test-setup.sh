@@ -75,7 +75,7 @@ if [ -d "$HOME/.cache/ms-playwright" ] || [ -d "$HOME/Library/Caches/ms-playwrig
   echo -e "${GREEN}OK${NC}"
 else
   echo -e "${YELLOW}NOT INSTALLED${NC}"
-  echo "  Install: npx playwright install chromium"
+  echo "  Install: npx playwright@1.62.0 install chromium webkit"
 fi
 
 # Check 7: docs/qa-checklist.md exists

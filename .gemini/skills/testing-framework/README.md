@@ -56,7 +56,7 @@ Solutions for 20+ common issues:
 **When to read:** Test is failing or acting flaky
 
 #### `performance-baselines.md` (future)
-Core Web Vitals targets and optimization strategies.
+Future Core Web Vitals target reference. Until it exists, use the performance table in `SKILL.md`.
 
 ### 💻 examples/ (Copy-Paste Ready)
 
@@ -114,7 +114,7 @@ Validation script checking:
 2. Copy: `examples/smoke-test.example.mjs` → `scripts/smoke-test.mjs`
 3. Edit: Customize the routes to test
 4. Run: `npm run test:smoke`
-5. Verify: All 9 routes passing
+5. Verify: all configured critical routes pass, or document the exact route set if a fixed count is required
 
 **Time:** 10 minutes
 
@@ -167,7 +167,7 @@ Validation script checking:
 
 ## Skill Structure
 
-```
+```text
 testing-framework/
 ├── SKILL.md                                      # START HERE (core docs)
 ├── README.md                                     # This file (skill overview)

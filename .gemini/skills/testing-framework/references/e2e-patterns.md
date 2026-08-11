@@ -9,9 +9,11 @@
 await page.getByRole('button', { name: 'Submit' }).click();
 await page.getByRole('heading', { level: 1 }).toContainText('Welcome');
 
-// ✅ GOOD: Text-based selectors
-await page.getByText('Sign in').click();
+// ✅ GOOD: Text is fine for stable visibility assertions
 await expect(page.getByText(/results found/i)).toBeVisible();
+
+// ✅ GOOD: Use role/label selectors for actions
+await page.getByRole('button', { name: /sign in/i }).click();
 
 // ✅ GOOD: Label-based for forms
 await page.getByLabel('Email address').fill('test@example.com');
@@ -53,15 +55,15 @@ await page.locator('[data-testid="save-confirmation"]').click();
 ### Pattern: Wait for Page Load
 
 ```typescript
-// ✅ Wait for network idle (page fully loaded)
-await page.waitForLoadState('networkidle');
+// ✅ Wait for a state that proves this flow is ready
+await expect(page.getByRole('heading', { name: /results/i })).toBeVisible();
 
 // ✅ Wait for specific element to appear
 await expect(page.locator('text=Results')).toBeVisible({ timeout: 3000 });
 
 // ✅ Wait for DOM update after action
 await page.click('button[aria-label="Sort"]');
-await page.waitForLoadState('domcontentloaded');
+await expect(page.getByRole('status')).toContainText(/sorted/i);
 ```
 
 ### Anti-Pattern: Fixed Waits
@@ -80,14 +82,15 @@ await page.fill('input', 'text');  // May fail if click hasn't processed
 
 ```typescript
 // ✅ Navigate and wait for destination
-Promise.all([
-  page.waitForNavigation(),
-  page.click('text=Go to next page')
+await Promise.all([
+  page.waitForURL(/\/next-page/),
+  page.getByRole('link', { name: /go to next page/i }).click()
 ]);
 await expect(page).toHaveURL(/\/next-page/);
 
-// ✅ Or use goto with explicit wait
-await page.goto('/page', { waitUntil: 'networkidle' });
+// ✅ Or use goto plus a web-first assertion for the expected ready state
+await page.goto('/page');
+await expect(page.getByRole('main')).toBeVisible();
 ```
 
 ## Setup & Teardown Patterns
@@ -196,7 +199,7 @@ test('user can search and filter', async ({ page }) => {
   // ACT: Perform the action
   await page.goto('/discover');
   await page.getByPlaceholder('Search...').fill('Aventus');
-  await page.waitForLoadState('networkidle');
+  await expect(page.locator('text=Creed Aventus')).toBeVisible();
 
   // ASSERT: Verify expected outcome
   await expect(page.locator('text=Creed Aventus')).toBeVisible();
@@ -277,7 +280,8 @@ test('user can save preferences', async ({ page }) => {
 test('page loads within performance budget', async ({ page }) => {
   const startTime = Date.now();
 
-  await page.goto('/discover', { waitUntil: 'networkidle' });
+  await page.goto('/discover');
+  await expect(page.getByRole('main')).toBeVisible();
 
   const loadTime = Date.now() - startTime;
   expect(loadTime).toBeLessThan(3000);  // 3 second budget
@@ -285,8 +289,9 @@ test('page loads within performance budget', async ({ page }) => {
   // Also measure First Contentful Paint
   const fcp = await page.evaluate(() => {
     const perfEntry = performance.getEntriesByName('first-contentful-paint')[0];
-    return perfEntry?.startTime || 0;
+    return perfEntry?.startTime ?? null;
   });
+  expect(fcp, 'first-contentful-paint entry should exist before asserting budget').not.toBeNull();
   expect(fcp).toBeLessThan(1500);  // 1.5s FCP budget
 });
 ```
@@ -322,12 +327,8 @@ test('form is keyboard accessible', async ({ page }) => {
 test('focus indicators visible', async ({ page }) => {
   await page.goto('/');
 
-  // Tab to button
-  await page.keyboard.press('Tab');
-
-  // Check focus outline is visible
   const button = page.getByRole('button').first();
-  const styles = await button.evaluate(el => {
+  const before = await button.evaluate(el => {
     const computed = window.getComputedStyle(el);
     return {
       outline: computed.outline,
@@ -336,8 +337,18 @@ test('focus indicators visible', async ({ page }) => {
     };
   });
 
-  // Should have some visible focus indicator
-  const hasFocus = styles.outline !== 'none' || styles.boxShadow !== 'none' || styles.border !== 'none';
+  await button.focus();
+  const after = await button.evaluate(el => {
+    const computed = window.getComputedStyle(el);
+    return {
+      outline: computed.outline,
+      boxShadow: computed.boxShadow,
+      border: computed.border
+    };
+  });
+
+  // Focus should visibly change at least one relevant style
+  const hasFocus = before.outline !== after.outline || before.boxShadow !== after.boxShadow || before.border !== after.border;
   expect(hasFocus).toBe(true);
 });
 ```
@@ -369,9 +380,8 @@ test.afterEach(async ({ page }, testInfo) => {
 await page.goto('/');
 await expect(page.locator('text=Dynamic content')).toBeVisible();
 
-// ✅ Wait for rendering to complete
-await page.goto('/', { waitUntil: 'networkidle' });
-await page.waitForLoadState('domcontentloaded');
+// ✅ Wait for the rendered state that matters to this test
+await page.goto('/');
 await expect(page.locator('text=Dynamic content')).toBeVisible();
 ```
 
@@ -393,12 +403,15 @@ test('modal accessible', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Open modal' }).click();
 
-  // Focus should be in modal
-  await expect(page.locator('[role="dialog"]')).toBeFocused();
+  const dialog = page.locator('[role="dialog"]');
+  await expect(dialog).toBeVisible();
+
+  // Focus should be contained within the modal, not necessarily on the dialog itself
+  const focusInsideDialog = await dialog.evaluate(dialogEl => dialogEl.contains(document.activeElement));
+  expect(focusInsideDialog).toBe(true);
 
   // Tab should cycle within modal
   await page.keyboard.press('Tab');
-  const focused = await page.evaluate(() => document.activeElement?.getAttribute('role'));
-  expect(focused === 'dialog' || focused === 'button').toBe(true);
+  await expect(dialog.getByRole('button').first()).toBeFocused();
 });
 ```

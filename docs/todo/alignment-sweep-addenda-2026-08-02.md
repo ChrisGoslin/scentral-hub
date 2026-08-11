@@ -11,9 +11,13 @@ Those two copies have a different, shorter base (127 lines vs 251). **Do not ove
 them with the repo version** — append only:
 
 ```bash
-sed -n "/^## Integrity assertions — added 2026-08-02/,\$p" \
-  ~/Projects/scentral-hub/.claude/skills/alignment-sweep/SKILL.md \
-  >> ~/Claude/Scheduled/monthly-alignment-sweep/SKILL.md
+marker="## Integrity assertions — added 2026-08-02"
+dest=~/Claude/Scheduled/monthly-alignment-sweep/SKILL.md
+if ! grep -qF "$marker" "$dest"; then
+  sed -n "/^$marker/,\$p" \
+    ~/Projects/scentral-hub/.claude/skills/alignment-sweep/SKILL.md \
+    >> "$dest"
+fi
 ```
 
 Verbatim content of both blocks follows, for the account-level copy which must be
@@ -34,15 +38,13 @@ above a merely unresolved one — it has suppressed further checking. Report as
 `lesson <id> claims <file>:<what> — absent`.
 
 ### Pass 4 addendum — declared scope vs actual trees (L46)
-```bash
-for d in .claude .agents .gemini; do echo "$d: $(ls $d/skills 2>/dev/null | wc -l)"; done
-comm -23 <(ls .claude/skills|sort) <(ls .agents/skills|sort)
-comm -23 <(ls .claude/skills|sort) <(ls .gemini/skills|sort)
-```
-Any skill present in one tree and absent from another is a finding. Additionally,
-when a skill's own description names a repo in its scope, assert that repo has a
-skills tree containing it — a skill declaring scope it cannot reach is a HIGH
-finding regardless of tree parity.
+Use `docs/skills.lock.json` as the declared shared-skill inventory rather than
+requiring raw tree counts to match; the trees intentionally differ. Compare the
+declared shared set across all pairs (`.claude` ↔ `.agents`, `.claude` ↔
+`.gemini`, `.agents` ↔ `.gemini`) and report only missing entries from that
+declared set. Additionally, when a skill's own description names a repo in its
+scope, assert that repo has a skills tree containing it — a skill declaring
+scope it cannot reach is a HIGH finding regardless of tree parity.
 
 ### Pass 6 addendum — lesson-ID integrity (L47)
 ```bash

@@ -89,7 +89,7 @@ set -euo pipefail  # without pipefail, a failing build/lint piped to `tail` can 
 
 # TypeScript compile check. Prefer a package script if one exists; otherwise use
 # the locally installed compiler. Do not use bare `npx tsc`.
-if npm run | grep -qE '^  typecheck$'; then
+if node -e "const s=require('./package.json').scripts||{}; process.exit(s.typecheck ? 0 : 1)"; then
   npm run typecheck
 elif [ -x node_modules/.bin/tsc ]; then
   node_modules/.bin/tsc --noEmit
@@ -161,6 +161,7 @@ Compare against the agent's summary using the `verify-cli-claims` skill. Any com
 □ .env.local variables are set in Vercel dashboard (not hardcoded)
 □ NEXT_PUBLIC_ variables are correct for production URL
 □ No console.log with sensitive data
+□ Production deployment output shows the expected `▲ Aliased` line for the newly deployed target
 □ verify-cli-claims ran and returned ≥ 80% Verified
 ```
 
