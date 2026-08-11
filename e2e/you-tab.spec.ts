@@ -14,11 +14,18 @@ test('shows signed-out state with identity prompt', async ({ page }) => {
 });
 
 test('shows wishlist if not empty', async ({ page }) => {
+  const supabaseCorsHeaders = {
+    'access-control-allow-origin': '*',
+    'access-control-allow-headers': 'authorization, apikey, content-type, x-client-info',
+    'access-control-expose-headers': 'content-range',
+  };
+
   // Mock Supabase Auth and Database routes in browser
   await page.route('**/auth/v1/user**', route => {
     route.fulfill({
       status: 200,
       contentType: 'application/json',
+      headers: supabaseCorsHeaders,
       body: JSON.stringify({
         id: 'test-user-id',
         email: 'test@example.com',
@@ -33,10 +40,14 @@ test('shows wishlist if not empty', async ({ page }) => {
   // render a signed-in page while the wishlist query received an empty real
   // response.
   await page.route(/\/rest\/v1\/fragrances(?:\?|$)/, route => {
+    if (route.request().method() === 'OPTIONS') {
+      return route.fulfill({ status: 204, headers: supabaseCorsHeaders });
+    }
+
     route.fulfill({
       status: 200,
       contentType: 'application/json',
-      headers: { 'content-range': '0-0/1' },
+      headers: { ...supabaseCorsHeaders, 'content-range': '0-0/1' },
       body: JSON.stringify([
         {
           id: '0b84f3c0-379e-4b77-834c-20e3636f018e',
@@ -49,17 +60,27 @@ test('shows wishlist if not empty', async ({ page }) => {
   });
 
   await page.route('**/rest/v1/collections**', route => {
+    if (route.request().method() === 'OPTIONS') {
+      return route.fulfill({ status: 204, headers: supabaseCorsHeaders });
+    }
+
     route.fulfill({
       status: 200,
       contentType: 'application/json',
+      headers: supabaseCorsHeaders,
       body: JSON.stringify([]),
     })
   });
 
   await page.route('**/rest/v1/wear_logs**', route => {
+    if (route.request().method() === 'OPTIONS') {
+      return route.fulfill({ status: 204, headers: supabaseCorsHeaders });
+    }
+
     route.fulfill({
       status: 200,
       contentType: 'application/json',
+      headers: supabaseCorsHeaders,
       body: JSON.stringify([]),
     })
   });
