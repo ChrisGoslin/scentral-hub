@@ -14,6 +14,8 @@ test('shows signed-out state with identity prompt', async ({ page }) => {
 });
 
 test('shows wishlist if not empty', async ({ page }) => {
+  const testId = '0b84f3c0-379e-4b77-834c-20e3636f018e'; // Lattafa Asad ID
+  const appUrl = 'http://127.0.0.1:3100'
   const supabaseCorsHeaders = {
     'access-control-allow-origin': '*',
     'access-control-allow-headers': 'authorization, apikey, content-type, x-client-info',
@@ -85,10 +87,6 @@ test('shows wishlist if not empty', async ({ page }) => {
     })
   });
 
-  // Inject a wishlist item
-  const testId = '0b84f3c0-379e-4b77-834c-20e3636f018e'; // Lattafa Asad ID
-  const appUrl = 'http://127.0.0.1:3100'
-
   // Set mock Supabase SSR cookie to simulate being signed in on the server
   await page.context().addCookies([
     {
@@ -103,20 +101,17 @@ test('shows wishlist if not empty', async ({ page }) => {
     }
   ]);
 
-  // Set mock Supabase client-side session in localStorage
-  await page.addInitScript(() => {
+  // Seed client state before the first document runs so React mount effects see
+  // the wishlist consistently in every CI browser project.
+  await page.addInitScript((id) => {
     localStorage.setItem('scentral_onboarded', 'true');
+    localStorage.setItem('scentral_wishlist', JSON.stringify([id]));
     localStorage.setItem('sb-lrkdwobnemczvhpixpky-auth-token', JSON.stringify({
       access_token: 'fake-access-token',
       refresh_token: 'fake-refresh-token',
       user: { id: 'test-user-id', email: 'test@example.com' },
       expires_at: Math.floor(Date.now() / 1000) + 3600
     }));
-  });
-
-  await page.goto('/');
-  await page.evaluate((id) => {
-    localStorage.setItem('scentral_wishlist', JSON.stringify([id]));
   }, testId);
 
   const wishlistRequest = page.waitForResponse(response =>
