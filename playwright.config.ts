@@ -4,7 +4,7 @@ export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
+  retries: process.env.CI ? 2 : 1,
   // Single shared dev server (one `webServer` instance below) serving all
   // parallel workers, each hitting the live 127k-row Supabase catalogue —
   // under default local concurrency (5 workers), you-tab.spec.ts's
