@@ -1,0 +1,17 @@
+name: Anti-Slop Gate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  anti-slop:
+    name: Lint Quality & Anti-Slop
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Run Anti-Slop Check
+        uses: peakoss/anti-slop@v0.3.0
