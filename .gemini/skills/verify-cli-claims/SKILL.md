@@ -1,10 +1,6 @@
 ---
 name: verify-cli-claims
-description: >-
-  Prove build/logic claims before stating a nota. component or flow is complete.
-  Runs a build/lint check and asserts the nota. performance brand budget and
-  DESIGN.md token usage. Trigger before claiming any UI component or logic flow
-  is done, complete, working, or verified.
+description: "Read-only verification agent. Takes a CLI agent's 'done!' summary and proves each claim against the actual repo, filesystem, and build output. Returns Verified / Unverified / False per claim."
 ---
 
 # Verify CLI Claims

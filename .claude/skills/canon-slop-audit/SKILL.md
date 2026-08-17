@@ -11,7 +11,7 @@ Every other guardrail in this repo enforces canon against code. This one asks th
 
 A doctrine written in year N encodes year N's defaults. Defaults commoditise. A choice that read as considered when made can, two years later, be the exact marker of an unedited AI export — while remaining perfectly internally consistent across every doc. Internal consistency cannot detect this; only external evidence can.
 
-Origin: `docs/lessons.md` L34. `NOTA-BRAND-UIUX-PACK.md` §4 names Geist as the 90% body face; by 2026 Geist sits in the widely-recognised "AI-startup typeface" cluster alongside Inter and General Sans — precisely the convergence §14 exists to prevent.
+Origin: `docs/lessons.md` L34. `NOTA-BRAND-UIUX-PACK.md` §4 names Geist as the 90% body face; the claim that Geist belongs in a 2026 "AI-startup typeface" cluster is a hypothesis to verify with dated external evidence before recommending any canon change.
 
 ## When to invoke
 
@@ -46,7 +46,11 @@ Canon changes are worthless if code still loads the old thing. For every asset c
 
 ```bash
 for f in Satoshi Unbounded Space_Grotesk Caveat Cormorant; do
-  printf "%-16s " "$f"; grep -rl "$f" app/ 2>/dev/null | tr '\n' ' '; echo
+  printf "%-16s " "$f"
+  git ls-files app components lib public '*.css' '*.ts' '*.tsx' '*.js' '*.mjs' 2>/dev/null \
+    | grep -Ev '(^|/)(node_modules|\\.next|dist|build|coverage)/' \
+    | xargs grep -lF "$f" 2>/dev/null | tr '\n' ' '
+  echo
 done
 ```
 
@@ -55,11 +59,11 @@ Any hit is outstanding migration work with an owner — see L35. Retirement is n
 ### 5. Propose — do not unilaterally edit
 Typeface, palette, and material choices are Christopher's call. This skill produces a **decision memo**, never a canon edit made on its own authority. `AGENTS.md` §5a exists because `DESIGN.md`'s body-sans flipped `Geist → Unbounded → Geist` across sessions with no record; silently editing canon is the exact failure mode.
 
-When a change is approved, follow §5a in full: confirm the file is git-tracked, state the *why* in the commit message with the evidence that moved the decision, date the change, and update **every** doc stating the same fact — `DESIGN.md`, `NOTA-BRAND-UIUX-PACK.md`, `NOTA_MANIFESTO.md`, and any `.claude/skills/` file repeating it — so three truths don't go live.
+When a change is approved, follow §5a in full: confirm the file is git-tracked, state the *why* in the commit message with the evidence that moved the decision, date the change, and update **every** doc stating the same fact — `DESIGN.md`, `NOTA-BRAND-UIUX-PACK.md`, `NOTA_MANIFESTO.md`, and any provider-specific skill copy under `.claude/skills/`, `.agents/skills/`, or `.gemini/skills/` repeating it — so three truths don't go live.
 
 ## Output format
 
-```
+```text
 CANON SLOP AUDIT — <date>
 
 CHOICE: <what canon specifies> (doc §section)
@@ -71,7 +75,7 @@ CHOICE: <what canon specifies> (doc §section)
   Decision:   AWAITING CHRISTOPHER — no edit made
 
 RETIRED-ASSET MIGRATION
-  <asset> — still referenced in <files> — owner: <who> 
+  <asset> — still referenced in <files> — owner: <who>
 ```
 
 ## Hard rules

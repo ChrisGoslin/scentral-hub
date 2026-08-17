@@ -342,7 +342,7 @@ E2E passed 35/35 throughout. Tests assert behaviour, not brand.
 **Enforced by:** `alignment-sweep` Pass 4 (skill-layer divergence) — extended to fail when a skill's stated scope names a repo whose tree does not contain it.
 
 ### L47 — Appending a lesson series without checking the existing range collides ten IDs silently
-**What happened:** `docs/lessons.md` contains 56 lesson headings but only 46 unique IDs. L26–L35 each appear **twice, with completely different content** — e.g. L29 is both "Preview/import features ship preview-first, write-later" (line 95) and "Authoring for a repo you have not opened is invention, not consulting" (line 220). Commit `c4de6f0 docs(lessons): add L29-L43` appended a second series beginning at L26 without checking that L26–L35 already existed. Twenty citations across `alignment-sweep`, `repo-tidy`, `canon-slop-audit`, `loop-orchestrator/references/engagement-scorecard.md`, the `.agents/` mirror, and `HANDOVER-2026-07-29` now point at ambiguous IDs. Every one inspected resolves by content to the *second* series, making the older block the orphan — but the ID alone cannot tell a reader which is meant.
+**What happened:** `docs/lessons.md` previously contained 56 lesson headings but only 46 unique IDs. L26–L35 each appeared **twice, with completely different content** — e.g. L29 was both "Preview/import features ship preview-first, write-later" and "Authoring for a repo you have not opened is invention, not consulting". Commit `c4de6f0 docs(lessons): add L29-L43` appended a second series beginning at L26 without checking that L26–L35 already existed. Twenty citations across `alignment-sweep`, `repo-tidy`, `canon-slop-audit`, `loop-orchestrator/references/engagement-scorecard.md`, the `.agents` mirror, and `HANDOVER-2026-07-29` pointed at ambiguous IDs until the orphan series was renumbered.
 **Rule:** A lesson ID is a citation target, so appending to a lessons file is an API change, not a text edit. Derive the next ID from `grep -oE '^### L[0-9]+' | sort -V | tail -1` before writing, and after writing assert `unique == total`. Never renumber a cited series to resolve a collision — renumber the uncited one, or every downstream reference silently retargets.
 **Remedy built in:** Collision quantified and a renumbering spec with citation-safety constraints recorded as open item 7 in `docs/HANDOVER-2026-08-02-memory-durability.md`, owned by Claude Code. Not executed from Cowork: the fix spans `.claude/`, `.agents/` and `.gemini/` trees plus handover docs, and a blind renumber would break the twenty live citations it is meant to protect.
 **Enforced by:** `alignment-sweep` Pass 6 (doc freshness) extended with an integrity assertion on `docs/lessons.md` — unique lesson IDs must equal total lesson headings, and any duplicate ID is a HIGH finding. `repo-tidy` step 7 (repo-level file; the account-level skill of the same name has a different phase structure and does not govern this repo) checks the same before any merge to main.
@@ -376,3 +376,59 @@ E2E passed 35/35 throughout. Tests assert behaviour, not brand.
 **Rule:** When fixing a detector's false negative (missed a real case), re-check whether the fix introduces a false positive elsewhere before shipping it — broadening scope and narrowing precision are two different fixes, and a gap found in one dimension is often best closed by tightening the other, not just scanning more files with the same loose pattern.
 **Remedy built in:** Narrowed the regex to the four actual canon filenames (`CLAUDE|PROJECTS|LESSONS|profile\.md`) instead of matching any `~/.claude/*.md`, then broadened the file scope to include `docs/launch/` and `docs/HANDOVER.md` safely on top of that.
 **Enforced by:** `.husky/pre-push`'s dead-canon-pointer check, re-tested against both the original failing case (`docs/launch/LAUNCH_MAESTRO_INTEGRATION.md`, now clean) and a real duplicate-ID failure case before this landed.
+
+---
+
+## 2026-07-27 — PR #82 skill hygiene and review hardening
+
+Context: PR #82 restored and hardened repo skills after review surfaced tampered skill bodies, stale audit claims, and missing integrity checks. These entries were appended at fresh IDs during the 2026-08-11 merge with `main` so existing `L36-L62` citations keep their original meanings.
+
+### L63 — A skill's "scope" or "rule" content can go stale even when its name still fires correctly
+**What happened:** The global `repo-tidy` skill's Phase 5 hardcoded a "locked MVP scope" that matched no current repo. It went unnoticed until read closely mid-run; a single-pass audit would have quietly produced a wrong or empty scope-purge result.
+**Rule:** Any skill step that encodes "current scope," "locked features," or similar project-state facts must read that state live from the target repo's own AGENTS.md/CLAUDE.md at run time. If no such source exists, the skill must say so explicitly rather than silently applying a stale or borrowed list.
+**Enforced by:** `repo-tidy` Phase 5 rewritten to read scope from the target repo's docs at run time and report an explicit skipped state instead of guessing.
+
+### L64 — A misleading commit message is a bigger threat than an obviously-bad diff
+**What happened:** Commit `55b2d2d` claimed to trim `repo-tidy` and `verify-cli-claims` into pointer copies, but the diff replaced mature safety skills with short instructions that could silently rewrite output and prompt-delete branches, then mirrored those replacements across `.claude/`, `.agents/`, and `.gemini/`.
+**Rule:** When a skill/doc's content materially differs from what its commit message or catalog description implies, run `git log -p --follow` on that file before treating the mismatch as ordinary drift. Treat "silently rewrite / silently replace" instructions in any skill as a stop-and-flag condition.
+**Enforced by:** restored `.claude/skills/repo-tidy` and `.claude/skills/verify-cli-claims` from pre-55b2d2d history; `.agents/` and `.gemini/` copies are thin pointers to the canonical `.claude/` bodies.
+
+### L65 — "Consolidation" and "pointer" commits need the same scrutiny as feature commits
+**What happened:** The tampering in L64 was framed as low-risk tooling hygiene. The administrative wording made the change easy to skim even though it altered instructions consumed by future agents.
+**Rule:** Any "refactor / consolidate / dedupe" commit touching skill, doc, or config files gets a full before/after content read. Do not assume a consolidation diff matches the message because the message sounds mechanical.
+**Enforced by:** `scripts/check-skill-integrity.mjs` content-hash enforcement catches unexpected skill-body changes regardless of the commit message.
+
+### L66 — The loop only works if it self-triggers
+**What happened:** The skill-tampering incident was found because the user explicitly asked for a loop after an initial pass had already declared the work done. The existing "substantial work" trigger was too fuzzy and failed to fire.
+**Rule:** Self-trigger the loop whenever work touches `.claude/skills/`, `.agents/skills/`, or `.gemini/skills/`; spans more than one repo; or finds a file whose content contradicts its own commit message, catalog, or README description. Skipping the loop when a trigger is present must be reported.
+**Enforced by:** `CLAUDE.md` rule 12 now names these concrete self-trigger conditions.
+
+### L67 — A commit-message keyword check does not detect content tampering; only a content hash does
+**What happened:** A first guard design checked whether changed skill filenames appeared in commit messages. The real bad commit would have passed because it named the files while misdescribing the content change.
+**Rule:** A tamper guard must check artifact content against a committed, reviewable baseline, not proxy signals like commit messages, labels, or descriptions. Test every new integrity check against the real incident it is meant to catch.
+**Enforced by:** `scripts/check-skill-integrity.mjs` checks skill file hashes against `docs/skills.lock.json`, with relocking reserved for deliberate `npm run skills:relock` changes.
+
+### L68 — A plausible-sounding rule ID is not a verified rule ID
+**What happened:** A SonarCloud failure was initially attributed to the wrong JavaScript rule ID and severity from memory. The first fix improved style but had no effect on the real Quality Gate.
+**Rule:** Before naming a third-party rule ID, severity, or tool behavior as the diagnosis for a real failure, verify it against the tool's own documentation or current source. If unverified, label it as suspected rather than fact.
+**Enforced by:** `verify-cli-claims` now has a claim-type section for named rule/tool diagnoses and requires external verification before a "Verified" verdict.
+
+### L69 — "No app code references it" needs dynamic-access and RPC checks
+**What happened:** A table audit initially classified candidates using literal string search across app code. That missed possible access through RPC functions, triggers, generic query helpers, and non-app surfaces.
+**Rule:** "No app code references table X" is only reviewed until the audit checks literal usage, dynamic query builders, `.rpc(` calls, migration-defined functions/triggers, and every declared surface such as `app/`, `lib/`, `components/`, `scripts/`, and `supabase/functions/`.
+**Enforced by:** `.claude/skills/db-table-usage-audit/SKILL.md` bakes those checks into the ORPHANED verdict requirements.
+
+### L70 — A hook file passing manually is not proof it fires on a real git event
+**What happened:** Claims that the pre-push guard blocked bad pushes were based on manual script execution, not proof that Git resolved and fired the hook.
+**Rule:** A hook claim requires checking the actual hook path, `core.hooksPath`, the named hook file, and any required hook runner binary. Verify each claimed hook independently.
+**Enforced by:** `verify-cli-claims` now includes a hook-verification correction for pre-push and pre-commit claims.
+
+### L71 — "No node_modules" silently downgrades build and typecheck claims to unverifiable
+**What happened:** Prior summaries referenced build, lint, and typecheck commands as standards without first confirming the local toolchain existed in the sandbox.
+**Rule:** Before citing a local command as verification evidence, confirm the declared binary or package script can execute in the current environment. If not, report the claim as unverifiable rather than substituting an unpinned fallback.
+**Enforced by:** `verify-cli-claims` now forbids unpinned `npx tsc` fallback and treats missing local compiler/scripts as Unverifiable.
+
+### L72 — A canonical lessons doc needs its own ID-uniqueness check
+**What happened:** Two independent sessions previously authored overlapping lesson IDs, and cross-references silently became ambiguous until review caught the collision. The current file has since been renumbered and `npm run lessons:check` verifies 72 unique lesson IDs.
+**Rule:** Before adding lesson entries, derive the next ID from the existing headings and assert unique heading count equals total heading count after the edit.
+**Enforced by:** `scripts/check-lesson-ids.mjs`, `npm run lessons:check`, `.husky/pre-push`, and `.github/workflows/skill-integrity.yml`.

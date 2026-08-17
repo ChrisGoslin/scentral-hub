@@ -56,7 +56,7 @@ Solutions for 20+ common issues:
 **When to read:** Test is failing or acting flaky
 
 #### `performance-baselines.md` (future)
-Core Web Vitals targets and optimization strategies.
+Future Core Web Vitals target reference. Until it exists, use the performance table in `SKILL.md`.
 
 ### 💻 examples/ (Copy-Paste Ready)
 
@@ -114,7 +114,7 @@ Validation script checking:
 2. Copy: `examples/smoke-test.example.mjs` → `scripts/smoke-test.mjs`
 3. Edit: Customize the routes to test
 4. Run: `npm run test:smoke`
-5. Verify: All 9 routes passing
+5. Verify: all configured critical routes pass, or document the exact route set if a fixed count is required
 
 **Time:** 10 minutes
 
@@ -167,7 +167,7 @@ Validation script checking:
 
 ## Skill Structure
 
-```
+```text
 testing-framework/
 ├── SKILL.md                                      # START HERE (core docs)
 ├── README.md                                     # This file (skill overview)
@@ -249,16 +249,16 @@ npm run test:e2e:headed  # Run with browser visible
 
 ## Troubleshooting This Skill
 
-**Problem:** Examples don't work  
+**Problem:** Examples don't work
 **Solution:** Read the example file comments first, then check `references/troubleshooting.md`
 
-**Problem:** Don't understand a pattern  
+**Problem:** Don't understand a pattern
 **Solution:** Find it in `references/e2e-patterns.md`, search for keyword
 
-**Problem:** Test keeps timing out  
+**Problem:** Test keeps timing out
 **Solution:** Search `references/troubleshooting.md` for "timeout"
 
-**Problem:** Can't find what I need  
+**Problem:** Can't find what I need
 **Solution:** Read `SKILL.md` for full overview, then browse `references/`
 
 ---

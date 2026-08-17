@@ -1,7 +1,5 @@
 # CLAUDE.md — nota. System Memory
 
-@AGENTS.md
-
 > **Living factual memory for the nota. product.** Created 2026-07-04 (Phase 0 of pre-launch audit).
 > **Updated 2026-07-08:** scentral + scentral-hub consolidated into nota (Phase 6).
 > Where this disagrees with older docs (AGENTS.md branding, PRODUCT_TRUTH.md, executive-suite), **this wins** — except AGENTS.md §8–§9 operational lessons (L1–L17), git hygiene, and deploy [...]
@@ -37,9 +35,9 @@ Next.js 16.2.9 (App Router, route groups `(main)` `(community)` `(account)`), Re
 **System:** `/`, `/onboarding`, `/login`, `/learning`, `/ritual/[id]`, `/waitlist`, `/privacy`, `/terms`, `/disclaimer`, `/admin/enrichment`, `/admin/feedback`.
 **~58 API routes** under `app/api/` incl. `read/generate`, `shelf`, `blind-ranking/{session,place,reveal}`, `traces`, `trails/progress`, `temptations`, `evolution/detect`, `insights`, `aura`, `og/[...]
 
-## 5. Database (live schema verified via Supabase MCP, 2026-07-04)
+## 5. Database (live schema verified via Supabase MCP, 2026-07-04; table count re-verified 2026-07-27)
 
-37 public tables, all RLS-enabled. `fragrances` = **127,595 rows** (`plain_description`, `inspired_by`, `family`, `projection`, `optimal_season`, `use_case`, `lean`, `image_url`, `popularity_rank`[...]
+**41 public tables** (was 37 as of 2026-07-04; drifted undetected for weeks — see `docs/lessons.md` L69 and the `db-table-usage-audit` skill for the per-table usage audit this correction came from), all RLS-enabled. `fragrances` = **127,595 rows** (`plain_description`, `inspired_by`, `family`, `projection`, `optimal_season`, `use_case`, `lean`, `image_url`, `popularity_rank`[...]
 
 **nota-era tables (all `user_id uuid`):**
 - `noseprints` — name, descriptor, read_text, signals jsonb, matches uuid[], stretch_note, status ('current').
@@ -51,15 +49,15 @@ Next.js 16.2.9 (App Router, route groups `(main)` `(community)` `(account)`), Re
 - `temptations` (reason, status shown/resolved), `evolution_events` (from/to_noseprint, choice, trigger_signals), `interactions` (event_type/entity/metadata — general event log), `insights_cache[...]
 - `houses`, `profiles` (username, house_id, onboarding_completed_at).
 
-**Legacy-era:** `collections` (status 'owned'|'wishlist' only — **no 'tested'/'past_purchase'**; wear_state, shelf_tier int default 2, affinity_score int default 50, scent_memory), `wear_logs` ([...]
+**Legacy-era:** `collections` (status enum includes **'owned'/'wishlist'/'tested'/'past_purchase'** — confirmed live via `supabase/migrations/20260704_db001_collections_status_enum.sql`; the "no tested/past_purchase" claim that used to live on this line was wrong, per this doc's own Phase 0 correction log below — don't reintroduce it; wear_state, shelf_tier int default 2, affinity_score int default 50, scent_memory), `wear_logs` ([...]
 
 **⚠️ Two competing shelf models:** `shelf_items.rank` (nota Shelf) vs `collections.shelf_tier` + `affinity_score` (Living Wardrobe). Both live. Seeding bridges them (`app/(main)/shelf/page.tsx[...]
 
 ## 6. My Shelf — current implementation vs. spec
 
-- **Current:** 10 slots (SHELF_SIZE=10 in `app/(main)/shelf/page.tsx` AND `app/api/shelf/route.ts`). Seeded once: top-3 noseprint matches + owned collections by tier/affinity. Actions: add/remove/[...]
+- **Current (corrected 2026-07-27 — was stale, said 10):** **20 slots** — `SHELF_SIZE=20` confirmed live in both `app/(main)/shelf/page.tsx:15` and `app/api/shelf/route.ts:13`. Seeded once: top-3 noseprint matches + owned collections by tier/affinity. Actions: add/remove/[...]
 - **Spec (founder brief):** **20 slots in 4 tiers** — S (1–5), A (6–10), B (11–15), C (16–20, at-risk). Eligibility: only Tested/Own/Past-Purchase fragrances, **enforced in data model**.[...]
-- **Gap (updated post-migrations 2026-07-04):** DB layer is DONE (tiers, BB, eligibility trigger, ±20 ranks). Remaining is ALL app-layer: SHELF_SIZE 10→20 in both files, tier-row UI, BB stamp r[...]
+- **Gap (corrected 2026-07-27):** DB layer is DONE (tiers, BB, eligibility trigger, ±20 ranks) **and app-layer SHELF_SIZE is now 20, matching spec** — the "SHELF_SIZE 10→20" migration this line used to describe as outstanding is done. Remaining gap, verified this session: `shelf_items.tier` and `shelf_items.blind_buy` columns exist live but are **never selected/read anywhere in app code** (`app/api/shelf/route.ts`, `app/(main)/shelf/page.tsx` only ever select `id, rank, source, locked, fragrance_id`) — no tier-row UI, no BB stamp rendering. See `db-table-usage-audit` skill for the audit this came from.
 
 ## 7. LLM / cost posture (verified)
 
@@ -71,7 +69,7 @@ Next.js 16.2.9 (App Router, route groups `(main)` `(community)` `(account)`), Re
 
 ## 8. Design primitives (verified in code)
 
-- **Fonts:** IBM Plex Sans (system UI, `next/font/google`) + **Instrument Serif Italic** (identity, memory, and emotional display). Reconciled 2026-08-10 against `app/layout.tsx`, `app/globals.css`, and implementation commit `f888e02`: IBM Plex Sans is intentionally shipped and canonical. Earlier Geist-target and Unbounded-migration language was stale; Geist, Unbounded, Space Grotesk, and Cormorant Garamond are retired for active UI work.
+- **Fonts:** **IBM Plex Sans** is the body/UI font (`app/layout.tsx` imports `IBM_Plex_Sans` and exposes `--font-ibm-plex`; `app/globals.css` maps `--font-body`/`--font-ui` to it). **Instrument Serif** remains the emotional/display font via `--font-display`, falling back to self-hosted Cormorant Garamond woff2 then Georgia if Instrument Serif fails to load. Verified 2026-08-11 against `app/layout.tsx` and `app/globals.css`.
 - **Colour:** light parchment palette in `:root` (`--color-bg #F7F3EE`, primary gold `#B8913A`) but `app/layout.tsx` hardcodes `data-theme="dark"` → effective default is dark slate `#0F172A` + g[...]
 - **Motion tokens:** `--motion-instant` 80ms / `--motion-responsive` 200ms / `--motion-ceremonial` 480ms / `--motion-organic` 800ms (+ legacy `--motion-fast/base`). Brief's motion verbs: reveal, d[...]
 - **Other:** glassmorphism (`--glass-*`), 8-layer `--shadow-object`, radius `--r-card 12px`/pill buttons, spacing `--sp-1..5`, fluid type scale (`--text-display` etc.), family gradient tokens.
@@ -83,10 +81,10 @@ Next.js 16.2.9 (App Router, route groups `(main)` `(community)` `(account)`), Re
 - **Shopify Storefront** (`lib/shopify.ts`): env-driven (`NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN`, `SHOPIFY_STOREFRONT_API_KEY`), graceful null when unconfigured. Consumed by `/boxes`.
 - **Pro gating:** `getIsPro()` is a global `NEXT_PUBLIC_BETA_MODE` flag, not per-user (known footgun; no Stripe).
 
-## 10. Personas & legacy point mechanics
+## 10. Personas & XP
 
 - 6 scent-identity personas in `lib/personas.ts` (canonical, never inline).
-- Existing contributor, scanner, and Spritz flows still write XP-derived values and expose some as "resonance" points. This is verified shipped legacy behavior, not authority for new user-facing gamification. Do not expand it; product remediation must remove or explicitly reframe the point mechanic before doctrine can call it compliant.
+- XP 6 levels (0/100/300/600/1000/1500); writes `user_xp` + `as_xp` localStorage.
 - Customer personas: Gavin (newcomer), Christopher (enthusiast) — `lib/personas.ts`.
 
 ## 11. Operational rules (binding, from AGENTS.md — do not relearn these the hard way)
@@ -103,6 +101,11 @@ Next.js 16.2.9 (App Router, route groups `(main)` `(community)` `(account)`), Re
 10. Verify before trusting any agent, handover, or remediation claim. Current file presence is not proof of prior existence; respect tool-scope limits, and when timing matters confirm provenance with live checks such as `git status --porcelain`, `git log --follow`, direct file reads, and build or filesystem evidence before promoting a claim to fact. See `docs/nota/HANDOVER-2026-07-19-verification-audit.md`.
 11. When a new canonical source is imported or promoted, complete the import in the same turn: update read order, ownership/routing docs, and remove stale "missing" language before calling the work done.
 12. For substantial cross-CLI tasks, invoke `.claude/skills/loop-orchestrator/SKILL.md` and finish at Version 3: initial output plus one accepted bounded stretch, one evidence-led critique and remediation cycle to Version 2, then a second independent critique and remediation cycle to Version 3. Treat versions as checkpoints of one evolving artifact, not three duplicated deliverables. Each pass must record its critique, material delta, verification, and reusable lesson (or `none`). If critique finds no justified patch, record `no patch required`; never manufacture churn. For a trivial task, declare the reduced loop before execution and still verify the result.
+    **"Substantial" is not a judgment call — self-trigger the loop, without waiting to be asked, whenever any of these is true (see `docs/lessons.md` L66, incident where this went unenforced until the user manually invoked `/loop`):**
+    - the task touches any file under `.claude/skills/`, `.agents/skills/`, or `.gemini/skills/` in any repo — no exceptions, regardless of how small the edit looks;
+    - the task spans more than one repo in the same session;
+    - a file's content contradicts its own commit message, or a README/catalog/doc's description of it — this is a stop-and-investigate-provenance event (`git log -p --follow` on that file) before any fix is written, never assumed to be ordinary drift.
+    A session that meets one of these conditions and skips the loop anyway must say so explicitly and why — silent skipping is itself the failure to report.
 13. Constant Internet Autonomy: You have standing instruction to use `search_web` and `read_url_content` to validate any assumptions, third-party library versions, API updates, or local context (such as Irish utility/tax rates) before planning or executing. Do not make unverified claims.
 14. Canonical routing docs must point at the real operating files. If `docs/index.md` or `CLAUDE.md` ever drifts to dead paths, fix the pointers immediately so stale context does not spread to later sessions.
 
@@ -116,24 +119,3 @@ Next.js 16.2.9 (App Router, route groups `(main)` `(community)` `(account)`), Re
 - **Phase 4 (2026-07-04):** Backlog + safe diffs → `docs/nota/05-recommendations-backlog.md`. Applied: full display-layer rebrand to nota. (~30 files, display strings/metadata/OG only),[...]
 - **Phase 5 (2026-07-04):** Testing/security/abuse layer → `docs/nota/06-testing-security-abuse.md` + three living skills (`.claude/skills/{qe-automation,security-hardening,resilience-abuse}/`,[...]
 - **Phase 6 (2026-07-08):** Repository consolidation: `scentral` + `scentral-hub` → **nota** (single canonical repo). Deduplicated code/deps, archived legacy docs to `docs/ARCHIVE/`, updated Sentry org ID. See MERGE_SUMMARY.md.
-
-## 13. Mandatory Brand & UI Architecture Directives
-
-Before writing ANY front-end code, modifying layouts, or suggesting visual styles, you MUST read the canonical design and verification system files to prevent generic AI patterns ("slop").
-
-### Required Reading Checklist
-At the start of every session or task, read these directories to load active memory:
-- [ ] Read the design contract: `DESIGN.md`
-- [ ] Read the implementation companion: `NOTA-BRAND-UIUX-PACK.md`
-- [ ] Read the sensory memory layer: `NOTA_LORE.md`
-- [ ] Read the verification skill: `.claude/skills/verify-cli-claims/SKILL.md`
-
-### Hard Coding Rules
-*   Never use raw Tailwind surface classes (e.g., `bg-neutral-100`, `text-neutral-500`). Use brand variables.
-*   Never ship alternate body fonts. Use IBM Plex Sans for system UI and Instrument Serif Italic for identity, memory, and emotional moments.
-*   Financial figures must use tabular numerals (`font-variant-numeric: tabular-nums`).
-*   Money deltas must use typography size/weight and glyphs (+/-) rather than reflexively coloring negative numbers red.
-*   Skeletons must mimic the real layout structure; no default `animate-pulse`.
-
-### UI Verification Gate
-*   You are not allowed to declare a component or page complete without running a visual audit of its states (loading, empty, success, error, focus, hover, mobile) against the `visual-verification` checks.

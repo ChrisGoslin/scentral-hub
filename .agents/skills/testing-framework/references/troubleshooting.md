@@ -6,7 +6,7 @@
 
 **Symptom:**
 ```
-Error: getaddrinfo EAI_AGAIN scentral-hub.vercel.app
+Error: getaddrinfo EAI_AGAIN <configured-deployment-host>
 Error: connect ECONNREFUSED 127.0.0.1:3000
 ```
 
@@ -15,7 +15,7 @@ Error: connect ECONNREFUSED 127.0.0.1:3000
 **Solution:**
 1. Check internet connection: `ping google.com`
 2. Verify dev server running: `npm run dev` (in separate terminal)
-3. Verify URL is correct: `curl https://scentral-hub.vercel.app`
+3. Verify URL is correct using the configured deployment URL: `curl "$NEXT_PUBLIC_SITE_URL"`
 4. If CI/CD: Check if deployment succeeded before running smoke tests
 
 ### Problem: "Response status 404 on homepage"
@@ -46,7 +46,7 @@ Error: request timed out after 10000ms
 1. Check server logs: `vercel logs` (production)
 2. Increase timeout: Edit `scripts/smoke-test.mjs` increase `timeout: 10_000`
 3. If CI/CD: Check resource limits, may need better server
-4. Profile app: `npx lighthouse https://app.url --view`
+4. Profile app: `npx --no-install lighthouse "$NEXT_PUBLIC_SITE_URL" --view`
 
 ---
 
@@ -102,12 +102,12 @@ Error: locator.click: Timeout 30000ms exceeded waiting for locator('text=Sign in
 
 1. **Text doesn't exist or has different content**
    ```typescript
-   // ❌ Wrong
-   await page.getByText('Sign in').click();
-   
-   // ✅ Use flexible matching
-   await page.getByText(/sign in/i).click();
-   
+   // ❌ Wrong: text selectors are brittle for actions
+   await page.locator('text=Sign in').click();
+
+   // ✅ Use text for visibility only
+   await expect(page.getByText(/sign in/i)).toBeVisible();
+
    // ✅ Use role instead
    await page.getByRole('button', { name: 'Sign in' }).click();
    ```
@@ -116,7 +116,7 @@ Error: locator.click: Timeout 30000ms exceeded waiting for locator('text=Sign in
    ```typescript
    // ❌ Can't find element outside iframe
    await page.getByText('Content').click();
-   
+
    // ✅ Access iframe explicitly
    const frameHandle = await page.$('iframe[name="editor"]');
    const frame = await frameHandle?.contentFrame();
@@ -125,19 +125,17 @@ Error: locator.click: Timeout 30000ms exceeded waiting for locator('text=Sign in
 
 3. **Element not visible (hidden or off-screen)**
    ```typescript
-   // ✅ Force click even if not visible
-   await page.click('text=Hidden button', { force: true });
-   
-   // ✅ Or scroll into view first
+   // ✅ Scroll into view first, then use a normal actionability-checked click
    await page.locator('text=Button').scrollIntoViewIfNeeded();
    await page.locator('text=Button').click();
    ```
+   Forced clicks bypass Playwright's actionability checks; use them only for a documented exception with separate coverage proving the hidden/obstructed state is intentional.
 
 4. **Selector changed in code**
    ```typescript
    // Debug mode to inspect page
    npx playwright test e2e/test.spec.ts --debug
-   
+
    // Or print page content
    await page.addInitScript(() => {
      console.log('Current URL:', window.location.href);
@@ -160,7 +158,10 @@ Error: strict mode violation: getByRole('button', { name: 'Delete' }) resolved t
 await page.getByRole('button', { name: 'Delete' }).click();
 
 // ✅ Target specific instance
-await page.locator('text=Item Name').closest('div').getByRole('button', { name: 'Delete' }).click();
+await page.getByRole('row', { name: /Item Name/ }).getByRole('button', { name: 'Delete' }).click();
+
+// ✅ Or filter a list item/container by text
+await page.locator('[data-testid="item-row"]').filter({ hasText: 'Item Name' }).getByRole('button', { name: 'Delete' }).click();
 
 // ✅ Or use nth()
 await page.getByRole('button', { name: 'Delete' }).nth(0).click();
@@ -180,10 +181,10 @@ await page.locator('[data-testid="delete-item-123"]').click();
    // ❌ Doesn't wait for API
    await page.click('button');
    await expect(page.locator('text=Success')).toBeVisible();
-   
+
    // ✅ Wait for network
    await page.click('button');
-   await page.waitForLoadState('networkidle');
+   await expect(page.locator('text=Loaded')).toBeVisible({ timeout: 5000 });
    await expect(page.locator('text=Success')).toBeVisible();
    ```
 
@@ -191,7 +192,7 @@ await page.locator('[data-testid="delete-item-123"]').click();
    ```typescript
    // ❌ Depends on speed
    await page.waitForTimeout(1000);
-   
+
    // ✅ Wait for condition
    await expect(page.locator('text=Loaded')).toBeVisible({ timeout: 5000 });
    ```
@@ -227,14 +228,14 @@ await page.locator('[data-testid="delete-item-123"]').click();
 
 2. **Click happens before JavaScript ready**
    ```typescript
-   // ✅ Wait for page to load
-   await page.waitForLoadState('networkidle');
+   // ✅ Wait for the control/state this action needs
+   await expect(page.getByRole('button')).toBeEnabled();
    await page.getByRole('button').click();
    ```
 
 3. **Click intercepted by overlay**
    ```typescript
-   // ✅ Close modal first or force click
+   // ✅ Close modal first, then click normally
    const modal = page.locator('[role="dialog"]');
    if (await modal.isVisible()) {
      await page.keyboard.press('Escape');
@@ -244,9 +245,9 @@ await page.locator('[data-testid="delete-item-123"]').click();
 
 4. **Button has complex event handlers**
    ```typescript
-   // ✅ Use waitForNavigation if button navigates
+   // ✅ Use URL waiting if button navigates
    await Promise.all([
-     page.waitForNavigation(),
+     page.waitForURL(/\/next-page/),
      page.getByRole('button', { name: 'Go' }).click()
    ]);
    ```
@@ -265,16 +266,16 @@ Error: page.waitForNavigation: Timeout 30000ms exceeded.
 1. **Verify navigation actually happens**
    ```typescript
    // ✅ Check where navigation goes
-   const response = await page.waitForNavigation();
+   await page.getByRole('button', { name: 'Go' }).click();
+   await page.waitForURL(/\/next-page/);
    console.log('Navigated to:', page.url());
-   console.log('Status:', response?.status());
    ```
 
 2. **Navigation might be delayed**
    ```typescript
    // ✅ Wait longer or use goto directly
    await Promise.all([
-     page.waitForNavigation({ waitUntil: 'networkidle' }),
+     page.waitForURL(/\/next-page/),
      page.getByRole('button').click()
    ]);
    ```
@@ -303,7 +304,7 @@ test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem('key', 'value');
   });
-  
+
   // ✅ THEN navigate
   await page.goto('/');
 });
@@ -332,7 +333,7 @@ await page.evaluate(() => {
      // Ignore third-party warnings
      if (msg.text().includes('FB')) return;
      if (msg.type() === 'warning') return;
-     
+
      // Fail on actual errors
      if (msg.type() === 'error') {
        throw new Error(`Console error: ${msg.text()}`);
@@ -346,7 +347,7 @@ await page.evaluate(() => {
    page.on('console', msg => {
      console.log(`${msg.type()}: ${msg.text()}`);
    });
-   
+
    // Then fix in source code
    ```
 
@@ -361,8 +362,7 @@ await page.evaluate(() => {
 1. **Environment variables missing**
    ```bash
    # Verify .env.local has all required variables
-   cat .env.local
-   echo "NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}"
+   node -e "for (const k of ['NEXT_PUBLIC_SUPABASE_URL','NEXT_PUBLIC_SUPABASE_ANON_KEY']) console.log(k + '=' + (process.env[k] ? 'set' : 'missing'))"
    ```
 
 2. **Different Node version**
@@ -381,9 +381,9 @@ await page.evaluate(() => {
 
 4. **Mobile device emulation issues**
    ```bash
-   # Mobile tests may be stricter
-   # Skip mobile in CI, run locally:
-   npx playwright test --project=chromium
+   # Mobile tests may be stricter. Keep a bounded mobile CI project or quarantine
+   # a known flaky spec with an owner/date and report the lost coverage.
+   npx playwright test --project='Mobile Safari'
    ```
 
 ### Problem: "Playwright version mismatch"
@@ -396,10 +396,10 @@ Error: browserType.launch: Browser is not compatible with this version of Playwr
 **Solution:**
 ```bash
 # Reinstall browsers
-npx playwright install
+npx playwright@1.62.0 install
 
 # Or specific browser
-npx playwright install chromium
+npx playwright@1.62.0 install chromium
 ```
 
 ---
@@ -424,7 +424,7 @@ npx playwright install chromium
 
 3. **Check if Vercel deployment is stalled**
    ```bash
-   vercel logs scentral-hub
+   vercel logs "$VERCEL_PROJECT_NAME"
    ```
 
 ### Problem: "E2E tests take 3+ minutes"
@@ -439,9 +439,11 @@ npx playwright install chromium
    workers: process.env.CI ? 1 : undefined,  // 1 in CI, auto in dev
    ```
 
-2. **Skip slow tests in CI**
+2. **Run slow tests in a bounded CI lane**
    ```typescript
-   test.skip(process.env.CI === 'true', 'Skip in CI');
+   // Prefer a separate project/job with tighter scope over skipping coverage.
+   // If quarantine is unavoidable, record the skipped spec, owner, date, and lost coverage.
+   test.describe.configure({ timeout: 60_000 });
    ```
 
 3. **Reduce browser coverage in CI**
@@ -471,10 +473,10 @@ npx playwright test --debug --project=chromium
 // In test:
 test.only('debug this test', async ({ page }) => {
   await page.goto('/');
-  
+
   // Pause here, inspect in browser debugger
   await page.pause();
-  
+
   // Continue test
   await page.getByText('Button').click();
 });
@@ -514,8 +516,8 @@ npx playwright show-trace trace.zip
 |---------|-----------|
 | Test timeout | Start `npm run dev` separately |
 | Element not found | Use `--debug` to inspect page |
-| Flaky tests | Add `waitForLoadState('networkidle')` |
-| Mobile test slow | Run locally, skip in CI |
+| Flaky tests | Add web-first assertions or wait for the specific response/URL |
+| Mobile test slow | Run a bounded mobile CI project or tracked quarantine |
 | Console errors | Use `page.on('console')` to filter noise |
 | localStorage not set | Call `addInitScript` BEFORE `goto` |
 | Click didn't work | Add `waitForLoadState` before click |

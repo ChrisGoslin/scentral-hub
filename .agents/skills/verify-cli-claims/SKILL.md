@@ -1,11 +1,6 @@
 ---
 name: verify-cli-claims
-description: >-
-  Prove build/logic claims before stating a nota. component or flow is complete.
-  Runs a build/lint check against the Next.js/Tailwind environment and asserts the
-  nota. performance brand budget (≤3 liquid glass backdrop filters, exactly one
-  fixed grain layer) and DESIGN.md token usage over hardcoded hexes. Trigger before
-  claiming any UI component or logic flow is done, complete, working, or verified.
+description: "Read-only verification agent. Takes a CLI agent's 'done!' summary and proves each claim against the actual repo, filesystem, and build output. Returns Verified / Unverified / False per claim. Run after any Claude Code, Antigravity, or Gemini session before merging or deploying."
 ---
 
 # Verify CLI Claims

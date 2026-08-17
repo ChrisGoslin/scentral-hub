@@ -73,7 +73,7 @@ test.describe('Example Feature Tests', () => {
 
     // ACT: Submit form
     await Promise.all([
-      page.waitForNavigation(),
+      page.waitForURL(/\/contact\/success/),
       page.getByRole('button', { name: 'Submit' }).click()
     ]);
 
