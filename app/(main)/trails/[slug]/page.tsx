@@ -6,6 +6,44 @@ import type { TrailStep } from './types'
 
 export const dynamic = 'force-dynamic'
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}) {
+  const { slug } = await params
+  const cookieStore = await cookies()
+  const supabase = await createClient(cookieStore)
+  const { data: trail } = await supabase
+    .from('trails')
+    .select('title, hook')
+    .eq('slug', slug)
+    .maybeSingle()
+
+  if (!trail) {
+    return {
+      title: 'nota. — Scent Trail',
+    }
+  }
+
+  const title = `nota. — ${trail.title}`
+  const description = trail.hook || `Explore the ${trail.title} scent journey on nota.`
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+    },
+  }
+}
+
 export default async function TrailDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   const cookieStore = await cookies()

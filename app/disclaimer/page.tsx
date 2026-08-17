@@ -1,5 +1,14 @@
 // app/disclaimer/page.tsx
 
+export const metadata = {
+  title: 'nota. — Disclaimer & Safety Guidelines',
+  description: 'Fragrance application guidelines, anosmia risk assessments, and hobbyist safety disclosures on nota.',
+  openGraph: {
+    title: 'nota. — Disclaimer & Safety Guidelines',
+    description: 'Fragrance application guidelines, anosmia risk assessments, and hobbyist safety disclosures on nota.',
+  },
+}
+
 export default function DisclaimerPage() {
   const sections = [
     {

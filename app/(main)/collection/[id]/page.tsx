@@ -48,6 +48,54 @@ const LONGEVITY_CHIP: Record<string, string> = {
   'Light':      '🌤 Light wear',
 }
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  try {
+    const { id } = await params
+    const cookieStore = await cookies()
+    const supabase = await createClient(cookieStore)
+    const { data } = await supabase
+      .from('fragrances')
+      .select('name, brand, family, plain_description, image_url')
+      .eq('id', id)
+      .maybeSingle()
+
+    if (!data) {
+      return {
+        title: 'nota. — Fragrance Detail',
+      }
+    }
+
+    const title = `${data.name} by ${data.brand} — nota.`
+    const description = data.plain_description || `${data.name} by ${data.brand} (${data.family || 'Fragrance'}). Olfactory profile, accords, layering notes, and community reviews on nota.`
+    const image = getSafeFragranceImageUrl(data.image_url)
+
+    return {
+      title,
+      description,
+      openGraph: {
+        title,
+        description,
+        images: image ? [image] : ['/og-default.png'],
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title,
+        description,
+        images: image ? [image] : ['/og-default.png'],
+      },
+    }
+  } catch {
+    return {
+      title: 'nota. — Fragrance Detail',
+      description: 'Olfactory profile, accords, layering notes, and community reviews on nota.',
+    }
+  }
+}
+
 export default async function FragranceDetailPage({ 
   params, 
   searchParams 

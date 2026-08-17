@@ -5,6 +5,11 @@ import ReadClient from './ReadClient'
 
 export const metadata = {
   title: 'nota. — The Read',
+  description: 'Interactive fragrance archetype diagnostic. Discover your scent persona and olfactory DNA profile.',
+  openGraph: {
+    title: 'nota. — The Read',
+    description: 'Interactive fragrance archetype diagnostic. Discover your scent persona and olfactory DNA profile.',
+  },
 }
 
 export default async function ReadPage() {

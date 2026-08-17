@@ -1,1 +1,1 @@
-export { default } from '../../collection/[id]/page'
+export { default, generateMetadata } from '../../collection/[id]/page'

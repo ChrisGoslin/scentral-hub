@@ -6,8 +6,16 @@ import NoseprintClient from './NoseprintClient'
 export async function generateMetadata() {
   return {
     title: 'nota. — My Noseprint',
+    description: 'Your personal olfactory profile and fragrance DNA signature on nota.',
     openGraph: {
+      title: 'nota. — My Noseprint',
+      description: 'Your personal olfactory profile and fragrance DNA signature on nota.',
       images: ['/api/og/noseprint'],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: 'nota. — My Noseprint',
+      description: 'Your personal olfactory profile and fragrance DNA signature on nota.',
     },
   }
 }

@@ -1,0 +1,27 @@
+name: Supabase DB Lint
+
+on:
+  pull_request:
+    paths:
+      - 'supabase/**'
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/**'
+
+jobs:
+  lint:
+    name: Lint Supabase Schema & Migrations
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Verify migration syntax
+        run: |
+          supabase db lint --level error

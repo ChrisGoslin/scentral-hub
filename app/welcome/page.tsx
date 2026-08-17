@@ -5,6 +5,11 @@ import WelcomeClient from './WelcomeClient'
 
 export const metadata = {
   title: 'nota. — Welcome',
+  description: 'Welcome to nota. Your digital fragrance cabinet, layering laboratory, and scent memory companion.',
+  openGraph: {
+    title: 'nota. — Welcome',
+    description: 'Welcome to nota. Your digital fragrance cabinet, layering laboratory, and scent memory companion.',
+  },
 }
 
 export default async function WelcomePage() {

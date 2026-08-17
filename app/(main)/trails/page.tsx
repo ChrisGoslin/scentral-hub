@@ -4,6 +4,15 @@ import { createClient } from '@/utils/supabase/server'
 
 export const dynamic = 'force-dynamic'
 
+export const metadata = {
+  title: 'nota. — Scent Trails',
+  description: 'Curated olfactory journeys and interactive fragrance exploration trails on nota.',
+  openGraph: {
+    title: 'nota. — Scent Trails',
+    description: 'Curated olfactory journeys and interactive fragrance exploration trails on nota.',
+  },
+}
+
 type TrailRow = {
   id: string
   title: string
