@@ -377,6 +377,7 @@ E2E passed 35/35 throughout. Tests assert behaviour, not brand.
 **Remedy built in:** Narrowed the regex to the four actual canon filenames (`CLAUDE|PROJECTS|LESSONS|profile\.md`) instead of matching any `~/.claude/*.md`, then broadened the file scope to include `docs/launch/` and `docs/HANDOVER.md` safely on top of that.
 **Enforced by:** `.husky/pre-push`'s dead-canon-pointer check, re-tested against both the original failing case (`docs/launch/LAUNCH_MAESTRO_INTEGRATION.md`, now clean) and a real duplicate-ID failure case before this landed.
 
+<<<<<<< HEAD
 ---
 
 ## 2026-07-27 — PR #82 skill hygiene and review hardening
@@ -432,3 +433,9 @@ Context: PR #82 restored and hardened repo skills after review surfaced tampered
 **What happened:** Two independent sessions previously authored overlapping lesson IDs, and cross-references silently became ambiguous until review caught the collision. The current file has since been renumbered and `npm run lessons:check` verifies 72 unique lesson IDs.
 **Rule:** Before adding lesson entries, derive the next ID from the existing headings and assert unique heading count equals total heading count after the edit.
 **Enforced by:** `scripts/check-lesson-ids.mjs`, `npm run lessons:check`, `.husky/pre-push`, and `.github/workflows/skill-integrity.yml`.
+
+### L73 — E2E testing of client hardware & Web APIs requires fake-media flags and DOM fallback assertions in headless CI
+**What happened:** Camera and barcode scanner surfaces (`/scanner`) prompt for device permissions and stream media via `getUserMedia`. In headless CI containers without physical cameras, unconfigured Playwright runners either block or throw unhandled permission exceptions when tests attempt camera operations.
+**Rule:** Any test suite exercising device sensors (camera, microphone, geolocation) must supply fake device launch args (`--use-fake-ui-for-media-stream`, `--use-fake-device-for-media-stream`) and explicit permissions in `playwright.config.ts`, and test assertions must verify deterministic DOM fallbacks (manual search/input) so pipelines remain resilient.
+**Remedy built in:** Configured Chromium and Mobile Chrome launch options with fake media stream flags and permissions in `playwright.config.ts`, and updated `e2e/big-bets.spec.ts` to assert manual form fallback accessibility.
+**Enforced by:** Playwright configuration check in CI pre-test and `e2e/big-bets.spec.ts`.

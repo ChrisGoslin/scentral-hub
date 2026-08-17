@@ -46,7 +46,7 @@ export function FragranceCardMedia({ imageUrl, brand, name, family, rating, owne
           backgroundImage: showImage ? undefined : getFamilyGradient(family),
           border: '1px solid color-mix(in srgb, var(--line) 70%, transparent)',
           boxShadow: '0 18px 32px rgba(0,0,0,0.22)',
-          transition: 'transform 200ms ease-out',
+          transition: 'transform var(--motion-responsive, 200ms cubic-bezier(0.16, 1, 0.3, 1))',
           transform: hovered ? 'scale(1.03)' : 'scale(1)',
         }}
       >
@@ -56,7 +56,7 @@ export function FragranceCardMedia({ imageUrl, brand, name, family, rating, owne
             alt={`${brand} ${name}`}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            style={{ objectFit: 'cover' }}
+            style={{ objectFit: 'contain', padding: 8 }}
             onError={() => setImgError(true)}
             priority={priority}
           />

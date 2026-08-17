@@ -9,9 +9,11 @@ The core views to update are:
 - `EmptyState` (`components/ui/EmptyState.tsx`) - Infuse with handwritten style and personalized hints.
 
 Design Tokens & Fonts:
-- **Display font**: Cormorant Garamond (emotional/display, `--font-display`)
-- **Handwritten font**: Caveat (handwritten/sketches, `--font-handwritten` or standard imports)
-- **Palette**: Ink, clay, brass, smoked glass on top of Stone-50 background and Fragrance Gold accent.
+- **The Vessel (Display font)**: Instrument Serif Italic (~10%, emotional/display, `--font-instrument-serif`)
+- **The Instrument (Sans font)**: Geist (~90%, body/labels, `--font-geist` or standard sans)
+- **Handwritten font**: Caveat (handwritten/sketches, `--font-handwritten` or standard imports, for annotations)
+- **Palette**: Ivory paper (`--surface` #F7F4EE), Charcoal ink (`--on-surface` #2B2926), Taupe (`--secondary-ink` #766E64), Olive (`--alignment` #6B7250), Moss (`--evolution` #4A5940), Amber (`--primary` #A0622A).
+- **Tactile Physics**: 2% SVG fractal noise grain, 0px structural radius, `mix-blend-multiply` for stamps.
 
 ## Milestones
 | # | Name | Scope | Dependencies | Status |

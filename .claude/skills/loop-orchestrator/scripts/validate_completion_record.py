@@ -101,8 +101,19 @@ def parse_sections(text: str) -> tuple[list[str], dict[str, dict[str, str]]]:
 
 
 def is_placeholder(value: str) -> bool:
+    if not value:
+        return True
     lowered = value.lower()
-    return not value or any(pattern in lowered for pattern in PLACEHOLDER_PATTERNS)
+    if any(pattern in lowered for pattern in PLACEHOLDER_PATTERNS):
+        return True
+    # Remove markdown links e.g. [label](url) to avoid matching them as placeholders
+    cleaned = re.sub(r"\[[^\]]+\]\([^)]+\)", "", value)
+    # Remove standard checkboxes e.g. [ ], [x], [X]
+    cleaned = re.sub(r"\[[ xX]\]", "", cleaned)
+    # Catch any remaining generic bracketed placeholders e.g. [populate here] or [token_id]
+    if re.search(r"\[[^\]]+\]", cleaned):
+        return True
+    return False
 
 
 def main() -> None:

@@ -131,6 +131,18 @@ class CompletionRecordValidatorTests(unittest.TestCase):
         content = record("quick").replace("- HEAD: abc1234", "- HEAD:")
         self.assertNotEqual(validate("quick", content).returncode, 0)
 
+    def test_rejects_bracketed_placeholders(self) -> None:
+        content = record("quick").replace("- HEAD: abc1234", "- HEAD: [populate hash]")
+        self.assertNotEqual(validate("quick", content).returncode, 0)
+
+    def test_accepts_markdown_links(self) -> None:
+        content = record("quick").replace("- HEAD: abc1234", "- HEAD: [Commit Details](https://github.com/example/commit/abc1234)")
+        self.assertEqual(validate("quick", content).returncode, 0)
+
+    def test_accepts_checkboxes(self) -> None:
+        content = record("quick").replace("- HEAD: abc1234", "- HEAD: [x] Done [ ] Pending [X] Done")
+        self.assertEqual(validate("quick", content).returncode, 0)
+
     def test_rejects_out_of_order_sections(self) -> None:
         content = record("standard")
         first = content.index("## Critique 1")
