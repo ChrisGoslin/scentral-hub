@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@/utils/supabase/server'
+import { parseReadIdentity } from '@/lib/ai/read-identity'
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
@@ -111,18 +112,8 @@ Rules:
   })
 
   const raw = (message.content[0] as { text: string }).text.trim()
-  let identity: {
-    opening: string
-    noseprintName: string
-    descriptor: string
-    signals: string[]
-    stretchNote: string
-  }
-
-  try {
-    const jsonMatch = raw.match(/\{[\s\S]*\}/)
-    identity = JSON.parse(jsonMatch ? jsonMatch[0] : raw)
-  } catch {
+  const identity = parseReadIdentity(raw)
+  if (!identity) {
     return NextResponse.json({ error: 'Generation failed' }, { status: 500 })
   }
 
