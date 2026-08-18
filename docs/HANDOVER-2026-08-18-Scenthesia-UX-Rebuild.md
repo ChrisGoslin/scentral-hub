@@ -31,10 +31,27 @@ Run this command to prove the Scenthesia Backlog contains absolutely zero AI slo
 grep -i -E "delve|foster|leverage|utilize|facilitate|empower|streamline|robust|cutting-edge|paradigm|game changer|tapestry|realm|beacon|multifaceted|meticulous|intricate|paramount|transformative|elevate|embark|supercharge|harness" docs/nota/CUSTOMER_WOW_SPIKES_BACKLOG.md
 ```
 
-## 3. Deployment Status
-Code was successfully pushed to `main` at `2026-08-18T02:12:16+01:00`. Vercel automatically deploys commits to `main`.
-To verify the live deployment status, the next agent should check the Vercel dashboard or CLI.
+## 3. Production Deployment & Build Status (Verifiable)
+Do not assume the build works. The next agent must run the exact build sequence Vercel uses to verify the codebase compiles into static HTML and Edge functions:
 
-## 4. Next Steps for Subsequent Agents
+```bash
+npm run build
+```
+*(Expected: Clean exit code 0. Note: Sentry may print a bypass warning which is expected, but the Next.js compile must finish successfully).*
+
+## 4. Globally Installed Skills
+During this session, two powerful agentic skills were installed globally to the user's `~/.gemini/config/plugins/` directory (outside this repo). You can verify their existence by running:
+
+```bash
+cat ~/.gemini/config/plugins/taste-ux-noslop-skill/skills/taste-ux-noslop-skill/SKILL.md
+```
+*(Expected: Outputs the Master Taste UX Skill)*
+
+```bash
+cat ~/.gemini/config/plugins/brain-to-docs-skill/skills/brain-to-docs/SKILL.md
+```
+*(Expected: Outputs the Brain to Docs Handover Skill)*
+
+## 5. Next Steps for Subsequent Agents
 - **Execution of the 75-Point Backlog**: The infrastructure is laid. The next agent should read `docs/nota/CUSTOMER_WOW_SPIKES_BACKLOG.md` and begin implementing the Traces & Synesthesia features (e.g., Spotify API Audio Analyzer sync).
 - **Gamification Metamorphosis**: The `GamificationProvider` logs level-ups. The next agent should build the visual CSS transitions to actually morph the UI from light to dark mode when the user reaches the "Atelier" tier.
