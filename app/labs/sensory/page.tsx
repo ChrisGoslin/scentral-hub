@@ -8,7 +8,21 @@ export default function SensoryPlayground() {
   const [bottleState, setBottleState] = useState<'full' | 'empty'>('full')
   const [shakeCount, setShakeCount] = useState(0)
   const [smudges, setSmudges] = useState<{ id: number, x: number, y: number }[]>([])
+  
+  // New Toggles
+  const [isAmoled, setIsAmoled] = useState(false)
+  const [isQuiet, setIsQuiet] = useState(false)
+  const [isThermal, setIsThermal] = useState(false)
+  
+  const hour = new Date().getHours()
+  const isMidnight = hour >= 2 && hour <= 4
+
   const controls = useAnimation()
+
+  // Feature 179: Quiet Mode Sync
+  useEffect(() => {
+    sensory.setMuted(isQuiet)
+  }, [isQuiet])
 
   // Feature 113: Shake-to-Randomize (DeviceMotionEvent)
   useEffect(() => {
@@ -41,34 +55,29 @@ export default function SensoryPlayground() {
       lastZ = z
     }
 
-    // iOS requires explicit permission for DeviceMotion now, 
-    // but Android and older iOS devices will fire this.
     window.addEventListener('devicemotion', handleMotion)
     return () => window.removeEventListener('devicemotion', handleMotion)
   }, [controls])
 
   // Feature 117 & 119: The "Empty Spray" Haptic Sputter & Fingerprint Smudges
   const handleSpray = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    // Record smudge location (Feature 119)
     const rect = e.currentTarget.getBoundingClientRect()
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
     
-    setSmudges(prev => [...prev.slice(-4), { id: Date.now(), x, y }]) // Keep last 5 smudges
+    setSmudges(prev => [...prev.slice(-4), { id: Date.now(), x, y }]) 
 
     if (bottleState === 'empty') {
-      // Sputter effect: 3 quick, weak haptic taps + a dull thud
-      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      if (typeof navigator !== 'undefined' && navigator.vibrate && !isQuiet) {
         navigator.vibrate([10, 50, 10, 50, 10]) 
       }
-      sensory.playInteraction('heavy_thud') // Dull, broken sound
+      sensory.playInteraction('heavy_thud') 
       
       controls.start({
         y: [0, 2, 0, 1, 0],
         transition: { duration: 0.2 }
       })
     } else {
-      // Normal spray effect
       sensory.playInteraction('glass_clink')
       sensory.triggerHaptic('medium')
       controls.start({
@@ -76,13 +85,33 @@ export default function SensoryPlayground() {
         transition: { duration: 0.1 }
       })
     }
-  }, [bottleState, controls])
+  }, [bottleState, controls, isQuiet])
+
+  // Dynamic Background (AMOLED vs Midnight vs Standard)
+  const getBackground = () => {
+    if (isAmoled) return '#000000'
+    if (isMidnight) return 'radial-gradient(circle at top, #3a0d13 0%, #0a0002 100%)' // Sultry Crimson
+    return 'var(--charcoal)'
+  }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-8 relative overflow-hidden" 
-         style={{ background: 'var(--charcoal)', color: 'var(--ivory)' }}>
+    <div className="min-h-screen flex flex-col items-center justify-center p-8 relative overflow-hidden transition-colors duration-700" 
+         style={{ background: getBackground(), color: isMidnight ? '#ffb3ba' : 'var(--ivory)' }}>
       
-      <div className="max-w-md text-center z-10">
+      {/* Feature 176: Toggles Bar */}
+      <div style={{ position: 'absolute', top: '24px', left: '24px', display: 'flex', gap: '8px', flexWrap: 'wrap', zIndex: 20 }}>
+        <button onClick={() => setIsAmoled(!isAmoled)} style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.2)', fontSize: '10px', textTransform: 'uppercase', background: isAmoled ? 'white' : 'transparent', color: isAmoled ? 'black' : 'white' }}>
+          AMOLED Black
+        </button>
+        <button onClick={() => setIsQuiet(!isQuiet)} style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.2)', fontSize: '10px', textTransform: 'uppercase', background: isQuiet ? 'white' : 'transparent', color: isQuiet ? 'black' : 'white' }}>
+          Quiet Mode
+        </button>
+        <button onClick={() => setIsThermal(!isThermal)} style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.2)', fontSize: '10px', textTransform: 'uppercase', background: isThermal ? 'white' : 'transparent', color: isThermal ? 'black' : 'white' }}>
+          Thermal UI
+        </button>
+      </div>
+
+      <div className="max-w-md text-center z-10" style={{ filter: isThermal ? 'hue-rotate(90deg) saturate(2)' : 'none', transition: 'filter 0.5s' }}>
         <h1 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '3rem', marginBottom: '1rem' }}>
           Sensory Playground
         </h1>
@@ -136,10 +165,11 @@ export default function SensoryPlayground() {
               left: '10px',
               right: '10px',
               height: '60%',
-              background: 'rgba(160, 98, 42, 0.4)', // Amber liquid
+              background: isThermal ? 'rgba(255, 0, 0, 0.4)' : 'rgba(160, 98, 42, 0.4)', // Amber or Heat Red
               borderRadius: '16px',
               filter: 'blur(4px)',
-              pointerEvents: 'none'
+              pointerEvents: 'none',
+              transition: 'background 0.5s'
             }} />
           )}
 
@@ -172,7 +202,7 @@ export default function SensoryPlayground() {
 
       {/* Feature 92: Midnight Mode indicator */}
       <div style={{ position: 'absolute', bottom: '24px', fontSize: '10px', opacity: 0.3, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-        {new Date().getHours() >= 2 || new Date().getHours() <= 4 ? 'Midnight Mode Active' : 'Standard Aura'}
+        {isMidnight ? 'Midnight Mode Active' : 'Standard Aura'}
       </div>
 
       {/* iOS 13+ DeviceMotion Permission Request */}
