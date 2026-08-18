@@ -22,8 +22,12 @@ npx tsc --noEmit
 ```
 *(Expected: Clean exit code 0)*
 
-### B. Core Innovations (Manual Verification Required)
-Since no automated tests currently cover the DeviceMotion or Web Audio prototypes, you must verify them by running `npm run dev` and navigating to `/labs/sensory` to test the Shake-to-Rattle and Haptic Sputter features on a mobile device.
+### B. Core Innovations & Test Suite
+The Sensory Playground (DeviceMotion shakes, WebAudio triggers, and glass smudges) is now covered by an automated Playwright End-to-End test suite to prevent regressions. Run the following command to verify:
+```bash
+npx playwright test e2e/sensory-playground.spec.ts
+```
+*(Expected: Clean exit code 0 across all browser matrices)*
 
 ### C. Aesthetic Integrity Audit
 Run this command to prove the Scenthesia Backlog contains absolutely zero AI slop words (must exit 1, meaning no matches):
