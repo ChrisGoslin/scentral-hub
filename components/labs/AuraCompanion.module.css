@@ -1,0 +1,112 @@
+.wrapper {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 900;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+/* 
+  Top Layer Popover using modern web guidance 
+  - Uses @starting-style and allow-discrete for entry animations
+*/
+.popover {
+  background: var(--charcoal, #2B2926);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 8px;
+  padding: 10px 14px;
+  max-width: 240px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  color: var(--ivory, #F7F4EE);
+  font-family: var(--font-display, "Instrument Serif", Georgia, serif);
+  font-style: italic;
+  font-size: 14px;
+  line-height: 1.35;
+  margin: 0; /* Reset popover margin */
+
+  /* Positioning relative to the viewport/button */
+  bottom: 100px;
+  right: 28px;
+  left: auto;
+  top: auto;
+
+  /* Base closed state */
+  opacity: 0;
+  transform: translateY(6px) scale(0.95);
+
+  /* Transition for display and overlay */
+  transition-property: opacity, transform, display, overlay;
+  transition-duration: 0.2s;
+  transition-timing-function: ease-out;
+  transition-behavior: allow-discrete;
+}
+
+.popover:popover-open,
+.popover.\:popover-open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+@starting-style {
+  .popover:popover-open,
+  .popover.\:popover-open {
+    opacity: 0;
+    transform: translateY(8px) scale(0.95);
+  }
+}
+
+/* 
+  Native CSS Animation for the infinite pulse 
+  Values rely on inline CSS variables passed from React
+*/
+.companionButton {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #F7F4EE 0%, var(--aura-primary) 65%, #1A1208 100%);
+  border: 1.5px solid rgba(247, 244, 238, 0.4);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(16px);
+  position: relative;
+  
+  /* Fallback in case JS doesn't set it */
+  --aura-speed: 4s;
+  --aura-glow: rgba(160, 98, 42, 0.3);
+
+  animation: aura-pulse var(--aura-speed) ease-in-out infinite;
+}
+
+.companionButton:focus-visible {
+  outline: 2px solid var(--ivory, #F7F4EE);
+  outline-offset: 4px;
+}
+
+@keyframes aura-pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 16px var(--aura-glow), 0 0 32px var(--aura-glow);
+  }
+  50% {
+    transform: scale(1.08);
+    box-shadow: 0 0 28px var(--aura-glow), 0 0 48px var(--aura-glow);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 16px var(--aura-glow), 0 0 32px var(--aura-glow);
+  }
+}
+
+/* Core pulsing dot */
+.coreDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #A0622A;
+  opacity: 0.9;
+}

@@ -181,6 +181,14 @@ export const EXPERIENCE_ROUTE_META: Record<string, RouteExperienceMeta> = {
     ambientEligible: true,
     socialSuppression: false,
   },
+  '/labs': {
+    label: 'nota.Labs Atelier',
+    canonicalPath: '/labs',
+    dominantAction: 'Experience the sanctuary',
+    shellVisible: true,
+    ambientEligible: true,
+    socialSuppression: false,
+  },
   '/spritz': {
     label: 'Ritual',
     canonicalPath: '/ritual',

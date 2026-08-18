@@ -12,6 +12,8 @@ import CompareBar from "@/components/ui/CompareBar";
 import TemptationProvider from "@/components/temptations/TemptationProvider";
 import ConsentBanner from "@/components/ConsentBanner";
 import AmbientModeController from "./components/AmbientModeController";
+import SmoothScroller from "@/components/ui/SmoothScroller";
+import { GamificationProvider } from "@/components/providers/GamificationProvider";
 
 const ibmPlexSans = IBM_Plex_Sans({
   subsets: ["latin"],
@@ -93,21 +95,36 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
         <DeferredFontLink />
+        {/* Modern Web Guidance: Conditionally load popover polyfill */}
+        <script
+          type="module"
+          dangerouslySetInnerHTML={{
+            __html: `
+              if (!("popover" in HTMLElement.prototype)) {
+                import("https://unpkg.com/@oddbird/popover-polyfill@latest/dist/popover.min.js");
+              }
+            `,
+          }}
+        />
       </head>
       <body className="min-h-[100dvh] flex flex-col" style={{ background: "var(--bg)", color: "var(--text)", fontFamily: "var(--font-ui)" }}>
         <Providers>
-          <AmbientModeController />
-          <PageTracker />
-          <AnalyticsProvider>
-            <PWARegistration />
-            <main className="flex-1">
-              {children}
-            </main>
-            <FeedbackWidget />
-            <CompareBar />
-            <TemptationProvider />
-            <ConsentBanner />
-          </AnalyticsProvider>
+          <GamificationProvider>
+            <SmoothScroller>
+              <AmbientModeController />
+              <PageTracker />
+              <AnalyticsProvider>
+                <PWARegistration />
+                <main className="flex-1">
+                  {children}
+                </main>
+                <FeedbackWidget />
+                <CompareBar />
+                <TemptationProvider />
+                <ConsentBanner />
+              </AnalyticsProvider>
+            </SmoothScroller>
+          </GamificationProvider>
         </Providers>
       </body>
     </html>

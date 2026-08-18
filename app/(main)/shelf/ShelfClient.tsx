@@ -14,6 +14,9 @@ import { SortableContext, useSortable, rectSortingStrategy, arrayMove } from '@d
 import { CSS } from '@dnd-kit/utilities'
 import Button from '@/components/ui/Button'
 import AuraShelfAdvisory from '@/components/aura/AuraShelfAdvisory'
+import AuraCompanion from '@/components/labs/AuraCompanion'
+import { playClink } from '@/components/ui/SensoryFeedback'
+import { AuraEmotionalState } from '@/lib/aura-companion'
 import { SafeFragranceImage } from '@/components/fragrance/SafeFragranceImage'
 import type { ShelfSlot, ShelfFragrance, ShelfTier } from './types'
 
@@ -168,12 +171,16 @@ function FilledSlot({
 
   const style: React.CSSProperties = {
     width: '100%',
-    transform: CSS.Transform.toString(transform),
-    transition: transition ? `${transition}` : `transform ${DRIFT_SETTLE}`,
-    opacity: isDragging ? 0.5 : 1,
+    transform: transform
+      ? `${CSS.Translate.toString(transform)} scale(${isDragging ? 1.05 : 1}) rotate(${isDragging ? '0.7deg' : '0deg'})`
+      : `scale(${isDragging ? 1.05 : 1}) rotate(${isDragging ? '0.7deg' : '0deg'})`,
+    transition: transition ? `${transition}, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)` : `transform ${DRIFT_SETTLE}`,
+    opacity: isDragging ? 0.8 : 1,
     cursor: isDragging ? 'grabbing' : 'grab',
     touchAction: 'none',
     position: 'relative',
+    filter: isDragging ? 'drop-shadow(0 12px 24px rgba(0,0,0,0.3))' : 'none',
+    zIndex: isDragging ? 50 : 1,
   }
 
   const f = slot.fragrance!
@@ -522,6 +529,7 @@ export default function ShelfClient({ slots: initialSlots, topThree }: ShelfClie
   const [searchTargetRank, setSearchTargetRank] = useState<number | null>(null)
   const [pendingEligibility, setPendingEligibility] = useState<{ fragrance: ShelfFragrance; payload: ShelfMutationPayload; previousSlots: ShelfSlot[] } | null>(null)
   const [mutationError, setMutationError] = useState<string | null>(null)
+  const [auraState, setAuraState] = useState<AuraEmotionalState>('idle_breathing')
   const slotsRef = useRef(slots)
 
   useEffect(() => {
@@ -706,13 +714,26 @@ export default function ShelfClient({ slots: initialSlots, topThree }: ShelfClie
 
       <AuraShelfAdvisory topThree={topThree} className="mb-4" />
 
-      <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={onDragEnd}>
+      <DndContext 
+        sensors={sensors} 
+        collisionDetection={closestCorners} 
+        onDragStart={() => {
+          playClink()
+          setAuraState('curious_inspecting')
+        }}
+        onDragEnd={(e) => {
+          playClink()
+          setAuraState('alignment_ecstasy')
+          setTimeout(() => setAuraState('idle_breathing'), 2000)
+          onDragEnd(e)
+        }}
+      >
         <SortableContext items={sortableIds} strategy={rectSortingStrategy}>
           {(['S', 'A', 'B', 'C'] as const).map(tier => {
             const tierSlots = slots.filter(s => tierForRank(s.rank) === tier)
             return (
-              <div key={tier} style={{ marginBottom: 20 }}>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 10 }}>
+              <div key={tier} style={{ marginBottom: 32 }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 12 }}>
                   <span style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 15, color: 'var(--accent)' }}>
                     {tier}
                   </span>
@@ -724,7 +745,13 @@ export default function ShelfClient({ slots: initialSlots, topThree }: ShelfClie
                   style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
-                    gap: 12,
+                    gap: 16,
+                    background: 'rgba(247, 244, 238, 0.02)',
+                    backdropFilter: 'blur(20px)',
+                    WebkitBackdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(247, 244, 238, 0.05)',
+                    borderRadius: 16,
+                    padding: 24,
                   }}
                 >
                   {tierSlots.map(slot =>
@@ -759,6 +786,8 @@ export default function ShelfClient({ slots: initialSlots, topThree }: ShelfClie
           mutationError={mutationError}
         />
       )}
+      
+      <AuraCompanion state={auraState} onClick={() => setAuraState(prev => prev === 'idle_breathing' ? 'curious_inspecting' : 'idle_breathing')} />
     </div>
   )
 }

@@ -17,6 +17,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Identity', href: '/noseprint', Icon: NoseprintInkIcon },
   { label: 'Shelf', href: '/shelf', Icon: ShelfInkIcon },
   { label: 'Cabinet', href: '/cabinet', Icon: CabinetIcon },
+  { label: 'Atelier', href: '/labs', Icon: CabinetIcon },
   { label: 'Traces', href: '/traces', Icon: TracesInkIcon },
   { label: 'Archive', href: '/archive', Icon: YouInkIcon },
 ]
