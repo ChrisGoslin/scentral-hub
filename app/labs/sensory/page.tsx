@@ -7,6 +7,7 @@ import { sensory } from '@/lib/sensory-engine'
 export default function SensoryPlayground() {
   const [bottleState, setBottleState] = useState<'full' | 'empty'>('full')
   const [shakeCount, setShakeCount] = useState(0)
+  const [smudges, setSmudges] = useState<{ id: number, x: number, y: number }[]>([])
   const controls = useAnimation()
 
   // Feature 113: Shake-to-Randomize (DeviceMotionEvent)
@@ -46,8 +47,15 @@ export default function SensoryPlayground() {
     return () => window.removeEventListener('devicemotion', handleMotion)
   }, [controls])
 
-  // Feature 117: The "Empty Spray" Haptic Sputter
-  const handleSpray = useCallback(() => {
+  // Feature 117 & 119: The "Empty Spray" Haptic Sputter & Fingerprint Smudges
+  const handleSpray = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    // Record smudge location (Feature 119)
+    const rect = e.currentTarget.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+    
+    setSmudges(prev => [...prev.slice(-4), { id: Date.now(), x, y }]) // Keep last 5 smudges
+
     if (bottleState === 'empty') {
       // Sputter effect: 3 quick, weak haptic taps + a dull thud
       if (typeof navigator !== 'undefined' && navigator.vibrate) {
@@ -100,9 +108,26 @@ export default function SensoryPlayground() {
             justifyContent: 'center',
             cursor: 'pointer',
             boxShadow: '0 24px 48px rgba(0,0,0,0.5)',
-            position: 'relative'
+            position: 'relative',
+            overflow: 'hidden'
           }}
         >
+          {/* Feature 119: Render Smudges */}
+          {smudges.map(smudge => (
+            <div key={smudge.id} style={{
+              position: 'absolute',
+              left: smudge.x - 30,
+              top: smudge.y - 30,
+              width: 60,
+              height: 60,
+              background: 'radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%)',
+              borderRadius: '50%',
+              pointerEvents: 'none',
+              zIndex: 1,
+              mixBlendMode: 'overlay'
+            }} />
+          ))}
+
           {/* Liquid Level */}
           {bottleState === 'full' && (
             <div style={{
@@ -125,10 +150,10 @@ export default function SensoryPlayground() {
 
         <div style={{ marginTop: '4rem', display: 'flex', gap: '16px', justifyContent: 'center' }}>
           <button 
-            onClick={() => setBottleState('full')}
+            onClick={() => { setBottleState('full'); setSmudges([]); }}
             style={{ padding: '12px 24px', borderRadius: '99px', border: '1px solid rgba(255,255,255,0.2)', fontSize: '12px', textTransform: 'uppercase' }}
           >
-            Refill
+            Refill (Wipe Glass)
           </button>
           <button 
             onClick={() => setBottleState('empty')}
