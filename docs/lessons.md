@@ -439,3 +439,13 @@ Context: PR #82 restored and hardened repo skills after review surfaced tampered
 **Rule:** Any test suite exercising device sensors (camera, microphone, geolocation) must supply fake device launch args (`--use-fake-ui-for-media-stream`, `--use-fake-device-for-media-stream`) and explicit permissions in `playwright.config.ts`, and test assertions must verify deterministic DOM fallbacks (manual search/input) so pipelines remain resilient.
 **Remedy built in:** Configured Chromium and Mobile Chrome launch options with fake media stream flags and permissions in `playwright.config.ts`, and updated `e2e/big-bets.spec.ts` to assert manual form fallback accessibility.
 **Enforced by:** Playwright configuration check in CI pre-test and `e2e/big-bets.spec.ts`.
+
+### L74 — iOS DeviceMotion & DeviceOrientation APIs fail silently without explicit async permission
+**What happened:** A "Shake to Rattle" sensory prototype was built using `window.addEventListener('devicemotion', ...)` inside a `useEffect`. It worked on Android, but failed silently on iPhones because iOS 13+ requires an explicit, user-initiated click that calls `DeviceMotionEvent.requestPermission()`.
+**Rule:** Any feature relying on device motion or gyroscope data must explicitly check for `typeof DeviceMotionEvent.requestPermission === 'function'` and render a fallback UI button to prompt the user to unlock sensors. Do not assume passive listeners will fire.
+**Enforced by:** Sensory engine hooks must now wrap sensor initializations inside a `requestPermission` interaction flow.
+
+### L75 — Web Audio API Context suspension causes silent failures on passive triggers
+**What happened:** We attempted to trigger glass clinking audio via `AudioContext` on passive events like scrolling or page load. The browser's Autoplay policy blocked the context, leaving it in a "suspended" state.
+**Rule:** `AudioContext` must be instantiated or resumed *strictly* within a user gesture (onClick, onTouchStart). If a sound needs to play during a passive scroll, the app must first demand a "Start Experience" or "Unlock Audio" click at the top of the funnel to resume the global context.
+**Enforced by:** `lib/sensory-engine.ts` must export a `unlockAudioContext()` method that gets bound to the main landing page's "Enter" button.

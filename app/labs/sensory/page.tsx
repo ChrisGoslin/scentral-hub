@@ -18,7 +18,7 @@ export default function SensoryPlayground() {
 
     const handleMotion = (e: DeviceMotionEvent) => {
       const { x, y, z } = e.accelerationIncludingGravity || {}
-      if (x === null || y === null || z === null) return
+      if (x == null || y == null || z == null) return
 
       const deltaX = Math.abs(x - lastX)
       const deltaY = Math.abs(y - lastY)
@@ -149,6 +149,25 @@ export default function SensoryPlayground() {
       <div style={{ position: 'absolute', bottom: '24px', fontSize: '10px', opacity: 0.3, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
         {new Date().getHours() >= 2 || new Date().getHours() <= 4 ? 'Midnight Mode Active' : 'Standard Aura'}
       </div>
+
+      {/* iOS 13+ DeviceMotion Permission Request */}
+      {typeof (DeviceMotionEvent as any) !== 'undefined' && typeof (DeviceMotionEvent as any).requestPermission === 'function' && (
+        <button 
+          onClick={async () => {
+            try {
+              const permissionState = await (DeviceMotionEvent as any).requestPermission()
+              if (permissionState === 'granted') {
+                alert('Sensors unlocked. Shake your phone.')
+              }
+            } catch (err) {
+              console.error('Error requesting device motion permission', err)
+            }
+          }}
+          style={{ position: 'absolute', top: '24px', right: '24px', padding: '8px 16px', borderRadius: '99px', border: '1px solid rgba(255,255,255,0.2)', fontSize: '10px', textTransform: 'uppercase', background: 'transparent', color: 'var(--ivory)' }}
+        >
+          Unlock Sensors (iOS)
+        </button>
+      )}
     </div>
   )
 }
