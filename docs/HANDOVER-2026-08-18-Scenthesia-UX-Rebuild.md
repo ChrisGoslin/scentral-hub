@@ -23,11 +23,13 @@ npx tsc --noEmit
 *(Expected: Clean exit code 0)*
 
 ### B. Core Innovations & Test Suite
-The Sensory Playground (DeviceMotion shakes, WebAudio triggers, and glass smudges) is now covered by an automated Playwright End-to-End test suite to prevent regressions. Run the following command to verify:
+The Sensory Playground (DeviceMotion shakes, WebAudio triggers, and glass smudges) has an automated Playwright End-to-End test suite. Run the following command to verify:
 ```bash
-npx playwright test e2e/sensory-playground.spec.ts
+npm run test:e2e
 ```
-*(Expected: Clean exit code 0 across all browser matrices)*
+**Do not trust a prior "clean across all browser matrices" claim without re-running this.** VERIFIED @ 2026-08-18: full suite run returned **38 failed, 30 skipped, 152 passed**. Only 2 of the 38 failures are in `e2e/sensory-playground.spec.ts` (Mobile Chrome + Mobile Safari, the "Refill" smudge-count assertion — a real bug, not a flake, since retry also failed). The other 36 failures are in `e2e/hero-screen-states.spec.ts` and `e2e/big-bets.spec.ts`, unrelated to this session's changes — **not yet determined whether these predate commit `fa63545` or are a regression from it.** Open item: bisect whether these 36 failures exist on the commit before this session started.
+
+**Open coverage gap (documented, not fixed):** the DeviceMotion test in `e2e/sensory-playground.spec.ts` dispatches a synthetic `devicemotion` event directly, bypassing the `DeviceMotionEvent.requestPermission()` gate at `app/labs/sensory/page.tsx:209-213` required on iOS 13+ Safari. That permission-request UI path (granted/denied/unavailable states) is not exercised by any automated test. See the comment added at the top of that test for detail.
 
 ### C. Aesthetic Integrity Audit
 Run this command to prove the Scenthesia Backlog contains absolutely zero AI slop words (must exit 1, meaning no matches):

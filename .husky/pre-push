@@ -33,6 +33,17 @@ if [ $LESSON_ID_STATUS -ne 0 ]; then
   exit 1
 fi
 
+# Handover script-reference check (L76) — a handover citing `npm run <script>`
+# that doesn't exist in package.json is an unrunnable, unverified claim by
+# construction. Runs on every branch, same reasoning as the two checks above.
+echo "🔍 Checking handover docs for nonexistent npm script references..."
+node "$(git rev-parse --show-toplevel)/scripts/check-handover-scripts.mjs"
+HANDOVER_SCRIPT_STATUS=$?
+if [ $HANDOVER_SCRIPT_STATUS -ne 0 ]; then
+  echo "❌ Pre-push checks failed — push blocked. Fix errors above before pushing."
+  exit 1
+fi
+
 if [ "$current_branch" != "main" ]; then
   exit 0
 fi

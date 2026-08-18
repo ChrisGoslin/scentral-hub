@@ -32,6 +32,13 @@ test.describe('Sensory Playground (Feature 113 & Toggles)', () => {
     // WebKit test runner lacks native mock support for DeviceMotionEvent in this environment
     test.skip(browserName === 'webkit', 'WebKit DeviceMotion mock unsupported in test env')
 
+    // COVERAGE GAP: this test dispatches `devicemotion` directly via page.evaluate, which
+    // bypasses the DeviceMotionEvent.requestPermission() gate at app/labs/sensory/page.tsx:209-213
+    // (required on iOS 13+ Safari). The permission-request button and its granted/denied/
+    // unavailable branches are NOT exercised by this suite. Playwright's DOM-only environment
+    // cannot simulate iOS's native permission prompt, so this gap is documented rather than
+    // silently left implicit. See docs/HANDOVER-2026-08-18-Scenthesia-UX-Rebuild.md open items.
+
     await page.goto('/labs/sensory')
 
     // Dispatch a mock devicemotion event to simulate a hard shake (threshold > 15)
