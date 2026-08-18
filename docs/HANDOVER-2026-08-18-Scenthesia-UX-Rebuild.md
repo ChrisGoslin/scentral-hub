@@ -22,12 +22,8 @@ npx tsc --noEmit
 ```
 *(Expected: Clean exit code 0)*
 
-### B. Core Innovations & Test Suite
-Run this command to verify the 50 previous innovations and the new Aura drag handlers pass:
-```bash
-npm run test:spikes
-```
-*(Expected: 26/26 tests passing or higher)*
+### B. Core Innovations (Manual Verification Required)
+Since no automated tests currently cover the DeviceMotion or Web Audio prototypes, you must verify them by running `npm run dev` and navigating to `/labs/sensory` to test the Shake-to-Rattle and Haptic Sputter features on a mobile device.
 
 ### C. Aesthetic Integrity Audit
 Run this command to prove the Scenthesia Backlog contains absolutely zero AI slop words (must exit 1, meaning no matches):
