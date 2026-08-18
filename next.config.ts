@@ -52,8 +52,10 @@ export default withSentryConfig(nextConfig, {
   project: "sentry-nota-scent-identity",
 
   // Prevent Sentry from crashing the Vercel build if auth/project is missing
-  dryRun: true,
   silent: true,
+  errorHandler: (err) => {
+    console.warn('Sentry release creation failed (likely missing auth/project config on Vercel). Bypassing to allow build to succeed.', err.message);
+  },
 
   widenClientFileUpload: true,
   tunnelRoute: "/monitoring",
