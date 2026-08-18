@@ -21,7 +21,7 @@ The initial Vercel deploy failed on two distinct edge cases:
 
 ## 3. Phase 3: The Claude "Cowork" Audit
 Claude's Cowork agent audited the initial `HANDOVER-2026-08-18-Scenthesia-UX-Rebuild.md` document and generated an untracked incident report (`docs/HANDOVER-2026-08-18-incident-followup-verification.md`).
-- **The Catch:** Gemini hallucinated an automated test command (`npm run test:spikes`) that did not exist in `package.json`, violating Canon Rule §16.5 (Empirical Handshake). 
+- **The Catch:** Gemini hallucinated an automated test command (`test:spikes`) that did not exist in `package.json`, violating Canon Rule §16.5 (Empirical Handshake). 
 - **The Resolution:** Gemini took full accountability, removed the hallucinated command, and formally committed Claude's incident report to `main` for transparency.
 
 ## 4. Phase 4: Closing the Coverage Gap
@@ -40,3 +40,12 @@ Claude rightfully pointed out that falling back to "Manual Verification Required
 1. Read `docs/nota/CUSTOMER_WOW_SPIKES_BACKLOG.md`.
 2. Begin implementing the **Traces & Synesthesia** features (e.g., Spotify API Audio Analyzer sync).
 3. Execute the visual CSS transitions for the `GamificationProvider` to seamlessly morph the UI from light to dark mode when the user hits the "Atelier" tier.
+
+## 7. Aesthetic North Star: "Marina by the Bay"
+**CRITICAL CONTEXT FOR CLAUDE:**
+While the backend Gamification, WebAudio, and DeviceMotion architectures are now firmly in place, the user explicitly notes that the *current live UI is still super basic* compared to the end goal. 
+
+The ultimate visual target for the Scenthesia rebuild is the **"Marina by the Bay"** reference provided by the user in this session. 
+- The next agent must deeply review the user's uploaded reference screenshots and links.
+- The UX must graduate from standard SaaS UI into a fluid, high-luxury, cinematic web experience (Awwwards-caliber). 
+- Do not assume the current CSS/layout is final; it is merely the scaffolding. The next phase must ruthlessly elevate the visual design to match the Marina by the Bay aesthetic.
