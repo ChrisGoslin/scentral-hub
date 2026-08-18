@@ -26,12 +26,12 @@ export default function SensoryPlayground() {
 
   // Feature 113: Shake-to-Randomize (DeviceMotionEvent)
   useEffect(() => {
-    if (typeof window === 'undefined' || !window.DeviceMotionEvent) return
+    if (typeof window === 'undefined' || !(window as any).DeviceMotionEvent) return
 
     let lastX = 0, lastY = 0, lastZ = 0
     const threshold = 15 // Shake sensitivity
 
-    const handleMotion = (e: DeviceMotionEvent) => {
+    const handleMotion = (e: any) => {
       const { x, y, z } = e.accelerationIncludingGravity || {}
       if (x == null || y == null || z == null) return
 
@@ -206,11 +206,11 @@ export default function SensoryPlayground() {
       </div>
 
       {/* iOS 13+ DeviceMotion Permission Request */}
-      {typeof (DeviceMotionEvent as any) !== 'undefined' && typeof (DeviceMotionEvent as any).requestPermission === 'function' && (
+      {typeof window !== 'undefined' && 'DeviceMotionEvent' in window && typeof (window as any).DeviceMotionEvent.requestPermission === 'function' && (
         <button 
           onClick={async () => {
             try {
-              const permissionState = await (DeviceMotionEvent as any).requestPermission()
+              const permissionState = await (window as any).DeviceMotionEvent.requestPermission()
               if (permissionState === 'granted') {
                 alert('Sensors unlocked. Shake your phone.')
               }
