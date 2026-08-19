@@ -13,8 +13,10 @@ test.describe('Big Bets & Innovation Horizons E2E Suite', () => {
       await page.goto('/wheel', { waitUntil: 'domcontentloaded' })
       await expect(page).toHaveTitle(/Fragrance Wheel | nota\./)
 
-      // Main container exists
-      const main = page.locator('main, [role="main"], div').first()
+      // Main container exists. Was previously `locator('main, [role="main"], div').first()`
+      // which matched document order across all three patterns and resolved to an
+      // unrelated hidden <div> before the real <main> — always failed (see docs/lessons.md).
+      const main = page.locator('main').first()
       await expect(main).toBeVisible({ timeout: 15_000 })
 
       // Radar chart or Empty State CTA to add fragrances

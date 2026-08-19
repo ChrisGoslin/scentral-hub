@@ -1,155 +1,58 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Hero Screen States', () => {
-  test('personalization badge appears for returning users', async ({ page, context }) => {
-    // Set up localStorage to simulate returning user with persona
-    await context.addInitScript(() => {
-      localStorage.setItem('scentral_persona', 'velvet_intellectual');
-      localStorage.setItem('scentral_persona_name', 'The Velvet Intellectual');
-    });
+// Rewritten 2026-08-19: the previous version of this file tested
+// components/landing/HeroSection.tsx (video hero, slow-connection poster
+// fallback, personalization badge, pause/play button). That component was
+// removed from app/page.tsx by commit 5125fe3 ("Master UX/UI Rebuild —
+// Scenthesia") on 2026-08-18 and replaced with a static parallax hero
+// (app/page.tsx) that has none of those states. The old file kept "passing"
+// its own assertions right up until it started failing 100% of the time —
+// no one ran the full suite between the rebuild landing and this rewrite,
+// so the break went undetected for ~2 weeks. See docs/lessons.md for the
+// remedy (scheduled full e2e run, not just pre-push chromium-only checks).
 
+test.describe('Landing Hero (Scenthesia rebuild)', () => {
+  test('hero renders title, kicker, and subtitle immediately', async ({ page }) => {
     await page.goto('/');
 
-    // Check that personalization badge renders
-    const badge = page.locator('span:has-text("Written for you")');
-    await expect(badge).toBeVisible();
-    await expect(badge).toHaveAttribute('title', /personalized based on your scent profile/i);
+    await expect(page.getByText('The Living Atelier')).toBeVisible();
+    await expect(page.locator('h1')).toContainText('nota');
+    await expect(page.getByText('Your scent identity, written in motion.')).toBeVisible();
   });
 
-  test('personalization badge does not appear for new users', async ({ page }) => {
-    // No localStorage persona data
+  test('hero title is immediately paintable (LCP-relevant opacity)', async ({ page }) => {
     await page.goto('/');
 
-    const badge = page.locator('span:has-text("Written for you")');
-    await expect(badge).not.toBeVisible();
+    const heroContent = page.locator('h1').locator('..');
+    const opacity = await heroContent.evaluate((el) => window.getComputedStyle(el).opacity);
+    expect(Number(opacity)).toBeGreaterThan(0);
   });
 
-  test('video element renders with error listener', async ({ page }) => {
+  test('manifesto section renders below the hero', async ({ page }) => {
     await page.goto('/');
 
-    // Video element should be present for non-reduced-motion users
-    const video = page.locator('video');
-    // Note: reduced-motion detection is client-side, may not trigger in test
-    // This test verifies the video element is in the DOM
-    const videoCount = await video.count();
-    expect(videoCount).toBeGreaterThanOrEqual(0); // 0 if reduced-motion, 1+ otherwise
+    await expect(page.getByText('The system notices before it asks.')).toBeVisible();
   });
 
-  test('media caption displays for non-static poster', async ({ page }) => {
+  test('entry section CTAs link to the correct destinations', async ({ page }) => {
     await page.goto('/');
 
-    const caption = page.locator('text="Film study / matter becoming memory"');
-    await expect(caption).toBeVisible();
+    const shelfLink = page.getByRole('link', { name: 'Enter Master Shelf' });
+    await expect(shelfLink).toBeVisible();
+    await expect(shelfLink).toHaveAttribute('href', '/shelf');
 
-    // Pause button should be accessible
-    const pauseBtn = page.getByRole('button', { name: /Play|Pause/ });
-    await expect(pauseBtn).toBeVisible();
+    const labsLink = page.getByRole('link', { name: 'Experience nota.Labs' });
+    await expect(labsLink).toBeVisible();
+    await expect(labsLink).toHaveAttribute('href', '/labs');
   });
 
-  test('blur-hash background color renders instantly', async ({ page }) => {
-    await page.goto('/');
-
-    const picture = page.locator('picture');
-    // Picture element should have background-color style (blur-hash placeholder)
-    const style = await picture.evaluate((el) => window.getComputedStyle(el).backgroundColor);
-    // RGB value for rgb(60, 55, 48)
-    expect(style).toMatch(/rgb\(60,\s*55,\s*48\)|rgb\(60\s+55\s+48\)/);
-  });
-
-  test('blur-hash SVG renders while image loads', async ({ page }) => {
-    await page.goto('/');
-
-    // Wait for page to hydrate
-    await page.waitForTimeout(100);
-
-    const picture = page.locator('picture');
-    // Check if blurhash image is present in the picture element
-    const blurhashImg = picture.locator('img[alt=""]').first();
-    const blurhashVisible = await blurhashImg.isVisible({ timeout: 1000 }).catch(() => false);
-
-    // The blur-hash should be rendered (displayed via data URL)
-    // Note: may not be visible if real image loads very quickly
-    expect(blurhashVisible).toBeDefined();
-  });
-
-  test('skeleton loader appears on slow 3G connections', async ({ page, context }) => {
-    // Simulate slow 3G connection
-    await context.route('**/*', route => {
-      setTimeout(() => route.continue(), 500);
-    });
+  test('landing page loads with no console errors', async ({ page }) => {
+    const errors: string[] = [];
+    page.on('pageerror', (err) => errors.push(err.message));
 
     await page.goto('/');
-    await page.waitForTimeout(100);
+    await page.waitForTimeout(500);
 
-    // Skeleton loader should be in DOM when connection is slow
-    // We check if any element with the skeleton-pulse animation exists
-    const picture = page.locator('picture');
-    const style = await picture.evaluate((el) => window.getComputedStyle(el).backgroundColor);
-    expect(style).toBeTruthy();
-  });
-
-  test('slow connections receive a poster-only experience', async ({ page, context }) => {
-    await context.addInitScript(() => {
-      Object.defineProperty(navigator, 'connection', {
-        configurable: true,
-        value: {
-          effectiveType: '3g',
-          addEventListener() {},
-          removeEventListener() {},
-        },
-      });
-    });
-
-    await page.goto('/');
-
-    await expect(page.locator('video')).toHaveCount(0);
-    await expect(page.getByText('Film study / matter becoming memory')).toBeVisible();
-  });
-
-  test('video failure explains the static fallback', async ({ page }) => {
-    await page.route('**/media/atelier-matter*.mp4', route => route.abort());
-    await page.route('**/media/atelier-matter.webm', route => route.abort());
-    await page.goto('/');
-    const video = page.locator('video');
-    await video.waitFor({ state: 'attached' });
-    // Chromium does not consistently emit media errors for aborted source requests;
-    // the aborted request exercises the network path, then this verifies the handler.
-    await video.evaluate(element => {
-      const media = element as HTMLVideoElement;
-      media.load();
-      media.dispatchEvent(new Event('error'));
-    });
-
-    await expect(page.getByText('Video unavailable. Viewing static mode.')).toBeVisible({ timeout: 7000 });
-  });
-
-  test('poster is immediately paintable for LCP', async ({ page }) => {
-    await page.goto('/');
-
-    // Get the real film image (not the blurhash placeholder)
-    const filmImg = page.locator('picture img[alt*="Dark ink"]');
-    // Wait for image to load
-    await filmImg.waitFor({ state: 'attached' });
-
-    const opacity = await filmImg.evaluate((el) => window.getComputedStyle(el).opacity);
-    expect(opacity).toBe('1');
-  });
-
-  test('pause/play button toggles aria-pressed state', async ({ page }) => {
-    await page.goto('/');
-
-    const pauseBtn = page.getByRole('button', { name: /Play|Pause/ });
-    await expect(pauseBtn).toBeVisible();
-
-    // Get initial aria-pressed state
-    const initialPressed = await pauseBtn.getAttribute('aria-pressed');
-    expect(initialPressed).toBeTruthy(); // Should be 'false' (paused) or 'true' (playing)
-
-    // Click and verify state changes
-    await pauseBtn.click();
-    await page.waitForTimeout(100);
-
-    const newPressed = await pauseBtn.getAttribute('aria-pressed');
-    expect(newPressed).not.toBe(initialPressed);
+    expect(errors).toEqual([]);
   });
 });
