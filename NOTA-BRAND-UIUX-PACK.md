@@ -71,8 +71,8 @@ semantic roles, never raw pigments.
 --pig-ivory       #F7F4EE   raw linen paper / bench surface
 --pig-stone       #E5E0D6   structure, tape, quiet borders
 --pig-charcoal    #2B2926   wet ink, authority
---pig-taupe       #766E64   memory, metadata, history — text-safe (see §2.2)
---pig-taupe-ink   #756A5C   deeper taupe for complex backgrounds (see §2.2)
+--pig-taupe       #766E64   memory, history, line work — atmospheric (see §2.2)
+--pig-taupe-ink   #756A5C   load-bearing taupe TEXT (see §2.2)
 --pig-olive       #6B7250   alignment, progress, resonance, recommendation
 --pig-moss        #4A5940   transformation, evolution, identity shift
 --pig-amber       #A0622A   biological heat — wordmark period, pulse points
@@ -86,22 +86,43 @@ use pure white `#FFFFFF` or pure black `#000000`.
 
 ### 2.2 Contrast is a hard rule (measured, both grounds)
 
+> **Re-measured 2026-08-19**, every cell recomputed from hex with the WCAG 2.x
+> relative-luminance formula. Two figures were wrong and are corrected below:
+> taupe on ivory was published as 10.35:1 (true: **4.57:1**), and taupe-ink on
+> dark was published as 7.54:1 (true: **3.18:1**). Both errors overstated
+> legibility. See `DESIGN.md` §2 for the full eight-token table.
+>
+> **Role labels below are unchanged and remain aspirational.** `--ink-quiet`,
+> `--ink-faint`, `--line-resonant`, `--accent-heat` and the `--pig-*` names have
+> **zero occurrences** in `app/`, `lib/`, or `components/` (verified 2026-08-19,
+> `grep -rn "ink-quiet\|ink-faint\|pig-"`). Nothing in code arbitrates which
+> pigment each role maps to, so this pass corrected only the ratios and the
+> permitted-use text. Whether `--ink-quiet` should point at taupe or taupe-ink is
+> a real open question — decide it when these tokens are actually implemented,
+> not by editing this table.
+
 | Role | Light (ivory) | ratio | Dark (#1F1D1A) | ratio |
 |---|---|---|---|---|
-| body ink `--on-surface` | charcoal | 13.2:1 | ivory | 15.3:1 |
-| metadata `--ink-quiet` | taupe `#766E64` | 10.35:1 | taupe `#766E64` | — |
-| deepened metadata `--ink-quiet` (complex bg) | taupe-ink `#756A5C` | 4.82:1 | taupe-ink `#756A5C` | 7.54:1 |
-| alignment edge `--line-resonant` | olive | 4.61:1 | olive | 3.32:1 † |
+| body ink `--on-surface` | charcoal | 13.21:1 | ivory | 15.32:1 |
+| metadata `--ink-quiet` | taupe `#766E64` | 4.57:1 † | taupe `#766E64` | 3.35:1 †† |
+| deepened metadata `--ink-quiet` (complex bg) | taupe-ink `#756A5C` | 4.82:1 | taupe-ink `#756A5C` | 3.18:1 †† |
+| alignment edge `--line-resonant` | olive | 4.61:1 | olive | 3.32:1 †† |
 | heat accent `--accent-heat` | amber `#A0622A` | 4.47:1 ‡ | amber-glow `#B98A58` | 5.48:1 |
 
-† Olive on dark is AA-large only — fine for edges/glow, never body text.
+† Taupe on ivory clears AA normal by 0.07 — no headroom once the 2.8% grain
+multiply lands. Atmospheric and large text only; use taupe-ink for anything
+small that carries information.
+†† AA-large only on dark ground — edges, glow, and ≥24px text. **Neither taupe
+token is safe for small text on the dark ground.** On dark, metadata text needs
+a lighter derived value, not a raw pigment; see the open item in `DESIGN.md` §2.
 ‡ Amber on ivory is AA-large only — wordmark period and Dot (non-text/large)
 only; never small text. Moss is never text on either ground.
 
-**Rule:** taupe `#766E64` is 10.35:1 on ivory — safe for any text size. Use
-`--ink-quiet` (taupe) for metadata text, `--ink-quiet` deepened to `#756A5C`
-when a complex background needs extra headroom. If an element carries
-information, it must clear 4.5:1 against its ground.
+**Rule:** if an element carries information, it must clear 4.5:1 against its
+actual ground. On ivory, taupe-ink `#756A5C` (4.82:1) is the load-bearing taupe
+text token and taupe `#766E64` (4.57:1, a 0.07 margin) is atmospheric. On the
+dark ground neither raw pigment is a text token — derive a lighter value and
+measure it before shipping.
 
 ---
 

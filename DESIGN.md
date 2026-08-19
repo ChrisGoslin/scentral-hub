@@ -3,7 +3,7 @@ colors:
   surface: "#F7F4EE"              # Ivory — raw linen canvas
   on-surface: "#2B2926"           # Charcoal — authority and wet ink
   surface-variant: "#E5E0D6"      # Stone — borders, tape, quiet structure
-  taupe: "#766E64"                # Taupe — atmospheric + line work (10.35:1 on ivory)
+  taupe: "#766E64"                # Taupe — atmospheric + line work (4.57:1 on ivory)
   taupe-ink: "#756A5C"            # Taupe ink — load-bearing TEXT (4.82:1)
   primary: "#A0622A"              # Amber — biological heat, wordmark period
   alignment: "#6B7250"            # Olive — progress, resonance, recommendation
@@ -57,25 +57,57 @@ Do not use amber as a large background, standard button colour, or gamification 
 
 ### Measured contrast on ivory `#F7F4EE`
 
+> **Re-measured 2026-08-19** with the WCAG 2.x relative-luminance formula, all eight
+> tokens recomputed from hex in one pass. Seven matched the previous table exactly.
+> **Taupe did not: the long-standing 10.35:1 figure is wrong — the true ratio is
+> 4.57:1.** The old table was also self-contradictory on its face, claiming the
+> *lighter* taupe outperformed the *darker* taupe-ink on a light ground, which is
+> arithmetically impossible. Treat 10.35:1 as retired wherever it still appears.
+
 | Token | Ratio | AA normal | AA large | Permitted use |
 |---|---|---|---|---|
 | Charcoal `#2B2926` | 13.21:1 | pass | pass | any text |
 | Moss `#4A5940` | 6.85:1 | pass | pass | any text |
 | Olive `#6B7250` | 4.61:1 | pass | pass | any text |
-| **Taupe `#766E64`** | 10.35:1 | pass | pass | any text, any size |
+| **Taupe `#766E64`** | 4.57:1 | pass (0.07 margin) | pass | **atmospheric, line work, borders; body text only with care — see below** |
 | **Taupe ink `#756A5C`** | 4.82:1 | pass | pass | **all load-bearing taupe text** |
 | Amber `#A0622A` | 4.47:1 | **fail** | pass | ≥24px / non-text only |
 | Terracotta `#B4674E` | 3.83:1 | **fail** | pass | ≥24px / non-text only |
 | Stone `#E5E0D6` | 1.20:1 | **fail** | **fail** | borders and fills only |
 
-Taupe carries the meaning *memory and metadata*. At 10.35:1 contrast on ivory, taupe can carry any text. The lighter `taupe-ink` variant provides extra breathing room for legibility:
+Taupe carries the meaning *memory and metadata*. Both taupe tokens clear WCAG AA for
+normal text, but only just — and they are close enough to each other that the choice
+between them is a real accessibility decision, not a stylistic one:
 
-- **`taupe`** — primary text colour for memory, metadata, historical information, specimen keys, and timestamps. Atmospheric and grounded. 10.35:1 contrast meets WCAG AA for any text size.
-- **`taupe-ink`** — deepened variant when additional contrast is needed on complex backgrounds. `oklch(0.5316 0.0263 75.2deg)` — identical chroma and hue to `taupe`, with lightness reduced in OKLCH. The same aged pigment at deeper concentration, not a sterile gray. 4.82:1 contrast leaves headroom for the 2.8% grain multiply.
+- **`taupe`** — atmospheric role: hairlines, borders, archive spine, anatomy line work,
+  marginal annotation, and large or non-critical text. At 4.57:1 it clears AA normal by
+  **0.07** — effectively no headroom, and the 2.8% grain multiply consumes what little
+  there is. Do not use it for small text that carries information.
+- **`taupe-ink`** — **the load-bearing taupe text token.** Memory, metadata, historical
+  information, specimen keys, timestamps. `oklch(0.5316 0.0263 75.2deg)` — identical
+  chroma and hue to `taupe`, with lightness reduced in OKLCH. The same aged pigment at
+  deeper concentration, not a sterile gray. 4.82:1 leaves the headroom the grain
+  multiply needs.
 
 Both colours express the same emotional identity: memory, not novelty; depth, not brightness.
 
 The audit test: *if this element vanished, would the contributor lose information?* Yes → `taupe-ink`. No → `taupe`.
+
+> **Open — this table measures a ground the app does not currently render (flagged
+> 2026-08-19, not resolved).** `:root` in `app/globals.css` sets `--color-bg: #1f1d1a`
+> and `--color-text: var(--ivory)`, and `app/layout.tsx` hardcodes `data-theme="dark"`.
+> **The shipped default ground is the dark evening bench, not ivory.** Muted text is
+> derived as `--color-text-muted: color-mix(in srgb, var(--taupe) 74%, var(--ivory))`
+> → `#989188`, which on its actual shipped ground measures **5.38:1 and passes AA**.
+> Lightening taupe toward ivory is the correct direction for a dark ground, so this is
+> not a shipped accessibility defect. It is a **doc-scope defect**: everything in this
+> section is measured on ivory, which is the design surface, not the running app. Also
+> note `--taupe-ink` has **zero occurrences** anywhere in `app/`, `lib/`, or
+> `components/` (verified 2026-08-19 by `grep -rn "taupe-ink"`), so the two-token split
+> described above exists only in this document. Two follow-ups, both needing a decision:
+> (1) whether to implement `--taupe-ink` in CSS at all, given nothing consumes it;
+> (2) whether this section needs a parallel dark-ground table, or should be re-based on
+> the dark ground outright.
 
 Amber's 4.47:1 is sufficient for the wordmark period and the Dot (both non-text or large), and insufficient for labels or body copy. Do not set small text in amber.
 
@@ -224,14 +256,14 @@ Until measured, the hold ships behind the three escape hatches documented in §8
 | **Shelf** | `/shelf` | ranked top-20 "ready to wear" surface | **Confirmed, and NOT retired** — this 2026-07-22 table's claim that "Shelf → Cabinet" was **wrong**. `/shelf` is a separate, live, actively-built route (`ShelfClient`, `SHELF_SIZE = 20`, S/A/B/C tiers, `shelf_items` table) distinct from Cabinet's `collections` table. Title: "Shelf \| nota." Copy: "Arrange your physical scent shelf... patina, memory, what is ready to wear next." Do not replace "Shelf" with "Cabinet" in copy or code — they are two different live surfaces backed by two different tables (matches the pre-existing "two competing shelf models" gap logged in `CLAUDE.md` §5–6) |
 | **Study** | `/study` | fragrance catalogue browse/search | **Confirmed.** Renders `DiscoverClient` (imported from `app/(main)/discover/`) — a paginated fragrance catalogue with social-proof owner counts and an active-challenge banner. Title: "The Study." **No Profiler/Trails content exists on this route** — the doctrine's "discovery/learning surface, mapping to Profiler/Trails" framing does not match what's shipped; this is a catalogue/search surface, full stop |
 | **Lab** | `/lab` | layering/dry-down combination workbench | **Confirmed, and confirmed distinct from Traces** as this doc previously suspected. Renders `LayeringClient` (imported from `app/(main)/layering/`). Title: "nota.Lab." Description: "workbench for layering combinations, dry-down logic, and scent experiments." Empty state links to `/cabinet` ("Add a few bottles to The Cabinet first"). This is a chemistry/combination tool, not an expression/memory surface — Traces (if it exists) is still unverified and must not be merged into this row |
-| Noseprint | — | behavioural scent identity | Unconfirmed against routes — verify still shipped |
-| Blind Ranking | — | bias removal | Unconfirmed against routes |
-| Traces | — | expression layer — memories, not descriptions | **Do not assume this is `/lab`.** Verify whether Traces exists as its own route or was never built |
-| Insights | — | reflection layer | Unconfirmed against routes |
-| Scentiment | — | resonance metric inside Insights | Unconfirmed |
-| Temptations | — | personalised commerce | Unconfirmed |
-| Aura | — | fragrance intelligence layer | Unconfirmed |
-| Houses | — | belonging layer | Unconfirmed |
+| Noseprint | `/noseprint` | behavioural scent identity | **Confirmed 2026-08-19** — top-level route `app/noseprint/page.tsx`, plus OG share image at `app/api/og/noseprint` |
+| Blind Ranking | `/shelf/blind` | bias removal | **Confirmed 2026-08-19** — `app/(main)/shelf/blind/page.tsx`, with a per-session reveal at `/shelf/blind/[sessionId]` (`app/shelf/blind/[sessionId]/page.tsx` + `opengraph-image.tsx`). Two directories, two distinct URLs, no route-group collision |
+| Traces | `/traces` | expression layer — memories, not descriptions | **Confirmed 2026-08-19 as its own route** (`app/(main)/traces/page.tsx`, `app/api/traces/`), separate from `/lab`. The prior "do not assume this is `/lab`" caution was correct — they are two routes |
+| Insights | `/insights` | reflection layer | **Confirmed 2026-08-19** — `app/(main)/insights/page.tsx` |
+| Scentiment | — (inside `/insights`) | resonance metric inside Insights | **Confirmed 2026-08-19** as data inside Insights (`app/api/insights/`), not a standalone route |
+| Temptations | — (API only) | personalised commerce | **Confirmed 2026-08-19** as API + component surface only (`app/api/temptations/`, `components/temptations/`). No standalone page — surfaces inline |
+| Aura | — (API + component) | fragrance intelligence layer | **Confirmed 2026-08-19** as API + component only (`app/api/aura/`, `components/aura/`). No standalone page |
+| Houses | — | belonging layer | Unconfirmed — `houses` table exists per `CLAUDE.md` §5, no route found |
 
 **Retired UI names — replace on sight:** "Discover" → **Study**. "Layering" (as a UI label, not the chemistry concept) → **Lab**. `nota.lab`, `Trace Composer` remain retired regardless of route naming. **"Shelf" is NOT retired** — see the flag above; this corrects the prior version of this table.
 

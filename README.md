@@ -9,9 +9,9 @@
 - **Current user-facing brand:** nota.
 - **Brand history:** current user-facing brand is nota. Older names may remain in repo names, database names, localStorage keys, archived docs, or old prompts.
 - **Repo / DB names:** Keep internal DB identifiers like `scentral-mvp` unchanged unless explicitly approved. Always verify the current Git remote and checkout name instead of assuming the repo is still called `scentral-hub`.
-- **Live app:** https://scentral-hub.vercel.app
-- **Latest source of truth:** `AGENTS.md`, `docs/HANDOVER.md`, and `docs/nota/`.
-- **Latest delivered build:** Tier 1 and Tier 2 pre-launch work complete per `docs/HANDOVER.md` dated 2026-07-04.
+- **Live app:** https://notalabs.io — VERIFIED 2026-08-19 (`dig +short notalabs.io A` → `216.198.79.1`; `curl -sIL https://notalabs.io` → `200`). The former `scentral-hub.vercel.app` deployment URL is superseded.
+- **Latest source of truth:** `AGENTS.md`, `docs/HANDOVER.md`, and `docs/nota/`. Design canon is root `DESIGN.md` and root `NOTA-BRAND-UIUX-PACK.md` — there are no `docs/` copies; if one reappears, it is a fork, not a mirror.
+- **Latest delivered build:** see `docs/HANDOVER.md` for current state. (Do not hand-copy a build date here — it goes stale silently. The handover is the one place this is tracked.)
 
 ## 🚀 Script Registry
 - `npm run dev`: Start dev server.
