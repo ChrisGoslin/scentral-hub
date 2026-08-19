@@ -44,6 +44,17 @@ if [ $HANDOVER_SCRIPT_STATUS -ne 0 ]; then
   exit 1
 fi
 
+# Canon uniqueness check (L77) — canon is cited by bare filename, so two files
+# sharing a canon name means every citation is ambiguous. Runs on every branch:
+# a fork lands via whatever branch created it, and merges to main afterwards.
+echo "🔍 Checking canon filename uniqueness..."
+node "$(git rev-parse --show-toplevel)/scripts/check-canon-uniqueness.mjs"
+CANON_UNIQUE_STATUS=$?
+if [ $CANON_UNIQUE_STATUS -ne 0 ]; then
+  echo "❌ Pre-push checks failed — push blocked. Fix errors above before pushing."
+  exit 1
+fi
+
 if [ "$current_branch" != "main" ]; then
   exit 0
 fi
