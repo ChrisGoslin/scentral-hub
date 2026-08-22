@@ -31,7 +31,12 @@ turns out to need a product decision, STOP and report rather than guessing.
    you chose and why. This is the query behind the e2e "127k-row fetch can exceed
    timeout" comment in `e2e/discover.spec.ts`.
 
-2. **Mobile hero `<video>` loads the DESKTOP poster, not the portrait mobile poster.**
+2. **MOOT (2026-08-22):** `HeroSection.tsx` was deleted this date — dead code since
+   `5125fe3` (2026-08-18) replaced the homepage hero with a video-free static parallax
+   version. This item no longer has a live target; do not action it against the current
+   hero without re-verifying it applies. See PR #98.
+
+2. ~~**Mobile hero `<video>` loads the DESKTOP poster, not the portrait mobile poster.**~~
    File: `components/landing/HeroSection.tsx`. The `<video>` `poster` attr (line ~258)
    is hard-set to `/media/atelier-matter-poster.jpg` (1280×676). The portrait
    `/media/atelier-matter-mobile-poster.jpg` (720×1280) is only referenced in the

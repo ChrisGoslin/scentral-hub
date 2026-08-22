@@ -45,6 +45,8 @@
 
 **Implementation status (2026-07-27):** Implemented in `components/landing/HeroSection.tsx` and covered by 11 Chromium E2E tests.
 
+**SUPERSEDED (2026-08-22):** `HeroSection.tsx` and the screen-states below were removed when `5125fe3` (2026-08-18) replaced the homepage hero with the current static parallax version (`app/page.tsx`) — that hero has no video, no slow-connection detection, and no personalization badge. `HeroSection.tsx` was deleted as dead code this session (zero remaining references); the E2E coverage was rewritten against what's actually shipped (`e2e/hero-screen-states.spec.ts`, 5 tests, PR #98). If this screen-state work is still wanted, it needs to be re-scoped against the current hero from scratch, not resurrected from this section.
+
 **What:** Hero section is designed for the happy path (video plays, chapter carousel animates). Recovery states now include:
 
 - **Reduced motion:** Static artifact mode is preserved through `useReducedMotion`
