@@ -19,11 +19,31 @@ test.describe('Big Bets & Innovation Horizons E2E Suite', () => {
       const main = page.locator('main').first()
       await expect(main).toBeVisible({ timeout: 15_000 })
 
-      // Radar chart or Empty State CTA to add fragrances
-      const chartOrEmpty = page.locator('svg[aria-label="Fragrance wheel radar chart"], svg, button, a').filter({
-        hasText: /Explore|Add|Collection|Wheel/i,
-      }).first()
+      // Either the populated radar chart or the empty-cabinet CTA. The previous
+      // locator filtered `svg, button, a` by /Explore|Add|Collection|Wheel/ and
+      // matched neither: the empty state's only link reads "Enter The Study", and
+      // its "Add fragrances..." copy is a <p>, not a control. Role-based per L17 —
+      // copy changes should not break this.
+      const chartOrEmpty = page
+        .locator('svg[aria-label="Fragrance wheel radar chart"]')
+        .or(page.getByRole('link', { name: /Enter The Study/i }))
+        .first()
       await expect(chartOrEmpty).toBeVisible({ timeout: 15_000 })
+    })
+
+    // Regression guard. A visitor with no `scentral_anon_id` (never used /scanner,
+    // /spritz, or the feedback widget, all of which mint it) used to land on the
+    // error branch showing the developer string "User ID not found" plus a
+    // "Try again" button that could never succeed — retrying re-reads the same
+    // absent key. An empty cabinet is not a failure; it renders the empty state.
+    test('shows the empty-cabinet state, not an error, when no guest id exists', async ({ page }) => {
+      await page.addInitScript(() => localStorage.removeItem('scentral_anon_id'))
+      await page.goto('/wheel', { waitUntil: 'domcontentloaded' })
+
+      await expect(page.getByText('Build your cabinet first')).toBeVisible({ timeout: 15_000 })
+      await expect(page.getByRole('link', { name: /Enter The Study/i })).toBeVisible()
+      await expect(page.getByText(/User ID not found/i)).toHaveCount(0)
+      await expect(page.getByRole('button', { name: /Try again/i })).toHaveCount(0)
     })
 
     test('renders interactive 9-axis breakdown when collection data is present', async ({ page }) => {

@@ -261,10 +261,18 @@ export default function WheelClient() {
     try {
       const anonId = localStorage.getItem('scentral_anon_id')
       if (!anonId) {
+        // No local guest id yet means this visitor has never added anything —
+        // an empty cabinet, not a failure. This previously rendered the error
+        // branch with the developer string "User ID not found" and a "Try again"
+        // button that could never succeed, because retrying re-reads the same
+        // absent localStorage key. The id is minted by the surfaces that actually
+        // write data (/scanner, /spritz, FeedbackWidget); the wheel is a read-only
+        // view and must not mint an identity just to render.
         setState(prev => ({
           ...prev,
           loading: false,
-          error: 'User ID not found',
+          wheelData: AXES.map(axis => ({ axis, count: 0 })),
+          total: 0,
         }))
         return
       }
