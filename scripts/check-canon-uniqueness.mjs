@@ -33,6 +33,21 @@ const SKIP_DIRS = new Set([
   'node_modules', '.git', '.next', '.vercel', 'dist', 'build', 'coverage', '.turbo',
 ]);
 
+// A nested checkout is not a fork. Parallel agent sessions run in git worktrees under
+// .claude/worktrees/ (see the git-worktree skill and LOG-43), each a full copy of this
+// repo — so every canon file appears twice and the guard fires on all of them. That is
+// the LOG-53 false-positive shape this script was written to avoid, and it was still
+// missed: worktrees only exist while another session is live, so a check that passes
+// alone fails the moment someone else is working. LOG-8 says the same thing from the
+// other side — do not treat worktrees as part of this tree.
+//
+// Detected structurally rather than by path, so it also covers submodules, vendored
+// checkouts, and any future worktree location: a directory containing its own `.git`
+// entry belongs to another checkout. The repo root is never tested, only descendants.
+function isNestedCheckout(entries) {
+  return entries.some((e) => e.name === '.git');
+}
+
 // filename -> { canonical, allowed[] }
 //   canonical : the one path a bare-filename citation must resolve to
 //   allowed   : other paths that may legitimately carry this name, each with a reason
@@ -73,13 +88,14 @@ const CANON = {
   },
 };
 
-function walk(dir, hits) {
+function walk(dir, hits, isRoot = false) {
   let entries;
   try {
     entries = readdirSync(dir, { withFileTypes: true });
   } catch {
     return hits;
   }
+  if (!isRoot && isNestedCheckout(entries)) return hits;
   for (const entry of entries) {
     const full = join(dir, entry.name);
     if (entry.isDirectory()) {
@@ -93,7 +109,7 @@ function walk(dir, hits) {
   return hits;
 }
 
-const found = walk(REPO_ROOT, {});
+const found = walk(REPO_ROOT, {}, true);
 const problems = [];
 
 for (const [filename, { canonical, allowed }] of Object.entries(CANON)) {
