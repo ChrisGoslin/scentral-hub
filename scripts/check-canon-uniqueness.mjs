@@ -17,7 +17,7 @@
 // Each entry below therefore declares its canonical path AND the duplicates that are
 // legitimate, so the guard has both an allow case and a deny case (LOG-42).
 
-import { readdirSync, statSync, existsSync } from 'node:fs';
+import { readdirSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 import { execSync } from 'node:child_process';
 
