@@ -4,6 +4,20 @@ import React, { useEffect, useState, useCallback } from 'react'
 import { motion, useAnimation } from 'framer-motion'
 import { sensory } from '@/lib/sensory-engine'
 
+// iOS 13+ gates DeviceMotion behind a user-gesture permission prompt. That is a
+// WebKit extension to the DeviceMotionEvent constructor and is absent from lib.dom,
+// so it needs a narrow declaration rather than an `any` cast. Returns undefined on
+// every non-iOS browser and during SSR.
+type DeviceMotionPermission = () => Promise<'granted' | 'denied' | 'prompt'>
+
+function deviceMotionPermission(): DeviceMotionPermission | undefined {
+  if (typeof window === 'undefined' || !('DeviceMotionEvent' in window)) return undefined
+  const ctor = window.DeviceMotionEvent as typeof DeviceMotionEvent & {
+    requestPermission?: DeviceMotionPermission
+  }
+  return typeof ctor.requestPermission === 'function' ? ctor.requestPermission : undefined
+}
+
 export default function SensoryPlayground() {
   const [bottleState, setBottleState] = useState<'full' | 'empty'>('full')
   const [shakeCount, setShakeCount] = useState(0)
@@ -26,12 +40,12 @@ export default function SensoryPlayground() {
 
   // Feature 113: Shake-to-Randomize (DeviceMotionEvent)
   useEffect(() => {
-    if (typeof window === 'undefined' || !(window as any).DeviceMotionEvent) return
+    if (typeof window === 'undefined' || !('DeviceMotionEvent' in window)) return
 
     let lastX = 0, lastY = 0, lastZ = 0
     const threshold = 15 // Shake sensitivity
 
-    const handleMotion = (e: any) => {
+    const handleMotion = (e: DeviceMotionEvent) => {
       const { x, y, z } = e.accelerationIncludingGravity || {}
       if (x == null || y == null || z == null) return
 
@@ -206,11 +220,11 @@ export default function SensoryPlayground() {
       </div>
 
       {/* iOS 13+ DeviceMotion Permission Request */}
-      {typeof window !== 'undefined' && 'DeviceMotionEvent' in window && typeof (window as any).DeviceMotionEvent.requestPermission === 'function' && (
-        <button 
+      {deviceMotionPermission() !== undefined && (
+        <button
           onClick={async () => {
             try {
-              const permissionState = await (window as any).DeviceMotionEvent.requestPermission()
+              const permissionState = await deviceMotionPermission()?.call(DeviceMotionEvent)
               if (permissionState === 'granted') {
                 alert('Sensors unlocked. Shake your phone.')
               }

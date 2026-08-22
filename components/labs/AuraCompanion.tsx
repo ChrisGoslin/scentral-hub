@@ -29,7 +29,6 @@ export default function AuraCompanion({
       */}
       <div 
         id="aura-tooltip" 
-        // @ts-ignore - TS types for popover might be missing depending on version
         popover="auto"
         className={styles.popover}
         role="status"
@@ -41,8 +40,7 @@ export default function AuraCompanion({
       {/* Living Aura Particle Body */}
       <button
         type="button"
-        // @ts-ignore
-        popovertarget="aura-tooltip"
+        popoverTarget="aura-tooltip"
         aria-label="Aura scent companion"
         onClick={onClick}
         className={styles.companionButton}

@@ -44,8 +44,9 @@ test.describe('Sensory Playground (Feature 113 & Toggles)', () => {
     // Dispatch a mock devicemotion event to simulate a hard shake (threshold > 15)
     await page.evaluate(() => {
       // Create and dispatch event
-      const event = new Event('devicemotion') as any
-      event.accelerationIncludingGravity = { x: 25, y: 0, z: 0 }
+      const event = Object.assign(new Event('devicemotion'), {
+        accelerationIncludingGravity: { x: 25, y: 0, z: 0 },
+      })
       window.dispatchEvent(event)
     })
 
@@ -54,8 +55,10 @@ test.describe('Sensory Playground (Feature 113 & Toggles)', () => {
     
     // Shake it again
     await page.evaluate(() => {
-      const event = new Event('devicemotion') as any
-      event.accelerationIncludingGravity = { x: -25, y: 0, z: 0 } // delta is 50 > 15
+      // delta is 50 > 15
+      const event = Object.assign(new Event('devicemotion'), {
+        accelerationIncludingGravity: { x: -25, y: 0, z: 0 },
+      })
       window.dispatchEvent(event)
     })
 
