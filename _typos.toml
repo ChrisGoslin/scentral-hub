@@ -1,0 +1,66 @@
+# Spell-check configuration for crate-ci/typos (.github/workflows/security-hygiene.yml).
+#
+# This is a fragrance product. Its vocabulary — brand names, perfumery terms, and
+# individual fragrance names — collides badly with an English typo dictionary, and
+# every entry below was checked in context before being added rather than being
+# whitelisted to silence the job. The dominant case is "Chanel", which typos reads
+# as a misspelling of "Channel" and which appears in shipped code
+# (lib/barcode-db.ts, lib/fragrance-education.ts), in SQL migrations, and in tests.
+#
+# Rule for adding to this file: open the flagged line, confirm the word is correct
+# in its context, and note why here. Do not add a genuine typo to make CI green.
+
+[default.extend-words]
+# Brand and house names.
+Chanel = "Chanel"
+chanel = "chanel"
+
+# Individual fragrance names.
+# Montblanc Individuel — docs/MASTER_WARDROBE.md, docs/archived/GENERATION_PROGRESS.md
+Individuel = "Individuel"
+# Paco Rabanne Invictus Victorioso — supabase/migrations/20260616_the_millennium_expansion.sql:176
+Victorioso = "Victorioso"
+# Nishane Ege (ΑΙΓΑΙΟ) — supabase/migrations/20260616_the_millennium_expansion.sql:50
+Ege = "Ege"
+
+# Perfumery vocabulary.
+# "flacons" — French for the bottles themselves, standard in the trade.
+# docs/nota/BIG_BETS_INNOVATION_HORIZONS.md:139
+flacons = "flacons"
+
+# Retailer name. SuperValu is an Irish supermarket chain.
+# docs/archived/stale-root/household-finance-pipeline-spec.md:113
+Valu = "Valu"
+
+# Business acronyms, read by typos as scrambled words.
+# CMO = Chief Marketing Officer (EXECUTIVE_SUMMARIES/CMO_REVIEW.md)
+CMO = "CMO"
+# ASO = App Store Optimization (docs/APP_STORE_LISTING.md:136)
+ASO = "ASO"
+
+# Hyphenated prefix, not a truncation of "miss": "mis-clone'd", "mis-resolved".
+# docs/todo/RUNBOOK-2026-08-09.md:232, docs/todo/claude-code-prompts-2026-08-02.md:125
+mis = "mis"
+
+# Accepted variant spelling. docs/ARCHIVE/FEATURE_PROMPTS.md:97
+browseable = "browseable"
+
+[default.extend-identifiers]
+# A real code identifier in a documented snippet, not prose:
+#   const sements = semanticResults.filter(...)
+# DISCOVER_FILES.md:190-191. Poorly named, but renaming it is a separate change and
+# the doc quotes shipped code.
+sements = "sements"
+
+# typos truncates "DELETEs" to "DELET" and offers "DELETE". The source text is
+# correct. docs/nota/PR-75-FOLLOW-UP-MASTER-PROMPT.md:263
+DELETEs = "DELETEs"
+
+[files]
+# Build output and vendored code are not ours to spell-check.
+extend-exclude = [
+  "package-lock.json",
+  "*.lock",
+  "public/**",
+  ".next/**",
+]
