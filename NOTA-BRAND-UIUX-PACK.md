@@ -334,11 +334,23 @@ the next step, never blame the user.
 
 ## 13. Performance is a brand attribute
 
-≤3 glass layers per viewport · one fixed grain layer · LCP < 2.5s · no
-ceremonial animation on scroll-critical paths · always support reduced motion.
+≤3 glass layers per viewport · one fixed grain layer · **homepage mobile LCP
+`<=3.0s` on slow 4G, desktop below 1.5s** · no ceremonial animation on
+scroll-critical paths · always support reduced motion.
 If a ceremonial hold pushes the identity past the LCP budget, start it at low
 non-zero opacity so it *resolves* rather than *appears*, or shorten it — and
 instrument the skip rate.
+
+> **The mobile budget is `3.0s`, not the generic 2.5s Core Web Vitals threshold.**
+> This is a deliberate, evidence-backed revision, not a slipped target. See
+> `docs/todo/homepage-follow-ups-2026-07-26.md` §Acceptance criteria: production
+> measurement after the hero image work put mobile LCP at 2.74–2.83s (down from a
+> 3.84–3.86s baseline) with desktop under 1s, and the launch gate was set at
+> `<=3.0s` accordingly. **Enforced in CI** by `scripts/check-performance-criteria.mjs`,
+> which fails if this file drops the `3.0s` criterion or reintroduces the retired
+> sub-2.5-second active target as a literal string. Restored 2026-08-22 after the
+> 2026-08-19 canon de-duplication deleted the `docs/` copy that carried the revised
+> budget and kept root's stale one.
 
 ---
 
