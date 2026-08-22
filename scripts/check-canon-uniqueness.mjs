@@ -18,10 +18,13 @@
 // legitimate, so the guard has both an allow case and a deny case (LOG-42).
 
 import { readdirSync } from 'node:fs';
-import { join, relative, sep } from 'node:path';
-import { execSync } from 'node:child_process';
+import { join, relative, sep, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const REPO_ROOT = execSync('git rev-parse --show-toplevel').toString().trim();
+// Same idiom as check-lesson-ids.mjs / check-handover-scripts.mjs / check-skill-integrity.mjs:
+// resolve the root from this file's own location rather than spawning git. Works
+// identically whether invoked from a hook, from CI, or from any working directory.
+const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
 // Directories never worth walking. Archived trees are excluded from the *walk*, not
 // from judgement: an archived copy that is legitimate must still be declared below,

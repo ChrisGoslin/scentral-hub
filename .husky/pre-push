@@ -55,6 +55,18 @@ if [ $CANON_UNIQUE_STATUS -ne 0 ]; then
   exit 1
 fi
 
+# Performance-criteria check (L79/L80) — also a CI job, but CI catches it after the
+# push. It caught exactly this on 2026-08-22: the canon de-duplication deleted a doc
+# this check reads, and the mobile LCP budget silently reverted to a retired value.
+# Four file reads, so there is no reason for it to live only in CI.
+echo "🔍 Checking performance criteria consistency..."
+node "$(git rev-parse --show-toplevel)/scripts/check-performance-criteria.mjs"
+PERF_CRITERIA_STATUS=$?
+if [ $PERF_CRITERIA_STATUS -ne 0 ]; then
+  echo "❌ Pre-push checks failed — push blocked. Fix errors above before pushing."
+  exit 1
+fi
+
 if [ "$current_branch" != "main" ]; then
   exit 0
 fi

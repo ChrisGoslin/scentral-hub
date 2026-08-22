@@ -85,9 +85,11 @@
 
 ## 4. Resolve taupe hex decision (docs vs. code) — RESOLVED 2026-07-26
 
-**What:** `app/globals.css` already ships `--taupe: #766E64`. `DESIGN.md`, `NOTA_MANIFESTO.md`, and `docs/brand/nota-imagery-briefs.md` were updated to `#766E64` (10.35:1 on ivory, clears WCAG AA for any text); `NOTA-BRAND-UIUX-PACK.md`, which still had the old `#B8AC9C`/2.03:1 rule, was brought in line the same day. Code and canonical docs now agree.
+**What:** `app/globals.css` already ships `--taupe: #766E64`. `DESIGN.md`, `NOTA_MANIFESTO.md`, and `docs/brand/nota-imagery-briefs.md` were updated to `#766E64`; `NOTA-BRAND-UIUX-PACK.md`, which still had the old `#B8AC9C`/2.03:1 rule, was brought in line the same day. Code and canonical docs now agree on the hex.
 
-Remaining stale reference: `docs/DESIGN.md` (a pre-root-move duplicate, not canonical) still shows the old value — separate repo-tidy cleanup, not a decision.
+**Correction 2026-08-22 — the contrast figure attached to this item was wrong.** This entry originally read "`#766E64` (10.35:1 on ivory, clears WCAG AA for any text)". That ratio was never measured. Re-measured with the WCAG 2.x relative-luminance formula, **`#766E64` on ivory `#F7F4EE` is 4.57:1** — it clears AA normal text by 0.07, with no headroom for the 2.8% grain multiply. All eight palette tokens were recomputed in the same pass and the other seven matched their published figures exactly, which is what isolated this one as a hand-entered error. `#756A5C` (taupe-ink, 4.82:1) is the load-bearing taupe text token. See `DESIGN.md` §2 and `docs/lessons.md` L78. **The hex consolidation this item describes was genuine and stands; only the attached claim was false** — consolidating a value is not validating its properties.
+
+~~Remaining stale reference: `docs/DESIGN.md` (a pre-root-move duplicate, not canonical) still shows the old value — separate repo-tidy cleanup, not a decision.~~ **Done 2026-08-19:** `docs/DESIGN.md` and `docs/NOTA-BRAND-UIUX-PACK.md` were deleted as forks, and `scripts/check-canon-uniqueness.mjs` now blocks either from reappearing at pre-push (`docs/lessons.md` L77).
 
 ---
 
