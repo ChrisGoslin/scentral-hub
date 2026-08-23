@@ -47,8 +47,20 @@ rather than left ambiguous — as-is, a reader can't tell which case they're in.
 ## Taupe hex — RESOLVED 2026-07-26
 
 Code was migrated to `#766E64` (`app/globals.css` verified live). Docs and
-code now agree: `DESIGN.md`, `NOTA_MANIFESTO.md`, `NOTA-BRAND-UIUX-PACK.md`,
-and `docs/brand/nota-imagery-briefs.md` all read `#766E64`, 10.35:1 on ivory.
-`NOTA-BRAND-UIUX-PACK.md` still had the stale `#B8AC9C`/2.03:1 rule until this
-date — fixed alongside the rest. Font drift (Geist target vs. shipped
+code now agree on the hex: `DESIGN.md`, `NOTA_MANIFESTO.md`,
+`NOTA-BRAND-UIUX-PACK.md`, and `docs/brand/nota-imagery-briefs.md` all read
+`#766E64`.
+
+**Correction 2026-08-22 — the "10.35:1 on ivory" figure above was never
+measured and is wrong.** Re-measured with the WCAG 2.x relative-luminance
+formula: `#766E64` on ivory `#F7F4EE` is **4.57:1** — it clears AA normal
+text with only 0.07 headroom. `#756A5C` (taupe-ink, 4.82:1) is the
+load-bearing taupe text token. See `docs/todo/homepage-follow-ups-2026-07-26.md`
+item 4 for the full re-measurement (all eight palette tokens recomputed;
+this was the one hand-entered error) and `docs/lessons.md` L78. The hex
+consolidation this file describes was genuine and stands — only the
+contrast-ratio claim attached to it was false.
+
+`NOTA-BRAND-UIUX-PACK.md` still had the stale `#B8AC9C`/2.03:1 rule until
+2026-07-26 — fixed alongside the rest. Font drift (Geist target vs. shipped
 Unbounded) remains open and separate; see `docs/HANDOVER.md`.

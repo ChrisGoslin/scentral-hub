@@ -19,7 +19,7 @@ Read in this order:
 
 For verification-discipline history and the three-round audit that motivated the current trust rule, see [docs/nota/HANDOVER-2026-07-19-verification-audit.md](./nota/HANDOVER-2026-07-19-verification-audit.md).
 For future handoffs, use [docs/nota/HANDOVER-TEMPLATE-verification-first.md](./nota/HANDOVER-TEMPLATE-verification-first.md) as the default scaffold.
-For hero-media brand rulings (stock-footage subject/face checks), see [docs/BRAND-RULING-hero-video.md](./BRAND-RULING-hero-video.md) — RESOLVED 2026-07-24, clip replaced with a faceless ink-in-water shot; confirmed still current in `components/landing/HeroSection.tsx` as of 2026-08-10.
+For hero-media brand rulings (stock-footage subject/face checks), see [docs/BRAND-RULING-hero-video.md](./BRAND-RULING-hero-video.md) — RESOLVED 2026-07-24 against `components/landing/HeroSection.tsx`, which was deleted 2026-08-19/22 as dead code (unused since `5125fe3` replaced the homepage hero; see `docs/SESSION-BACKLOG-2026-08-22-ci-and-e2e-followups.md`). The current homepage hero (`app/page.tsx`) has no video/stock-footage at all, so this ruling no longer has a live subject — treat as historical unless footage is reintroduced.
 For accumulated session lessons (verification traps, drift patterns, reusable fixes), see [docs/lessons.md](./lessons.md).
 For substantial multi-pass work, use [the loop orchestrator](../.claude/skills/loop-orchestrator/SKILL.md) to select the appropriate depth and enforce independent critique and completion evidence.
 

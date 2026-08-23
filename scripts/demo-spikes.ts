@@ -78,8 +78,8 @@ for (const h of hoursToSample) {
 // 4. Olfactory Elo Duel Demo
 console.log('\n---------------------------------------------------------------')
 console.log('⚔️ 4. OLFACTORY ELO DUEL MINI-GAME ENGINE...')
-let bottleA = { id: '1', name: 'Santal 33', brand: 'Le Labo', eloRating: 1200, matchesPlayed: 0 }
-let bottleB = { id: '2', name: 'Baccarat Rouge 540', brand: 'MFK', eloRating: 1200, matchesPlayed: 0 }
+const bottleA = { id: '1', name: 'Santal 33', brand: 'Le Labo', eloRating: 1200, matchesPlayed: 0 }
+const bottleB = { id: '2', name: 'Baccarat Rouge 540', brand: 'MFK', eloRating: 1200, matchesPlayed: 0 }
 console.log(`Initial ratings: ${bottleA.name} (${bottleA.eloRating}) vs ${bottleB.name} (${bottleB.eloRating})`)
 const duelResult = updateEloRatings(bottleA, bottleB)
 console.log(`🏆 Duel Result (Winner: ${duelResult.updatedWinner.name}):`)

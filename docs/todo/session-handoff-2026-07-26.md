@@ -4,6 +4,13 @@
 **Date:** 2026-07-26  
 **Context:** Adversarial loop identified gaps in LCP verification, screen-state completeness, and opportunity for 20% innovation upgrades.
 
+**SUPERSEDED (2026-08-22):** every reference to `HeroSection.tsx`/`.module.css` below
+describes a component that was deleted this date — dead code since `5125fe3`
+(2026-08-18) replaced the homepage hero with a static parallax version
+(`app/page.tsx`) with no video, connection-detection, or personalization badge.
+Historical record only; do not use as a spec for current hero work. See
+`docs/SESSION-BACKLOG-2026-08-22-ci-and-e2e-followups.md` and PR #98.
+
 ---
 
 ## Priority 1: LCP Verification (GATE — Run First)

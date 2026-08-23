@@ -44,6 +44,29 @@ if [ $HANDOVER_SCRIPT_STATUS -ne 0 ]; then
   exit 1
 fi
 
+# Canon uniqueness check (L77) — canon is cited by bare filename, so two files
+# sharing a canon name means every citation is ambiguous. Runs on every branch:
+# a fork lands via whatever branch created it, and merges to main afterwards.
+echo "🔍 Checking canon filename uniqueness..."
+node "$(git rev-parse --show-toplevel)/scripts/check-canon-uniqueness.mjs"
+CANON_UNIQUE_STATUS=$?
+if [ $CANON_UNIQUE_STATUS -ne 0 ]; then
+  echo "❌ Pre-push checks failed — push blocked. Fix errors above before pushing."
+  exit 1
+fi
+
+# Performance-criteria check (L79/L80) — also a CI job, but CI catches it after the
+# push. It caught exactly this on 2026-08-22: the canon de-duplication deleted a doc
+# this check reads, and the mobile LCP budget silently reverted to a retired value.
+# Four file reads, so there is no reason for it to live only in CI.
+echo "🔍 Checking performance criteria consistency..."
+node "$(git rev-parse --show-toplevel)/scripts/check-performance-criteria.mjs"
+PERF_CRITERIA_STATUS=$?
+if [ $PERF_CRITERIA_STATUS -ne 0 ]; then
+  echo "❌ Pre-push checks failed — push blocked. Fix errors above before pushing."
+  exit 1
+fi
+
 if [ "$current_branch" != "main" ]; then
   exit 0
 fi

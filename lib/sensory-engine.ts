@@ -19,7 +19,10 @@ class SensoryEngine {
     // Respect system reduced motion/audio preferences if possible, 
     // but here we just initialize the Web Audio API context
     try {
-      const AudioContext = window.AudioContext || (window as any).webkitAudioContext
+      const AudioContext =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext?: typeof window.AudioContext })
+          .webkitAudioContext
       if (AudioContext && !this.audioCtx) {
         this.audioCtx = new AudioContext()
       }
