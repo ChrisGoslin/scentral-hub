@@ -1,6 +1,21 @@
 import { test, expect } from '@playwright/test'
 
 test.describe('Sensory Playground (Feature 113 & Toggles)', () => {
+  // `force: true` on the Refill click (below) bypasses Playwright's own actionability
+  // check but still dispatches a real click at the button's screen coordinates — the
+  // fixed-to-viewport-bottom consent banner (ConsentBanner.tsx) sits on top of it on
+  // narrow/mobile viewports and swallows the click there. Seeding consent dismisses
+  // the banner before it can intercept, same pattern as e2e/fragrance-detail.spec.ts.
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem('scentral_onboarded', 'true')
+      localStorage.setItem(
+        'nota_consent',
+        JSON.stringify({ analytics: true, errorTracking: true, timestamp: Date.now() })
+      )
+    })
+  })
+
   test('Renders playground and toggles AMOLED, Quiet, and Thermal modes', async ({ page }) => {
     await page.goto('/labs/sensory')
 
