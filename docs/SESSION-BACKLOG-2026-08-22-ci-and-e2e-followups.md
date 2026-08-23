@@ -9,9 +9,12 @@ as a new permanent canon doc.
 — `fix: dead HeroSection + stale e2e tests, canon doc forks, canon-uniqueness guard`.
 Everything already fixed this session (dead `HeroSection.tsx` removal, rewritten
 `hero-screen-states.spec.ts`, `big-bets.spec.ts` locator fix, canon doc de-duplication,
-the `check-canon-uniqueness.mjs` pre-push guard, the perf-gate repointing) is verified
-and committed there — check that PR's description and commit messages for evidence
-before re-deriving any of it. Do not re-investigate what's already receipted there.
+the `check-canon-uniqueness.mjs` pre-push guard, the perf-gate repointing) is claimed
+fixed and committed there. **Read that PR's diff yourself before relying on any of
+it — a commit message or PR description is a claim, not verification (this session's
+own incident was exactly this: a prior agent's unverified "done" claim getting
+inherited and repeated). Re-derive the state you need from the live diff/tests, don't
+just cite the PR.**
 
 Everything below is **not yet fixed** — each entry has enough context for any CLI to
 pick up cold.
@@ -126,7 +129,26 @@ and should be corrected to describe the PR flow instead.
 
 ---
 
-## 6. Deferred, not started this session
+## 6. `sensory-playground.spec.ts` fails on Mobile Chrome + Mobile Safari
+
+**Status:** confirmed real by an independent isolated-worktree adversarial review of
+PR #98; not fixed, not previously documented anywhere in this backlog or in PR #98's
+description. §1 above ("`/wheel` ... the only outstanding e2e item") is inaccurate —
+this is a second, separate outstanding e2e gap.
+
+**Evidence:** `e2e/sensory-playground.spec.ts` around line 65 fails on the `Mobile
+Chrome` and `Mobile Safari` Playwright projects (chromium/webkit desktop projects were
+not reported as failing). The independent reviewer found this while auditing PR #98 in
+an isolated git worktree; it was not caused by anything in that PR's diff.
+
+**Next step:** run `npx playwright test e2e/sensory-playground.spec.ts --project="Mobile Chrome"
+--project="Mobile Safari"` to reproduce, read the assertion at/near line 65, and
+determine whether this is a viewport-specific rendering gap, a mobile-only interaction
+gap (touch vs. click), or a stale assertion — root cause not yet investigated.
+
+---
+
+## 7. Deferred, not started this session
 
 - **"App looks out of date" / `/goal-loop` request:** investigated earlier — the live
   Vercel deployment for `notalabs.io` exactly matched `git rev-parse HEAD` at the time
