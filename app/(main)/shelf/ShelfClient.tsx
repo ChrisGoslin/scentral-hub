@@ -18,6 +18,7 @@ import AuraCompanion from '@/components/labs/AuraCompanion'
 import { playClink } from '@/components/ui/SensoryFeedback'
 import { AuraEmotionalState } from '@/lib/aura-companion'
 import { SafeFragranceImage } from '@/components/fragrance/SafeFragranceImage'
+import TriedSomethingSheet from '@/components/collection/TriedSomethingSheet'
 import type { ShelfSlot, ShelfFragrance, ShelfTier } from './types'
 
 const TIER_LABELS: Record<ShelfTier, string> = {
@@ -530,6 +531,8 @@ export default function ShelfClient({ slots: initialSlots, topThree }: ShelfClie
   const [pendingEligibility, setPendingEligibility] = useState<{ fragrance: ShelfFragrance; payload: ShelfMutationPayload; previousSlots: ShelfSlot[] } | null>(null)
   const [mutationError, setMutationError] = useState<string | null>(null)
   const [auraState, setAuraState] = useState<AuraEmotionalState>('idle_breathing')
+  const [shareStatus, setShareStatus] = useState<'idle' | 'sharing' | 'shared' | 'error'>('idle')
+  const [triedSheetOpen, setTriedSheetOpen] = useState(false)
   const slotsRef = useRef(slots)
 
   useEffect(() => {
@@ -701,16 +704,115 @@ export default function ShelfClient({ slots: initialSlots, topThree }: ShelfClie
     }
   }, [pendingEligibility, searchTargetRank])
 
+  // Share to Traces: takes the current shelf's filled slots, ranked, and posts a
+  // moment trace with an og/shelf card image. Calm, restrained — a single line of
+  // confirmation, no fanfare (nota-customer-experience: "silence is the default state").
+  const handleShareToTraces = useCallback(async () => {
+    const filled = slotsRef.current
+      .filter(s => s.fragrance)
+      .sort((a, b) => a.rank - b.rank)
+    if (filled.length === 0) return
+
+    const top = filled.slice(0, 5)
+    const items = top.map(s => `${s.fragrance!.brand} — ${s.fragrance!.name}`)
+    const ogUrl = `/api/og/shelf?items=${encodeURIComponent(items.join('|'))}&count=${filled.length}`
+    const bodyText = `My Shelf, ranked: ${top.map(s => s.fragrance!.name).join(', ')}${filled.length > top.length ? '…' : ''}`
+
+    setShareStatus('sharing')
+    try {
+      const res = await fetch('/api/traces', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          trace_type: 'moment',
+          body: bodyText,
+          image_url: ogUrl,
+        }),
+      })
+      if (!res.ok) throw new Error('share failed')
+      setShareStatus('shared')
+      setTimeout(() => setShareStatus('idle'), 2600)
+    } catch {
+      setShareStatus('error')
+      setTimeout(() => setShareStatus('idle'), 2600)
+    }
+  }, [])
+
   return (
     <div style={{ padding: '20px 16px calc(5rem + env(safe-area-inset-bottom, 0px))' }}>
-      <div style={{ marginBottom: 16 }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 26, color: 'var(--text)' }}>
-          My Shelf
-        </h1>
-        <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>
-          Your top twenty, ranked. Drag to reorder, remove what&apos;s wrong, replace what&apos;s missing.
-        </p>
+      <div style={{ marginBottom: 16, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+        <div>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 26, color: 'var(--text)' }}>
+            My Shelf
+          </h1>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>
+            Your top twenty, ranked. Drag to reorder, remove what&apos;s wrong, replace what&apos;s missing.
+          </p>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end' }}>
+          <button
+            type="button"
+            onClick={() => setTriedSheetOpen(true)}
+            style={{
+              fontSize: 12,
+              letterSpacing: '0.04em',
+              color: 'var(--text-muted)',
+              background: 'transparent',
+              border: '1px solid var(--line, #334155)',
+              borderRadius: 999,
+              padding: '6px 14px',
+              whiteSpace: 'nowrap',
+              cursor: 'pointer',
+            }}
+          >
+            I tried something
+          </button>
+          <button
+            type="button"
+            onClick={handleShareToTraces}
+            disabled={shareStatus === 'sharing' || slots.every(s => !s.fragrance)}
+            style={{
+              fontSize: 12,
+              letterSpacing: '0.04em',
+              color: 'var(--color-primary, #B8913A)',
+              background: 'transparent',
+              border: '1px solid var(--color-primary, #B8913A)',
+              borderRadius: 999,
+              padding: '6px 14px',
+              whiteSpace: 'nowrap',
+              opacity: shareStatus === 'sharing' ? 0.6 : 1,
+              cursor: slots.every(s => !s.fragrance) ? 'not-allowed' : 'pointer',
+              transition: `opacity var(--motion-responsive, 200ms)`,
+            }}
+          >
+            {shareStatus === 'sharing' ? 'Sharing…' : 'Share to Traces'}
+          </button>
+        </div>
       </div>
+
+      {triedSheetOpen && <TriedSomethingSheet onClose={() => setTriedSheetOpen(false)} />}
+
+      {shareStatus === 'shared' && (
+        <div
+          role="status"
+          style={{
+            fontSize: 13,
+            color: 'var(--text-muted)',
+            marginBottom: 12,
+            transition: `opacity var(--motion-ceremonial, 480ms)`,
+          }}
+        >
+          Shared to Traces.
+        </div>
+      )}
+      {shareStatus === 'error' && (
+        <div
+          role="status"
+          style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 12 }}
+        >
+          That didn&apos;t save. Try once more.
+        </div>
+      )}
 
       <AuraShelfAdvisory topThree={topThree} className="mb-4" />
 
