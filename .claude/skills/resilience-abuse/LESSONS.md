@@ -13,3 +13,7 @@
 ## RES-3 (2026-07-09) — Rate-limit audit false negative on read/generate
 **What happened:** A prior audit (SKILL.md "Corrections 2026-07-05") grepped for `rate-limit\|Ratelimit` across `app/api/*/route.ts` and reported `/api/read/generate` as unguarded — flagged as the one item still missing from the original security brief. Re-reading the route directly showed it already 429s at 1 read/hour/user via a plain `interactions`-table count query, no Upstash import at all — a legitimate, already-shipped guard the grep couldn't see.
 **Response & guard:** SKILL.md corrected in place; the re-verify instruction now says "read the route" instead of grepping for one import name. Any future rate-limit audit must open routes that look unguarded before recording them as gaps — a missing import is not proof of a missing guard.
+
+## RES-4 (2026-08-24) — `/api/og/template` had no rate limit; `/api/og/noseprint` was the only og/* route guarded
+**What happened:** Backlog-clearance audit of the `og/*` budget (20/min/IP per this skill) found `app/api/og/noseprint/route.tsx` correctly using `lib/rate-limit.ts`, but the sibling `app/api/og/template/route.tsx` (also an unauthenticated, per-request `ImageResponse` renderer) had no limiter at all.
+**Response & guard:** Added the same `makeLimiter('og-template', 20, '1 m')` + `enforce`/`clientIp` pattern to `app/api/og/template/route.tsx`, matching `og/noseprint`. Any future og/* route audit must check every file under `app/api/og/`, not just the one with a subdirectory name that matches the feature.

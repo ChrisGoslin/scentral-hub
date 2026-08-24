@@ -1,7 +1,11 @@
 import { ImageResponse } from 'next/og'
-import { type NextRequest } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
+import { makeLimiter, enforce, clientIp } from '@/lib/rate-limit'
 
 export const runtime = 'nodejs'
+
+// Same budget as app/api/og/noseprint (resilience-abuse skill: og/* 20/min/IP).
+const ogTemplateLimiter = makeLimiter('og-template', 20, '1 m')
 
 const COLORS = {
   bg: '#F7F3EE',
@@ -39,6 +43,10 @@ interface OGParams {
 }
 
 export async function GET(req: NextRequest) {
+  if (!(await enforce(ogTemplateLimiter, clientIp(req)))) {
+    return NextResponse.json({ error: 'Too many requests.' }, { status: 429 })
+  }
+
   const searchParams = req.nextUrl.searchParams
   const type = (searchParams.get('type') || 'home') as OGParams['type']
   const brand = searchParams.get('brand') || ''
