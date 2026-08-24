@@ -92,21 +92,32 @@ narrow enough. Two-minute fix, just needs someone to own it.
 
 ---
 
-## 4. `claude-review` CI job fails — `ANTHROPIC_API_KEY` secret not set
+## 4. `claude-review` CI job fails — two independent causes, not one
 
-**Status:** not fixed. Infra/secrets gap, not a code issue.
+**Status:** not fixed. Infra/secrets + workflow-permissions gap, not a code issue.
 
-**Evidence:** `.github/workflows/claude-review.yml:39` passes
-`${{ secrets.ANTHROPIC_API_KEY }}` to the Claude Code Action; the job log shows the
-env var arriving empty and the step no-ops rather than reviewing anything. This has
-presumably been silently non-functional since the workflow was added — it "passes" in
-the sense of not blocking merges, but does nothing.
+**Correction 2026-08-24:** the original diagnosis below (empty
+`ANTHROPIC_API_KEY` only) was incomplete. An independent adversarial review of
+PR #98 (see `docs/HANDOVER-2026-08-23-pr98-e2e-fix.md`) read the actual failed
+run's log and found a **second, distinct failure**: `.github/workflows/claude-review.yml`
+declares only `contents: read / pull-requests: write / issues: write` — it is
+missing `id-token: write`, so the job fails with
+`Could not fetch an OIDC token. Did you remember to add 'id-token: write' to
+your workflow permissions?` before it ever gets to the missing-secret problem.
+Both defects need fixing, not one.
 
-**Next step:** either set the `ANTHROPIC_API_KEY` repo secret (GitHub Settings →
-Secrets and variables → Actions) if automated PR review is wanted, or remove the
-workflow if it isn't. Christopher's call — this is a secrets-management action,
-not something to do without his explicit sign-off per the Reversibility Gate (adding
-a secret is reversible; his call on which direction to go).
+**Evidence:** `.github/workflows/claude-review.yml:13-16` (permissions block,
+missing `id-token: write`) and `:39` (passes `${{ secrets.ANTHROPIC_API_KEY }}`,
+arrives empty). This has presumably been silently non-functional since the
+workflow was added — it "passes" in the sense of not blocking merges (not a
+required check), but does nothing.
+
+**Next step:** add `id-token: write` to the workflow's `permissions:` block,
+**and** either set the `ANTHROPIC_API_KEY` repo secret (GitHub Settings →
+Secrets and variables → Actions) if automated PR review is wanted, or remove
+the workflow if it isn't. Christopher's call — secrets and workflow-permission
+changes are not something to do without his explicit sign-off per the
+Reversibility Gate.
 
 ---
 
@@ -120,7 +131,7 @@ admin pushes landed directly on `main` anyway, bypassing the already-required `e
 check. With `enforce_admins` on, no one — no CLI, no admin — can push straight past a
 red required check anymore. **This changes the team's normal workflow** from
 direct-push-to-main to PR-based (confirmed working: PR #98 was opened and pushed to
-successfully this session, all 4 pre-push hooks fired as expected). Any future
+successfully this session, all 5 pre-push hooks fired as expected). Any future
 CLAUDE.md/AGENTS.md rule that says "push directly to main" for this repo is now stale
 and should be corrected to describe the PR flow instead.
 
@@ -129,22 +140,33 @@ and should be corrected to describe the PR flow instead.
 
 ---
 
-## 6. `sensory-playground.spec.ts` fails on Mobile Chrome + Mobile Safari
+## 6. `sensory-playground.spec.ts` fails on Mobile Chrome + Mobile Safari — RESOLVED 2026-08-24
 
-**Status:** confirmed real by an independent isolated-worktree adversarial review of
-PR #98; not fixed, not previously documented anywhere in this backlog or in PR #98's
-description. §1 above ("`/wheel` ... the only outstanding e2e item") is inaccurate —
-this is a second, separate outstanding e2e gap.
+**Status:** fixed, committed, and independently verified against live CI (not
+just local) at commit `24e6050634eb58423829738a41b7d32cd5a0b7c8`, merged to
+`main` in `9e74e71ae6d2ecd398c237627d9136c9fb6c7e8f`. See
+`docs/HANDOVER-2026-08-23-pr98-e2e-fix.md` for the full verification chain —
+this took three attempts, including one false "already fixed" claim that a
+second independent CI check caught; read that handover's retrospective before
+trusting a similar "local pass" claim in future.
 
-**Evidence:** `e2e/sensory-playground.spec.ts` around line 65 fails on the `Mobile
-Chrome` and `Mobile Safari` Playwright projects (chromium/webkit desktop projects were
-not reported as failing). The independent reviewer found this while auditing PR #98 in
-an isolated git worktree; it was not caused by anything in that PR's diff.
+**Root cause:** `ConsentBanner.tsx` (`position:fixed; bottom:16; zIndex:9999`)
+intercepted the "Refill (Wipe Glass)" button's click on narrow (mobile)
+viewports. Playwright's `click({force:true})` bypasses Playwright's own
+actionability check but still performs a real browser click at the target's
+screen coordinates, so the banner still ate the click underneath it.
 
-**Next step:** run `npx playwright test e2e/sensory-playground.spec.ts --project="Mobile Chrome"
---project="Mobile Safari"` to reproduce, read the assertion at/near line 65, and
-determine whether this is a viewport-specific rendering gap, a mobile-only interaction
-gap (touch vs. click), or a stale assertion — root cause not yet investigated.
+**Fix:** `test.beforeEach` in `e2e/sensory-playground.spec.ts` now seeds
+`nota_consent` / `scentral_onboarded` in localStorage via
+`page.addInitScript`, dismissing the banner before it can render — same
+pattern as `e2e/fragrance-detail.spec.ts`.
+
+**Known residual flake (undocumented until now):** the DeviceMotion test
+("Simulates DeviceMotion to trigger Shake-to-Rattle") fails on first attempt
+on `chromium` and `Mobile Chrome` in CI and passes on Playwright's built-in
+retry — `2 flaky` in CI runs, not `0 failed`. Not yet root-caused; low
+priority since it self-heals via retry, but should not be reported as fully
+green without noting this.
 
 ---
 
