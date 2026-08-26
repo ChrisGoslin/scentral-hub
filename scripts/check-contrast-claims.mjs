@@ -24,8 +24,12 @@ import { fileURLToPath } from 'node:url';
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
-// The table quotes two decimals, so anything beyond rounding is a real discrepancy.
-const TOLERANCE = 0.05;
+// Published values carry two decimals, so rounding explains at most 0.005 and anything
+// beyond that is a real discrepancy. An earlier 0.05 here was ten times too loose: it
+// would have accepted a 4.61 claim for a token measuring 4.57, which is exactly the
+// kind of near-boundary error (AA normal text is 4.5:1) this guard exists to catch.
+// Verified achievable — the worst true delta across the shipped tables is 0.0046.
+const TOLERANCE = 0.005;
 
 // ---- WCAG 2.1 relative luminance and contrast ------------------------------
 
@@ -126,6 +130,73 @@ for (const [, role, lightCell, lightRatio, darkCell, darkRatio] of pack.matchAll
   check('NOTA-BRAND-UIUX-PACK.md (light)', label, light, lightGround, Number.parseFloat(lightRatio));
   check('NOTA-BRAND-UIUX-PACK.md (dark)', label, dark, darkGround, Number.parseFloat(darkRatio));
 }
+
+// ---- Prose claims: ratios stated in body text, not tables -------------------
+//
+// Tables are not the only place a ratio gets published. DESIGN.md's front matter and
+// several passages state ratios inline, and one of them (#989188 at "5.38:1") was
+// wrong by 0.02 — below the old 0.05 tolerance and invisible to a table-only parser.
+//
+// The rule for what counts as a claim: a hex literal AND a ratio in the SAME sentence.
+// That is not merely convenient, it is what makes the check safe. Both docs contain
+// narrative passages that must quote the retired wrong figures in order to retract
+// them ("the long-standing 10.35:1 figure is wrong — the true ratio is 4.57:1"), and
+// those sentences name no hex. Requiring a hex literal excludes every retraction
+// without needing a list of exemptions to maintain.
+
+// Known limitation, stated rather than implied: segmentation is approximate, so a
+// neighbouring sentence in the same block can supply the ground word. That is the safe
+// direction to be wrong in — a mis-resolved ground yields a loud mismatch a human then
+// checks, never a silent pass. What it must never do is guess when nothing names a
+// ground, so that case fails explicitly.
+
+// Ground keywords, longest first so "shipped ground" wins over a bare "ground".
+const GROUND_WORDS = [
+  [/\bshipped ground\b|\bevening bench\b|\bdark ground\b|\bon dark\b|#1F1D1A/i, () => darkGround],
+  [/\bivory\b|\blight ground\b|#F7F4EE/i, () => lightGround],
+];
+
+function proseClaims(text, source) {
+  // Sentence-ish segmentation: markdown line breaks mid-sentence are common, so split
+  // on sentence terminators and blank lines rather than on newlines.
+  const segments = text
+    .split(/\n\s*\n|(?<=[.!?])\s+/)
+    .map((seg) => seg.replace(/\n/g, ' '));
+
+  for (const segment of segments) {
+    // Table rows are handled by the parsers above; skip anything that looks like one.
+    if (/^\s*\|/.test(segment)) continue;
+
+    const hexes = [...segment.matchAll(/(#[0-9A-Fa-f]{6})/g)].map((m) => m[1]);
+    const ratios = [...segment.matchAll(/\*{0,2}([0-9]+\.[0-9]+)\*{0,2}:1/g)].map((m) =>
+      Number.parseFloat(m[1])
+    );
+    if (hexes.length === 0 || ratios.length === 0) continue;
+
+    // A sentence pairing several hexes with several ratios is not unambiguously a
+    // single claim; checking a guessed pairing would be worse than not checking.
+    if (hexes.length !== 1 || ratios.length !== 1) continue;
+
+    const [hex] = hexes;
+    const [claimed] = ratios;
+
+    // A ground token is itself a hex, so ignore the claim's own colour when matching.
+    const withoutSubject = segment.split(hex).join(' ');
+    const ground = GROUND_WORDS.find(([re]) => re.test(withoutSubject))?.[1]();
+
+    if (!ground) {
+      failures.push(
+        `${source} (prose): "${segment.trim().slice(0, 80)}…" states ${claimed}:1 for ${hex} ` +
+          'but names no ground. Name the ground (ivory / dark) so the number can be checked.'
+      );
+      continue;
+    }
+    check(`${source} (prose)`, 'inline claim', hex, ground, claimed);
+  }
+}
+
+proseClaims(design, 'DESIGN.md');
+proseClaims(pack, 'NOTA-BRAND-UIUX-PACK.md');
 
 // A vacuous pass is the failure mode this guard exists to prevent: if the tables
 // are reformatted so nothing parses, silence would read as "all numbers correct".

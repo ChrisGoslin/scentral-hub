@@ -58,9 +58,12 @@ If any step fails, the script exits non-zero with the error printed — there is
 **Install (verified, `.husky/pre-push` + AGENTS.md "Local Dev Setup"):**
 ```bash
 git config core.hooksPath .husky
-cp scripts/hooks/pre-push .husky/pre-push && chmod +x .husky/pre-push
 ```
-Both commands are required on every fresh clone. `core.hooksPath` and the hook file are both local, uncommitted, working-tree state — a hook placed at `.git/hooks/` will **silently never run** if `core.hooksPath` points elsewhere (this bit the team once; see AGENTS.md line ~28). Verify install with:
+One command, required on every fresh clone. `.husky/pre-push` is **committed** and is the single source of truth for the hook; only `core.hooksPath` is local, uncommitted state — and a hook placed at `.git/hooks/` will **silently never run** if `core.hooksPath` points elsewhere (this bit the team once; see AGENTS.md "Local Dev Setup").
+
+> Do **not** add a `cp … .husky/pre-push` step. Until 2026-08-24 this install copied the hook from `scripts/hooks/pre-push`, a file predating all five always-on guards — so running the documented setup silently removed every one of them. Enforced by `scripts/check-hook-source-of-truth.mjs`.
+
+Verify install with:
 ```bash
 git config --get core.hooksPath   # must print .husky
 ls -la .husky/pre-push             # must exist and be executable

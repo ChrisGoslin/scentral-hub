@@ -98,7 +98,7 @@ The audit test: *if this element vanished, would the contributor lose informatio
 > and `--color-text: var(--ivory)`, and `app/layout.tsx` hardcodes `data-theme="dark"`.
 > **The shipped default ground is the dark evening bench, not ivory.** Muted text is
 > derived as `--color-text-muted: color-mix(in srgb, var(--taupe) 74%, var(--ivory))`
-> → `#989188`, which on its actual shipped ground measures **5.38:1 and passes AA**.
+> → `#989188`, which on its actual shipped ground measures **5.40:1 and passes AA**.
 > Lightening taupe toward ivory is the correct direction for a dark ground, so this is
 > not a shipped accessibility defect. It is a **doc-scope defect**: everything in this
 > section is measured on ivory, which is the design surface, not the running app. Also
