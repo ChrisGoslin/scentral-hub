@@ -13,6 +13,11 @@ jobs:
   anti-slop:
     name: Lint Quality & Anti-Slop
     runs-on: ubuntu-latest
+    # peakoss/anti-slop reads PR-diff fields (event.pull_request.base) that
+    # don't exist on a push event — it crashed with "Cannot read properties
+    # of undefined (reading 'base')" on every push to main. It only has a
+    # meaningful diff to check on pull_request anyway.
+    if: github.event_name == 'pull_request'
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
