@@ -156,42 +156,64 @@ const GROUND_WORDS = [
   [/\bivory\b|\blight ground\b|#F7F4EE/i, () => lightGround],
 ];
 
+function groundFor(text, subjectHex) {
+  // A ground token is itself a hex, so ignore the claim's own colour when matching.
+  const withoutSubject = subjectHex ? text.split(subjectHex).join(' ') : text;
+  return GROUND_WORDS.find(([re]) => re.test(withoutSubject))?.[1]();
+}
+
+// Check one unit of text known to hold at most one claim. `inheritedGround` carries the
+// enclosing block's ground so a wrapped continuation line ("...and taupe #766E64
+// (4.57:1) is atmospheric.") is still checkable against the ground its sentence named.
+function checkUnit(unit, source, inheritedGround, onAmbiguous) {
+  if (/^\s*\|/.test(unit)) return; // table rows are handled by the parsers above
+  const hexes = [...unit.matchAll(/(#[0-9A-Fa-f]{6})/g)].map((m) => m[1]);
+  const ratios = [...unit.matchAll(/\*{0,2}([0-9]+\.[0-9]+)\*{0,2}:1/g)].map((m) =>
+    Number.parseFloat(m[1])
+  );
+  if (hexes.length === 0 || ratios.length === 0) return;
+
+  if (hexes.length !== 1 || ratios.length !== 1) {
+    onAmbiguous(hexes.length, ratios.length);
+    return;
+  }
+
+  const [hex] = hexes;
+  const [claimed] = ratios;
+  const ground = groundFor(unit, hex) ?? inheritedGround;
+
+  if (!ground) {
+    failures.push(
+      `${source} (prose): "${unit.trim().slice(0, 80)}…" states ${claimed}:1 for ${hex} ` +
+        'but names no ground. Name the ground (ivory / dark) so the number can be checked.'
+    );
+    return;
+  }
+  check(`${source} (prose)`, 'inline claim', hex, ground, claimed);
+}
+
 function proseClaims(text, source) {
   // Sentence-ish segmentation: markdown line breaks mid-sentence are common, so split
   // on sentence terminators and blank lines rather than on newlines.
-  const segments = text
-    .split(/\n\s*\n|(?<=[.!?])\s+/)
-    .map((seg) => seg.replace(/\n/g, ' '));
+  const segments = text.split(/\n\s*\n|(?<=[.!?])\s+/);
 
   for (const segment of segments) {
-    // Table rows are handled by the parsers above; skip anything that looks like one.
-    if (/^\s*\|/.test(segment)) continue;
-
-    const hexes = [...segment.matchAll(/(#[0-9A-Fa-f]{6})/g)].map((m) => m[1]);
-    const ratios = [...segment.matchAll(/\*{0,2}([0-9]+\.[0-9]+)\*{0,2}:1/g)].map((m) =>
-      Number.parseFloat(m[1])
-    );
-    if (hexes.length === 0 || ratios.length === 0) continue;
-
-    // A sentence pairing several hexes with several ratios is not unambiguously a
-    // single claim; checking a guessed pairing would be worse than not checking.
-    if (hexes.length !== 1 || ratios.length !== 1) continue;
-
-    const [hex] = hexes;
-    const [claimed] = ratios;
-
-    // A ground token is itself a hex, so ignore the claim's own colour when matching.
-    const withoutSubject = segment.split(hex).join(' ');
-    const ground = GROUND_WORDS.find(([re]) => re.test(withoutSubject))?.[1]();
-
-    if (!ground) {
-      failures.push(
-        `${source} (prose): "${segment.trim().slice(0, 80)}…" states ${claimed}:1 for ${hex} ` +
-          'but names no ground. Name the ground (ivory / dark) so the number can be checked.'
-      );
-      continue;
-    }
-    check(`${source} (prose)`, 'inline claim', hex, ground, claimed);
+    const flat = segment.replace(/\n/g, ' ');
+    checkUnit(flat, source, undefined, () => {
+      // A block holding several claims is not a failure if each LINE inside it holds
+      // exactly one — the YAML front matter is exactly that shape. Retry line by line,
+      // inheriting the block's ground, and only report ambiguity a line cannot resolve.
+      const blockGround = groundFor(flat, null);
+      for (const line of segment.split('\n')) {
+        checkUnit(line, source, blockGround, (h, r) => {
+          failures.push(
+            `${source} (prose): "${line.trim().slice(0, 70)}…" pairs ${h} hex value(s) with ` +
+              `${r} ratio(s), so no claim can be checked unambiguously. Split it so each ` +
+              'colour and its ratio sit on their own line.'
+          );
+        });
+      }
+    });
   }
 }
 

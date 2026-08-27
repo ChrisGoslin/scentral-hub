@@ -81,7 +81,8 @@ elsewhere).
 Before doing anything:
 1. `npm run test:smoke:prod`
 2. `cat AGENTS.md`
-3. If `git config --get core.hooksPath` doesn't print `.husky`, or `.husky/pre-push` doesn't exist: run the two commands under "Local Dev Setup" above.
+3. If `git config --get core.hooksPath` doesn't print `.husky`: run the command under "Local Dev Setup" above.
+4. If `.husky/pre-push` doesn't exist, `core.hooksPath` alone will NOT bring it back — the hook is a tracked file, so restore it: `git restore --source=HEAD -- .husky/pre-push`. (There is no longer a second copy to install from; see "Local Dev Setup".)
 
 ## 0. Why this file exists
 Prior agent runs produced confident "breakthrough" output full of fabricated detail (fake repo paths,

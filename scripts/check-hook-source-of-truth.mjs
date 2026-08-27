@@ -82,7 +82,11 @@ walk(REPO_ROOT, (full) => {
 // rule then flagged the lesson entry documenting the fix. Shape has no such tradeoff.
 // Leading blockquote markers and shell prompts are stripped so neither can disguise a
 // real command.
-const COPY_INSTRUCTION = /^cp\s+\S+\s+\.husky\/pre-push\b/;
+// Anchored on the DESTINATION, not on argument count. An earlier version assumed
+// exactly one token between `cp` and the target, so `cp -f src .husky/pre-push` walked
+// straight past it (found in review). GNU documents the syntax as `cp [OPTION]... SOURCE
+// DEST`, so any number of options may precede the source.
+const COPY_INSTRUCTION = /^cp\b.*\s\.husky\/pre-push\s*$/;
 
 walk(REPO_ROOT, (full) => {
   if (!full.endsWith('.md')) return;
