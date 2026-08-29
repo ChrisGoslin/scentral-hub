@@ -31,7 +31,16 @@ const failures = [];
 const hookPath = join(REPO_ROOT, '.husky', 'pre-push');
 if (!existsSync(hookPath)) {
   failures.push(
-    '.husky/pre-push is missing. It is committed and is the single source of truth for the hook.'
+    '.husky/pre-push is missing. It is committed and is the single source of truth for the hook.\n' +
+      '       Restore it: git restore --source=HEAD -- .husky/pre-push'
+  );
+} else if ((statSync(hookPath).mode & 0o111) === 0) {
+  // Existence is not enough. Git does not error on a non-executable hook — it prints
+  // "hook was ignored because it's not set as executable" and PROCEEDS, so a mode-only
+  // change silently disables every gate below while this guard reports green.
+  failures.push(
+    '.husky/pre-push exists but is not executable, so git skips it with a warning and ' +
+      'pushes anyway — every local gate is off.\n       Fix: chmod +x .husky/pre-push'
   );
 }
 
@@ -86,7 +95,22 @@ walk(REPO_ROOT, (full) => {
 // exactly one token between `cp` and the target, so `cp -f src .husky/pre-push` walked
 // straight past it (found in review). GNU documents the syntax as `cp [OPTION]... SOURCE
 // DEST`, so any number of options may precede the source.
-const COPY_INSTRUCTION = /^cp\b.*\s\.husky\/pre-push\s*$/;
+// Anchored on the normalised DESTINATION rather than one literal spelling. Two earlier
+// versions matched a fixed shape and were evaded in turn: first by options
+// (`cp -f src .husky/pre-push`), then by quoting and a `./` prefix
+// (`cp -f src "./.husky/pre-push"`). Normalising the final operand closes both as a
+// class instead of adding a third pattern.
+const HOOK_DESTINATIONS = new Set(['.husky/pre-push', 'husky/pre-push']);
+
+function copiesOverHook(line) {
+  if (!/^cp\b/.test(line)) return false;
+  const dest = line.trim().split(/\s+/).pop() ?? '';
+  const normalised = dest
+    .replace(/^["']|["']$/g, '') // surrounding quotes
+    .replace(/^\.\//, '') // leading ./
+    .replace(/\/+/g, '/'); // duplicated slashes
+  return HOOK_DESTINATIONS.has(normalised);
+}
 
 walk(REPO_ROOT, (full) => {
   if (!full.endsWith('.md')) return;
@@ -94,7 +118,7 @@ walk(REPO_ROOT, (full) => {
   const text = readFileSync(full, 'utf8');
   for (const [i, line] of text.split('\n').entries()) {
     const bare = line.replace(/^[\s>]*/, '').replace(/^[$#]\s+/, '');
-    if (!COPY_INSTRUCTION.test(bare)) continue;
+    if (!copiesOverHook(bare)) continue;
     failures.push(
       `${rel}:${i + 1} instructs copying a file over .husky/pre-push. ` +
         'That overwrites the committed hook with a copy that will drift out of date — ' +

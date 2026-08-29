@@ -57,6 +57,7 @@ Do not use amber as a large background, standard button colour, or gamification 
 
 ### Measured contrast on ivory `#F7F4EE`
 
+> <!-- contrast:retired --> The figures quoted below are retired values being retracted, not claims.
 > **Re-measured 2026-08-19** with the WCAG 2.x relative-luminance formula, all eight
 > tokens recomputed from hex in one pass. Seven matched the previous table exactly.
 > **Taupe did not: the long-standing 10.35:1 figure is wrong — the true ratio is
@@ -80,13 +81,13 @@ normal text, but only just — and they are close enough to each other that the 
 between them is a real accessibility decision, not a stylistic one:
 
 - **`taupe`** — atmospheric role: hairlines, borders, archive spine, anatomy line work,
-  marginal annotation, and large or non-critical text. At 4.57:1 it clears AA normal by
+  marginal annotation, and large or non-critical text. Taupe at 4.57:1 on ivory clears AA normal by
   **0.07** — effectively no headroom, and the 2.8% grain multiply consumes what little
   there is. Do not use it for small text that carries information.
 - **`taupe-ink`** — **the load-bearing taupe text token.** Memory, metadata, historical
   information, specimen keys, timestamps. `oklch(0.5316 0.0263 75.2deg)` — identical
   chroma and hue to `taupe`, with lightness reduced in OKLCH. The same aged pigment at
-  deeper concentration, not a sterile gray. 4.82:1 leaves the headroom the grain
+  deeper concentration, not a sterile gray. Taupe ink at 4.82:1 on ivory leaves the headroom the grain
   multiply needs.
 
 Both colours express the same emotional identity: memory, not novelty; depth, not brightness.
@@ -109,7 +110,7 @@ The audit test: *if this element vanished, would the contributor lose informatio
 > (2) whether this section needs a parallel dark-ground table, or should be re-based on
 > the dark ground outright.
 
-Amber's 4.47:1 is sufficient for the wordmark period and the Dot (both non-text or large), and insufficient for labels or body copy. Do not set small text in amber.
+Amber's 4.47:1 on ivory is sufficient for the wordmark period and the Dot (both non-text or large), and insufficient for labels or body copy. Do not set small text in amber.
 
 ## 3. Typography
 

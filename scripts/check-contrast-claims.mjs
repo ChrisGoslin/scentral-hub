@@ -156,6 +156,46 @@ const GROUND_WORDS = [
   [/\bivory\b|\blight ground\b|#F7F4EE/i, () => lightGround],
 ];
 
+// Named tokens, so a claim like "Amber's 4.47:1" is checkable without a hex literal.
+// Built from both docs' own dictionaries: the pack's --pig-* block (already parsed
+// above) and DESIGN.md's front matter, where each entry's comment names the token
+// ("taupe: \"#766E64\"   # Taupe — ..."). Longest name first so `taupe-ink` wins over
+// `taupe` and `amber-glow` over `amber`.
+const tokenNames = new Map();
+for (const [name, hex] of pigments) tokenNames.set(name.toLowerCase(), hex);
+for (const [, hex, label] of design.matchAll(
+  /^\s*[a-z-]+:\s*"(#[0-9A-Fa-f]{6})"\s*#\s*([A-Za-z][A-Za-z ]*?)\s+[—-]/gm
+)) {
+  tokenNames.set(label.trim().toLowerCase().replace(/\s+/g, '-'), hex);
+}
+const NAMES_LONGEST_FIRST = [...tokenNames.keys()].sort((a, b) => b.length - a.length);
+
+// Token names mentioned in a passage, earliest first. Length only breaks ties at one
+// position, so `taupe-ink` wins over `taupe` where both start together.
+function namesIn(text) {
+  const found = [];
+  for (const n of NAMES_LONGEST_FIRST) {
+    const m = new RegExp(`\\b${n.replace('-', '[- ]')}\\b`, 'i').exec(text);
+    if (!m) continue;
+    // "on ivory" names the GROUND, not the subject. Without this the subject picker
+    // measured ivory against ivory (1.00:1) for a sentence whose subject was Amber.
+    if (/\bon\s+$/i.test(text.slice(0, m.index))) continue;
+    found.push({ name: n, index: m.index });
+  }
+  return found.sort((a, b) => a.index - b.index || b.name.length - a.name.length);
+}
+
+// A passage that quotes a retired figure in order to retract it is canon doing its job,
+// not a false claim. Those passages must declare themselves — an earlier heuristic
+// exemption (nearby negation words) was evaded twice, so this one is explicit and
+// greppable rather than inferred.
+const RETIRED_MARKER = /<!--\s*contrast:retired\s*-->/;
+
+// A threshold is not a claim: "must clear 4.5:1" states a requirement about any token,
+// not a measurement of one. Checking it against a resolved name would invent a defect.
+const THRESHOLD_CONTEXT =
+  /\b(must|clears?|at least|minimum|threshold|requires?|below|above|target)\b[^.]{0,40}$/i;
+
 function groundFor(text, subjectHex) {
   // A ground token is itself a hex, so ignore the claim's own colour when matching.
   const withoutSubject = subjectHex ? text.split(subjectHex).join(' ') : text;
@@ -167,11 +207,33 @@ function groundFor(text, subjectHex) {
 // (4.57:1) is atmospheric.") is still checkable against the ground its sentence named.
 function checkUnit(unit, source, inheritedGround, onAmbiguous) {
   if (/^\s*\|/.test(unit)) return; // table rows are handled by the parsers above
+  if (RETIRED_MARKER.test(unit)) return; // declared retraction — see RETIRED_MARKER
+
   const hexes = [...unit.matchAll(/(#[0-9A-Fa-f]{6})/g)].map((m) => m[1]);
-  const ratios = [...unit.matchAll(/\*{0,2}([0-9]+\.[0-9]+)\*{0,2}:1/g)].map((m) =>
-    Number.parseFloat(m[1])
-  );
-  if (hexes.length === 0 || ratios.length === 0) return;
+  const ratios = [];
+  for (const m of unit.matchAll(/\*{0,2}([0-9]+\.[0-9]+)\*{0,2}:1/g)) {
+    if (THRESHOLD_CONTEXT.test(unit.slice(0, m.index))) continue;
+    ratios.push(Number.parseFloat(m[1]));
+  }
+  if (ratios.length === 0) return;
+
+  // No hex literal: fall back to the token named in the passage. The FIRST name is the
+  // subject — bullets and sentences lead with what they are about ("**`taupe-ink`** —
+  // …4.82:1…", "Amber's 4.47:1"). If a later name would satisfy a claim the subject
+  // does not, that is reported rather than quietly resolved to whichever one passes.
+  if (hexes.length === 0) {
+    // Deliberately NOT inherited from a neighbouring sentence. Carrying the nearest
+    // preceding name forward was tried and misattributes: inside the `taupe-ink` bullet
+    // the phrase "identical chroma and hue to `taupe`" is the most recent name, so a
+    // later "4.82:1 …" sentence resolved to taupe and reported a false mismatch. A claim
+    // must name its own subject; where canon prose did not, the prose was made explicit
+    // rather than the guess made cleverer.
+    const found = namesIn(unit);
+    if (found.length === 0) return;
+    hexes.push(tokenNames.get(found[0].name));
+  }
+
+
 
   if (hexes.length !== 1 || ratios.length !== 1) {
     onAmbiguous(hexes.length, ratios.length);
@@ -193,9 +255,13 @@ function checkUnit(unit, source, inheritedGround, onAmbiguous) {
 }
 
 function proseClaims(text, source) {
-  // Sentence-ish segmentation: markdown line breaks mid-sentence are common, so split
-  // on sentence terminators and blank lines rather than on newlines.
-  const segments = text.split(/\n\s*\n|(?<=[.!?])\s+/);
+  // The retired marker is BLOCK scoped: a retraction passage is a whole blockquote, and
+  // requiring the marker on each sentence of it would be noise a future editor drops.
+  const blocks = text.split(/\n\s*\n/).filter((b) => !RETIRED_MARKER.test(b));
+
+  // Sentence-ish segmentation within each surviving block: markdown line breaks
+  // mid-sentence are common, so split on sentence terminators rather than on newlines.
+  const segments = blocks.flatMap((b) => b.split(/(?<=[.!?])\s+/));
 
   for (const segment of segments) {
     const flat = segment.replace(/\n/g, ' ');
