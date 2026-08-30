@@ -44,7 +44,54 @@ if (!existsSync(hookPath)) {
   );
 }
 
-// 2. No rival copy of the hook anywhere else in the tree.
+// 2. The hook must actually invoke the checks CI runs, and vice versa.
+//
+// Existence and mode are not enough: the committed hook can be edited to drop a check
+// and every other test here still passes, so the "single source of truth" can quietly
+// stop running one of the gates it promises. Found in review — and worth recording that
+// the parity below is a diff a human (me) had been running BY HAND every round and
+// reporting as evidence. It passed every time. Nothing enforced it, so it would have
+// stopped happening the moment nobody remembered. That is the same failure class as
+// L82 itself: a guarantee that depends on someone remembering is not a guarantee.
+//
+// Neither side is a hardcoded list. A fixed array here would be a third copy of the
+// truth, which is the defect this whole guard exists to remove — so the hook and the
+// workflow check each other. Adding a guard therefore means editing both, deliberately.
+const WORKFLOW = join(REPO_ROOT, '.github', 'workflows', 'skill-integrity.yml');
+
+function checksIn(path) {
+  if (!existsSync(path)) return null;
+  return new Set(
+    [...readFileSync(path, 'utf8').matchAll(/scripts\/(check-[a-z-]+\.mjs)/g)].map((m) => m[1])
+  );
+}
+
+const hookChecks = existsSync(hookPath) ? checksIn(hookPath) : null;
+const ciChecks = checksIn(WORKFLOW);
+
+if (!ciChecks) {
+  failures.push(
+    `${relative(REPO_ROOT, WORKFLOW)} is missing — it is the server-side twin of the hook ` +
+      'and the only gate that survives a GitHub UI merge.'
+  );
+} else if (hookChecks) {
+  const missingFromHook = [...ciChecks].filter((c) => !hookChecks.has(c)).sort();
+  const missingFromCi = [...hookChecks].filter((c) => !ciChecks.has(c)).sort();
+  if (missingFromHook.length > 0) {
+    failures.push(
+      `.husky/pre-push does not run: ${missingFromHook.join(', ')} — CI does. A check that ` +
+        'runs only server-side lets a bad change reach review before anything catches it.'
+    );
+  }
+  if (missingFromCi.length > 0) {
+    failures.push(
+      `.github/workflows/skill-integrity.yml does not run: ${missingFromCi.join(', ')} — the ` +
+        'hook does. A check that runs only locally is skipped entirely by a GitHub UI merge.'
+    );
+  }
+}
+
+// 3. No rival copy of the hook anywhere else in the tree.
 const IGNORED = new Set(['.git', 'node_modules', '.next', 'dist', 'build', '.vercel', '.husky']);
 function walk(dir, onFile) {
   for (const entry of readdirSync(dir)) {
@@ -77,7 +124,7 @@ walk(REPO_ROOT, (full) => {
   );
 });
 
-// 3. No document may instruct copying anything over the installed hook.
+// 4. No document may instruct copying anything over the installed hook.
 //    Matched on the shape (`cp <anything> .husky/pre-push`) rather than the old path,
 //    so reintroducing it from a new location is caught too.
 // An *instruction* is a bare command occupying its own line — which is how it appeared
@@ -103,8 +150,17 @@ walk(REPO_ROOT, (full) => {
 const HOOK_DESTINATIONS = new Set(['.husky/pre-push', 'husky/pre-push']);
 
 function copiesOverHook(line) {
-  if (!/^cp\b/.test(line)) return false;
-  const dest = line.trim().split(/\s+/).pop() ?? '';
+  // Split on shell separators FIRST. Taking the last token of the whole line treated
+  // `cp source .husky/pre-push && echo installed` as copying to "installed", so a
+  // perfectly ordinary chained setup command sailed through (found in review).
+  return line
+    .split(/&&|\|\||[;|]/)
+    .some((segment) => segmentCopiesOverHook(segment.trim()));
+}
+
+function segmentCopiesOverHook(segment) {
+  if (!/^cp\b/.test(segment)) return false;
+  const dest = segment.trim().split(/\s+/).pop() ?? '';
   const normalised = dest
     .replace(/^["']|["']$/g, '') // surrounding quotes
     .replace(/^\.\//, '') // leading ./
@@ -133,4 +189,7 @@ if (failures.length > 0) {
   process.exit(1);
 }
 
-console.log('✅ Hook source of truth OK — .husky/pre-push is the only copy, no doc copies over it.');
+console.log(
+  `✅ Hook source of truth OK — .husky/pre-push is the only copy, executable, no doc copies ` +
+    `over it, and hook/CI run the same ${hookChecks?.size ?? 0} checks.`
+);
