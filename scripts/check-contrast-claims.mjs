@@ -81,12 +81,18 @@ if (!groundMatch) {
 const ivory = groundMatch[1];
 
 // | **Taupe `#766E64`** | 4.57:1 | pass (0.07 margin) | pass | ... |
-const designRow = /^\|\s*\*{0,2}([^`|*]+?)\*{0,2}\s*`(#[0-9A-Fa-f]{6})`\*{0,2}\s*\|\s*([0-9.]+):1/gm;
+// Trimming is done in JS, not in the pattern. Every earlier version wrapped the token
+// name in optional whitespace/emphasis quantifiers whose character sets OVERLAPPED the
+// name's own class, so the engine could split one cell many ways — super-linear
+// backtracking (sonarjs, and the D reliability rating on this PR). Each class here
+// excludes its own terminator, so the match is deterministic.
+const designRow = /^\|([^|`]*)`(#[0-9A-Fa-f]{6})`([^|]*)\|\s*(\d+\.\d+):1/gm;
 
 let designRows = 0;
-for (const [, name, hex, claimed] of design.matchAll(designRow)) {
+for (const [, rawName, hex, , claimed] of design.matchAll(designRow)) {
   designRows += 1;
-  check('DESIGN.md', name.trim(), hex, ivory, Number.parseFloat(claimed));
+  const name = rawName.replace(/[*|]/g, '').trim();
+  check('DESIGN.md', name, hex, ivory, Number.parseFloat(claimed));
 }
 
 // ---- NOTA-BRAND-UIUX-PACK.md: two grounds, tokens named not inlined --------
@@ -186,9 +192,13 @@ const GROUND_WORDS = [
 const tokenNames = new Map();
 for (const [name, hex] of pigments) tokenNames.set(name.toLowerCase(), hex);
 for (const [, hex, label] of design.matchAll(
-  /^\s*[a-z-]+:\s*"(#[0-9A-Fa-f]{6})"\s*#\s*([A-Za-z][A-Za-z ]*?)\s+[—-]/gm
+  // One greedy class terminated by the em dash, trimmed in JS. The previous
+  // `[ \t]*`, never `\s*`: `\s` matches newlines, so with /m every run could swallow line
+  // breaks and overlap the `^` anchor — many ways to match the same text, which is what
+  // super-linear backtracking is. Horizontal whitespace only keeps each run on its line.
+  /^[ \t]*[a-z-]+:[ \t]*"(#[0-9A-Fa-f]{6})"[ \t]*#[ \t]*([^—\n]+)—/gm
 )) {
-  tokenNames.set(label.trim().toLowerCase().replace(/\s+/g, '-'), hex);
+  tokenNames.set(label.trim().toLowerCase().replaceAll(/\s+/g, '-'), hex);
 }
 const NAMES_LONGEST_FIRST = [...tokenNames.keys()].sort((a, b) => b.length - a.length);
 
@@ -237,7 +247,10 @@ function checkUnit(unit, source, inheritedGround, onAmbiguous) {
 
   const hexes = [...unit.matchAll(/(#[0-9A-Fa-f]{6})/g)].map((m) => m[1]);
   const ratios = [];
-  for (const m of unit.matchAll(/\*{0,2}([0-9]+\.[0-9]+)\*{0,2}:1/g)) {
+  // Atomic-group emulation: `(?=(...))\1` matches the number once and never gives it
+  // back. Plain `(\d+\.\d+)\**:1` re-splits the digits on every failed `:1`, which is the
+  // polynomial case sonarjs flags. JS has no atomic groups, so the lookahead does it.
+  for (const m of unit.matchAll(/(?=(\d+\.\d+))\1\**:1/g)) {
     if (THRESHOLD_CONTEXT.test(unit.slice(0, m.index))) continue;
     ratios.push(Number.parseFloat(m[1]));
   }
