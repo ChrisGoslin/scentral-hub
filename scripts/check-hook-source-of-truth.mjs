@@ -61,8 +61,17 @@ const WORKFLOW = join(REPO_ROOT, '.github', 'workflows', 'skill-integrity.yml');
 
 function checksIn(path) {
   if (!existsSync(path)) return null;
+  // Comments do not run. Scanning raw text meant commenting out a workflow step
+  // (`# - run: node scripts/check-contrast-claims.mjs`) still satisfied parity while
+  // GitHub Actions skipped the guard entirely — the check reported all seven present
+  // and exited 0. `#` starts a comment in both YAML and shell, so one rule covers the
+  // workflow and the hook.
+  const active = readFileSync(path, 'utf8')
+    .split('\n')
+    .filter((line) => !/^\s*#/.test(line))
+    .join('\n');
   return new Set(
-    [...readFileSync(path, 'utf8').matchAll(/scripts\/(check-[a-z-]+\.mjs)/g)].map((m) => m[1])
+    [...active.matchAll(/scripts\/(check-[a-z-]+\.mjs)/g)].map((m) => m[1])
   );
 }
 

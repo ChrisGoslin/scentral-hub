@@ -18,7 +18,7 @@
 // from this file's own location rather than spawning git, so it behaves identically
 // from a hook, from CI, or from any working directory.
 
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -144,6 +144,25 @@ for (const [, role, lightCell, lightRatio, darkCell, darkRatio] of pack.matchAll
 // those sentences name no hex. Requiring a hex literal excludes every retraction
 // without needing a list of exemptions to maintain.
 
+// The ground the app ACTUALLY paints, read from the cascade rather than from a token a
+// doc declares. app/layout.tsx hardcodes data-theme="dark", so the [data-theme="dark"]
+// override of --color-bg wins over :root — and over --pig-ground-dark, which is a design
+// token, not a rendered value.
+//
+// This distinction is not academic: DESIGN.md's "its actual shipped ground" sentence was
+// corrected twice (5.38 → 5.40 → 5.52) and stayed wrong both times, because every check
+// resolved the ground from a declared token instead of the winning rule. A guard that
+// reads what the docs say about the app cannot catch the docs being wrong about the app.
+function shippedDarkGround() {
+  const cssPath = join(REPO_ROOT, 'app', 'globals.css');
+  if (!existsSync(cssPath)) return null;
+  const css = readFileSync(cssPath, 'utf8');
+  const block = css.match(/\[data-theme=["']dark["']\]\s*\{([^}]*)\}/);
+  const hex = block?.[1].match(/--color-bg:\s*(#[0-9A-Fa-f]{6})/);
+  return hex ? hex[1].toUpperCase() : null;
+}
+const SHIPPED_DARK = shippedDarkGround();
+
 // Known limitation, stated rather than implied: segmentation is approximate, so a
 // neighbouring sentence in the same block can supply the ground word. That is the safe
 // direction to be wrong in — a mis-resolved ground yields a loud mismatch a human then
@@ -152,7 +171,10 @@ for (const [, role, lightCell, lightRatio, darkCell, darkRatio] of pack.matchAll
 
 // Ground keywords, longest first so "shipped ground" wins over a bare "ground".
 const GROUND_WORDS = [
-  [/\bshipped ground\b|\bevening bench\b|\bdark ground\b|\bon dark\b|#1F1D1A/i, () => darkGround],
+  // "shipped"/"renders"/"paints" means the live cascade; everything else naming dark
+  // means the design token. Longest/most specific first.
+  [/\bshipped ground\b|\bactually paints\b|\brenders\b/i, () => SHIPPED_DARK ?? darkGround],
+  [/\bevening bench\b|\bdark ground\b|\bon dark\b|#1F1D1A/i, () => darkGround],
   [/\bivory\b|\blight ground\b|#F7F4EE/i, () => lightGround],
 ];
 
@@ -175,7 +197,11 @@ const NAMES_LONGEST_FIRST = [...tokenNames.keys()].sort((a, b) => b.length - a.l
 function namesIn(text) {
   const found = [];
   for (const n of NAMES_LONGEST_FIRST) {
-    const m = new RegExp(`\\b${n.replace('-', '[- ]')}\\b`, 'i').exec(text);
+    // Escape before interpolating, and replaceAll so a name with two hyphens still
+    // matches. The single-arg replace rewrote only the first hyphen (latent today: no
+    // token has two) and an unescaped interpolation builds a regex from external data.
+    const pattern = n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replaceAll('-', '[- ]');
+    const m = new RegExp(`\\b${pattern}\\b`, 'i').exec(text);
     if (!m) continue;
     // "on ivory" names the GROUND, not the subject. Without this the subject picker
     // measured ivory against ivory (1.00:1) for a sentence whose subject was Amber.

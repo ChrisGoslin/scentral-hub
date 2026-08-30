@@ -95,11 +95,19 @@ Both colours express the same emotional identity: memory, not novelty; depth, no
 The audit test: *if this element vanished, would the contributor lose information?* Yes → `taupe-ink`. No → `taupe`.
 
 > **Open — this table measures a ground the app does not currently render (flagged
-> 2026-08-19, not resolved).** `:root` in `app/globals.css` sets `--color-bg: #1f1d1a`
-> and `--color-text: var(--ivory)`, and `app/layout.tsx` hardcodes `data-theme="dark"`.
+> 2026-08-19, not resolved).** `app/layout.tsx:88` hardcodes `data-theme="dark"`, and
+> `app/globals.css:89-90` overrides `--color-bg` to **`#1d1b18`** under
+> `[data-theme="dark"]`. That override — not the `:root` value `#1f1d1a` on line 15, and
+> not the `--pig-ground-dark` token — is the background the app actually paints.
 > **The shipped default ground is the dark evening bench, not ivory.** Muted text is
 > derived as `--color-text-muted: color-mix(in srgb, var(--taupe) 74%, var(--ivory))`
-> → `#989188`, which on its actual shipped ground measures **5.40:1 and passes AA**.
+> → `#989188`, which on that shipped ground measures **5.52:1 and passes AA**.
+>
+> **Corrected twice, 2026-08-30.** This figure was 5.38:1, then 5.40:1, and both were
+> wrong. The 5.40 came from measuring against `:root` `#1f1d1a` instead of the
+> `[data-theme="dark"]` override that actually ships — in a sentence whose entire point
+> is "its actual shipped ground". A token declared in a doc is not evidence of what
+> renders; only the cascade that wins is.
 > Lightening taupe toward ivory is the correct direction for a dark ground, so this is
 > not a shipped accessibility defect. It is a **doc-scope defect**: everything in this
 > section is measured on ivory, which is the design surface, not the running app. Also
