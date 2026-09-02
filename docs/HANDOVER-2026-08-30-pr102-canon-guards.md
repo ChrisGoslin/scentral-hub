@@ -27,17 +27,19 @@ that the pre-push hook's documented install silently deleted every gate it carri
   `claude/canon-duplication-docs-audit-lzp95f`, PR #102 open, mergeable.
 - **Vercel ×3: green. CodeRabbit: skipped** (repo under 10 stars — a skip reported as
   success, not a review).
-- **`claude-review`: FAILING, not this PR's.** Empty `ANTHROPIC_API_KEY` secret; fails
-  identically on #98/#99/#101; documented in
-  `docs/SESSION-BACKLOG-2026-08-22-ci-and-e2e-followups.md` item 4; not a required check.
-  Needs a repo secret only Christopher can set.
+- **`claude-review`: PASSING as of `2d4d68d`.** It failed on every earlier commit on an
+  empty `ANTHROPIC_API_KEY`; it now succeeds. Nothing in this PR fixed it, so the secret
+  was presumably set outside this branch. Treat the earlier "blocks every PR" note in
+  `docs/SESSION-BACKLOG-2026-08-22-ci-and-e2e-followups.md` item 4 as resolved-unverified —
+  the secret's state in repo settings was never inspected directly.
 - **`SonarCloud Code Analysis`: FAILING — D Reliability Rating on New Code (required ≥A).**
   First appeared on `b0e68a6`, still failing on `0975e4b`. This one **is** this PR's code.
   See §5 — it is the main unresolved item.
-- **UNCOMMITTED: `scripts/check-contrast-claims.mjs`** carries partial Sonar regex work.
-  Verified behaviour-preserving (all guards still pass, three planted-violation cases
-  still blocked) but it does **not** clear the rule locally. Committing it is a judgment
-  call, not an obvious win.
+- **The partial Sonar regex work is COMMITTED**, in `2d4d68d` alongside this handover —
+  not sitting in the working tree. (This section originally said "UNCOMMITTED" and told
+  the next agent to decide whether to commit it, which was already false when written;
+  corrected in round 7.) It is behaviour-preserving and verified, but it does **not**
+  clear the rule locally. There is nothing to decide about it — only the gate to clear.
 - The 2026-08-24 canon diff-review doc was never landed — `main` deleted the duplicate
   design docs via #98 before it could be useful. Not blocking anything.
 
@@ -127,9 +129,9 @@ from declared token rather than cascade).
   Depends on either reading the real SonarCloud findings (needs egress, or Christopher
   pasting them) or establishing whether the local `recommended` profile matches the
   project's actual quality profile.
-- **Uncommitted regex work** — behaviour-verified, does not clear the gate. Commit or
-  discard is undecided.
-- **`ANTHROPIC_API_KEY`** — empty repo secret, blocks `claude-review` on every PR.
+- **The regex work is committed and does not clear the gate.** No decision pending on
+  it; it stays until the real findings say otherwise.
+- ~~`ANTHROPIC_API_KEY`~~ — `claude-review` went green on `2d4d68d`. No longer open.
 - **Three Vercel projects build from this repo** (`scentral-hub`, `scentral`,
   `nota-deploy-0a1b96c`). `CLAUDE.md` §1 records `scentral` as archived read-only after
   the Phase 6 consolidation, so at least one is a leftover. Flagged, never investigated.
@@ -169,13 +171,13 @@ recomputes every published WCAG contrast ratio in `DESIGN.md` and
 truth for the pre-push hook and in parity with the CI workflow.
 
 An automated reviewer has produced six rounds of findings; all were valid and all were
-fixed. The branch is green except two checks: `claude-review` (empty repo secret, fails
-on every PR, not this branch's problem) and `SonarCloud` (D Reliability Rating, which
-*is* this branch's code and is not resolved). The failing Sonar rule has been reproduced
+fixed. The branch is green except `SonarCloud` (D Reliability Rating, which *is* this branch's
+code and is not resolved). `claude-review` was failing on an empty repo secret and is now
+passing. The failing Sonar rule has been reproduced
 locally as `sonarjs/super-linear-regex` but the last two findings resist every rewrite
 attempted, and it is unconfirmed whether the local rule profile matches the project's
-real one. There are uncommitted changes in `scripts/check-contrast-claims.mjs` from that
-attempt — verified behaviour-preserving, but they do not clear the gate.
+real one. The regex changes from that attempt are committed, verified behaviour-preserving, and do
+not clear the gate.
 
 Before responding, read every file listed under "Files and pointers" above. Do not
 summarize, paraphrase, or claim you already have context — actually read each file.

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// pre-push: required
 // Measured-contrast guard (L78).
 //
 // L78 records a published WCAG ratio that was never measured and stayed canon for
@@ -57,6 +58,27 @@ function contrastRatio(foreground, background) {
 const failures = [];
 
 function check(where, label, fg, bg, claimed) {
+  // A gradient ground arrives as an array of stops. One published figure then has to be
+  // the WORST case — the value an implementer can rely on everywhere the gradient runs —
+  // not the midpoint, which is what "5.52:1 on the shipped ground" silently was.
+  if (Array.isArray(bg)) {
+    const ratios = bg.map((stop) => contrastRatio(fg, stop));
+    const worst = Math.min(...ratios);
+    const best = Math.max(...ratios);
+    const claims = Array.isArray(claimed) ? claimed : [claimed];
+    const ok =
+      claims.length === 2
+        ? Math.abs(claims[0] - worst) <= TOLERANCE && Math.abs(claims[1] - best) <= TOLERANCE
+        : Math.abs(claims[0] - worst) <= TOLERANCE;
+    if (!ok) {
+      failures.push(
+        `${where}: ${label} ${fg} claims ${claims.map((c) => c.toFixed(2)).join('–')}:1 against a ` +
+          `gradient ground (${bg.join(' → ')}), but the range is ${worst.toFixed(2)}–${best.toFixed(2)}:1. ` +
+          'A single figure must be the worst case; a range must be both endpoints.'
+      );
+    }
+    return;
+  }
   const actual = contrastRatio(fg, bg);
   if (Math.abs(actual - claimed) > TOLERANCE) {
     failures.push(
@@ -86,13 +108,45 @@ const ivory = groundMatch[1];
 // name's own class, so the engine could split one cell many ways — super-linear
 // backtracking (sonarjs, and the D reliability rating on this PR). Each class here
 // excludes its own terminator, so the match is deterministic.
-const designRow = /^\|([^|`]*)`(#[0-9A-Fa-f]{6})`([^|]*)\|\s*(\d+\.\d+):1/gm;
+const designRow =
+  /^\|([^|`]*)`(#[0-9A-Fa-f]{6})`([^|]*)\|\s*(\d+\.\d+):1\s*\|([^|]*)\|([^|]*)\|/gm;
+
+// A recomputed ratio next to an unchecked verdict is half a guard. Flipping Amber's
+// "AA normal" from fail to pass while leaving 4.47:1 intact used to pass this script
+// clean — and the verdict column, not the number, is what an implementer reads when
+// deciding whether small text in that colour is allowed (found in review, round 7).
+const AA_NORMAL = 4.5;
+const AA_LARGE = 3;
+
+function verdict(cell) {
+  // Cells read "pass", "**fail**", "pass (0.07 margin)". The leading word is the claim.
+  const word = cell.replace(/[*`]/g, '').trim().toLowerCase().split(/[^a-z]/)[0];
+  return word === 'pass' || word === 'fail' ? word : null;
+}
+
+function checkVerdict(where, label, actual, cell, threshold, column) {
+  const claimed = verdict(cell);
+  if (!claimed) {
+    failures.push(`${where}: ${label} has an unreadable "${column}" verdict (${cell.trim()})`);
+    return;
+  }
+  const truth = actual >= threshold ? 'pass' : 'fail';
+  if (claimed !== truth) {
+    failures.push(
+      `${where}: ${label} claims ${column} "${claimed}" but ${actual.toFixed(2)}:1 ` +
+        `${truth === 'pass' ? 'clears' : 'misses'} the ${threshold}:1 threshold — it is a ${truth}`
+    );
+  }
+}
 
 let designRows = 0;
-for (const [, rawName, hex, , claimed] of design.matchAll(designRow)) {
+for (const [, rawName, hex, , claimed, aaNormal, aaLarge] of design.matchAll(designRow)) {
   designRows += 1;
   const name = rawName.replace(/[*|]/g, '').trim();
   check('DESIGN.md', name, hex, ivory, Number.parseFloat(claimed));
+  const actual = contrastRatio(hex, ivory);
+  checkVerdict('DESIGN.md', name, actual, aaNormal, AA_NORMAL, 'AA normal');
+  checkVerdict('DESIGN.md', name, actual, aaLarge, AA_LARGE, 'AA large');
 }
 
 // ---- NOTA-BRAND-UIUX-PACK.md: two grounds, tokens named not inlined --------
@@ -124,10 +178,50 @@ function resolveToken(cell) {
   return pigments.get(word) ?? null;
 }
 
-const packRow = /^\|([^|]+)\|([^|]+)\|\s*([0-9.]+):1[^|]*\|([^|]+)\|\s*([0-9.]+):1[^|]*\|/gm;
+const packRow =
+  /^\|([^|]+)\|([^|]+)\|\s*([0-9.]+):1([^|]*)\|([^|]+)\|\s*([0-9.]+):1([^|]*)\|/gm;
+
+// The pack has no "AA normal"/"AA large" columns — it carries the same verdicts as
+// footnote daggers trailing each ratio, and a dagger is as much an accessibility claim
+// as a column is. Per the pack's own footnotes:
+//   ††, ‡  AA-large only          → 3.0 <= r < 4.5
+//   †      clears AA normal, thin → r >= 4.5
+//   none   clears AA normal       → r >= 4.5
+// Swapping a dagger without touching the number used to pass clean, exactly as the
+// DESIGN.md verdict columns did (found in review, round 7).
+function checkDagger(where, label, actual, marks) {
+  const largeOnly = /††|‡/.test(marks);
+  if (largeOnly) {
+    if (actual >= AA_NORMAL) {
+      failures.push(
+        `${where}: ${label} is marked AA-large-only but ${actual.toFixed(2)}:1 clears ` +
+          `AA normal (${AA_NORMAL}:1) — the marker understates it`
+      );
+    } else if (actual < AA_LARGE) {
+      failures.push(
+        `${where}: ${label} is marked AA-large-only but ${actual.toFixed(2)}:1 misses even ` +
+          `AA large (${AA_LARGE}:1)`
+      );
+    }
+  } else if (actual < AA_NORMAL) {
+    failures.push(
+      `${where}: ${label} carries no AA-large-only marker but ${actual.toFixed(2)}:1 misses ` +
+        `AA normal (${AA_NORMAL}:1) — mark it †† or ‡`
+    );
+  }
+}
 
 let packRows = 0;
-for (const [, role, lightCell, lightRatio, darkCell, darkRatio] of pack.matchAll(packRow)) {
+for (const [
+  ,
+  role,
+  lightCell,
+  lightRatio,
+  lightMarks,
+  darkCell,
+  darkRatio,
+  darkMarks,
+] of pack.matchAll(packRow)) {
   const light = resolveToken(lightCell);
   const dark = resolveToken(darkCell);
   if (!light || !dark) continue; // header/separator rows and prose tables
@@ -135,6 +229,8 @@ for (const [, role, lightCell, lightRatio, darkCell, darkRatio] of pack.matchAll
   const label = role.trim().replace(/`/g, '');
   check('NOTA-BRAND-UIUX-PACK.md (light)', label, light, lightGround, Number.parseFloat(lightRatio));
   check('NOTA-BRAND-UIUX-PACK.md (dark)', label, dark, darkGround, Number.parseFloat(darkRatio));
+  checkDagger('NOTA-BRAND-UIUX-PACK.md (light)', label, contrastRatio(light, lightGround), lightMarks);
+  checkDagger('NOTA-BRAND-UIUX-PACK.md (dark)', label, contrastRatio(dark, darkGround), darkMarks);
 }
 
 // ---- Prose claims: ratios stated in body text, not tables -------------------
@@ -159,13 +255,45 @@ for (const [, role, lightCell, lightRatio, darkCell, darkRatio] of pack.matchAll
 // corrected twice (5.38 → 5.40 → 5.52) and stayed wrong both times, because every check
 // resolved the ground from a declared token instead of the winning rule. A guard that
 // reads what the docs say about the app cannot catch the docs being wrong about the app.
+//
+// And the ground is not one colour. `body` paints a linear-gradient between three
+// stops, so a claim about "the background the app paints" is a RANGE. Resolving it to
+// the middle stop alone was the third correction of the same sentence (5.38 → 5.40 →
+// 5.52, all single values, the last one the midpoint of 5.01–5.89). The recurring error
+// is not any of those numbers; it is measuring against something simpler than what
+// renders. So this returns every stop, and the claim is checked against all of them.
 function shippedDarkGround() {
   const cssPath = join(REPO_ROOT, 'app', 'globals.css');
   if (!existsSync(cssPath)) return null;
   const css = readFileSync(cssPath, 'utf8');
   const block = css.match(/\[data-theme=["']dark["']\]\s*\{([^}]*)\}/);
-  const hex = block?.[1].match(/--color-bg:\s*(#[0-9A-Fa-f]{6})/);
-  return hex ? hex[1].toUpperCase() : null;
+  if (!block) return null;
+
+  // Tokens declared inside the winning [data-theme="dark"] rule.
+  const vars = new Map();
+  for (const [, name, hex] of block[1].matchAll(/(--[a-z-]+):\s*(#[0-9A-Fa-f]{6})/g)) {
+    vars.set(name, hex.toUpperCase());
+  }
+
+  // The base layer of body's background stack — the last comma-separated layer, the
+  // only opaque one. The radial overlays above it are translucent and are NOT modelled;
+  // that makes this range a floor on the uncertainty, which is stated in DESIGN.md.
+  // globals.css declares `body` TWICE at top level. Taking the first match is the same
+  // mistake as reading :root instead of [data-theme="dark"] — the later rule wins — so
+  // scan every body block and keep the last one that actually sets a gradient.
+  let grad = null;
+  for (const [, decls] of css.matchAll(/^body\s*\{([\s\S]*?)\n\}/gm)) {
+    const m = decls.match(/linear-gradient\(([^;]*?)\)\s*;/);
+    if (m) grad = m;
+  }
+  if (!grad) return vars.get('--color-bg') ? [vars.get('--color-bg')] : null;
+
+  const stops = [];
+  for (const [, ref] of grad[1].matchAll(/var\((--[a-z-]+)\)/g)) {
+    const hex = vars.get(ref);
+    if (hex) stops.push(hex);
+  }
+  return stops.length > 0 ? stops : null;
 }
 const SHIPPED_DARK = shippedDarkGround();
 
@@ -179,7 +307,10 @@ const SHIPPED_DARK = shippedDarkGround();
 const GROUND_WORDS = [
   // "shipped"/"renders"/"paints" means the live cascade; everything else naming dark
   // means the design token. Longest/most specific first.
-  [/\bshipped ground\b|\bactually paints\b|\brenders\b/i, () => SHIPPED_DARK ?? darkGround],
+  [
+    /\bshipped ground\b|\bactually paints\b|\brenders\b|\bpainted gradient\b/i,
+    () => SHIPPED_DARK ?? darkGround,
+  ],
   [/\bevening bench\b|\bdark ground\b|\bon dark\b|#1F1D1A/i, () => darkGround],
   [/\bivory\b|\blight ground\b|#F7F4EE/i, () => lightGround],
 ];
@@ -274,14 +405,22 @@ function checkUnit(unit, source, inheritedGround, onAmbiguous) {
 
 
 
-  if (hexes.length !== 1 || ratios.length !== 1) {
+  // Ground first: against a gradient ground a claim is legitimately TWO numbers (the
+  // endpoints of the range), so the ambiguity gate has to know the ground before it can
+  // judge how many ratios are too many.
+  const ground = hexes.length === 1 ? groundFor(unit, hexes[0]) ?? inheritedGround : null;
+  const gradient = Array.isArray(ground);
+  const ratioLimit = gradient ? 2 : 1;
+
+  if (gradient && ratios.length === 2) {
+    // fine: the endpoints of the range
+  } else if (hexes.length !== 1 || ratios.length !== 1) {
     onAmbiguous(hexes.length, ratios.length);
     return;
   }
 
   const [hex] = hexes;
-  const [claimed] = ratios;
-  const ground = groundFor(unit, hex) ?? inheritedGround;
+  const claimed = gradient ? ratios : ratios[0];
 
   if (!ground) {
     failures.push(

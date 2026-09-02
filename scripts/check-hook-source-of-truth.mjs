@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// pre-push: required
 // Hook source-of-truth guard.
 //
 // `.husky/pre-push` is committed and is the only copy of the hook. Until 2026-08-24
@@ -57,6 +58,20 @@ if (!existsSync(hookPath)) {
 // Neither side is a hardcoded list. A fixed array here would be a third copy of the
 // truth, which is the defect this whole guard exists to remove — so the hook and the
 // workflow check each other. Adding a guard therefore means editing both, deliberately.
+//
+// But parity alone only catches ASYMMETRIC drift. Delete a check from the hook AND the
+// workflow in one commit and the two sets stay equal: this guard reported six matching
+// checks and exited 0 while both enforcement paths had dropped a gate (found in review,
+// round 7). Comparing two copies can never notice what is missing from both — the same
+// blindness as L78, where two forks of DESIGN.md agreed on a wrong ratio and every
+// reconciliation preserved it.
+//
+// So there is a third input, and it is still not a list in this file: each
+// scripts/check-*.mjs declares its own status on line 1 or 2 as
+// `// pre-push: required` or `// pre-push: excluded — <reason>`. Every `required`
+// script must appear in both the hook and the workflow. The truth stays in the script
+// it describes, and dropping a gate now means editing the guarded script itself, where
+// it is visible in the diff rather than inferable from an absence.
 const WORKFLOW = join(REPO_ROOT, '.github', 'workflows', 'skill-integrity.yml');
 
 function checksIn(path) {
@@ -75,8 +90,48 @@ function checksIn(path) {
   );
 }
 
+// Declared status of every guard script, read from the scripts themselves.
+function declaredChecks() {
+  const dir = join(REPO_ROOT, 'scripts');
+  const required = new Set();
+  const undeclared = [];
+  for (const entry of readdirSync(dir)) {
+    if (!/^check-[a-z-]+\.mjs$/.test(entry)) continue;
+    const head = readFileSync(join(dir, entry), 'utf8').split('\n').slice(0, 3).join('\n');
+    const m = head.match(/^\/\/ pre-push: (required|excluded)\b/m);
+    if (!m) undeclared.push(entry);
+    else if (m[1] === 'required') required.add(entry);
+  }
+  return { required, undeclared };
+}
+
+const { required: requiredChecks, undeclared } = declaredChecks();
+if (undeclared.length > 0) {
+  failures.push(
+    `these guard scripts declare no pre-push status: ${undeclared.sort().join(', ')} — add ` +
+      "'// pre-push: required' or '// pre-push: excluded — <reason>' as the first comment " +
+      'line. Without it a script can be dropped from both the hook and CI without this ' +
+      'guard noticing.'
+  );
+}
+
 const hookChecks = existsSync(hookPath) ? checksIn(hookPath) : null;
 const ciChecks = checksIn(WORKFLOW);
+
+for (const [label, set] of [
+  ['.husky/pre-push', hookChecks],
+  ['.github/workflows/skill-integrity.yml', ciChecks],
+]) {
+  if (!set) continue;
+  const missing = [...requiredChecks].filter((c) => !set.has(c)).sort();
+  if (missing.length > 0) {
+    failures.push(
+      `${label} does not run: ${missing.join(', ')} — each declares '// pre-push: required'. ` +
+        'Removing a gate from both enforcement paths at once keeps them in parity while ' +
+        'turning the gate off; the declaration in the script is what makes that visible.'
+    );
+  }
+}
 
 if (!ciChecks) {
   failures.push(
@@ -167,14 +222,27 @@ function copiesOverHook(line) {
     .some((segment) => segmentCopiesOverHook(segment.trim()));
 }
 
-function segmentCopiesOverHook(segment) {
-  if (!/^cp\b/.test(segment)) return false;
-  const dest = segment.trim().split(/\s+/).pop() ?? '';
-  const normalised = dest
+function normaliseDest(raw) {
+  return raw
     .replace(/^["']|["']$/g, '') // surrounding quotes
     .replace(/^\.\//, '') // leading ./
     .replace(/\/+/g, '/'); // duplicated slashes
-  return HOOK_DESTINATIONS.has(normalised);
+}
+
+// `cp` is not the only way to write a file over another. `install`, `mv`, a symlink,
+// and a redirect all replace the committed hook just as completely — matching only the
+// literal command that caused the original incident would guard the anecdote instead of
+// the shape. Found by testing `install -m755 x .husky/pre-push` against this guard and
+// watching it pass.
+const OVERWRITE_COMMANDS = /^(cp|install|mv|ln|rsync|cat|tee|curl|wget)\b/;
+
+function segmentCopiesOverHook(segment) {
+  // A redirect writes the destination without naming it as an argument.
+  const redirect = segment.match(/>{1,2}\s*(\S+)\s*$/);
+  if (redirect && HOOK_DESTINATIONS.has(normaliseDest(redirect[1]))) return true;
+  if (!OVERWRITE_COMMANDS.test(segment)) return false;
+  const dest = segment.trim().split(/\s+/).pop() ?? '';
+  return HOOK_DESTINATIONS.has(normaliseDest(dest));
 }
 
 walk(REPO_ROOT, (full) => {
