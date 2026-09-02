@@ -1,3 +1,4 @@
+// pre-push: required
 import { readFile } from 'node:fs/promises';
 
 const canonicalPath = 'docs/todo/homepage-follow-ups-2026-07-26.md';

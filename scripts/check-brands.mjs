@@ -1,3 +1,4 @@
+// pre-push: excluded — needs SUPABASE_SERVICE_KEY and network; cannot run offline in a hook.
 import dotenv from 'dotenv'
 import { createClient } from '@supabase/supabase-js'
 dotenv.config({ path: '.env.local' })
