@@ -28,7 +28,7 @@
   ".agents/skills/testing-framework/SKILL.md": "372d086417d233aa9212c0f297b5972f35298cc3c5850093bcbdabe7804e1740",
   ".agents/skills/vercel-domain-tls-workflow/SKILL.md": "06a97c758aca21db5585d4e2fa2d9afaa66558e6b7fe0012e7a787bdf75e8a25",
   ".agents/skills/verify-cli-claims/SKILL.md": "801b7eabeec519bfbdbff136d3d941ab500aa9602ce2d876da2550749c4a1013",
-  ".claude/skills/alignment-sweep/SKILL.md": "77575a8835f1d1f41e36da2c5a5417ddedd3d3d658de500a73620f93d4af880e",
+  ".claude/skills/alignment-sweep/SKILL.md": "b5c189077eabc583d8c864781c72c293a24f4a97f89644bde74f80e1bc079ebf",
   ".claude/skills/branch-hygiene/SKILL.md": "c73a69f42a984093f123f404edccbb49b3cc92acf8e3d1d422745e33237cf22a",
   ".claude/skills/brand-terminology-audit/SKILL.md": "6f90abaa41d39cb6f0957bfa8e1d45628830b81947a328e68e62c830bd4a6fd4",
   ".claude/skills/canon-slop-audit/SKILL.md": "6cd2dcf55ef3715127323dcc9d7adb691f2d8db7abc993ade60d0e6f03c04c4e",
