@@ -78,7 +78,7 @@ export default function LexiconPage() {
 
   return (
     <div className="min-h-[100dvh] bg-stone-50 text-stone-900">
-      <main className="max-w-4xl mx-auto px-6 py-16 space-y-16">
+      <section className="max-w-4xl mx-auto px-6 py-16 space-y-16">
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-stone-200 pb-12">
           <div className="space-y-3">
             <h1 className="editorial-title text-5xl">The Lexicon</h1>
@@ -189,7 +189,7 @@ export default function LexiconPage() {
             ))
           )}
         </div>
-      </main>
+      </section>
       
       <footer className="py-20 text-center border-t border-stone-200 mt-20">
         <p className="text-stone-300 text-[10px] uppercase tracking-[0.4em] font-bold">

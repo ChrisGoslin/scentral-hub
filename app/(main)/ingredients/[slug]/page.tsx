@@ -162,7 +162,7 @@ export default async function IngredientsPage({ params }: Props) {
   const description = FAMILY_DESCRIPTIONS[familyName] ?? 'Explore this scent family.'
 
   return (
-    <main style={{ minHeight: '100vh', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 96px)' }}>
+    <div style={{ minHeight: '100vh', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 96px)' }}>
       {/* Hero */}
       <section style={{ padding: '48px 16px 32px' }}>
         <h1
@@ -278,6 +278,6 @@ export default async function IngredientsPage({ params }: Props) {
           </p>
         </section>
       )}
-    </main>
+    </div>
   )
 }

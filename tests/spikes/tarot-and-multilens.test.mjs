@@ -3,12 +3,10 @@ import assert from 'node:assert/strict'
 
 import {
   divineTarotPersona,
-  TAROT_SOMMELIER_DECK,
 } from '../../lib/personas-tarot.ts'
 import {
   filterAndRankShelfBottles,
   parseSupplierOrderText,
-  CATEGORY_LENS_CONFIG,
 } from '../../lib/shelf-multi-lens.ts'
 
 test('divineTarotPersona accurately resolves Tarot Sommelier Archetype', () => {

@@ -23,7 +23,7 @@ export default function Home() {
   const yBg = useTransform(scrollYProgress, [0, 1], [0, 100])
 
   return (
-    <main className={styles.mainWrapper} ref={containerRef}>
+    <div className={styles.mainWrapper} ref={containerRef}>
       
       {/* 
         SECTION 1: THE HOOK 
@@ -90,6 +90,6 @@ export default function Home() {
         </div>
       </section>
       
-    </main>
+    </div>
   )
 }

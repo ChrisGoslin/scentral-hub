@@ -26,7 +26,7 @@ export default function LabsExperiencePage() {
   }
 
   return (
-    <main
+    <div
       style={{
         minHeight: '100vh',
         background: '#1A1208',
@@ -109,6 +109,6 @@ export default function LabsExperiencePage() {
           <SynesthesiaMemoryWidget />
         </section>
       </div>
-    </main>
+    </div>
   )
 }

@@ -5,7 +5,6 @@
  */
 
 import { DetectedFragranceCandidate } from './scan-to-shelf'
-import { simulateEvaporation } from './evaporation-simulator'
 
 export interface WeatherCondition {
   tempC: number

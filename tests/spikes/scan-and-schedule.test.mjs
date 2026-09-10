@@ -14,7 +14,6 @@ import {
 } from '../../lib/spikes/evaporation-simulator.ts'
 import {
   updateEloRatings,
-  calculateExpectedScore,
 } from '../../lib/spikes/elo-duel.ts'
 
 test('stringSimilarity correctly scores exact and fuzzy strings', () => {

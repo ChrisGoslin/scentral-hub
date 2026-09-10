@@ -212,14 +212,27 @@ skills tree containing it — a skill declaring scope it cannot reach is a HIGH
 finding regardless of tree parity.
 
 ### Pass 6 addendum — lesson-ID integrity (L47)
+For `claude-global`'s `LESSONS.md`, don't hand-roll a grep — a hand-rolled pattern
+drifts out of sync with the file's real shape and silently reports a false
+all-clear (confirmed 2026-09-06: an old `^### L[0-9]+`-style pattern, and a
+narrower `^[0-9]+\. \`LOG-` pattern, both return 0 against the live table-shaped
+file while the real checker below correctly finds 17 landed IDs). Run the real,
+maintained script instead:
 ```bash
-u=$(grep -oE "^### L[0-9]+" docs/lessons.md | sort -u | wc -l)
-t=$(grep -cE "^### L[0-9]+" docs/lessons.md)
-[ "$u" -eq "$t" ] || echo "HIGH: $((t-u)) duplicate lesson IDs"
+bash scripts/check-lesson-id-collision.sh
 ```
-Unique lesson IDs must equal total lesson headings. On collision, renumber the
-**uncited** series only — check citations first with
-`grep -rnoE "\bL[0-9]+\b" docs .claude .agents .gemini | grep -v docs/lessons.md`.
+It already handles both the table format (`| LOG-N |`) and the legacy
+numbered-list format (`` N. `LOG-N` ``), and exits non-zero if any draft/doc names
+an unlanded `LOG-N`. Quote this script's actual output as the finding — never a
+hand-rolled pattern that may not match the current file's shape.
+
+For repos that use a project-local `docs/lessons.md` (household-finance,
+abundance) instead of `LESSONS.md`: no equivalent checker script exists yet.
+As of the 2026-09-01 sweep neither repo even has a `docs/lessons.md` file (see
+the scope-correction note below) — treat that absence itself as the finding
+rather than running a grep against a file that isn't there. If one of those
+files reappears, flag lesson-ID uniqueness by eye until a script is written for
+its actual heading format.
 
 ### Pass 5 addendum — the second global-instruction surface (GL-8)
 Global instructions live on two independently-drifting surfaces: files under

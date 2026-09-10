@@ -3,7 +3,6 @@ import assert from 'node:assert/strict'
 
 import {
   calculateAuraResponse,
-  AURA_STATE_MATRIX,
 } from '../../lib/aura-companion.ts'
 
 test('calculateAuraResponse transitions states accurately across interactions', () => {

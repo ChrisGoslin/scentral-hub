@@ -5,18 +5,10 @@
 import { parseVanityShelfVision } from '../lib/spikes/scan-to-shelf'
 import { generateSpritzSchedule } from '../lib/spikes/spritz-schedule'
 import { divineTarotPersona } from '../lib/personas-tarot'
-import { filterAndRankShelfBottles, parseSupplierOrderText } from '../lib/shelf-multi-lens'
 import { resolveConciergeQuery, recommendPartnerGift, generateInsuranceValuation } from '../lib/scent-concierge'
-import { calculateDecantSplit, generateAwinAffiliateUrl } from '../lib/trails-and-commerce'
+import { calculateDecantSplit } from '../lib/trails-and-commerce'
 import {
-  detectPruningCandidates,
-  generateSeasonalRotationAdvisory,
   decodeBatchCode,
-  evaluateSunlightUVExposure,
-  evaluateLayeringHarmony,
-  checkOlfactoryFatigueRisk,
-  calculateScentBridge,
-  calculateNoseprintRadarAffinities,
   planTravelCapsule,
 } from '../lib/portfolio-innovations-matrix'
 

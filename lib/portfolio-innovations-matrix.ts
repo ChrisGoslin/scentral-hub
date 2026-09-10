@@ -5,7 +5,7 @@
  */
 
 import { OlfactoryFamily } from './spikes/scan-to-shelf'
-import { ExtendedShelfBottle, ShelfCategoryLens } from './shelf-multi-lens'
+import { ExtendedShelfBottle } from './shelf-multi-lens'
 
 // -------------------------------------------------------------
 // PILLAR 1: Multi-Lens Virtual Shelf & Smart Drag-and-Drop (#1 - #10)

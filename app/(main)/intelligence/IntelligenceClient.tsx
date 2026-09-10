@@ -564,7 +564,7 @@ export default function IntelligenceClient({ fragrances }: IntelligenceClientPro
         <p className="text-sm text-[var(--text-muted)] font-light mt-2">Surface deep patterns across your collection.</p>
       </header>
 
-      <main className="px-6 py-10 space-y-16">
+      <div className="px-6 py-10 space-y-16">
         
         {/* Radar & Distro Grid */}
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -628,7 +628,7 @@ export default function IntelligenceClient({ fragrances }: IntelligenceClientPro
           <DailyBrief />
         </section>
 
-      </main>
+      </div>
     </div>
   )
 }
