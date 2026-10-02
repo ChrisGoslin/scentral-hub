@@ -71,9 +71,11 @@ function check(where, label, fg, bg, claimed) {
         ? Math.abs(claims[0] - worst) <= TOLERANCE && Math.abs(claims[1] - best) <= TOLERANCE
         : Math.abs(claims[0] - worst) <= TOLERANCE;
     if (!ok) {
+      const worstGround = bg[ratios.indexOf(worst)];
       failures.push(
-        `${where}: ${label} ${fg} claims ${claims.map((c) => c.toFixed(2)).join('–')}:1 against a ` +
-          `gradient ground (${bg.join(' → ')}), but the range is ${worst.toFixed(2)}–${best.toFixed(2)}:1. ` +
+        `${where}: ${label} ${fg} claims ${claims.map((c) => c.toFixed(2)).join('–')}:1 against the ` +
+          `composited ground (${bg.length} layer combinations), but the range is ` +
+          `${worst.toFixed(2)}–${best.toFixed(2)}:1 — worst on ${worstGround}. ` +
           'A single figure must be the worst case; a range must be both endpoints.'
       );
     }
@@ -256,12 +258,25 @@ for (const [
 // resolved the ground from a declared token instead of the winning rule. A guard that
 // reads what the docs say about the app cannot catch the docs being wrong about the app.
 //
-// And the ground is not one colour. `body` paints a linear-gradient between three
-// stops, so a claim about "the background the app paints" is a RANGE. Resolving it to
-// the middle stop alone was the third correction of the same sentence (5.38 → 5.40 →
-// 5.52, all single values, the last one the midpoint of 5.01–5.89). The recurring error
-// is not any of those numbers; it is measuring against something simpler than what
-// renders. So this returns every stop, and the claim is checked against all of them.
+// And the ground is not one colour, nor one layer. `body` paints FOUR layers: an opaque
+// linear-gradient base of three stops, and three translucent radial overlays above it.
+// Each simplification of that was its own wrong answer for the same sentence:
+//
+//   5.38 / 5.40  a token declared in a doc            (:root, --pig-ground-dark)
+//   5.52         the winning declaration, alone       ([data-theme="dark"] --color-bg)
+//   5.01         the linear base, overlays ignored    (this function, one round ago)
+//
+// Four corrections, one error: measuring against something simpler than what renders.
+// Reading the cascade correctly was not enough — the cascade produces a COMPOSITE, and
+// an opaque layer under three translucent ones is not what a reader's eye lands on.
+// So this composites every overlay over every base stop and returns the whole set; the
+// worst member of that set is what a single published figure has to be.
+//
+// The overlays are radial with a `transparent` falloff, so full strength applies only
+// near each centre. That is a real region of the page, not a hypothetical, so it counts.
+// What is still NOT modelled: overlay-on-overlay where two radii intersect, and
+// `body::before`. Both can only darken or lighten further, so the figure here remains a
+// bound rather than a proof — stated in DESIGN.md as such.
 function shippedDarkGround() {
   const cssPath = join(REPO_ROOT, 'app', 'globals.css');
   if (!existsSync(cssPath)) return null;
@@ -293,7 +308,59 @@ function shippedDarkGround() {
     const hex = vars.get(ref);
     if (hex) stops.push(hex);
   }
-  return stops.length > 0 ? stops : null;
+  if (stops.length === 0) return null;
+
+  // Tokens an overlay may reference are not all redeclared under [data-theme="dark"]
+  // (--olive lives in :root and is not overridden), so fall back to the root block.
+  const rootBlock = css.match(/:root\s*\{([\s\S]*?)\n\}/);
+  const rootVars = new Map();
+  if (rootBlock) {
+    for (const [, name, hex] of rootBlock[1].matchAll(/(--[a-z-]+):\s*(#[0-9A-Fa-f]{6})/g)) {
+      rootVars.set(name, hex.toUpperCase());
+    }
+  }
+  const resolveVar = (name) => vars.get(name) ?? rootVars.get(name) ?? null;
+
+  // Each radial layer contributes one (colour, alpha) pair: either a color-mix of a
+  // token toward transparent, or an rgba() literal.
+  const overlays = [];
+  for (const [, body] of grad.input.matchAll(/radial-gradient\(([^;]*?)\)\s*(?:,|;)/g)) {
+    const mix = body.match(
+      /color-mix\(\s*in\s+srgb\s*,\s*var\((--[a-z-]+)\)\s+([\d.]+)%\s*,\s*transparent\s*\)/
+    );
+    if (mix) {
+      const hex = resolveVar(mix[1]);
+      if (hex) overlays.push([hex, Number.parseFloat(mix[2]) / 100]);
+      continue;
+    }
+    const rgba = body.match(/rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)\s*(?:[,/]\s*([\d.]+))?\s*\)/);
+    if (rgba) {
+      const hex =
+        '#' +
+        [1, 2, 3].map((i) => Number(rgba[i]).toString(16).padStart(2, '0')).join('').toUpperCase();
+      overlays.push([hex, rgba[4] === undefined ? 1 : Number.parseFloat(rgba[4])]);
+    }
+  }
+
+  const over = (fg, bg, a) =>
+    '#' +
+    [1, 3, 5]
+      .map((i) =>
+        Math.round(
+          Number.parseInt(fg.slice(i, i + 2), 16) * a +
+            Number.parseInt(bg.slice(i, i + 2), 16) * (1 - a)
+        )
+          .toString(16)
+          .padStart(2, '0')
+      )
+      .join('')
+      .toUpperCase();
+
+  const grounds = new Set(stops);
+  for (const base of stops) {
+    for (const [hex, alpha] of overlays) grounds.add(over(hex, base, alpha));
+  }
+  return [...grounds];
 }
 const SHIPPED_DARK = shippedDarkGround();
 
@@ -358,6 +425,10 @@ function namesIn(text) {
 // greppable rather than inferred.
 const RETIRED_MARKER = /<!--\s*contrast:retired\s*-->/;
 
+// Line-scoped, unlike RETIRED_MARKER which is block-scoped: a continuation is one
+// sentence carrying on from a checked claim, not a whole passage to exempt.
+const CONTINUATION_MARKER = /<!--\s*contrast:continuation\s*-->/;
+
 // A threshold is not a claim: "must clear 4.5:1" states a requirement about any token,
 // not a measurement of one. Checking it against a resolved name would invent a defect.
 const THRESHOLD_CONTEXT =
@@ -399,7 +470,26 @@ function checkUnit(unit, source, inheritedGround, onAmbiguous) {
     // must name its own subject; where canon prose did not, the prose was made explicit
     // rather than the guess made cleverer.
     const found = namesIn(unit);
-    if (found.length === 0) return;
+    if (found.length === 0) {
+      // A ratio with no resolvable subject used to be dropped SILENTLY, and that hole
+      // swallowed a real defect twice: once when a two-number range hit a non-gradient
+      // ground, and again when rewriting DESIGN.md's own correction moved `#989188` into
+      // the preceding sentence — a planted 5.01 then passed clean. "Cannot check" is not
+      // "nothing to check"; it is the one outcome a guard must never report as success.
+      //
+      // Measured before making it loud: across both documents exactly ONE passage is a
+      // genuine continuation of an already-stated claim, so this needs an escape, not a
+      // tolerance. The escape is explicit and greppable, like contrast:retired — a
+      // heuristic here would be the fourth inferred exemption to be evaded.
+      if (!CONTINUATION_MARKER.test(unit)) {
+        failures.push(
+          `${source} (prose): "${unit.trim().slice(0, 80)}…" states a ratio but names no ` +
+            'colour or token, so it cannot be checked. Name the subject, or mark the line ' +
+            '<!-- contrast:continuation --> if it discusses a figure stated elsewhere.'
+        );
+      }
+      return;
+    }
     hexes.push(tokenNames.get(found[0].name));
   }
 

@@ -100,24 +100,45 @@ The audit test: *if this element vanished, would the contributor lose informatio
 > `--pig-ground-dark` token. **The shipped default ground is the dark evening bench, not
 > ivory.**
 >
-> That ground is not one colour. `app/globals.css:163-173` paints `body` as four
-> layers, the opaque base being
+> That ground is neither one colour nor one layer. `app/globals.css:163-173` paints `body`
+> as four layers: an opaque base
 > `linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--color-bg) 42%, var(--bg-gradient-end) 100%)`
-> — under `[data-theme="dark"]`, `#27231F` → `#1D1B18` → `#171411`. Muted text is derived
-> as `--color-text-muted: color-mix(in srgb, var(--taupe) 74%, var(--ivory))` → `#989188`,
-> which across that painted gradient measures **5.01:1 at worst, rising to 5.89:1** — it clears AA
-> normal everywhere the gradient runs. Quote the worst case, not the midpoint. Three
-> translucent radial overlays sit above this base and are not modelled, so treat 5.01 as a
-> floor on the uncertainty rather than a proven minimum.
+> — under `[data-theme="dark"]`, `#27231F` → `#1D1B18` → `#171411` — and above it three
+> translucent radial overlays (olive at 22%, `rgba(185,138,88,0.16)`, `rgba(72,58,41,0.58)`),
+> each at full strength near its own centre and fading to transparent.
 >
-> **Corrected three times, 2026-08-30.** 5.38:1, then 5.40:1, then 5.52:1 — each wrong,
-> and each wrong the same way: measured against something simpler than what renders. 5.40
-> came from `:root` `#1f1d1a` instead of the `[data-theme="dark"]` override; 5.52 came
-> from that override alone, which is only the gradient's middle stop. The lesson is not
-> any of the three numbers. A token declared in a doc is not evidence of what renders,
-> and neither is a single winning declaration when the property is a gradient — only the
-> full painted result is. `scripts/check-contrast-claims.mjs` now resolves this ground
-> from the cascade and requires the worst case, so a fourth recurrence fails the push.
+> Muted text is derived as `--color-text-muted: color-mix(in srgb, var(--taupe) 74%, var(--ivory))`.
+> Composited over every one of those layer combinations, `#989188` measures
+> **3.94:1 at worst, rising to 5.89:1 against the painted gradient**.
+>
+> **This is below AA normal, and it is a live defect, not a doc-scope one.** Where the
+> amber overlay is near full strength the ground reaches `#3E3328` and muted body text
+> sits at 3.94:1 <!-- contrast:continuation --> — under the 4.5:1 floor this document's own §2 rule sets for anything
+> carrying information. The other two overlay regions are also below it (both between 4
+> and 4.2; run `node scripts/check-contrast-claims.mjs` for the per-layer figures rather
+> than copying them into prose that then has to be kept true).
+> Muted text is AA-large-only in the overlay regions as currently shipped. No remedy is
+> proposed here: deriving a lighter `--color-text-muted` is the obvious direction but it
+> is a product decision and must be measured, not assumed. **Open.**
+>
+> Still unmodelled, and therefore why 3.94 is a bound rather than a proof: overlay-on-overlay
+> where two radii intersect, and `body::before`. Both can only move the figure further.
+>
+> **Corrected four times.** 5.38 → 5.40 → 5.52 → 5.01 → **3.94**. Every one of them was
+> wrong the same way — measured against something simpler than what renders:
+>
+> | figure | measured against | what it missed |
+> |---|---|---|
+> | 5.38 / 5.40 | a token a doc declared | the cascade |
+> | 5.52 | the winning `[data-theme="dark"]` declaration | that the property is a gradient |
+> | 5.01 | the opaque linear base | the three translucent layers above it |
+> | **3.94** | every composited layer combination | overlay intersections, `::before` (bounded) |
+>
+> Reading the cascade correctly was not enough, because the cascade produces a composite.
+> `scripts/check-contrast-claims.mjs` now composites the overlays and requires any single
+> published figure to be the worst member of the set, so a fifth recurrence fails the push.
+> Each of the four was caught by review, not by the guard that existed at the time — which
+> is the actual lesson, recorded in `docs/lessons.md` L82.
 > Lightening taupe toward ivory is the correct direction for a dark ground, so this is
 > not a shipped accessibility defect. It is a **doc-scope defect**: everything in this
 > section is measured on ivory, which is the design surface, not the running app. Also
