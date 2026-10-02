@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// pre-push: required
 // Canon uniqueness guard (L77).
 //
 // Skills, AGENTS.md, and handovers cite canon by bare filename — "see DESIGN.md",

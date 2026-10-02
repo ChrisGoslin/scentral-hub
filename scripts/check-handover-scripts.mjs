@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// pre-push: required
 // Fails if any docs/HANDOVER-*.md references an `npm run <script>` that does
 // not exist in package.json. Built after a 2026-08-18 session's handover
 // cited `npm run test:spikes` with a claimed "26/26 passing" result — the

@@ -57,6 +57,7 @@ Do not use amber as a large background, standard button colour, or gamification 
 
 ### Measured contrast on ivory `#F7F4EE`
 
+> <!-- contrast:retired --> The figures quoted below are retired values being retracted, not claims.
 > **Re-measured 2026-08-19** with the WCAG 2.x relative-luminance formula, all eight
 > tokens recomputed from hex in one pass. Seven matched the previous table exactly.
 > **Taupe did not: the long-standing 10.35:1 figure is wrong — the true ratio is
@@ -80,13 +81,13 @@ normal text, but only just — and they are close enough to each other that the 
 between them is a real accessibility decision, not a stylistic one:
 
 - **`taupe`** — atmospheric role: hairlines, borders, archive spine, anatomy line work,
-  marginal annotation, and large or non-critical text. At 4.57:1 it clears AA normal by
+  marginal annotation, and large or non-critical text. Taupe at 4.57:1 on ivory clears AA normal by
   **0.07** — effectively no headroom, and the 2.8% grain multiply consumes what little
   there is. Do not use it for small text that carries information.
 - **`taupe-ink`** — **the load-bearing taupe text token.** Memory, metadata, historical
   information, specimen keys, timestamps. `oklch(0.5316 0.0263 75.2deg)` — identical
   chroma and hue to `taupe`, with lightness reduced in OKLCH. The same aged pigment at
-  deeper concentration, not a sterile gray. 4.82:1 leaves the headroom the grain
+  deeper concentration, not a sterile gray. Taupe ink at 4.82:1 on ivory leaves the headroom the grain
   multiply needs.
 
 Both colours express the same emotional identity: memory, not novelty; depth, not brightness.
@@ -94,11 +95,50 @@ Both colours express the same emotional identity: memory, not novelty; depth, no
 The audit test: *if this element vanished, would the contributor lose information?* Yes → `taupe-ink`. No → `taupe`.
 
 > **Open — this table measures a ground the app does not currently render (flagged
-> 2026-08-19, not resolved).** `:root` in `app/globals.css` sets `--color-bg: #1f1d1a`
-> and `--color-text: var(--ivory)`, and `app/layout.tsx` hardcodes `data-theme="dark"`.
-> **The shipped default ground is the dark evening bench, not ivory.** Muted text is
-> derived as `--color-text-muted: color-mix(in srgb, var(--taupe) 74%, var(--ivory))`
-> → `#989188`, which on its actual shipped ground measures **5.38:1 and passes AA**.
+> 2026-08-19, not resolved).** `app/layout.tsx:88` hardcodes `data-theme="dark"`, so the
+> `[data-theme="dark"]` block wins — not the `:root` values, and not the
+> `--pig-ground-dark` token. **The shipped default ground is the dark evening bench, not
+> ivory.**
+>
+> That ground is neither one colour nor one layer. `app/globals.css:163-173` paints `body`
+> as four layers: an opaque base
+> `linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--color-bg) 42%, var(--bg-gradient-end) 100%)`
+> — under `[data-theme="dark"]`, `#27231F` → `#1D1B18` → `#171411` — and above it three
+> translucent radial overlays (olive at 22%, `rgba(185,138,88,0.16)`, `rgba(72,58,41,0.58)`),
+> each at full strength near its own centre and fading to transparent.
+>
+> Muted text is derived as `--color-text-muted: color-mix(in srgb, var(--taupe) 74%, var(--ivory))`.
+> Composited over every one of those layer combinations, `#989188` measures
+> **3.94:1 at worst, rising to 5.89:1 against the painted gradient**.
+>
+> **This is below AA normal, and it is a live defect, not a doc-scope one.** Where the
+> amber overlay is near full strength the ground reaches `#3E3328` and muted body text
+> sits at 3.94:1 <!-- contrast:continuation --> — under the 4.5:1 floor this document's own §2 rule sets for anything
+> carrying information. The other two overlay regions are also below it (both between 4
+> and 4.2; run `node scripts/check-contrast-claims.mjs` for the per-layer figures rather
+> than copying them into prose that then has to be kept true).
+> Muted text is AA-large-only in the overlay regions as currently shipped. No remedy is
+> proposed here: deriving a lighter `--color-text-muted` is the obvious direction but it
+> is a product decision and must be measured, not assumed. **Open.**
+>
+> Still unmodelled, and therefore why 3.94 is a bound rather than a proof: overlay-on-overlay
+> where two radii intersect, and `body::before`. Both can only move the figure further.
+>
+> **Corrected four times.** 5.38 → 5.40 → 5.52 → 5.01 → **3.94**. Every one of them was
+> wrong the same way — measured against something simpler than what renders:
+>
+> | figure | measured against | what it missed |
+> |---|---|---|
+> | 5.38 / 5.40 | a token a doc declared | the cascade |
+> | 5.52 | the winning `[data-theme="dark"]` declaration | that the property is a gradient |
+> | 5.01 | the opaque linear base | the three translucent layers above it |
+> | **3.94** | every composited layer combination | overlay intersections, `::before` (bounded) |
+>
+> Reading the cascade correctly was not enough, because the cascade produces a composite.
+> `scripts/check-contrast-claims.mjs` now composites the overlays and requires any single
+> published figure to be the worst member of the set, so a fifth recurrence fails the push.
+> Each of the four was caught by review, not by the guard that existed at the time — which
+> is the actual lesson, recorded in `docs/lessons.md` L82.
 > Lightening taupe toward ivory is the correct direction for a dark ground, so this is
 > not a shipped accessibility defect. It is a **doc-scope defect**: everything in this
 > section is measured on ivory, which is the design surface, not the running app. Also
@@ -109,7 +149,7 @@ The audit test: *if this element vanished, would the contributor lose informatio
 > (2) whether this section needs a parallel dark-ground table, or should be re-based on
 > the dark ground outright.
 
-Amber's 4.47:1 is sufficient for the wordmark period and the Dot (both non-text or large), and insufficient for labels or body copy. Do not set small text in amber.
+Amber's 4.47:1 on ivory is sufficient for the wordmark period and the Dot (both non-text or large), and insufficient for labels or body copy. Do not set small text in amber.
 
 ## 3. Typography
 

@@ -56,20 +56,33 @@ If you intentionally use less than the required depth, state the reason and the 
 ## Local Dev Setup (run once after clone or new session)
 ```
 git config core.hooksPath .husky
-cp scripts/hooks/pre-push .husky/pre-push && chmod +x .husky/pre-push
 ```
-Installs a pre-push hook that blocks pushes to `main` if `tsc --noEmit` fails or a module-level
+That is the whole setup. `.husky/pre-push` is committed and is the **single source of
+truth** for the hook; `core.hooksPath` is local-only `.git/config` state that is never
+committed, so every fresh clone needs this one command.
+
+`.husky/pre-push` blocks pushes to `main` if `tsc --noEmit` fails or a module-level
 `createClient()` is found in `app/api` — the exact bug class that broke 19+ consecutive Vercel
-builds on 2026-06-25 (see §9, L15). **Must go in `.husky/`, not `.git/hooks/`**, AND
-`core.hooksPath` must be set — both are local-only `.git/config`/working-tree state, never
-committed, so every fresh clone needs both commands (confirmed the hard way: an install at
-`.git/hooks/` silently never fired because this repo's local config already pointed elsewhere).
+builds on 2026-06-25 (see §9, L15) — and on **every** branch runs the skill-integrity,
+lesson-ID, handover-script, canon-uniqueness, and measured-contrast guards.
+
+**Must go in `.husky/`, not `.git/hooks/`** (confirmed the hard way: an install at
+`.git/hooks/` silently never fired because this repo's local config already pointed
+elsewhere).
+
+> **Do not reintroduce a `cp … .husky/pre-push` step here.** This setup used to copy the
+> hook from `scripts/hooks/pre-push`. That source file was last updated before any of the
+> five always-on guards existed, so following the documented setup on a fresh clone
+> *silently deleted every one of them* — including the canon-uniqueness guard that PR #98
+> added specifically to stop canon forking. Removed 2026-08-24; enforced by
+> `scripts/check-hook-source-of-truth.mjs`, because prose alone had already failed here.
 
 ## Session start checklist
 Before doing anything:
 1. `npm run test:smoke:prod`
 2. `cat AGENTS.md`
-3. If `git config --get core.hooksPath` doesn't print `.husky`, or `.husky/pre-push` doesn't exist: run the two commands under "Local Dev Setup" above.
+3. If `git config --get core.hooksPath` doesn't print `.husky`: run the command under "Local Dev Setup" above.
+4. If `.husky/pre-push` doesn't exist, `core.hooksPath` alone will NOT bring it back — the hook is a tracked file, so restore it: `git restore --source=HEAD -- .husky/pre-push`. (There is no longer a second copy to install from; see "Local Dev Setup".)
 
 ## 0. Why this file exists
 Prior agent runs produced confident "breakthrough" output full of fabricated detail (fake repo paths,
@@ -404,7 +417,7 @@ line in the deploy output rather than assuming the URL in this doc is still curr
 Next.js's build-time module evaluation. Root cause wasn't the bugs themselves — it's that nothing ran
 `npm run build` (or any check) locally before pushing to `main`, so Vercel was the first thing to ever catch
 each one. Fixed two ways: (1) `branch-hygiene` skill now has a mandatory `npm run build` step before
-`git push origin main`; (2) a git pre-push hook (`scripts/hooks/pre-push`, installed via "Local Dev Setup"
+`git push origin main`; (2) a git pre-push hook (`.husky/pre-push`, activated via "Local Dev Setup"
 above, **must go in `.husky/pre-push` — this repo uses `core.hooksPath=.husky`, not `.git/hooks/`**) blocks
 pushes to `main` on `tsc --noEmit` failure OR a column-0 `const x = createClient(...)` match in `app/api`
 (an early line-number-relative-to-export heuristic false-positived on a helper function in

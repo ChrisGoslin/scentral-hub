@@ -58,15 +58,41 @@ If any step fails, the script exits non-zero with the error printed — there is
 **Install (verified, `.husky/pre-push` + AGENTS.md "Local Dev Setup"):**
 ```bash
 git config core.hooksPath .husky
-cp scripts/hooks/pre-push .husky/pre-push && chmod +x .husky/pre-push
 ```
-Both commands are required on every fresh clone. `core.hooksPath` and the hook file are both local, uncommitted, working-tree state — a hook placed at `.git/hooks/` will **silently never run** if `core.hooksPath` points elsewhere (this bit the team once; see AGENTS.md line ~28). Verify install with:
+One command, required on every fresh clone. `.husky/pre-push` is **committed** and is the single source of truth for the hook; only `core.hooksPath` is local, uncommitted state — and a hook placed at `.git/hooks/` will **silently never run** if `core.hooksPath` points elsewhere (this bit the team once; see AGENTS.md "Local Dev Setup").
+
+> Do **not** add a `cp … .husky/pre-push` step. Until 2026-08-24 this install copied the hook from `scripts/hooks/pre-push`, a file predating all five always-on guards — so running the documented setup silently removed every one of them. Enforced by `scripts/check-hook-source-of-truth.mjs`.
+
+Verify install with:
 ```bash
 git config --get core.hooksPath   # must print .husky
 ls -la .husky/pre-push             # must exist and be executable
 ```
 
-**The three checks** (only run when pushing to `main` — the hook no-ops on other branches, verified `.husky/pre-push` line ~13):
+**Seven always-on guards, then three branch-gated checks.** Corrected 2026-09-02: this
+section used to say "the three checks (only run when pushing to `main` — the hook no-ops
+on other branches)". That stopped being true as the guard set grew, and it misled agents
+into treating a legitimate feature-branch failure as a hook bug.
+
+**Always-on — these run on EVERY branch**, before the branch gate, each exiting non-zero
+on failure (verified against `.husky/pre-push`; every one of them declares
+`// pre-push: required` in its own source, which `check-hook-source-of-truth.mjs`
+enforces against both the hook and `.github/workflows/skill-integrity.yml`):
+
+| guard | blocks on |
+|---|---|
+| `check-skill-integrity.mjs` | a skill file whose hash ≠ `docs/skills.lock.json` → run `node scripts/relock-skills.mjs`, review the diff, commit both |
+| `check-lesson-ids.mjs` | a duplicate `### L<n>` in `docs/lessons.md` |
+| `check-handover-scripts.mjs` | a handover citing an `npm run` script that does not exist |
+| `check-canon-uniqueness.mjs` | two files sharing a canon filename (bare-filename citations resolve ambiguously) |
+| `check-hook-source-of-truth.mjs` | a second copy of the hook, a non-executable hook, a doc instructing an overwrite of it, or hook/CI drift |
+| `check-contrast-claims.mjs` | a published WCAG ratio that does not match the recomputed value |
+| `check-performance-criteria.mjs` | performance criteria disagreeing with their canonical source |
+
+If one of these blocks you on a feature branch, that is the hook working as designed —
+resolve the named guard. `--no-verify` is not the answer.
+
+**Branch-gated — only when pushing to `main`:**
 
 1. `tsc --noEmit` — type-check. Failure = a real type error; fix it, don't bypass.
 2. Grep for column-0 (module-level) `const X = createClient(...)` in `app/api/**/*.ts`. Failure = a Supabase client instantiated at module scope, which throws at **build time** if env vars are missing — move the `createClient()` call inside the route handler function instead.

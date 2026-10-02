@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// pre-push: required
 // Skill integrity guard. Blocks the push if any skill file's on-disk content hash
 // doesn't match docs/skills.lock.json, or if a tracked skill file has no lock entry
 // at all. Run `node scripts/relock-skills.mjs`, review the diff, and commit both

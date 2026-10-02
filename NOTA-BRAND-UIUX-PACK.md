@@ -88,6 +88,7 @@ use pure white `#FFFFFF` or pure black `#000000`.
 
 > **Re-measured 2026-08-19**, every cell recomputed from hex with the WCAG 2.x
 > relative-luminance formula. Two figures were wrong and are corrected below:
+> <!-- contrast:retired --> The figures in this paragraph are retired values being retracted, not claims.
 > taupe on ivory was published as 10.35:1 (true: **4.57:1**), and taupe-ink on
 > dark was published as 7.54:1 (true: **3.18:1**). Both errors overstated
 > legibility. See `DESIGN.md` §2 for the full eight-token table.

@@ -1,7 +1,20 @@
 name: Skill Integrity
-# CI twin of the local .husky/pre-push guard (skill hash lock + lesson-ID
-# uniqueness). The pre-push hook only runs on a machine that pushes
-# directly — a merge performed through the GitHub UI never triggers it,
+# CI twin of the local .husky/pre-push guard. Despite the name (kept so any
+# required-check configuration keeps resolving), this runs EVERY always-on
+# check the hook runs, not just the skill lock — see the step list below.
+#
+# Widened 2026-08-24: five of the seven checks existed only in the local hook,
+# so canon-uniqueness, measured-contrast, handover-scripts, hook-source-of-truth
+# and performance-criteria had no server-side enforcement at all. That is the
+# same gap this file was created to close, left open for the newer guards. It
+# mattered more than it looks: L82 records that the documented setup used to
+# overwrite the local hook from a stale copy, so for those five checks there was
+# briefly no enforcement path that survived either a UI merge or a fresh clone.
+#
+# Keep this list in sync with .husky/pre-push.
+#
+# The pre-push hook only runs on a machine that pushes directly — a merge
+# performed through the GitHub UI never triggers it,
 # which is exactly the path commit 55b2d2d could have taken (see
 # docs/lessons.md L36-L40). This workflow closes that gap by running the
 # same checks server-side on every push and PR against main. It is also
@@ -26,3 +39,8 @@ jobs:
           node-version: '20'
       - run: node scripts/check-skill-integrity.mjs
       - run: node scripts/check-lesson-ids.mjs
+      - run: node scripts/check-handover-scripts.mjs
+      - run: node scripts/check-canon-uniqueness.mjs
+      - run: node scripts/check-hook-source-of-truth.mjs
+      - run: node scripts/check-contrast-claims.mjs
+      - run: node scripts/check-performance-criteria.mjs

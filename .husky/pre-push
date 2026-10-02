@@ -55,6 +55,32 @@ if [ $CANON_UNIQUE_STATUS -ne 0 ]; then
   exit 1
 fi
 
+# Hook source-of-truth check — the setup documented in AGENTS.md used to copy this
+# file over itself from scripts/hooks/pre-push, a source that predated every guard
+# below, so a fresh clone following the mandatory setup silently disabled all of them.
+# Runs first: if the hook a contributor is running is not the committed one, nothing
+# else in this file can be trusted to have run either.
+echo "🔍 Checking pre-push hook source of truth..."
+node "$(git rev-parse --show-toplevel)/scripts/check-hook-source-of-truth.mjs"
+HOOK_SOT_STATUS=$?
+if [ $HOOK_SOT_STATUS -ne 0 ]; then
+  echo "❌ Pre-push checks failed — push blocked. Fix errors above before pushing."
+  exit 1
+fi
+
+# Measured-contrast check (L78) — every published WCAG ratio in DESIGN.md and the
+# brand pack is recomputed from its own hex. A ratio is arithmetic, so a human or an
+# agent should never be its source of truth: L78's 10.35:1 survived 24 days and two
+# forks precisely because nothing recomputed it. Runs on every branch, same reasoning
+# as the canon uniqueness check above.
+echo "🔍 Checking measured contrast claims..."
+node "$(git rev-parse --show-toplevel)/scripts/check-contrast-claims.mjs"
+CONTRAST_STATUS=$?
+if [ $CONTRAST_STATUS -ne 0 ]; then
+  echo "❌ Pre-push checks failed — push blocked. Fix errors above before pushing."
+  exit 1
+fi
+
 # Performance-criteria check (L79/L80) — also a CI job, but CI catches it after the
 # push. It caught exactly this on 2026-08-22: the canon de-duplication deleted a doc
 # this check reads, and the mobile LCP budget silently reverted to a retired value.

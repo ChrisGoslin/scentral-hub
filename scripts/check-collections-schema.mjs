@@ -1,3 +1,4 @@
+// pre-push: excluded — reads .env.local and queries live Supabase; cannot run offline in a hook.
 import { createClient } from '@supabase/supabase-js';
 import fs from 'node:fs';
 import path from 'node:path';

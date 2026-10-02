@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// pre-push: required
 // Fails if docs/lessons.md contains a duplicate `### L<n>` lesson ID.
 // Built because two unrelated 2026-07-27 sessions each independently
 // authored L26-L32, and it went uncaught by a human read-through until
